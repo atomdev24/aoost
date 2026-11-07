@@ -1,0 +1,52 @@
+# Weekly backup of everything edited in Atom (Supabase) into this repo:
+# backup/content.json plus every uploaded photo under backup/media/.
+# Runs Sunday 03:17 UTC, or by hand from the Actions tab ("Run workflow").
+name: Weekly content backup
+on:
+  schedule:
+    - cron: '17 3 * * 0'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pull content and photos from Supabase
+        env:
+          SB_URL: https://htlshvacmhprvsupkbpt.supabase.co
+          SB_KEY: sb_publishable_tVvMoEvf6SHjAe-5mU-Bjw_DpdVgSBT   # public read-only key, same one the site uses
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          url, key = os.environ['SB_URL'], os.environ['SB_KEY']
+          req = urllib.request.Request(url + '/rest/v1/rpc/site_content', data=b'{}', method='POST',
+                                       headers={'apikey': key, 'Content-Type': 'application/json'})
+          data = json.load(urllib.request.urlopen(req, timeout=60))
+          os.makedirs('backup/media', exist_ok=True)
+          json.dump(data, open('backup/content.json', 'w'), indent=2, ensure_ascii=False)
+          marker = '/storage/v1/object/public/'
+          def walk(x):
+              if isinstance(x, dict):
+                  for v in x.values(): yield from walk(v)
+              elif isinstance(x, list):
+                  for v in x: yield from walk(v)
+              elif isinstance(x, str) and marker in x:
+                  yield x
+          n = 0
+          for u in sorted(set(walk(data))):
+              rel = u.split(marker, 1)[1].split('?')[0]
+              dest = os.path.join('backup/media', rel)
+              if os.path.exists(dest): continue
+              os.makedirs(os.path.dirname(dest), exist_ok=True)
+              urllib.request.urlretrieve(u, dest); n += 1
+          print('saved content.json and', n, 'new photos')
+          PY
+      - name: Commit if anything changed
+        run: |
+          git config user.name "aoost backup"
+          git config user.email "actions@users.noreply.github.com"
+          git add backup
+          git diff --cached --quiet || git commit -m "Weekly content backup"
+          git push

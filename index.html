@@ -224,6 +224,81 @@ html.late body{background:#111213}
 .ghost.on{opacity:.55}
 .ghost svg{display:block;width:18px;height:18px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
 @media (prefers-reduced-motion:reduce){.ghost{transition:opacity .6s}}
+
+/* ---- journals: A6 books on the mat, opened in a 3D viewer ---- */
+.journals{position:relative;isolation:isolate;padding-block:clamp(40px,7vw,80px);--ink:#EDEDE8;--ink-2:#8E918C;color:#EDEDE8}
+.journals::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:calc(50% - 50vw);right:calc(50% - 50vw);background:#18191A url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22100%22%20height%3D%22100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%2318191A%22/%3E%3Cpath%20d%3D%22M20%200V100M0%2020H100%22%20stroke%3D%22%2326282A%22%20stroke-width%3D%221%22/%3E%3Cpath%20d%3D%22M40%200V100M0%2040H100%22%20stroke%3D%22%2326282A%22%20stroke-width%3D%221%22/%3E%3Cpath%20d%3D%22M60%200V100M0%2060H100%22%20stroke%3D%22%2326282A%22%20stroke-width%3D%221%22/%3E%3Cpath%20d%3D%22M80%200V100M0%2080H100%22%20stroke%3D%22%2326282A%22%20stroke-width%3D%221%22/%3E%3Cpath%20d%3D%22M0%200.5H100M0.5%200V100%22%20stroke%3D%22%23383B3E%22%20stroke-width%3D%221.4%22/%3E%3C/svg%3E") 0 0/100px 100px;box-shadow:inset 0 14px 22px -16px rgba(0,0,0,.6),inset 0 -14px 22px -16px rgba(0,0,0,.6)}
+.jr-sub{font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin-top:8px}
+.jr-shelf{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(22px,5vw,56px);padding:clamp(8px,2vw,20px) 0 clamp(18px,3vw,30px)}
+.jr{--w:clamp(118px,15vw,168px);position:relative;width:var(--w);aspect-ratio:105/148;border:0;padding:0;background:none;cursor:var(--cur-hand,pointer);
+  transform:rotate(var(--r,0deg));transition:transform .35s cubic-bezier(.3,.7,.3,1.2)}
+.jr:hover,.jr:focus-visible{transform:rotate(0deg) translateY(-8px)}
+.jr:focus-visible{outline:2px solid #0D99FF;outline-offset:6px}
+.jr-cv{position:absolute;inset:0;border-radius:3px 7px 7px 3px;overflow:hidden;background:var(--cbg,#222) center/cover no-repeat;
+  box-shadow:1px 1px 0 #F3F0E6,2px 2px 0 #E2DDCF,3px 3px 0 #F3F0E6,4px 4px 0 #D9D3C3,6px 12px 18px -6px rgba(0,0,0,.45)}
+.jr-cv::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.32),rgba(0,0,0,.06) 7%,rgba(255,255,255,.08) 9%,transparent 14%),linear-gradient(160deg,rgba(255,255,255,.14),transparent 45%)}
+.jr-cv img.st{position:absolute;left:50%;top:46%;width:74%;transform:translate(-50%,-50%) rotate(-4deg)}
+.jr-band{position:absolute;top:-1px;bottom:-1px;right:16%;width:5px;background:var(--band,#141516);z-index:2;box-shadow:1px 0 0 rgba(255,255,255,.18),-1px 0 0 rgba(0,0,0,.25)}
+.jr-lbl{z-index:3;position:absolute;left:12%;bottom:10%;max-width:64%;background:#F7F5EE;color:#141516;font:500 9px/1.25 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 7px;transform:rotate(-2deg);box-shadow:0 1px 2px rgba(0,0,0,.25);text-align:left}
+.jr-coil,.jr-tip,.jr-deb,.jr-stk{display:none}
+.jr-n{position:absolute;right:-6px;top:-10px;font:500 10px/1 var(--mono);color:var(--ink-2)}
+
+.jr-shelf{padding-top:64px;row-gap:64px}
+.jr-n,.cvx .jr-lbl{display:none}
+/* the name sits above each book, with a tick down to it */
+.jr-cap{display:flex;gap:8px;align-items:baseline;position:absolute;z-index:5;left:0;bottom:calc(100% + 22px);white-space:nowrap;pointer-events:none;
+  font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#8E918C;transform-origin:left bottom;transform:rotate(calc(-1 * var(--r,0deg)))}
+.jr-cap i{font-style:normal}
+.jr-cap b{font-weight:500;color:#EDEDE8}
+.jr-cap span{display:none}
+.jr-cap::after{content:"";position:absolute;left:3px;top:calc(100% + 5px);width:1px;height:14px;background:#5B5E60}
+/* viewer */
+.jv{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:rgba(12,12,13,.88);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;transition:opacity .35s;perspective:2400px;touch-action:none}
+.jv.on{opacity:1}
+.jv[hidden]{display:none}
+.jv-stage{position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.3,.7,.3,1)}
+.jv-book{position:relative;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.45,.05,.2,1)}
+.jv-lf{position:absolute;left:50%;top:0;width:50%;height:100%;transform-origin:left center;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.45,.05,.2,1)}
+.jv-lf.fl{transform:rotateY(-179.6deg)}
+.jv-pg{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;background:#F5F2E9;border-radius:0 6px 6px 0}
+.jv-pg.bk{transform:rotateY(180deg);border-radius:6px 0 0 6px}
+.jv-pg::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.18),rgba(0,0,0,.04) 9%,transparent 22%)}
+.jv-pg.bk::after{background:linear-gradient(270deg,rgba(0,0,0,.18),rgba(0,0,0,.04) 9%,transparent 22%)}
+.jv-pg.cover,.jv-pg.backcover{background:var(--cbg,#222) center/cover no-repeat}
+.jv-pg.cover::after{background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(0,0,0,.05) 7%,transparent 12%),linear-gradient(160deg,rgba(255,255,255,.12),transparent 45%)}
+.jv-pg.cover img.st{position:absolute;left:50%;top:46%;width:74%;transform:translate(-50%,-50%) rotate(-4deg)}
+.jv-pg.cover .jr-band{right:16%;width:2.4%}
+.jv-pg.cover .jr-lbl{font-size:clamp(9px,1.4vw,13px)}
+.jv-pg.dots{background:#F5F2E9 radial-gradient(#CFCabd 1px,transparent 1.2px) 0 0/16px 16px}
+.jv-pg.dark{background:#1C1C1E radial-gradient(#323236 1px,transparent 1.2px) 0 0/16px 16px;color:#EDEBE4}
+.jv-pg.end{background:var(--end,#141516)}
+.jv-pg .in{position:absolute;inset:7% 8%;display:flex;flex-direction:column;gap:6%}
+.jv-pg .hand{font:400 clamp(15px,2.3vw,26px)/1.15 "Caveat","Comic Sans MS",cursive;color:#2A2A2C}
+.jv-pg.dark .hand{color:#EDEBE4}
+.jv-pg .date{font:500 clamp(8px,1vw,11px)/1 var(--mono);letter-spacing:.06em;color:#8B887E;text-transform:uppercase}
+.jv-pg .pic{position:relative;flex:1;min-height:0;display:grid;place-items:center}
+.jv-pg .pic img{max-width:92%;max-height:100%;object-fit:contain;box-shadow:0 2px 5px rgba(0,0,0,.22);transform:rotate(var(--t,-2deg));background:#fff}
+.jv-pg .pic.raw img{box-shadow:none;background:none;mix-blend-mode:multiply}
+.jv-pg.dark .pic.raw img{mix-blend-mode:screen;filter:invert(1)}
+.jv-pg .pic::before{content:"";position:absolute;z-index:1;top:2%;left:50%;width:28%;height:7%;transform:translateX(-50%) rotate(3deg);background:rgba(232,226,200,.72);box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.jv-pg .pic.raw::before{display:none}
+.jv-pg .full{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.jv-pg .sw{display:flex;gap:6%;flex-wrap:wrap}
+.jv-pg .sw i{width:20%;aspect-ratio:1;border-radius:50%;background:var(--c);box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.jv-pg .wip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-3deg);white-space:nowrap;padding:6px 10px;border:1.5px dashed #B3AE9F;border-radius:4px;font:500 clamp(8px,1.05vw,11px)/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#9A968A}
+.jv-pg.dark .wip{border-color:#4A4A4E;color:#77777C}
+.jv-pg .pn{position:absolute;bottom:4%;right:7%;font:500 9px/1 var(--mono);color:#A9A59A}
+.jv-pg.bk .pn{right:auto;left:7%}
+.jv-pg .endtxt{position:absolute;inset:auto 10% 12% 10%;font:500 clamp(8px,1vw,11px)/1.5 var(--mono);letter-spacing:.05em;color:#8B887E;text-transform:uppercase}
+.jv-bar{position:fixed;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));display:flex;justify-content:center;align-items:center;gap:14px;color:#EDEDE8;font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;pointer-events:none}
+.jv-bar button{pointer-events:auto;width:44px;height:44px;border-radius:50%;border:1px solid #3A3D40;background:#1E1F21;color:#EDEDE8;display:grid;place-items:center;cursor:var(--cur-hand,pointer)}
+.jv-bar button:disabled{opacity:.3}
+.jv-bar .ct{min-width:150px;text-align:center}
+.jv-x{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;width:44px;height:44px;border-radius:50%;border:1px solid #3A3D40;background:#1E1F21;color:#EDEDE8;font:400 22px/1 var(--body);cursor:var(--cur-hand,pointer)}
+.jv-t{position:fixed;top:max(24px,calc(env(safe-area-inset-top) + 10px));left:18px;color:#9A9C98;font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.jv-hint{position:fixed;left:50%;bottom:calc(max(18px,env(safe-area-inset-bottom)) + 58px);transform:translateX(-50%);color:#77797A;font:500 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;transition:opacity .6s}
+@media (prefers-reduced-motion:reduce){.jv-lf,.jv-book,.jv-stage{transition-duration:.01s}}
 /* mock-up switcher */
 @media (prefers-reduced-motion:reduce){.tk-track,.tk-c svg{animation:none}}
 
@@ -444,6 +519,11 @@ footer .scorp .legs{animation:scuttle .22s ease-in-out infinite alternate;transf
     <label class="btn add-art" for="addArt">Add artwork (preview only)<input id="addArt" type="file" accept="image/*" multiple hidden></label>
   </section>
 
+  <section class="focus-sec journals" aria-labelledby="h-jr">
+    <div class="head"><h2 id="h-jr" data-underline>journals</h2><p class="jr-sub">tap a book to open it</p></div>
+    <div class="jr-shelf" id="jrShelf"></div>
+  </section>
+
   <section class="focus-sec skills" aria-labelledby="h-tools">
     <div class="head"><h2 id="h-tools" data-underline>skills</h2></div>
     <ul class="sk-list"><li><span class="sk-ic" aria-hidden="true">Id</span><div class="sk-main"><div class="sk-top"><b>InDesign</b><span class="sk-lv">Daily</span></div><div class="sk-bar" role="meter" aria-label="InDesign proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90" aria-valuetext="Daily"><i style="--v:0.9"></i></div></div></li><li><span class="sk-ic" aria-hidden="true">Ai</span><div class="sk-main"><div class="sk-top"><b>Illustrator</b><span class="sk-lv">Fluent</span></div><div class="sk-bar" role="meter" aria-label="Illustrator proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85" aria-valuetext="Fluent"><i style="--v:0.85"></i></div></div></li><li><span class="sk-ic" aria-hidden="true">Ps</span><div class="sk-main"><div class="sk-top"><b>Photoshop</b><span class="sk-lv">Daily</span></div><div class="sk-bar" role="meter" aria-label="Photoshop proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-valuetext="Daily"><i style="--v:0.75"></i></div></div></li><li><span class="sk-ic" aria-hidden="true">Fg</span><div class="sk-main"><div class="sk-top"><b>Figma</b><span class="sk-lv">Fluent</span></div><div class="sk-bar" role="meter" aria-label="Figma proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" aria-valuetext="Fluent"><i style="--v:0.6"></i></div></div></li><li><span class="sk-ic" aria-hidden="true">Ae</span><div class="sk-main"><div class="sk-top"><b>After Effects</b><span class="sk-lv">Learning</span></div><div class="sk-bar" role="meter" aria-label="After Effects proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="45" aria-valuetext="Learning"><i style="--v:0.45"></i></div></div></li><li><span class="sk-ic" aria-hidden="true">Bl</span><div class="sk-main"><div class="sk-top"><b>Blender</b><span class="sk-lv">Learning</span></div><div class="sk-bar" role="meter" aria-label="Blender proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="35" aria-valuetext="Learning"><i style="--v:0.35"></i></div></div></li></ul>
@@ -568,13 +648,15 @@ footer .scorp .legs{animation:scuttle .22s ease-in-out infinite alternate;transf
   <div class="stage" id="vStage"></div>
 </div>
 
-<script>
+<script type="text/plain" data-boot>
 (() => {
 /* ============================================================
    YOUR FILES — add them to the site folder and list them here.
    Leave a list empty to see the generated placeholders.
    ============================================================ */
-const ARTWORK = [            // projects table: any shape, 1600 px on the long edge
+const CMS = window.CMS || {};  // content from Supabase (edited in Atom); the lists below are the fallback
+const cmsList = k => Array.isArray(CMS[k]) && CMS[k].length ? CMS[k] : null;
+const ARTWORK = cmsList('projects') ? cmsList('projects').map(p => p.image_url) : [            // projects table: any shape, 1600 px on the long edge
   'art/hero.jpg', 'art/grillz.jpg', 'art/monkey-figure.jpg', 'art/storefront.png',
   'art/hear-no-evil-3d.png', 'art/flower-skull.png', 'art/hear-no-evil-ring.png',
 ];
@@ -587,7 +669,7 @@ const SITE_NOTES = [         // sticky notes around the page: 600 × 600
 const SCOREBOARD = {         // shared leaderboard (Supabase). The publishable key is meant to be public; never put the secret key here
   url:'https://htlshvacmhprvsupkbpt.supabase.co', key:'sb_publishable_tVvMoEvf6SHjAe-5mU-Bjw_DpdVgSBT',
 };
-const PLAYLISTS = [          // name + cover come from Spotify on your live site; set cover to override (square, 1080 × 1080)
+const PLAYLISTS = cmsList('playlists') ? cmsList('playlists').map(p => ({title:p.title, id:p.spotify_id, cover:p.cover_url||null})) : [          // name + cover come from Spotify on your live site; set cover to override (square, 1080 × 1080)
   {title:'Rock',        id:'2FeVxQ6ZPLOAuoejGJj9Fb', cover:'art/cover-disc1.jpg'},
   {title:'Alt',         id:'3PbXJWUZ4RooUU0aSSdDi0', cover:'art/cover-disc2.jpg'},
   {title:'H | T | R',   id:'6KYCNr0X6Zt189pYxHMx1j', cover:'art/cover-disc3.jpg'},
@@ -1176,7 +1258,8 @@ selectDisc(0,false);
 /* ---- ticker, visitors, ghosts, late mode ---- */
 function ago(t){const m=Math.floor((Date.now()-t)/60000);if(m<1)return'just now';if(m<60)return m+' min ago';const h=Math.floor(m/60);if(h<24)return h+(h===1?' hour':' hours')+' ago';const d=Math.floor(h/24);return d+(d===1?' day':' days')+' ago';}
 function tickerBuild(){
-  const items=TK.late?["you're up late","the station's still on",TK.top]:['welcome','pick a disc',TK.top];
+  const own=(cmsList('ticker')||[]).filter(t=>t.mode==='both'||t.mode===(TK.late?'late':'day')).map(t=>t.text);
+  const items=(own.length?own:(TK.late?["you're up late","the station's still on"]:['welcome','pick a disc'])).concat([TK.top]);
   if(TK.visitor)items.push("you're visitor #"+String(TK.visitor).padStart(4,'0'));
   const pres=[];if(TK.last)pres.push('last here '+ago(TK.last));if(TK.here)pres.push(TK.here>1?TK.here+' here now':'just you here');
   if(pres.length)items.push(pres.join(' · '));
@@ -1353,7 +1436,7 @@ function exportPng(){const name=`aoost-wall-${new Date().toISOString().slice(0,1
 saveBtn.addEventListener('click',exportPng);
 })();
 </script>
-<script>
+<script type="text/plain" data-boot>
 (()=>{
   /* ruler ticks + numbers along the top of each mat */
   document.querySelectorAll('.mat').forEach(m=>{const r=document.createElement('div');r.className='mat-ruler';r.setAttribute('aria-hidden','true');m.prepend(r);
@@ -1362,9 +1445,114 @@ saveBtn.addEventListener('click',exportPng);
     new ResizeObserver(draw).observe(m);});
 })();
 </script>
-<script>
+<script type="text/plain" data-boot>
 (()=>{const k=document.getElementById('keychain');k.addEventListener('click',()=>{k.classList.remove('kick');void k.offsetWidth;k.classList.add('kick');});k.addEventListener('animationend',e=>{if(e.animationName==='kc-kick')k.classList.remove('kick');});
   const sk=document.querySelector('.skills');if('IntersectionObserver' in window){new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){sk.classList.add('seen');o.disconnect();}}),{threshold:.3}).observe(sk);}else sk.classList.add('seen');})();
 </script>
+
+<script type="text/plain" data-boot>
+/* ---- journals ----
+   Each journal: title, cover (image or colour), sticker, band colour, and pages.
+   A page can be a scan ('art/journal-1/p01.jpg' fills the page), {pic, note, date}, or {wip:true} for a blank page.
+   Keep an even number of pages. */
+const wip=n=>Array.from({length:n},()=>({wip:true}));
+const CMSJ = (window.CMS && Array.isArray(window.CMS.journals) && window.CMS.journals.length) ? window.CMS.journals.map(j => {
+  const pages = (j.pages || []).map(p => p.image_url ? p.image_url : {wip:true});
+  const all = pages.length ? pages : wip(8);
+  if (all.length % 2) all.push({wip:true});
+  return {title:j.title, year:j.year||'', cover:j.cover_url||null, cbg:j.cover_color||'#222', sticker:j.sticker_url||null, band:j.band||'#141516', dark:!!j.dark, r:+j.rot||0, pages:all};
+}) : null;
+const JOURNALS = CMSJ || [
+  {title:'sketchbook 01',  cover:'art/j-star1.jpg', band:'#141516', year:'2025', r:-5, pages:wip(8)},
+  {title:'hear no evil',   cbg:'#B48A5C', sticker:'art/hear-no-evil-ring.png', band:'#7A1A1A', year:'2025', r:4, pages:wip(8)},
+  {title:'stars & static', cover:'art/j-star2.jpg', band:'#1B2BA0', year:'2026', r:-2, pages:wip(8)},
+  {title:'late nights',    cbg:'#141516', sticker:'art/j-monkey.png', band:'#7C5CFF', year:'2026', r:6, dark:true, pages:wip(8)},
+];
+
+(()=>{const shelf=document.getElementById('jrShelf');if(!shelf)return;
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const coverStyle=j=>(j.cover?`--cbg:url('${j.cover}')`:`--cbg:${j.cbg||'#222'}`)+`;--tone:${j.tone||'#333'};--band:${j.band||'#141516'}`;
+const coverInner=j=>`${j.sticker?`<img class="st" src="${j.sticker}" alt="">`:''}<span class="jr-coil"></span><span class="jr-tip"><img src="${j.cover||j.sticker}" alt=""></span><span class="jr-deb">${esc(j.title)}</span><span class="jr-stk">${(j.stk||[]).map((u,k)=>`<img src="${u}" alt="" style="--k:${k}">`).join('')}</span><span class="jr-band"></span><span class="jr-lbl">${esc(j.title)}</span>`;
+JOURNALS.forEach((j,i)=>{const b=document.createElement('button');b.type='button';b.className='jr';b.style.setProperty('--r',(j.r||0)+'deg');
+  b.setAttribute('aria-label',`Open journal: ${j.title}`);
+  b.style.setProperty('--i',i);b.innerHTML=`<span class="jr-cv cvx" style="${coverStyle(j)}">${coverInner(j)}</span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;
+  b.addEventListener('click',()=>openJ(i,b));shelf.appendChild(b);});
+
+/* one page's inner html */
+function page(p,n,dark){
+  if(typeof p==='string')return {cls:'',html:`<img class="full" src="${p}" alt="">`};
+  if(p.wip)return {cls:dark?'dark':'dots',html:`<span class="wip">work in progress</span><span class="pn">${n}</span>`};
+  const date=p.date?`<span class="date">${esc(p.date)}</span>`:'';
+  const note=p.note?`<span class="hand">${esc(p.note).replace(/\n/g,'<br>')}</span>`:'';
+  let mid='';
+  if(p.pic)mid=`<div class="pic" style="--t:${p.t||'-2deg'}"><img src="${p.pic}" alt="" loading="lazy"></div>`;
+  else if(p.raw)mid=`<div class="pic raw"><img src="${p.raw}" alt="" loading="lazy"></div>`;
+  else if(p.sw)mid=`<div class="sw">${p.sw.map(c=>`<i style="--c:${c}"></i>`).join('')}</div>`;
+  return {cls:dark?'dark':'dots',html:`<div class="in">${date}${mid}${note}</div><span class="pn">${n}</span>`};}
+
+let V=null;
+function build(j){
+  const leaves=[];const P=j.pages;
+  // leaf 0: cover / inside cover. then pages in pairs. last leaf: blank / back cover
+  leaves.push({f:{cls:'cover cvx',style:coverStyle(j),html:coverInner(j)},b:{cls:'end',style:`--end:${j.band||'#141516'}`,html:`<span class="endtxt" style="color:#ffffffaa">if found, return to<br>aoost — cape town</span>`}});
+  for(let k=0;k<P.length;k+=2){const a=page(P[k],k+1,j.dark),c=page(P[k+1]||{blank:true},k+2,j.dark);leaves.push({f:a,b:c});}
+  leaves.push({f:{cls:'end',style:`--end:${j.band||'#141516'}`,html:''},b:{cls:'backcover cvx',style:coverStyle(j),html:''}});
+  return leaves;}
+
+function openJ(i,trigger){
+  const j=JOURNALS[i],leaves=build(j);
+  const el=document.createElement('div');el.className='jv';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',`Journal: ${j.title}`);
+  el.innerHTML=`<span class="jv-t">${esc(j.title)}</span><button class="jv-x" type="button" aria-label="Close journal">×</button>
+    <div class="jv-stage"><div class="jv-book">${leaves.map((l,k)=>`<div class="jv-lf" data-k="${k}"><div class="jv-pg ${l.f.cls||''}" style="${l.f.style||''}">${l.f.html}</div><div class="jv-pg bk ${l.b.cls||''}" style="${l.b.style||''}">${l.b.html}</div></div>`).join('')}</div></div>
+    <span class="jv-hint">tap the right page · swipe · scroll</span>
+    <div class="jv-bar"><button type="button" class="pv" aria-label="Previous page">‹</button><span class="ct" aria-live="polite"></span><button type="button" class="nx" aria-label="Next page">›</button></div>`;
+  document.body.appendChild(el);
+  const stage=el.querySelector('.jv-stage'),book=el.querySelector('.jv-book'),lfs=[...el.querySelectorAll('.jv-lf')],ct=el.querySelector('.ct'),pv=el.querySelector('.pv'),nx=el.querySelector('.nx'),hint=el.querySelector('.jv-hint');
+  const N=lfs.length;let cur=0,W=0,H=0,busy=0;
+  function size(){const vw=innerWidth,vh=innerHeight;H=Math.min(vh*.68,(vw*.94/2)*148/105);W=H*105/148;book.style.width=2*W+'px';book.style.height=H+'px';place();}
+  function place(){const shift=cur===0?-W/2:cur===N?W/2:0;book.style.transform=`translateX(${shift}px)`;
+    lfs.forEach((l,k)=>{const f=k<cur;l.classList.toggle('fl',f);if(!l._busy)l.style.zIndex=f?k+1:N-k;});
+    const P=j.pages.length;ct.textContent=cur===0?'cover':cur===N?'back cover':cur===1?`inside cover · p. 1`:(cur*2-2>=P?`p. ${P}`:`p. ${cur*2-2} – ${cur*2-1} / ${P}`);
+    pv.disabled=cur===0;nx.disabled=cur===N;}
+  function go(d){const n=Math.max(0,Math.min(N,cur+d));if(n===cur)return;const l=lfs[d>0?cur:n];l._busy=1;l.style.zIndex=N+5;clearTimeout(l._t);l._t=setTimeout(()=>{l._busy=0;place();},900);cur=n;place();hint.style.opacity=0;}
+  size();addEventListener('resize',size);
+  requestAnimationFrame(()=>{el.classList.add('on');setTimeout(()=>{if(cur===0)go(1);},650);});
+  // tilt the book a little with the pointer: it reads as an object, not a picture
+  const tilt=e=>{if(matchMedia('(hover:none)').matches)return;const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;stage.style.transform=`rotateX(${8-y*8}deg) rotateY(${x*10}deg)`;};
+  stage.style.transform='rotateX(8deg)';el.addEventListener('pointermove',tilt);
+  // click a page, swipe, wheel, keys
+  let sx=null,sy=null;
+  book.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;});
+  book.addEventListener('pointerup',e=>{if(sx===null)return;const dx=e.clientX-sx,dy=e.clientY-sy;sx=null;
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){go(dx<0?1:-1);return;}
+    const r=book.getBoundingClientRect(),mid=r.left+r.width/2+(cur===0?W/2:cur===N?-W/2:0)*0;go(e.clientX>r.left+r.width/2?1:-1);});
+  let acc=0,lock=0;el.addEventListener('wheel',e=>{e.preventDefault();const n=performance.now();if(n<lock)return;acc+=Math.abs(e.deltaY)>Math.abs(e.deltaX)?e.deltaY:e.deltaX;
+    if(Math.abs(acc)>70){go(acc>0?1:-1);acc=0;lock=n+700;}},{passive:false});
+  pv.onclick=()=>go(-1);nx.onclick=()=>go(1);
+  const key=e=>{if(e.key==='ArrowRight')go(1);else if(e.key==='ArrowLeft')go(-1);else if(e.key==='Escape')close();};addEventListener('keydown',key);
+  el.addEventListener('click',e=>{if(e.target===el)close();});
+  const x=el.querySelector('.jv-x');x.onclick=close;x.focus({preventScroll:true});
+  const prevOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow='hidden';
+  function close(){if(cur>0){cur=0;place();}el.classList.remove('on');removeEventListener('keydown',key);removeEventListener('resize',size);
+    setTimeout(()=>{el.remove();document.documentElement.style.overflow=prevOverflow;trigger&&trigger.focus({preventScroll:true});},cur>0?900:350);}
+}
+})();
+</script>
+
+<script>
+/* content loader: fetch everything the page shows from Supabase in one request, then start the page */
+(()=>{const URL='https://htlshvacmhprvsupkbpt.supabase.co/rest/v1/rpc/site_content',KEY='sb_publishable_tVvMoEvf6SHjAe-5mU-Bjw_DpdVgSBT';
+  let done=false;const boot=c=>{if(done)return;done=true;window.CMS=c||{};
+    document.querySelectorAll('script[data-boot]').forEach(o=>{const n=document.createElement('script');n.textContent=o.textContent;o.replaceWith(n);});};
+  let cache=null;try{cache=JSON.parse(localStorage.getItem('aoost-cms')||'null');}catch(e){}
+  if(typeof window.claude==='object'&&window.claude!==null){boot(null);return;}
+  const t=setTimeout(()=>boot(cache),1800);
+  fetch(URL,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:'{}',cache:'no-store'})
+    .then(r=>r.ok?r.json():null)
+    .then(j=>{clearTimeout(t);if(j){try{localStorage.setItem('aoost-cms',JSON.stringify(j));}catch(e){}}boot(j||cache);})
+    .catch(()=>{clearTimeout(t);boot(cache);});
+})();
+</script>
+
 </body>
 </html>
