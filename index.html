@@ -369,6 +369,14 @@ html.late body{background:#111213}
 .jw-heavy{background:radial-gradient(circle at 0 0,rgba(240,235,222,.4),transparent 11%),radial-gradient(circle at 100% 100%,rgba(240,235,222,.36),transparent 11%),radial-gradient(circle at 100% 0,rgba(240,235,222,.26),transparent 8%),radial-gradient(circle at 0 100%,rgba(240,235,222,.22),transparent 8%),
   radial-gradient(circle at 70% 28%,transparent 14%,rgba(110,78,40,.22) 15%,rgba(110,78,40,.1) 16.5%,transparent 18%),radial-gradient(circle at 34% 66%,transparent 10%,rgba(110,78,40,.12) 10.8%,transparent 12.4%),
   linear-gradient(115deg,transparent 40%,rgba(240,235,222,.08) 41%,transparent 43%)}
+.jstamp.lt{color:rgba(255,255,255,.42);text-shadow:0 -1px 0 rgba(0,0,0,.35)}
+.jv-book.at-back>.jrib{left:calc(50% - var(--pw,200px) * .6 - 6px)}
+#atomShelf{display:none;position:fixed;z-index:300;left:0;right:0;bottom:110px;height:226px;background:#18191A;border-top:1px solid #26282A;
+  background-image:linear-gradient(#26282A 1px,transparent 1px),linear-gradient(90deg,#26282A 1px,transparent 1px);background-size:20px 20px;pointer-events:none}
+.cv-on #atomShelf{display:block}
+#atomShelf .as-l{position:absolute;right:14px;top:10px;font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#8E918C}
+#atomShelf .as-b{position:absolute;left:0;right:0;top:46px;display:flex;justify-content:center}
+#atomShelf .jr{--w:118px;transition:none}
 .jstamp{position:absolute;z-index:3;left:10%;right:24%;top:11%;font:500 11cqw/1.02 var(--display);letter-spacing:-.02em;text-transform:lowercase;color:rgba(0,0,0,.35);text-shadow:0 1px 0 rgba(255,255,255,.2);overflow-wrap:break-word}
 /* zoom and Atom's preview */
 .jv.zoomed .jv-stage{cursor:grab}
@@ -1550,7 +1558,9 @@ function mapJournal(j){
   const all=pages.length?pages:wip(8);
   if(all.length%2)all.push({wip:true});
   return {id:j.id,title:j.title,year:j.year||'',cover:j.cover_url||null,cbg:j.cover_color||'#222',sticker:j.sticker_url||null,band:j.band||'#141516',dark:!!j.dark,r:+j.rot||0,
-    props:isObj(j.props)?j.props:{},citems:Array.isArray(j.cover_items)?j.cover_items:[],pages:all};}
+    props:isObj(j.props)?j.props:{},citems:coverSide(j,false),bitems:coverSide(j,true),pages:all};}
+/* cover items: page_id null; props.side 'back' = the back cover, anything else = the front (and the shelf) */
+function coverSide(j,back){return (Array.isArray(j.cover_items)?j.cover_items:[]).filter(i=>((isObj(i.props)?i.props:{}).side==='back')===back);}
 const CMSJ = (window.CMS && Array.isArray(window.CMS.journals) && window.CMS.journals.length) ? window.CMS.journals.map(mapJournal) : null;
 const JOURNALS = CMSJ || [
   {title:'sketchbook 01',  cover:'art/j-star1.jpg', band:'#141516', year:'2025', r:-5, pages:wip(8)},
@@ -1618,7 +1628,7 @@ function layerHTML(off){return `<div class="it-l${off?' sp':''}"${off?` style="-
 const coverStyle=j=>(j.cover?`--cbg:url('${url(j.cover)}')`:`--cbg:${j.cbg||'#222'}`)+`;--tone:${j.tone||'#333'};--band:${j.band||'#141516'}`;
 function coverExtras(j,shelfCover){const p=j.props||{};let h='';
   if(p.wear==='light'||p.wear==='heavy')h+=`<span class="jw jw-${p.wear}"></span>`;
-  if(p.title_stamp)h+=`<span class="jstamp">${esc(j.title)}</span>`;
+  if(p.title_stamp)h+=`<span class="jstamp${p.cover_text==='light'?' lt':''}">${esc(j.title)}</span>`;
   if((j.citems||[]).length)h+=layerHTML(0);
   return h;}
 const coverInner=j=>`${j.sticker?`<img class="st" src="${esc(j.sticker)}" alt="">`:''}<span class="jr-coil"></span><span class="jr-tip"><img src="${esc(j.cover||j.sticker||'')}" alt=""></span><span class="jr-deb">${esc(j.title)}</span><span class="jr-stk">${(j.stk||[]).map((u,k)=>`<img src="${u}" alt="" style="--k:${k}">`).join('')}</span><span class="jr-band"></span>${coverExtras(j)}<span class="jr-lbl">${esc(j.title)}</span>`;
@@ -1668,7 +1678,7 @@ function build(j){
     if(faces[i]){faces[i].layers=faces[i].layers.filter(l=>l.sp);if(p.scan)faces[i].html=faces[i].html.replace(/<img class="full"[^>]*>/,'');}
     // one sheet across the fold: the facing page takes the spread's paper
     const other=i===s.L?s.R:s.L;if(faces[other]&&faces[i]){faces[other].cls=faces[i].cls;faces[other].html=faces[other].html.replace(/<span class="wip">[^<]*<\/span>/,'');}});
-  leaves.push({f:{cls:'end',style:`--end:${j.band||'#141516'}`,html:''},b:{cls:'backcover cvx',style:back,html:pr.wear&&pr.wear!=='none'?`<span class="jw jw-${pr.wear}"></span>`:''}});
+  leaves.push({f:{cls:'end',style:`--end:${j.band||'#141516'}`,html:''},b:{cls:'backcover cvx',style:back,html:(pr.wear&&pr.wear!=='none'?`<span class="jw jw-${pr.wear}"></span>`:'')+((j.bitems||[]).length?layerHTML(0):''),citems:j.bitems}});
   return leaves;}
 function faceHTML(f,bk){
   const layers=(f.layers||[]).map(l=>l.sp?`<div class="it-l sp" style="--off:${l.off}">${l.scan?`<img class="full sp-scan" src="${esc(l.scan)}" alt="">`:''}</div>`:layerHTML(0)).join('');
@@ -1700,7 +1710,7 @@ function openJ(j,trigger,opts={}){
   function size(){const vw=innerWidth,vh=innerHeight;H=Math.min(vh*(PREVIEW?.86:.68),(vw*.94/2)*148/105);W=H*105/148;book.style.width=2*W+'px';book.style.height=H+'px';
     el.style.setProperty('--pw',W+'px');place();}
   function place(){const shift=cur===0?-W/2:cur===N?W/2:0;book.style.transform=`translateX(${shift}px)`;
-    lfs.forEach((l,k)=>{const f=k<cur;l.classList.toggle('fl',f);if(!l._busy)l.style.zIndex=f?k+1:N-k;});
+    lfs.forEach((l,k)=>{const f=k<cur;l.classList.toggle('fl',f);if(!l._busy)l.style.zIndex=f?k+1:N-k;});book.classList.toggle('at-back',cur===N);
     const P=j.pages.length;ct.textContent=cur===0?'cover':cur===N?'back cover':cur===1?`inside cover · p. 1`:(cur*2-2>=P?`p. ${P}`:`p. ${cur*2-2} – ${cur*2-1} / ${P}`);
     pv.disabled=cur===0;nx.disabled=cur===N;activate();}
   /* only the open spread's media play; doodles there draw in once */
@@ -1778,14 +1788,37 @@ if(PREVIEW){
     const sr=st.getBoundingClientRect(),cx=sr.left+sr.width/2,cy=sr.top+sr.height/2,fw=r.right-r.left,fh=r.bottom-r.top;
     const sc=Math.min(innerWidth*.94/fw,innerHeight*.94/fh),fx=(r.left+r.right)/2,fy=(r.top+r.bottom)/2;
     st.style.transform=`translate(${innerWidth/2-cx-(fx-cx)*sc}px,${innerHeight/2-cy-(fy-cy)*sc}px) scale(${sc})`;}
-  function show(msg){const nj=mapJournal(msg.journal||{}),pageNo=Math.max(1,+msg.page||1),c=curFor(pageNo-1);
+  /* the cover editor: page 'cover' / 'back' shows the closed book, that side big and centred above a shelf strip */
+  const coverFace=side=>side==='back'?V.lfs[V.lfs.length-1].children[1]:V.lfs[0].children[0];
+  function fitCover(side){if(!V)return;const st=V.el.querySelector('.jv-stage');st.style.transition='none';st.style.transform='none';
+    const r=coverFace(side).getBoundingClientRect(),sr=st.getBoundingClientRect(),cx=sr.left+sr.width/2,cy=sr.top+sr.height/2;
+    const top=96,bottom=innerHeight-368,sc=Math.min(innerWidth*.84/r.width,(bottom-top)/r.height),fx=r.left+r.width/2,fy=r.top+r.height/2;
+    st.style.transform=`translate(${innerWidth/2-cx-(fx-cx)*sc}px,${(top+bottom)/2-cy-(fy-cy)*sc}px) scale(${sc})`;}
+  function reportCover(side){if(!V)return;const face=coverFace(side),r=face.getBoundingClientRect(),pw=face.offsetWidth||1,ph=face.offsetHeight||1;
+    const layer=face.querySelector(':scope > .it-l'),items=layer?[...layer.children].map(e=>({id:e.dataset.id,wf:e.offsetWidth/pw,hf:e.offsetHeight/ph})):[];
+    const st=side==='back'?null:face.querySelector(':scope > img.st');   // the old cover sticker: a locked layer in Atom
+    if(st)items.push({id:'__sticker',wf:st.offsetWidth/pw,hf:st.offsetHeight/ph});
+    const out={frame:{x:r.left,y:r.top,w:r.width,h:r.height},spread:false,dpr:devicePixelRatio,items,side};
+    try{window.AtomBridge&&AtomBridge.layout(JSON.stringify(out));}catch(e){}
+    window.__atomLayout=out;}
+  /* how the book looks on the shelf, at its real size, under the editor */
+  function shelfStrip(nj){let sh=document.getElementById('atomShelf');
+    if(!sh){sh=document.createElement('div');sh.id='atomShelf';sh.innerHTML='<span class="as-l">on the shelf</span><div class="as-b"></div>';document.body.appendChild(sh);}
+    const b=sh.querySelector('.as-b');b.innerHTML='';b.appendChild(shelfButton(nj,0));}
+  function showCover(msg,side){const nj=mapJournal(msg.journal||{});
+    if(!(V&&V.j().id===nj.id&&V.update(nj))){if(V){V.el.remove();V=null;}openJ(nj,null,{cur:0,noAnim:true});}
+    V.goTo(side==='back'?V.lfs.length:0);V.el.classList.add('cv-mode');document.documentElement.classList.add('cv-on');shelfStrip(nj);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{fitCover(side);reportCover(side);}));setTimeout(()=>{fitCover(side);reportCover(side);},400);}
+  function show(msg){if(msg.page==='cover'||msg.page==='back')return showCover(msg,msg.page==='back'?'back':'cover');
+    document.documentElement.classList.remove('cv-on');if(V)V.el.classList.remove('cv-mode');
+    const nj=mapJournal(msg.journal||{}),pageNo=Math.max(1,+msg.page||1),c=curFor(pageNo-1);
     if(V&&V.j().id===nj.id&&V.update(nj)){V.goTo(c);}
     else{if(V){V.el.remove();V=null;}openJ(nj,null,{cur:c,noAnim:true});}
     requestAnimationFrame(()=>requestAnimationFrame(()=>{fit(pageNo);report(pageNo);}));setTimeout(()=>{fit(pageNo);report(pageNo);},400);}
   addEventListener('message',e=>{const d=e.data;if(d&&d.type==='atom-journal'&&d.journal)show(d);});
   window.atomJournal=show;
-  addEventListener('resize',()=>{if(V&&window.__atomLast)setTimeout(()=>{fit(window.__atomLast);report(window.__atomLast);},120);});
-  addEventListener('message',e=>{if(e.data&&e.data.page)window.__atomLast=+e.data.page;});
+  addEventListener('resize',()=>{if(!V||!window.__atomLast)return;const l=window.__atomLast;setTimeout(()=>{if(l==='cover'||l==='back'){fitCover(l);reportCover(l);}else{fit(l);report(l);}},120);});
+  addEventListener('message',e=>{if(e.data&&e.data.page)window.__atomLast=(e.data.page==='cover'||e.data.page==='back')?e.data.page:+e.data.page;});
   try{window.AtomBridge&&AtomBridge.ready();}catch(e){}
 }
 })();
