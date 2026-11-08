@@ -1625,7 +1625,8 @@ function fillLayer(layer,items){
 function layerHTML(off){return `<div class="it-l${off?' sp':''}"${off?` style="--off:${off}"`:''}></div>`;}
 
 /* ---------- covers ---------- */
-const coverStyle=j=>(j.cover?`--cbg:url('${url(j.cover)}')`:`--cbg:${j.cbg||'#222'}`)+`;--tone:${j.tone||'#333'};--band:${j.band||'#141516'}`;
+/* an image cover sits on the cover colour, so a transparent image (a library sticker) never shows what's behind the board */
+const coverStyle=j=>(j.cover?`--cbg:url('${url(j.cover)}') center/cover no-repeat,${j.cbg||'#222'}`:`--cbg:${j.cbg||'#222'}`)+`;--tone:${j.tone||'#333'};--band:${j.band||'#141516'}`;
 function coverExtras(j,shelfCover){const p=j.props||{};let h='';
   if(p.wear==='light'||p.wear==='heavy')h+=`<span class="jw jw-${p.wear}"></span>`;
   if(p.title_stamp)h+=`<span class="jstamp${p.cover_text==='light'?' lt':''}">${esc(j.title)}</span>`;
@@ -1666,7 +1667,7 @@ function spreadOf(P,i){const p=P[i];if(!isObj(p)||!(p.props||{}).spread)return n
 
 function build(j){
   const leaves=[];const P=j.pages,pr=j.props||{};
-  const back=pr.back_cover_url?`--cbg:url('${url(pr.back_cover_url)}');--band:${j.band||'#141516'}`:coverStyle(j);
+  const back=pr.back_cover_url?`--cbg:url('${url(pr.back_cover_url)}') center/cover no-repeat,${j.cbg||'#222'};--band:${j.band||'#141516'}`:coverStyle(j);
   leaves.push({f:{cls:'cover cvx',style:coverStyle(j),html:coverInner(j),citems:j.citems},b:{cls:'end',style:`--end:${j.band||'#141516'}`,html:`<span class="endtxt" style="color:#ffffffaa">if found, return to<br>aoost — cape town</span>`}});
   const faces=[];
   for(let k=0;k<P.length;k+=2){const a=page(P[k],k+1,j.dark),c=page(P[k+1]||{blank:true},k+2,j.dark);faces[k]=a;faces[k+1]=c;leaves.push({f:a,b:c});}
