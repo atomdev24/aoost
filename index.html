@@ -1667,7 +1667,7 @@ function build(j){
     if(faces[s.R])faces[s.R].layers.push({items,off:1,sp:true,scan:p.scan,side:'R',owner:i});
     if(faces[i]){faces[i].layers=faces[i].layers.filter(l=>l.sp);if(p.scan)faces[i].html=faces[i].html.replace(/<img class="full"[^>]*>/,'');}
     // one sheet across the fold: the facing page takes the spread's paper
-    const other=i===s.L?s.R:s.L;if(faces[other]&&faces[i])faces[other].cls=faces[i].cls;});
+    const other=i===s.L?s.R:s.L;if(faces[other]&&faces[i]){faces[other].cls=faces[i].cls;faces[other].html=faces[other].html.replace(/<span class="wip">[^<]*<\/span>/,'');}});
   leaves.push({f:{cls:'end',style:`--end:${j.band||'#141516'}`,html:''},b:{cls:'backcover cvx',style:back,html:pr.wear&&pr.wear!=='none'?`<span class="jw jw-${pr.wear}"></span>`:''}});
   return leaves;}
 function faceHTML(f,bk){
@@ -1764,7 +1764,9 @@ if(PREVIEW){
     const s=spreadOf(V.j().pages,i);
     if(s){const L=leafOf(s.L),R=leafOf(s.R),a=V.lfs[L.k].children[1].getBoundingClientRect(),b=V.lfs[R.k].children[0].getBoundingClientRect();frame={x:a.left,y:a.top,w:a.width,h:a.height};}
     const layer=s?(V.lfs[leafOf(s.L).k].children[1].querySelector('.it-l.sp')):face.querySelector(':scope > .it-l');
-    const items=layer?[...layer.children].map(e=>({id:e.dataset.id,wf:e.offsetWidth/frame.w,hf:e.offsetHeight/frame.h})):[];
+    // sizes in the page's own layout px (the preview scales the stage, so screen rects would be off by that scale)
+    const pw=face.offsetWidth||1,ph=face.offsetHeight||1;
+    const items=layer?[...layer.children].map(e=>({id:e.dataset.id,wf:e.offsetWidth/pw,hf:e.offsetHeight/ph})):[];
     const out={frame,spread:!!s,dpr:devicePixelRatio,items};
     try{window.AtomBridge&&AtomBridge.layout(JSON.stringify(out));}catch(e){}
     window.__atomLayout=out;}
