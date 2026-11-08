@@ -1,0 +1,182 @@
+{
+  "projects": [
+    {
+      "id": "dee0709a-fea9-40cb-9e87-43951253ba98",
+      "image_url": "art/hero.jpg",
+      "title": null,
+      "sort": 1,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00",
+      "props": {}
+    },
+    {
+      "id": "56d3eb11-12ad-4b72-8ff3-b797d07c0907",
+      "image_url": "art/grillz.jpg",
+      "title": null,
+      "sort": 2,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00",
+      "props": {}
+    },
+    {
+      "id": "8c05bb5d-71c2-404d-a90b-37603bf70087",
+      "image_url": "art/monkey-figure.jpg",
+      "title": null,
+      "sort": 3,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00",
+      "props": {}
+    },
+    {
+      "id": "b0897cc4-6552-4645-8ac6-55f564f8e3da",
+      "image_url": "art/storefront.png",
+      "title": null,
+      "sort": 4,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00",
+      "props": {}
+    },
+    {
+      "id": "48c89b20-77d5-4ce4-af8b-abe7c91a79f5",
+      "image_url": "art/hear-no-evil-3d.png",
+      "title": null,
+      "sort": 5,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00",
+      "props": {}
+    },
+    {
+      "id": "cfc1a9bd-57e9-4f82-9392-9e5f181e947d",
+      "image_url": "art/flower-skull.png",
+      "title": null,
+      "sort": 6,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00",
+      "props": {}
+    },
+    {
+      "id": "32432b32-039a-443e-bb28-2a0404663fa9",
+      "image_url": "art/hear-no-evil-ring.png",
+      "title": null,
+      "sort": 7,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00",
+      "props": {}
+    }
+  ],
+  "playlists": [
+    {
+      "id": "ff7bff33-c1cb-43f9-92f5-2ba61beb4267",
+      "title": "Rock",
+      "spotify_id": "2FeVxQ6ZPLOAuoejGJj9Fb",
+      "cover_url": "art/cover-disc1.jpg",
+      "sort": 1,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00"
+    },
+    {
+      "id": "0d10be47-c038-465f-999b-23f307ad175a",
+      "title": "Alt",
+      "spotify_id": "3PbXJWUZ4RooUU0aSSdDi0",
+      "cover_url": "art/cover-disc2.jpg",
+      "sort": 2,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00"
+    },
+    {
+      "id": "76e6b9eb-6f1b-4a29-a2c6-e4c7a94a9341",
+      "title": "H | T | R",
+      "spotify_id": "6KYCNr0X6Zt189pYxHMx1j",
+      "cover_url": "art/cover-disc3.jpg",
+      "sort": 3,
+      "hidden": false,
+      "created_at": "2026-11-07T20:57:52.614808+00:00",
+      "updated_at": "2026-11-07T22:00:16.501842+00:00"
+    }
+  ],
+  "journals": [
+    {
+      "id": "be69ee42-3ea8-4546-bceb-8b78fae880ad",
+      "title": "sketchbook 01",
+      "year": "2025",
+      "cover_url": "art/j-star1.jpg",
+      "cover_color": null,
+      "sticker_url": null,
+      "band": "#141516",
+      "dark": false,
+      "rot": -5,
+      "props": {},
+      "cover_items": [],
+      "pages": []
+    },
+    {
+      "id": "a4c71a05-e0fd-48f9-89c9-bdf470468614",
+      "title": "hear no evil",
+      "year": "2025",
+      "cover_url": null,
+      "cover_color": "#B48A5C",
+      "sticker_url": "art/hear-no-evil-ring.png",
+      "band": "#7A1A1A",
+      "dark": false,
+      "rot": 4,
+      "props": {},
+      "cover_items": [],
+      "pages": []
+    },
+    {
+      "id": "ca88850c-5c8f-48c7-8043-c2dec54e571f",
+      "title": "stars & static",
+      "year": "2026",
+      "cover_url": "art/j-star2.jpg",
+      "cover_color": null,
+      "sticker_url": null,
+      "band": "#1B2BA0",
+      "dark": false,
+      "rot": -2,
+      "props": {},
+      "cover_items": [],
+      "pages": []
+    },
+    {
+      "id": "f23e4dd2-b012-41a8-ae3b-45b535357b7c",
+      "title": "late nights",
+      "year": "2026",
+      "cover_url": null,
+      "cover_color": "#141516",
+      "sticker_url": "art/j-monkey.png",
+      "band": "#7C5CFF",
+      "dark": true,
+      "rot": 6,
+      "props": {},
+      "cover_items": [],
+      "pages": []
+    }
+  ],
+  "ticker": [
+    {
+      "text": "welcome",
+      "mode": "day"
+    },
+    {
+      "text": "pick a playlist",
+      "mode": "both"
+    },
+    {
+      "text": "you're up late",
+      "mode": "late"
+    },
+    {
+      "text": "the station's still on",
+      "mode": "late"
+    }
+  ]
+}
