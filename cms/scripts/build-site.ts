@@ -7,6 +7,7 @@ import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } fro
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildSite } from "../src/render/build";
+import { siteToFiles } from "../src/schema";
 import { loadSite } from "../src/schema/load-node";
 
 const cms = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -23,6 +24,9 @@ for (const [path, body] of Object.entries(files)) {
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, body);
 }
+
+// The published content, for the draft store to start from and compare against (not publicly served).
+writeFileSync(resolve(dist, "_published.json"), JSON.stringify(siteToFiles(site)));
 
 cpSync(resolve(cms, "static"), dist, { recursive: true });
 if (existsSync(resolve(repo, "art"))) cpSync(resolve(repo, "art"), resolve(dist, "art"), { recursive: true });

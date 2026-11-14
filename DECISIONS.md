@@ -20,3 +20,6 @@ One line each: the decision, and why. Newest at the bottom.
 - Pages are written as `work.html` / `work/digital.html` so Cloudflare serves clean URLs (`/work`). All CSS is inlined per page (only the components that page uses) and there is one deferred script (`/assets/site.js`, ~8 KB).
 - Text content supports only `**bold**`, `*italic*`, `[links](url)` and line breaks, rendered as React nodes. Why: no raw HTML in text means nothing to sanitise; the Code block is the place for custom HTML.
 - A page link with sub-pages uses a split control in the pill: the label navigates, the caret button opens the menu (works for hover, tap and keyboard).
+- The draft lives in a SQLite-backed Durable Object (free plan) as the same files as `content/`; changes travel as page-granular ops (last write wins per page). Why: publishing becomes "commit these files", and live sync stays simple.
+- The editor uses Puck's own layout (plugin rail, canvas zoom, fields) re-themed dark, with our top bar and panels plugged in, instead of a hand-built layout. Why: Puck's drag and overlay maths depend on its own canvas zoom.
+- The editor keeps its own undo stack at site level (it must also hold page, nav, theme and Claude edits); Puck is a view of the current page.
