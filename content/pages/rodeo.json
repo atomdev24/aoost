@@ -1,0 +1,128 @@
+{
+  "id": "rodeo",
+  "title": "Rodeo",
+  "slug": "/rodeo",
+  "parentId": null,
+  "status": "published",
+  "template": "blank",
+  "seo": {},
+  "isHome": false,
+  "showInNav": true,
+  "sections": [
+    {
+      "id": "rodeo-head",
+      "kind": "flow",
+      "name": "Content",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "120px 20px 64px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "160px 56px 96px"
+        }
+      },
+      "children": [
+        {
+          "id": "rodeo-kicker",
+          "type": "Text",
+          "content": {
+            "text": "/rodeo",
+            "styleId": "label",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "color": "token:muted"
+            }
+          }
+        },
+        {
+          "id": "rodeo-title",
+          "type": "Text",
+          "content": {
+            "text": "Rodeo",
+            "styleId": "h1",
+            "tag": "h1"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "rodeo-blurb",
+          "type": "Text",
+          "content": {
+            "text": "The lasso game and its leaderboard still live on the current site until the cut-over.",
+            "styleId": "body",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "maxWidth": "520px",
+              "color": "token:text"
+            }
+          }
+        },
+        {
+          "id": "rodeo-art",
+          "type": "Image",
+          "content": {
+            "src": "/seed/scorpion.svg",
+            "alt": "Line drawing of a scorpion",
+            "lightbox": false
+          },
+          "style": {
+            "base": {
+              "width": "200px",
+              "margin": "12px 0"
+            }
+          }
+        },
+        {
+          "id": "rodeo-cta",
+          "type": "Button",
+          "content": {
+            "label": "Play the rodeo",
+            "target": {
+              "kind": "url",
+              "url": "https://alexoostendurp.com/"
+            },
+            "variant": "outline",
+            "newTab": true
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "rodeo-footer",
+      "kind": "flow",
+      "name": "Footer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "rodeo-footer-ref",
+          "type": "Global",
+          "content": {
+            "globalId": "footer"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": []
+}

@@ -1,0 +1,466 @@
+{
+  "settings": {
+    "title": "aoost",
+    "socials": [
+      {
+        "network": "instagram",
+        "url": "https://www.instagram.com/",
+        "label": "Instagram"
+      },
+      {
+        "network": "spotify",
+        "url": "https://open.spotify.com/",
+        "label": "Spotify"
+      }
+    ],
+    "defaultSeo": {
+      "title": "aoost",
+      "description": "Alex Oostendurp's visual diary: drawings, objects, playlists and a rodeo."
+    }
+  },
+  "theme": {
+    "colors": {
+      "bone": "#F3EFE6",
+      "sand": "#E7E0D2",
+      "ink": "#141414",
+      "text": "#3D3830",
+      "muted": "#5E584E",
+      "rust": "#B5421A",
+      "rustOnDark": "#E2683A",
+      "line": "#141414"
+    },
+    "fonts": {
+      "display": "'Facile Sans', 'Space Grotesk', Inter, system-ui, sans-serif",
+      "body": "Inter, system-ui, sans-serif",
+      "mono": "'JetBrains Mono', ui-monospace, monospace"
+    },
+    "fontFaces": [],
+    "googleFonts": [
+      "Inter:wght@400;500;600",
+      "Space Grotesk:wght@500;700"
+    ],
+    "typeStyles": {
+      "hero": {
+        "name": "Hero",
+        "font": "display",
+        "size": {
+          "base": 44,
+          "desktop": 88
+        },
+        "weight": 700,
+        "lineHeight": 1.02,
+        "tracking": -0.03
+      },
+      "h1": {
+        "name": "Heading 1",
+        "font": "display",
+        "size": {
+          "base": 36,
+          "desktop": 64
+        },
+        "weight": 700,
+        "lineHeight": 1.05,
+        "tracking": -0.03
+      },
+      "h2": {
+        "name": "Heading 2",
+        "font": "display",
+        "size": {
+          "base": 26,
+          "desktop": 34
+        },
+        "weight": 700,
+        "lineHeight": 1.1,
+        "tracking": -0.02
+      },
+      "h3": {
+        "name": "Heading 3",
+        "font": "display",
+        "size": {
+          "base": 19,
+          "desktop": 22
+        },
+        "weight": 500,
+        "lineHeight": 1.2,
+        "tracking": -0.01
+      },
+      "body": {
+        "name": "Body",
+        "font": "body",
+        "size": {
+          "base": 15,
+          "desktop": 16
+        },
+        "weight": 400,
+        "lineHeight": 1.55,
+        "tracking": 0
+      },
+      "small": {
+        "name": "Small",
+        "font": "body",
+        "size": {
+          "base": 13
+        },
+        "weight": 400,
+        "lineHeight": 1.5,
+        "tracking": 0
+      },
+      "label": {
+        "name": "Label",
+        "font": "body",
+        "size": {
+          "base": 12
+        },
+        "weight": 600,
+        "lineHeight": 1.3,
+        "tracking": 0.12,
+        "uppercase": true
+      }
+    },
+    "radii": {
+      "none": 0,
+      "sm": 6,
+      "md": 12,
+      "lg": 18,
+      "pill": 999
+    },
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 28,
+      "xl": 48,
+      "xxl": 96
+    }
+  },
+  "nav": {
+    "style": "pill",
+    "logoText": "aoost",
+    "showLogoMark": true,
+    "hideOnScroll": true,
+    "currentMarker": "pill",
+    "items": [
+      {
+        "id": "nav-work",
+        "type": "page",
+        "target": {
+          "kind": "page",
+          "pageId": "work"
+        },
+        "showOn": "both",
+        "hover": "tint"
+      },
+      {
+        "id": "nav-diary",
+        "type": "page",
+        "target": {
+          "kind": "page",
+          "pageId": "diary"
+        },
+        "showOn": "both",
+        "hover": "tint"
+      },
+      {
+        "id": "nav-playlists",
+        "type": "page",
+        "target": {
+          "kind": "page",
+          "pageId": "playlists"
+        },
+        "showOn": "both",
+        "hover": "tint"
+      },
+      {
+        "id": "nav-rodeo",
+        "type": "page",
+        "target": {
+          "kind": "page",
+          "pageId": "rodeo"
+        },
+        "showOn": "both",
+        "hover": "tint"
+      },
+      {
+        "id": "nav-about",
+        "type": "page",
+        "target": {
+          "kind": "page",
+          "pageId": "about"
+        },
+        "showOn": "both",
+        "hover": "tint"
+      },
+      {
+        "id": "nav-social",
+        "type": "social",
+        "showOn": "mobile",
+        "hover": "tint"
+      }
+    ]
+  },
+  "globals": [
+    {
+      "id": "footer",
+      "name": "Footer",
+      "node": {
+        "id": "footer-node",
+        "type": "Footer",
+        "content": {
+          "text": "Made in the small hours. © Alex Oostendurp",
+          "showSocials": true
+        },
+        "style": {
+          "base": {}
+        }
+      }
+    }
+  ],
+  "templates": [
+    {
+      "id": "blank",
+      "name": "Blank",
+      "kind": "page",
+      "sections": [
+        {
+          "id": "t-blank-1",
+          "kind": "flow",
+          "name": "Content",
+          "layout": {
+            "base": {
+              "columns": 1,
+              "gap": 18,
+              "padding": "120px 20px 64px",
+              "maxWidth": 1160
+            },
+            "desktop": {
+              "padding": "160px 56px 96px"
+            }
+          },
+          "children": [
+            {
+              "id": "t-blank-title",
+              "type": "Text",
+              "content": {
+                "text": "Untitled",
+                "styleId": "h1",
+                "tag": "h1"
+              },
+              "style": {
+                "base": {}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gallery",
+      "name": "Gallery",
+      "kind": "page",
+      "sections": [
+        {
+          "id": "t-gal-head",
+          "kind": "flow",
+          "name": "Heading",
+          "layout": {
+            "base": {
+              "columns": 1,
+              "gap": 18,
+              "padding": "120px 20px 12px",
+              "maxWidth": 1160
+            },
+            "desktop": {
+              "padding": "160px 56px 20px"
+            }
+          },
+          "children": [
+            {
+              "id": "t-gal-title",
+              "type": "Text",
+              "content": {
+                "text": "Gallery",
+                "styleId": "h1",
+                "tag": "h1"
+              },
+              "style": {
+                "base": {}
+              }
+            },
+            {
+              "id": "t-gal-blurb",
+              "type": "Text",
+              "content": {
+                "text": "A line about this body of work.",
+                "styleId": "body",
+                "tag": "p"
+              },
+              "style": {
+                "base": {
+                  "color": "token:text"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "t-gal-grid",
+          "kind": "flow",
+          "name": "Gallery",
+          "layout": {
+            "base": {
+              "columns": 1,
+              "gap": 18,
+              "padding": "12px 20px 64px",
+              "maxWidth": 1160
+            },
+            "desktop": {
+              "padding": "20px 56px 96px"
+            }
+          },
+          "children": [
+            {
+              "id": "t-gal-gg",
+              "type": "GalleryGrid",
+              "content": {
+                "items": [],
+                "columns": 2,
+                "columnsDesktop": 3,
+                "gap": 12,
+                "lightbox": true
+              },
+              "style": {
+                "base": {}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "diary",
+      "name": "Diary entry",
+      "kind": "page",
+      "sections": [
+        {
+          "id": "t-diary-1",
+          "kind": "flow",
+          "name": "Diary",
+          "layout": {
+            "base": {
+              "columns": 1,
+              "gap": 18,
+              "padding": "120px 20px 64px",
+              "maxWidth": 1160
+            },
+            "desktop": {
+              "padding": "160px 56px 96px"
+            }
+          },
+          "children": [
+            {
+              "id": "t-diary-kicker",
+              "type": "Text",
+              "content": {
+                "text": "Diary",
+                "styleId": "label",
+                "tag": "p"
+              },
+              "style": {
+                "base": {
+                  "color": "token:muted"
+                }
+              }
+            },
+            {
+              "id": "t-diary-title",
+              "type": "Text",
+              "content": {
+                "text": "Diary",
+                "styleId": "h1",
+                "tag": "h1"
+              },
+              "style": {
+                "base": {}
+              }
+            },
+            {
+              "id": "t-diary-list",
+              "type": "DiaryList",
+              "content": {
+                "limit": 0,
+                "showImages": true
+              },
+              "style": {
+                "base": {
+                  "margin": "20px 0 0"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "playlist",
+      "name": "Playlist",
+      "kind": "page",
+      "sections": [
+        {
+          "id": "t-pl-1",
+          "kind": "flow",
+          "name": "Playlists",
+          "layout": {
+            "base": {
+              "columns": 1,
+              "gap": 18,
+              "padding": "120px 20px 64px",
+              "maxWidth": 1160
+            },
+            "desktop": {
+              "padding": "160px 56px 96px"
+            }
+          },
+          "children": [
+            {
+              "id": "t-pl-title",
+              "type": "Text",
+              "content": {
+                "text": "Playlists",
+                "styleId": "h1",
+                "tag": "h1"
+              },
+              "style": {
+                "base": {}
+              }
+            },
+            {
+              "id": "t-pl-cards",
+              "type": "PlaylistCard",
+              "content": {
+                "source": "all",
+                "playlistId": ""
+              },
+              "style": {
+                "base": {
+                  "margin": "20px 0 0"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "redirects": [],
+  "pageOrder": [
+    "home",
+    "work",
+    "digital",
+    "physical",
+    "diary",
+    "playlists",
+    "rodeo",
+    "about",
+    "links"
+  ]
+}

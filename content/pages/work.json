@@ -1,0 +1,150 @@
+{
+  "id": "work",
+  "title": "Work",
+  "slug": "/work",
+  "parentId": null,
+  "status": "published",
+  "template": "gallery",
+  "seo": {},
+  "isHome": false,
+  "showInNav": true,
+  "sections": [
+    {
+      "id": "work-head",
+      "kind": "flow",
+      "name": "Heading",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "120px 20px 12px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "160px 56px 20px"
+        }
+      },
+      "children": [
+        {
+          "id": "work-kicker",
+          "type": "Text",
+          "content": {
+            "text": "/work",
+            "styleId": "label",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "color": "token:muted"
+            }
+          }
+        },
+        {
+          "id": "work-title",
+          "type": "Text",
+          "content": {
+            "text": "Work",
+            "styleId": "h1",
+            "tag": "h1"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "work-blurb",
+          "type": "Text",
+          "content": {
+            "text": "Two bodies of work: things made on a screen, and things you can drop on your foot.",
+            "styleId": "body",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "maxWidth": "560px",
+              "color": "token:text"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "work-gallery",
+      "kind": "flow",
+      "name": "Gallery",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "12px 20px 64px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "20px 56px 96px"
+        }
+      },
+      "children": [
+        {
+          "id": "work-grid",
+          "type": "GalleryGrid",
+          "content": {
+            "items": [
+              {
+                "src": "/art/hero.jpg",
+                "alt": "Studio piece",
+                "title": "Studio piece"
+              },
+              {
+                "src": "/art/grillz.jpg",
+                "alt": "Grillz",
+                "title": "Grillz"
+              },
+              {
+                "src": "/art/storefront.png",
+                "alt": "Storefront",
+                "title": "Storefront"
+              },
+              {
+                "src": "/art/monkey-figure.jpg",
+                "alt": "Monkey figure",
+                "title": "Monkey figure"
+              }
+            ],
+            "columns": 2,
+            "columnsDesktop": 3,
+            "gap": 12,
+            "lightbox": true
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "work-footer",
+      "kind": "flow",
+      "name": "Footer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "work-footer-ref",
+          "type": "Global",
+          "content": {
+            "globalId": "footer"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": []
+}

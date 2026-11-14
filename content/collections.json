@@ -1,0 +1,48 @@
+{
+  "diary": [
+    {
+      "id": "entry-014",
+      "date": "2026-11-08",
+      "title": "Stars & static",
+      "text": "New sketchbook. Stars on the cover, static on the radio. Filled six pages before the tea went cold.",
+      "image": "/art/j-star2.jpg",
+      "imageAlt": "Sketchbook cover with stars"
+    },
+    {
+      "id": "entry-013",
+      "date": "2026-10-31",
+      "title": "Hear no evil",
+      "text": "The ring came back from casting. Heavier than the render, which feels right.",
+      "image": "/art/hear-no-evil-ring.png",
+      "imageAlt": "Hear no evil ring"
+    },
+    {
+      "id": "entry-012",
+      "date": "2026-10-19",
+      "title": "Flower skull",
+      "text": "Drew this one in a single sitting. Left the mistakes in.",
+      "image": "/art/flower-skull.png",
+      "imageAlt": "Flower skull drawing"
+    }
+  ],
+  "playlists": [
+    {
+      "id": "pl-rock",
+      "title": "Rock",
+      "spotify": "2FeVxQ6ZPLOAuoejGJj9Fb",
+      "cover": "/art/cover-disc1.jpg"
+    },
+    {
+      "id": "pl-alt",
+      "title": "Alt",
+      "spotify": "3PbXJWUZ4RooUU0aSSdDi0",
+      "cover": "/art/cover-disc2.jpg"
+    },
+    {
+      "id": "pl-htr",
+      "title": "H | T | R",
+      "spotify": "6KYCNr0X6Zt189pYxHMx1j",
+      "cover": "/art/cover-disc3.jpg"
+    }
+  ]
+}

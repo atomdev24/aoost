@@ -1,0 +1,150 @@
+{
+  "id": "digital",
+  "title": "Digital",
+  "slug": "/work/digital",
+  "parentId": "work",
+  "status": "published",
+  "template": "gallery",
+  "seo": {},
+  "isHome": false,
+  "showInNav": true,
+  "sections": [
+    {
+      "id": "digital-head",
+      "kind": "flow",
+      "name": "Heading",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "120px 20px 12px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "160px 56px 20px"
+        }
+      },
+      "children": [
+        {
+          "id": "digital-kicker",
+          "type": "Text",
+          "content": {
+            "text": "/work/digital",
+            "styleId": "label",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "color": "token:muted"
+            }
+          }
+        },
+        {
+          "id": "digital-title",
+          "type": "Text",
+          "content": {
+            "text": "Digital",
+            "styleId": "h1",
+            "tag": "h1"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "digital-blurb",
+          "type": "Text",
+          "content": {
+            "text": "Screen work.",
+            "styleId": "body",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "maxWidth": "560px",
+              "color": "token:text"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "digital-gallery",
+      "kind": "flow",
+      "name": "Gallery",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "12px 20px 64px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "20px 56px 96px"
+        }
+      },
+      "children": [
+        {
+          "id": "digital-grid",
+          "type": "GalleryGrid",
+          "content": {
+            "items": [
+              {
+                "src": "/art/hero.jpg",
+                "alt": "Studio piece",
+                "title": "Studio piece"
+              },
+              {
+                "src": "/art/storefront.png",
+                "alt": "Storefront",
+                "title": "Storefront"
+              },
+              {
+                "src": "/art/hear-no-evil-3d.png",
+                "alt": "Hear no evil, 3D",
+                "title": "Hear no evil, 3D"
+              },
+              {
+                "src": "/art/flower-skull.png",
+                "alt": "Flower skull",
+                "title": "Flower skull"
+              }
+            ],
+            "columns": 2,
+            "columnsDesktop": 3,
+            "gap": 12,
+            "lightbox": true
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "digital-footer",
+      "kind": "flow",
+      "name": "Footer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "digital-footer-ref",
+          "type": "Global",
+          "content": {
+            "globalId": "footer"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": []
+}

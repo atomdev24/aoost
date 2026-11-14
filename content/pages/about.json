@@ -1,0 +1,112 @@
+{
+  "id": "about",
+  "title": "About",
+  "slug": "/about",
+  "parentId": null,
+  "status": "published",
+  "template": "blank",
+  "seo": {},
+  "isHome": false,
+  "showInNav": true,
+  "sections": [
+    {
+      "id": "about-head",
+      "kind": "flow",
+      "name": "Content",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "120px 20px 64px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "160px 56px 96px"
+        }
+      },
+      "children": [
+        {
+          "id": "about-kicker",
+          "type": "Text",
+          "content": {
+            "text": "/about",
+            "styleId": "label",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "color": "token:muted"
+            }
+          }
+        },
+        {
+          "id": "about-title",
+          "type": "Text",
+          "content": {
+            "text": "About",
+            "styleId": "h1",
+            "tag": "h1"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "about-body",
+          "type": "Text",
+          "content": {
+            "text": "Alex Oostendurp draws, builds small objects and keeps a diary in public. This is where it all lands.",
+            "styleId": "body",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "maxWidth": "560px",
+              "color": "token:text"
+            }
+          }
+        },
+        {
+          "id": "about-art",
+          "type": "Image",
+          "content": {
+            "src": "/seed/sun.svg",
+            "alt": "Line drawing of a sun",
+            "lightbox": false
+          },
+          "style": {
+            "base": {
+              "width": "72px",
+              "margin": "16px 0 0"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "about-footer",
+      "kind": "flow",
+      "name": "Footer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "about-footer-ref",
+          "type": "Global",
+          "content": {
+            "globalId": "footer"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": []
+}
