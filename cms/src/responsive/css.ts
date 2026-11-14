@@ -189,6 +189,11 @@ export function addSectionCss(sheet: Sheet, section: Section) {
   ) as [ReturnType<typeof sectionDecls>, ReturnType<typeof sectionDecls>];
   sheet.add(`.s-${section.id}`, m.outer, d.outer);
   sheet.add(`.s-${section.id}>.si`, m.inner, d.inner);
+  const tint = (bp: Breakpoint): Decls => {
+    const c = resolve(section.layout, bp).background?.overlay;
+    return c ? { background: colorValue(c) } : {};
+  };
+  sheet.add(`.s-${section.id}>.s-bg>.s-bg-tint`, tint("mobile"), tint("desktop"));
   for (const node of section.children) addNodeCss(sheet, node, section);
 }
 

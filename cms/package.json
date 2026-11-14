@@ -7,11 +7,11 @@
     "predev": "node scripts/link-dev-vars.mjs",
     "dev": "npm run build && wrangler dev",
     "dev:admin": "vite",
-    "build": "tsc --noEmit && vite build && tsx scripts/build-site.ts",
+    "build": "npm run typecheck && vite build && tsx scripts/build-site.ts",
     "build:site": "tsx scripts/build-site.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.worker.json",
     "deploy:preview": "npm run build && wrangler deploy"
   },
   "dependencies": {
@@ -28,6 +28,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
+    "esbuild": "^0.28.2",
     "jsdom": "^29.1.1",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",

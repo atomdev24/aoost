@@ -218,8 +218,9 @@
             "tag": "h2"
           },
           "style": {
-            "base": {
-              "colSpan": 1
+            "base": {},
+            "desktop": {
+              "colSpan": 3
             }
           }
         },

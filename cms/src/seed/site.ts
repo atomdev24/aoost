@@ -59,7 +59,7 @@ const home = page({
       "home-latest",
       "grid",
       [
-        text("home-latest-h", "h2", "Lately", { colSpan: 1 }, "h2"),
+        text("home-latest-h", "h2", "Lately", { base: {}, desktop: { colSpan: 3 } }, "h2"),
         image("home-g1", art("grillz.jpg"), "Grillz", { aspectRatio: "4/3", radius: [6, 6, 6, 6] }),
         image("home-g2", art("monkey-figure.jpg"), "Monkey figure", { aspectRatio: "4/3", radius: [6, 6, 6, 6] }),
         image("home-g3", art("storefront.png"), "Storefront", { aspectRatio: "4/3", radius: [6, 6, 6, 6] }),

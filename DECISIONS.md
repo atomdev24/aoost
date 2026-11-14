@@ -16,3 +16,7 @@ One line each: the decision, and why. Newest at the bottom.
 - Desktop breakpoint starts at 900px (`DESKTOP_MIN`). Why: below that the pill nav's link row and multi-column grids get cramped; tablets in portrait get the mobile layout until a tablet breakpoint exists.
 - A canvas layer with no desktop position is derived by scaling the mobile artboard uniformly to fit a band at most 720px tall, centred in 1440px. Why: literal width scaling (×3.7) makes sections absurdly tall.
 - Text sizes are emitted as `calc(var(--cs, 1px) * N)`: inside a canvas `--cs` is one design px, so type scales with the artboard; elsewhere it is 1px.
+- Components keep their CSS in a `*.styles.ts` string, not a `.css` file. Why: the same component code runs under Vite (editor), tsx (build) and the Worker (draft preview), and a TS string is the one format all three import without loader config.
+- Pages are written as `work.html` / `work/digital.html` so Cloudflare serves clean URLs (`/work`). All CSS is inlined per page (only the components that page uses) and there is one deferred script (`/assets/site.js`, ~8 KB).
+- Text content supports only `**bold**`, `*italic*`, `[links](url)` and line breaks, rendered as React nodes. Why: no raw HTML in text means nothing to sanitise; the Code block is the place for custom HTML.
+- A page link with sub-pages uses a split control in the pill: the label navigates, the caret button opens the menu (works for hover, tap and keyboard).

@@ -20,7 +20,7 @@ Tick items as they're done (`- [x]`) and commit after each one. If the run stops
 - [x] Worker with static assets, plus `wrangler.toml` (R2 binding, Durable Object binding, vars). `wrangler dev` serves a hello page.
 - [x] Content schema in TypeScript with zod validation (SPEC §3), plus a seed `content/` with Home, Work (with Digital and Physical), Diary, Playlists, Rodeo, About and Links (hidden).
 - [x] Responsive resolver: merge mobile base with desktop overrides, then generate CSS with media queries. Unit tests.
-- [ ] Static renderer: content JSON to HTML/CSS per page, with redirects output. Build script. Tests.
+- [x] Static renderer: content JSON to HTML/CSS per page, with redirects output. Build script. Tests.
 
 ## Phase 2: Editor core
 
