@@ -3,7 +3,8 @@ import type { Responsive, Section, SectionLayout } from "../../schema";
 import { SectionBackground } from "../../render/SectionView";
 import { resolve } from "../../responsive/resolve";
 import { newId } from "../../schema/ids";
-import { useEditor } from "../store";
+import { currentPage, useEditor } from "../store";
+import { EditorOverlay } from "./EditorOverlay";
 import { itemToSection, SECTION_TYPES, type PuckItem } from "./adapter";
 import { layoutField } from "./fields";
 
@@ -47,6 +48,7 @@ function sectionConfig(kind: Section["kind"]): ComponentConfig {
 function EditorSection({ kind, ...props }: SectionProps & { kind: Section["kind"] }) {
   const { id, items: Items, puck } = props;
   const bp = useEditor((s) => s.bp);
+  const overlays = useEditor((s) => currentPage(s).overlays);
   const section = itemToSection({ type: SECTION_TYPES[kind], props: { ...props, items: [] } } as unknown as PuckItem);
   const layout = resolve(section.layout, bp);
   // Column guides for grid sections: the drop zones Alex splits the section into.
@@ -58,6 +60,11 @@ function EditorSection({ kind, ...props }: SectionProps & { kind: Section["kind"
     <section ref={puck.dragRef} id={id} className={`s s-${id}`} data-kind={kind} data-section-id={id}>
       <SectionBackground section={section} />
       <Items className="si" style={guides} minEmptyHeight={kind === "canvas" ? 0 : 120} />
+      {overlays
+        .filter((o) => o.anchor !== "viewport" && o.anchor.sectionId === id)
+        .map((o) => (
+          <EditorOverlay key={o.id} overlay={o} />
+        ))}
     </section>
   );
 }

@@ -26,3 +26,5 @@ One line each: the decision, and why. Newest at the bottom.
 - Free canvas: Puck keeps selection, but dragging/resizing layers is our own pointer controller inside the preview iframe (Puck's list drag is switched off for canvas layers). Moves commit to the editor store as one undo step. Resize ignores a layer's rotation (handles act on the unrotated box).
 - Puck selects one item, so multi-select exists only on a canvas (Shift-click). Align works on one layer (to the artboard) or several (to each other); distribute needs three or more.
 - Grid "drop zones" are shown as column guides in the editor; cells auto-flow and each cell can span columns/rows. "Split into 1/2/3/4/6" sets the column count for the active breakpoint.
+- Overlays live on the page (`page.overlays`), outside Puck's tree: they are added from the Layers panel, drawn on the canvas, and edited in their own right-hand panel. An overlay attached to a section sits centred on that section's top or bottom edge (straddling it) and can be nudged; attached to the screen it is `position: fixed`.
+- Hide is per breakpoint (it writes `hidden` at the active breakpoint); lock and rename are shared.

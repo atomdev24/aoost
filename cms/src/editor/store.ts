@@ -23,6 +23,8 @@ export type EditorState = {
   future: HistoryEntry[];
   /** Selected node ids. Puck selects one; Shift-click on a canvas adds more. */
   selection: string[];
+  /** The overlay being edited (overlays live outside Puck's tree). */
+  overlayId: string | null;
   /** Node ids to flash (changes made by Claude). */
   highlight: string[];
   /** Label of the last history step, for the status line. */
@@ -61,6 +63,7 @@ export function initStore(site: Site, unpublished: boolean) {
     past: [],
     future: [],
     selection: [],
+    overlayId: null,
     highlight: [],
     lastLabel: null,
     clientId: crypto.randomUUID(),
@@ -151,12 +154,13 @@ export function redo() {
 export function setPage(pageId: string) {
   if (pageId === state.pageId || !state.site.pages.some((p) => p.id === pageId)) return;
   history.replaceState(null, "", `?page=${pageId}`);
-  set({ pageId });
+  set({ pageId, selection: [], overlayId: null });
 }
 export const setBreakpoint = (bp: Breakpoint) => bp !== state.bp && set({ bp });
 export const setSelection = (ids: string[]) => {
   if (ids.length !== state.selection.length || ids.some((id, i) => id !== state.selection[i])) set({ selection: ids });
 };
+export const setOverlay = (overlayId: string | null) => overlayId !== state.overlayId && set({ overlayId });
 export const setUnpublished = (unpublished: boolean) => set({ unpublished });
 
 // ---------------------------------------------------------- autosave

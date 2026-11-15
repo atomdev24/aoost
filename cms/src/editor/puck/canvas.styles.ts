@@ -21,6 +21,9 @@ html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!imp
 html.ed-dragging *{cursor:grabbing!important}
 html.ed-dragging [data-puck-overlay-portal],html.ed-dragging [class*="DraggableComponent"]{opacity:0}
 .s[data-kind="grid"]>.si{background-image:repeating-linear-gradient(to right,rgba(181,66,26,.07) 0,rgba(181,66,26,.07) var(--ed-col),transparent var(--ed-col),transparent calc(var(--ed-col) + var(--ed-gap)));background-origin:content-box;background-clip:content-box}
+.ov{cursor:pointer;outline:1px dashed rgba(226,104,58,.6);outline-offset:2px}
+.ov.ed-selected{outline:2px solid #E2683A}
+.ov[data-anchor="viewport"]{position:fixed}
 .ed-flash{animation:ed-flash 2s ease-out}
 @keyframes ed-flash{0%,60%{outline:3px solid #E2683A;outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}
 .ed-locked{cursor:not-allowed}

@@ -589,3 +589,148 @@ body {
   font-size: 11px;
   pointer-events: none;
 }
+
+/* ---- layers ---- */
+.ed-layers {
+  list-style: none;
+  margin: 0;
+  padding: 0 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.ed-layer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding-right: 4px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+}
+.ed-layer:hover {
+  background: var(--ed-raised);
+}
+.ed-layer.is-selected {
+  background: var(--ed-selected);
+  border-color: var(--ed-line-strong);
+}
+.ed-layer.is-hidden .ed-layer-name {
+  opacity: 0.5;
+}
+.ed-layer-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  line-height: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ed-text);
+  font: 500 13px Inter, system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.ed-layer-name span,
+.ed-layer-name small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ed-layer-name small {
+  flex: 1;
+  color: var(--ed-muted);
+  font-size: 11px;
+}
+.ed-layer-tools {
+  display: flex;
+  align-items: center;
+  opacity: 0.35;
+}
+.ed-layer:hover .ed-layer-tools,
+.ed-layer:focus-within .ed-layer-tools,
+.ed-layer.is-selected .ed-layer-tools {
+  opacity: 1;
+}
+.ed-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ed-muted);
+  cursor: pointer;
+}
+.ed-mini:hover {
+  background: var(--ed-line);
+  color: var(--ed-text);
+}
+.ed-mini[aria-pressed="true"] {
+  color: var(--ed-accent);
+}
+.ed-empty {
+  padding: 4px 8px 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ed-muted);
+}
+.ed-panel-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 12px 16px;
+}
+.ed-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* ---- right-hand side panels (overlay, page settings) ---- */
+.ed-side {
+  display: flex;
+  flex-direction: column;
+  color: var(--ed-text);
+}
+.ed-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 12px 12px 16px;
+  border-bottom: 1px solid var(--ed-line);
+}
+.ed-side-head h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.ed-side-head span {
+  font-size: 12px;
+  color: var(--ed-muted);
+}
+.ed-side-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 24px;
+}
+.ed-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.ed-autofields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

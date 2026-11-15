@@ -6,7 +6,7 @@ import { baseCss } from "./base.styles";
 import { makeCtx } from "./context";
 import { navRenderer } from "./nav";
 import { addOverlayCss } from "./overlay-css";
-import { SectionView } from "./SectionView";
+import { OverlayView, SectionView } from "./SectionView";
 
 export type RenderOptions = {
   /** Absolute origin for canonical and share URLs, e.g. "https://alexoostendurp.com". */
@@ -83,24 +83,10 @@ export function PageBody({ site, page, opts = {} }: { site: Site; page: Page; op
         {page.overlays
           .filter((o) => o.anchor === "viewport")
           .map((o) => (
-            <div key={o.id} className={`ov ov-${o.id}`} data-anchor="viewport">
-              <SectionOverlayNode site={site} page={page} overlayId={o.id} prefix={opts.preview?.prefix} />
-            </div>
+            <OverlayView key={o.id} overlay={o} ctx={ctx} />
           ))}
       </main>
     </>
-  );
-}
-
-function SectionOverlayNode({ site, page, overlayId, prefix }: { site: Site; page: Page; overlayId: string; prefix?: string }) {
-  const o = page.overlays.find((x) => x.id === overlayId)!;
-  const ctx = makeCtx(site, page, { prefix });
-  const def = getComponent(o.node.type);
-  if (!def) return null;
-  return (
-    <div className={`n n-${o.node.id}`} data-type={o.node.type}>
-      <def.Render node={o.node} content={{ ...def.defaults.content, ...o.node.content }} ctx={ctx} />
-    </div>
   );
 }
 

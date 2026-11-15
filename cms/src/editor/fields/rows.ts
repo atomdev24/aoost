@@ -1,4 +1,4 @@
-import type { FrameFit, SectionLayout, Style } from "../../schema";
+import type { FrameFit, Overlay, SectionLayout, Style } from "../../schema";
 
 /** A declarative description of one property row in a responsive panel. */
 export type RowKind = "aspect" | "length" | "text" | "number" | "select" | "color" | "toggle" | "corners" | "border" | "filter" | "background";
@@ -118,4 +118,32 @@ export const SECTION_ROWS: RowDef<SectionLayout>[] = [
   { key: "justify", label: "Justify cells", group: "Layout", kind: "select", options: ALIGN, when: notCanvas },
   { key: "background", label: "Background", group: "Background", kind: "background" },
   { key: "hidden", label: "Hide on this breakpoint", group: "Visibility", kind: "toggle" },
+];
+
+export const OVERLAY_ROWS: RowDef<Overlay["place"]["base"]>[] = [
+  {
+    key: "h",
+    label: "Across",
+    group: "Placement",
+    kind: "select",
+    options: [
+      { value: "left", label: "Left" },
+      { value: "center", label: "Centre" },
+      { value: "right", label: "Right" },
+    ],
+  },
+  {
+    key: "v",
+    label: "Down (viewport)",
+    group: "Placement",
+    kind: "select",
+    options: [
+      { value: "top", label: "Top" },
+      { value: "center", label: "Middle" },
+      { value: "bottom", label: "Bottom" },
+    ],
+  },
+  { key: "dx", label: "Nudge X", group: "Placement", kind: "number", suffix: "px" },
+  { key: "dy", label: "Nudge Y", group: "Placement", kind: "number", suffix: "px" },
+  { key: "width", label: "Width", group: "Placement", kind: "number", min: 1, suffix: "px" },
 ];

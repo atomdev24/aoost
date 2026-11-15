@@ -1,4 +1,4 @@
-import { blocksPlugin, outlinePlugin, Puck, type Plugin } from "@puckeditor/core";
+import { blocksPlugin, Puck, type Plugin } from "@puckeditor/core";
 import "@puckeditor/core/puck.css";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { deepEqual } from "../responsive/resolve";
@@ -8,6 +8,8 @@ import { pageToPuck, puckToPage, type PuckData } from "./puck/adapter";
 import { puckConfig } from "./puck/config";
 import { markFromPuck } from "./puck/PuckSync";
 import { currentPage, getState, redo, undo, updatePage, useEditor } from "./store";
+import { LayersPanel } from "./ui/LayersPanel";
+import { OverlayPanel } from "./ui/OverlayPanel";
 import { PagesPanel } from "./ui/PagesPanel";
 import { TopBar } from "./ui/TopBar";
 
@@ -21,6 +23,18 @@ const PagesIcon = () => (
     <path d="M4 1.5h5.5L12.500 4.500V14.500H4z" />
   </svg>
 );
+
+const LayersIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
+    <path d="M8 2l6 3-6 3-6-3zM2 8l6 3 6-3M2 11l6 3 6-3" />
+  </svg>
+);
+
+/** The right-hand panel: an overlay's settings when one is selected, otherwise Puck's fields. */
+function Fields({ children }: { children: ReactNode }) {
+  const overlayId = useEditor((s) => s.overlayId);
+  return overlayId ? <OverlayPanel overlayId={overlayId} /> : <>{children}</>;
+}
 
 /** ⌘Z / ⇧⌘Z drive the editor's own undo stack (it also holds Claude's and panel edits). */
 function useUndoKeys(doc: Document | undefined) {
@@ -69,7 +83,7 @@ export function Editor() {
     () => [
       { name: "pages", label: "Pages", icon: <PagesIcon />, render: () => <PagesPanel /> },
       blocksPlugin({ label: "Add" }),
-      outlinePlugin({ label: "Layers" }),
+      { name: "outline", label: "Layers", icon: <LayersIcon />, render: () => <LayersPanel /> },
     ],
     [],
   );
@@ -89,6 +103,7 @@ export function Editor() {
       overrides={{
         header: () => <TopBar />,
         iframe: Frame,
+        fields: Fields,
       }}
       onAction={(action) => {
         if (action.type === "insert") pendingLabel.current = { label: `Add ${action.componentType}` };

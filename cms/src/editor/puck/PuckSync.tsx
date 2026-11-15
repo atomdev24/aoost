@@ -2,7 +2,7 @@ import { useGetPuck } from "@puckeditor/core";
 import { useEffect } from "react";
 import { deepEqual } from "../../responsive/resolve";
 import { DESIGN_WIDTH } from "../../schema";
-import { currentPage, getState, setBreakpoint, setSelection, subscribe } from "../store";
+import { currentPage, getState, setBreakpoint, setOverlay, setSelection, subscribe } from "../store";
 import { pageToPuck, puckToPage, type PuckData } from "./adapter";
 import { usePuck } from "./usePuck";
 
@@ -30,7 +30,10 @@ export function PuckSync() {
   const selectedId = usePuck((s) => (s.selectedItem?.props.id as string | undefined) ?? null);
   useEffect(() => {
     if (!selectedId) setSelection([]);
-    else if (!getState().selection.includes(selectedId)) setSelection([selectedId]);
+    else {
+      setOverlay(null);
+      if (!getState().selection.includes(selectedId)) setSelection([selectedId]);
+    }
   }, [selectedId]);
 
   useEffect(() => {

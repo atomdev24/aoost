@@ -28,7 +28,7 @@ Tick items as they're done (`- [x]`) and commit after each one. If the run stops
 - [x] Desktop/Mobile switch. Edits go to the active breakpoint, with override dots and "reset to mobile".
 - [x] Section kinds: flow, grid (split N with drop zones) and canvas (absolute layers per breakpoint, snapping, guides, Shift axis lock, align/distribute).
 - [x] Frame node: frame size and aspect ratio, per-corner radius, border, shadow, plus content fit, focal point, zoom and pan.
-- [ ] Overlays (anchored to a section or the viewport, sticky). Layers panel (lock, hide, rename, reorder).
+- [x] Overlays (anchored to a section or the viewport, sticky). Layers panel (lock, hide, rename, reorder).
 - [ ] Theme panel: tokens, text styles and colour styles applied site-wide.
 - [ ] Global components. Section and page templates, including the four starters.
 - [ ] Undo/redo, autosave, Preview, Publish (commit through the GitHub API, then the Action deploys).

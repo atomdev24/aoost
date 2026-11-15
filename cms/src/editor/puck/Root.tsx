@@ -6,6 +6,7 @@ import { CanvasController } from "../canvas/CanvasController";
 import { currentPage, useEditor } from "../store";
 import { puckToPage, type PuckData } from "./adapter";
 import { canvasCss } from "./canvas.styles";
+import { EditorOverlay } from "./EditorOverlay";
 import { usePuck } from "./usePuck";
 
 /**
@@ -29,7 +30,14 @@ export function Root({ children }: { children: ReactNode }) {
       <div className="ed-nav-preview" inert>
         <Nav ctx={ctx} />
       </div>
-      <main id="main">{children}</main>
+      <main id="main">
+        {children}
+        {page.overlays
+          .filter((o) => o.anchor === "viewport")
+          .map((o) => (
+            <EditorOverlay key={o.id} overlay={o} />
+          ))}
+      </main>
       <CanvasController />
     </>
   );
