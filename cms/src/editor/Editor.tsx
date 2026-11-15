@@ -11,6 +11,7 @@ import { currentPage, getState, redo, undo, updatePage, useEditor } from "./stor
 import { LayersPanel } from "./ui/LayersPanel";
 import { OverlayPanel } from "./ui/OverlayPanel";
 import { PagesPanel } from "./ui/PagesPanel";
+import { ThemePanel } from "./ui/ThemePanel";
 import { TopBar } from "./ui/TopBar";
 
 const VIEWPORTS = [
@@ -27,6 +28,13 @@ const PagesIcon = () => (
 const LayersIcon = () => (
   <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
     <path d="M8 2l6 3-6 3-6-3zM2 8l6 3 6-3M2 11l6 3 6-3" />
+  </svg>
+);
+
+const ThemeIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+    <circle cx="8" cy="8" r="6" />
+    <path d="M8 2v12M8 2a6 6 0 0 1 0 12" fill="currentColor" fillOpacity=".25" />
   </svg>
 );
 
@@ -84,6 +92,7 @@ export function Editor() {
       { name: "pages", label: "Pages", icon: <PagesIcon />, render: () => <PagesPanel /> },
       blocksPlugin({ label: "Add" }),
       { name: "outline", label: "Layers", icon: <LayersIcon />, render: () => <LayersPanel /> },
+      { name: "theme", label: "Theme", icon: <ThemeIcon />, render: () => <ThemePanel /> },
     ],
     [],
   );
