@@ -30,7 +30,7 @@ Tick items as they're done (`- [x]`) and commit after each one. If the run stops
 - [x] Frame node: frame size and aspect ratio, per-corner radius, border, shadow, plus content fit, focal point, zoom and pan.
 - [x] Overlays (anchored to a section or the viewport, sticky). Layers panel (lock, hide, rename, reorder).
 - [x] Theme panel: tokens, text styles and colour styles applied site-wide.
-- [ ] Global components. Section and page templates, including the four starters.
+- [x] Global components. Section and page templates, including the four starters.
 - [ ] Undo/redo, autosave, Preview, Publish (commit through the GitHub API, then the Action deploys).
 
 ## Phase 3: Pages & navigation

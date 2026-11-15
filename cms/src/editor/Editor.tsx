@@ -8,7 +8,9 @@ import { pageToPuck, puckToPage, type PuckData } from "./puck/adapter";
 import { puckConfig } from "./puck/config";
 import { markFromPuck } from "./puck/PuckSync";
 import { currentPage, getState, redo, undo, updatePage, useEditor } from "./store";
+import { GlobalPanel } from "./ui/GlobalPanel";
 import { LayersPanel } from "./ui/LayersPanel";
+import { LibraryPanel } from "./ui/LibraryPanel";
 import { OverlayPanel } from "./ui/OverlayPanel";
 import { PagesPanel } from "./ui/PagesPanel";
 import { ThemePanel } from "./ui/ThemePanel";
@@ -31,6 +33,15 @@ const LayersIcon = () => (
   </svg>
 );
 
+const LibraryIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
+    <rect x="2" y="2" width="5" height="5" rx="1" />
+    <rect x="9" y="2" width="5" height="5" rx="1" />
+    <rect x="2" y="9" width="5" height="5" rx="1" />
+    <path d="M11.500 9.500v4M9.500 11.500h4" strokeLinecap="round" />
+  </svg>
+);
+
 const ThemeIcon = () => (
   <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
     <circle cx="8" cy="8" r="6" />
@@ -41,7 +52,10 @@ const ThemeIcon = () => (
 /** The right-hand panel: an overlay's settings when one is selected, otherwise Puck's fields. */
 function Fields({ children }: { children: ReactNode }) {
   const overlayId = useEditor((s) => s.overlayId);
-  return overlayId ? <OverlayPanel overlayId={overlayId} /> : <>{children}</>;
+  const globalId = useEditor((s) => s.globalId);
+  if (overlayId) return <OverlayPanel overlayId={overlayId} />;
+  if (globalId) return <GlobalPanel globalId={globalId} />;
+  return <>{children}</>;
 }
 
 /** ⌘Z / ⇧⌘Z drive the editor's own undo stack (it also holds Claude's and panel edits). */
@@ -92,6 +106,7 @@ export function Editor() {
       { name: "pages", label: "Pages", icon: <PagesIcon />, render: () => <PagesPanel /> },
       blocksPlugin({ label: "Add" }),
       { name: "outline", label: "Layers", icon: <LayersIcon />, render: () => <LayersPanel /> },
+      { name: "library", label: "Library", icon: <LibraryIcon />, render: () => <LibraryPanel /> },
       { name: "theme", label: "Theme", icon: <ThemeIcon />, render: () => <ThemePanel /> },
     ],
     [],

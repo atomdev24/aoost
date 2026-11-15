@@ -25,6 +25,8 @@ export type EditorState = {
   selection: string[];
   /** The overlay being edited (overlays live outside Puck's tree). */
   overlayId: string | null;
+  /** The global component being edited, if any. */
+  globalId: string | null;
   /** Node ids to flash (changes made by Claude). */
   highlight: string[];
   /** Label of the last history step, for the status line. */
@@ -64,6 +66,7 @@ export function initStore(site: Site, unpublished: boolean) {
     future: [],
     selection: [],
     overlayId: null,
+    globalId: null,
     highlight: [],
     lastLabel: null,
     clientId: crypto.randomUUID(),
@@ -154,13 +157,14 @@ export function redo() {
 export function setPage(pageId: string) {
   if (pageId === state.pageId || !state.site.pages.some((p) => p.id === pageId)) return;
   history.replaceState(null, "", `?page=${pageId}`);
-  set({ pageId, selection: [], overlayId: null });
+  set({ pageId, selection: [], overlayId: null, globalId: null });
 }
 export const setBreakpoint = (bp: Breakpoint) => bp !== state.bp && set({ bp });
 export const setSelection = (ids: string[]) => {
   if (ids.length !== state.selection.length || ids.some((id, i) => id !== state.selection[i])) set({ selection: ids });
 };
-export const setOverlay = (overlayId: string | null) => overlayId !== state.overlayId && set({ overlayId });
+export const setOverlay = (overlayId: string | null) => overlayId !== state.overlayId && set({ overlayId, globalId: null });
+export const setGlobalEdit = (globalId: string | null) => globalId !== state.globalId && set({ globalId, overlayId: null });
 export const setUnpublished = (unpublished: boolean) => set({ unpublished });
 
 // ---------------------------------------------------------- autosave
