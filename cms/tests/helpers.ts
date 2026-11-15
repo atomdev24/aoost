@@ -53,7 +53,8 @@ export async function fullPageShot(page: Page, path: string) {
   });
   const height = Math.min(16000, await page.evaluate(() => document.documentElement.scrollHeight));
   await page.setViewportSize({ width: size.width, height });
-  await page.waitForLoadState("networkidle").catch(() => {});
+  // Third-party embeds can keep connections open for ever, so don't wait on them for long.
+  await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(1500);
   await page.screenshot({ path });
   await page.setViewportSize(size);

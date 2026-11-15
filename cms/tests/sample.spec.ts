@@ -14,6 +14,7 @@ const widths = [
 for (const { name, viewport } of widths) {
   test.describe(`sample page at ${name}px`, () => {
     test.use({ viewport });
+    test.setTimeout(90_000); // full-height captures with live embeds are slow
 
     test("renders every section kind and media type, and is captured for the docs", async ({ page }) => {
       const errors: string[] = [];
