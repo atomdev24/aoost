@@ -127,6 +127,158 @@
       ]
     },
     {
+      "id": "home-journals",
+      "kind": "flow",
+      "name": "Journals",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "home-journals-block",
+          "type": "AoostJournals",
+          "content": {
+            "mat": "light",
+            "heading": "journals",
+            "sub": "tap a book to open it",
+            "journals": [
+              {
+                "title": "sketchbook 01",
+                "year": "2025",
+                "cover": "/art/j-star1.jpg",
+                "band": "#141516",
+                "tilt": -5,
+                "pages": [
+                  {
+                    "id": "cc67ed56-1343-4107-8236-c6fc982e371f",
+                    "paper": "black",
+                    "spread": true,
+                    "items": [
+                      {
+                        "id": "e244da62-0ce7-4377-9ba9-4cb4cec26aa7",
+                        "kind": "sticker",
+                        "src": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/stickers/4e412042-39ad-4a0e-ac61-a61006fd405c.webp",
+                        "x": 0.512805,
+                        "y": 0.478652,
+                        "w": 0.512394,
+                        "rot": -20.8,
+                        "skew": -0.778526,
+                        "z": 1,
+                        "props": {
+                          "lift": 0,
+                          "tape": "none",
+                          "aspect": 0.6330275229357798,
+                          "shadow": "soft",
+                          "tapeStyle": "masking"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "title": "hear no evil",
+                "year": "2025",
+                "coverColor": "#B48A5C",
+                "sticker": "/art/hear-no-evil-ring.png",
+                "band": "#7A1A1A",
+                "tilt": 4,
+                "pages": []
+              },
+              {
+                "title": "stars & static",
+                "year": "2026",
+                "cover": "/art/j-star2.jpg",
+                "band": "#1B2BA0",
+                "tilt": -2,
+                "pages": []
+              },
+              {
+                "title": "late nights",
+                "year": "2026",
+                "coverColor": "#141516",
+                "sticker": "/art/j-monkey.png",
+                "band": "#7C5CFF",
+                "dark": true,
+                "tilt": 6,
+                "pages": []
+              }
+            ]
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-tools",
+      "kind": "flow",
+      "name": "Skills",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "home-tools-block",
+          "type": "AoostTools",
+          "content": {
+            "mat": "light",
+            "heading": "skills",
+            "tools": [
+              {
+                "abbr": "Id",
+                "name": "InDesign",
+                "level": "Daily",
+                "value": 90
+              },
+              {
+                "abbr": "Ai",
+                "name": "Illustrator",
+                "level": "Fluent",
+                "value": 85
+              },
+              {
+                "abbr": "Ps",
+                "name": "Photoshop",
+                "level": "Daily",
+                "value": 75
+              },
+              {
+                "abbr": "Fg",
+                "name": "Figma",
+                "level": "Fluent",
+                "value": 60
+              },
+              {
+                "abbr": "Ae",
+                "name": "After Effects",
+                "level": "Learning",
+                "value": 45
+              },
+              {
+                "abbr": "Bl",
+                "name": "Blender",
+                "level": "Learning",
+                "value": 35
+              }
+            ]
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
       "id": "home-viewer",
       "kind": "flow",
       "name": "Artwork viewer",
