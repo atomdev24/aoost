@@ -60,4 +60,4 @@ Tick items as they're done (`- [x]`) and commit after each one. If the run stops
 - [x] Editor on small screens: quick-edit mode (text, swap image, add a diary entry or playlist, publish).
 - [x] Build a sample page with every section kind, media type and nav feature. Playwright screenshots at 390 and 1440 into `docs/screenshots/`.
 - [x] Tests green, Lighthouse mobile ≥ 90 on the sample page, README written.
-- [ ] Open a PR from `cms-v1` to `main` with a summary, screenshots, `DECISIONS.md` and `BLOCKERS.md`. Do not merge.
+- [x] Open a PR from `cms-v1` to `main` with a summary, screenshots, `DECISIONS.md` and `BLOCKERS.md`. Do not merge.
