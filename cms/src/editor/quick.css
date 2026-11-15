@@ -1,0 +1,199 @@
+/* Quick edit: the phone layout of the editor. Touch targets are at least 44px. */
+.qe {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ed-bg);
+  color: var(--ed-text);
+}
+.qe-top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 10px 16px;
+  background: var(--ed-panel);
+  border-bottom: 1px solid var(--ed-line);
+}
+.qe-brand {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.qe-brand strong {
+  font: 700 17px "Space Grotesk", Inter, sans-serif;
+}
+.qe-brand span {
+  font-size: 12px;
+  color: var(--ed-muted);
+}
+.qe .ed-btn {
+  height: 44px;
+}
+.qe .ed-icon {
+  width: 44px;
+  height: 44px;
+}
+.qe-status {
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--ed-muted);
+  border-bottom: 1px solid var(--ed-line);
+}
+.qe-status.is-error {
+  color: var(--ed-accent);
+}
+.qe-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px 0;
+  border-bottom: 1px solid var(--ed-line);
+}
+.qe-tabs button {
+  flex: 1;
+  height: 44px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--ed-muted);
+  font: 500 15px Inter, system-ui, sans-serif;
+  cursor: pointer;
+}
+.qe-tabs button[aria-selected="true"] {
+  color: var(--ed-text);
+  font-weight: 600;
+  border-bottom-color: var(--ed-accent);
+}
+.qe-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 12px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.qe-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ed-text-2);
+}
+.qe-input {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 16px; /* 16px stops iOS zooming into the field */
+}
+.qe-text {
+  height: auto;
+  padding: 10px 12px;
+  line-height: 1.45;
+  resize: vertical;
+}
+.qe-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--ed-line);
+  border-radius: 12px;
+  background: var(--ed-panel);
+}
+.qe-card h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ed-muted);
+}
+.qe-card h3 span {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.qe-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  margin: -6px 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ed-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.qe-card-head strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.qe-card-head span {
+  flex: none;
+  font-size: 13px;
+  color: var(--ed-muted);
+}
+.qe-add {
+  width: 100%;
+}
+.qe .ed-media .ed-input {
+  height: 44px;
+  font-size: 16px;
+}
+.qe .ed-media .ed-btn {
+  height: 44px;
+  padding: 0 16px;
+}
+.qe .ed-media img {
+  max-height: 200px;
+}
+.qe-empty {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ed-muted);
+}
+.qe-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 24px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.qe-foot .ed-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.qe-foot p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ed-muted);
+  text-align: center;
+}
+.qe :focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 1px;
+}
+.qe .ed-modal {
+  padding: 16px;
+}
+.qe *,
+.qe *::before {
+  box-sizing: border-box;
+}

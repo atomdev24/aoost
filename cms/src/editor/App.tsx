@@ -2,12 +2,23 @@ import { useEffect, useState } from "react";
 import "../components/registry";
 import { api } from "./api";
 import { Editor } from "./Editor";
+import { QuickEdit } from "./QuickEdit";
 import { capturePreview } from "./screenshot";
 import { noteVersion, onServerMessage, startSync } from "./socket";
 import { flush, getState, initStore, setOnSaved } from "./store";
 
+/** Below this width the editor switches to quick edit (precise drag layout is desktop-only). */
+const QUICK_BELOW = 900;
+
 export function App() {
   const [ready, setReady] = useState(false);
+  const [small, setSmall] = useState(() => window.innerWidth < QUICK_BELOW);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${QUICK_BELOW - 1}px)`);
+    const onChange = () => setSmall(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,5 +43,5 @@ export function App() {
 
   if (error) return <div className="ed-splash">Could not load the draft: {error}</div>;
   if (!ready) return <div className="ed-splash">Loading the draft…</div>;
-  return <Editor />;
+  return small ? <QuickEdit /> : <Editor />;
 }
