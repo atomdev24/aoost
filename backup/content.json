@@ -116,7 +116,40 @@
       "rot": -5,
       "props": {},
       "cover_items": [],
-      "pages": []
+      "pages": [
+        {
+          "id": "cc67ed56-1343-4107-8236-c6fc982e371f",
+          "image_url": null,
+          "props": {
+            "paper": "black",
+            "spread": true
+          },
+          "items": [
+            {
+              "id": "e244da62-0ce7-4377-9ba9-4cb4cec26aa7",
+              "journal_id": "be69ee42-3ea8-4546-bceb-8b78fae880ad",
+              "page_id": "cc67ed56-1343-4107-8236-c6fc982e371f",
+              "kind": "sticker",
+              "src": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/stickers/4e412042-39ad-4a0e-ac61-a61006fd405c.webp",
+              "x": 0.512805,
+              "y": 0.478652,
+              "w": 0.512394,
+              "rot": -20.8,
+              "skew": -0.778526,
+              "z": 1,
+              "props": {
+                "lift": 0,
+                "tape": "none",
+                "aspect": 0.6330275229357798,
+                "shadow": "soft",
+                "tapeStyle": "masking"
+              },
+              "created_at": "2026-11-08T11:16:25.08983+00:00",
+              "updated_at": "2026-11-08T11:21:29.608157+00:00"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "a4c71a05-e0fd-48f9-89c9-bdf470468614",
