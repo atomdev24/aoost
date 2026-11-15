@@ -6,6 +6,7 @@ import { DESIGN_WIDTH } from "../schema";
 import "./editor.css";
 import { pageToPuck, puckToPage, type PuckData } from "./puck/adapter";
 import { puckConfig } from "./puck/config";
+import { markFromPuck } from "./puck/PuckSync";
 import { currentPage, getState, redo, undo, updatePage, useEditor } from "./store";
 import { PagesPanel } from "./ui/PagesPanel";
 import { TopBar } from "./ui/TopBar";
@@ -102,6 +103,7 @@ export function Editor() {
         if (deepEqual(next.sections, page.sections)) return;
         const step = pendingLabel.current ?? { label: "Edit" };
         pendingLabel.current = null;
+        markFromPuck(next);
         updatePage(page.id, () => next, step.label, { merge: step.merge });
       }}
     />

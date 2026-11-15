@@ -12,6 +12,12 @@ import { usePuck } from "./usePuck";
  *   Puck → store   the chosen viewport becomes the active breakpoint
  * (Canvas edits flow Puck → store through <Puck onChange>.)
  */
+/** The page object most recently produced by a canvas edit; Puck already shows it. */
+let fromPuck: unknown = null;
+export const markFromPuck = (page: unknown) => {
+  fromPuck = page;
+};
+
 export function PuckSync() {
   const getPuck = useGetPuck();
   const width = usePuck((s) => s.appState.ui.viewports.current.width);
@@ -26,6 +32,7 @@ export function PuckSync() {
       const page = currentPage(getState());
       if (page === last) return;
       last = page;
+      if (page === fromPuck) return;
       const puck = getPuck();
       const shown = puckToPage(puck.appState.data as unknown as PuckData, page);
       if (!deepEqual(shown.sections, page.sections)) {

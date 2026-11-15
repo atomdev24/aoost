@@ -24,8 +24,8 @@ Tick items as they're done (`- [x]`) and commit after each one. If the run stops
 
 ## Phase 2: Editor core
 
-- [ ] Puck at `/admin` with our config. Load and save the draft through `/api/editor`.
-- [ ] Desktop/Mobile switch. Edits go to the active breakpoint, with override dots and "reset to mobile".
+- [x] Puck at `/admin` with our config. Load and save the draft through `/api/editor`.
+- [x] Desktop/Mobile switch. Edits go to the active breakpoint, with override dots and "reset to mobile".
 - [ ] Section kinds: flow, grid (split N with drop zones) and canvas (absolute layers per breakpoint, snapping, guides, Shift axis lock, align/distribute).
 - [ ] Frame node: frame size and aspect ratio, per-corner radius, border, shadow, plus content fit, focal point, zoom and pan.
 - [ ] Overlays (anchored to a section or the viewport, sticky). Layers panel (lock, hide, rename, reorder).

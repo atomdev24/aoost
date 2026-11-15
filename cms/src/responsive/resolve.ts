@@ -4,10 +4,13 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== "object" || typeof b !== "object" || a === null || b === null) return false;
   if (Array.isArray(a) !== Array.isArray(b)) return false;
-  const ka = Object.keys(a as object);
-  const kb = Object.keys(b as object);
+  // Keys holding undefined count as absent: that is how the data looks once it has been through JSON.
+  const ra = a as Record<string, unknown>;
+  const rb = b as Record<string, unknown>;
+  const ka = Object.keys(ra).filter((k) => ra[k] !== undefined);
+  const kb = Object.keys(rb).filter((k) => rb[k] !== undefined);
   if (ka.length !== kb.length) return false;
-  return ka.every((k) => deepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]));
+  return ka.every((k) => deepEqual(ra[k], rb[k]));
 }
 
 /** The value in effect at a breakpoint: mobile base, with desktop overrides on top. */
