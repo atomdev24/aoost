@@ -41,9 +41,10 @@ export function TopBar() {
     setNotice(null);
     try {
       if (!(await flush())) throw new Error("Fix the save error first.");
-      await api.publish();
+      const result = await api.publish();
       setUnpublished(false);
-      setNotice("Published. The site rebuilds in about a minute.");
+      setNotice(result.commit ? "Published. The site rebuilds in about a minute." : "Nothing new to publish.");
+      setTimeout(() => setNotice(null), 6000);
     } catch (e) {
       setNotice(e instanceof ApiError || e instanceof Error ? e.message : "Publishing failed.");
     } finally {

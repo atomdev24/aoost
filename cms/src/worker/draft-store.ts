@@ -5,10 +5,17 @@ import type { ClientMessage, EditorContext, ServerMessage } from "../model/proto
 import { filesToSite, siteToFiles, validateSite, type ContentFiles, type Issue, type Site } from "../schema";
 import type { Env } from "./env";
 
+const same = (a: ContentFiles, b: ContentFiles) => {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  return [...keys].every((k) => a[k] === b[k]);
+};
+
 export type ApplyResult = { ok: true; version: number } | { ok: false; issues: Issue[] };
 export type DraftState = { version: number; dirty: boolean; editors: number; context: EditorContext | null };
 
 const FILE = "file:";
+/** Snapshot of what was last published from here, until the next deploy catches up. */
+const PUB = "pub:";
 const PUBLISHED_URL = "https://assets.local/_published.json";
 
 /**
@@ -22,7 +29,21 @@ export class DraftStore extends DurableObject<Env> {
   private version = 0;
   private waiting = new Map<string, (png: string | null) => void>();
 
+  /** The live content: the snapshot from our last publish if there is one, else what this deploy was built from. */
   private async published(): Promise<ContentFiles> {
+    const snapshot = await this.ctx.storage.list<string>({ prefix: PUB });
+    if (snapshot.size) {
+      const built = await this.built().catch(() => null);
+      const files: ContentFiles = {};
+      for (const [key, value] of snapshot) files[key.slice(PUB.length)] = value;
+      // Once a deploy contains exactly this snapshot, it is no longer needed.
+      if (built && same(built, files)) await this.ctx.storage.delete([...snapshot.keys()]);
+      return files;
+    }
+    return this.built();
+  }
+
+  private async built(): Promise<ContentFiles> {
     const res = await this.env.ASSETS.fetch(PUBLISHED_URL);
     if (!res.ok) throw new Error("published content is missing from the build (_published.json)");
     return (await res.json()) as ContentFiles;
@@ -89,16 +110,19 @@ export class DraftStore extends DurableObject<Env> {
     const draft = siteToFiles(await this.load());
     let dirty = true;
     try {
-      const live = await this.published();
-      const keys = new Set([...Object.keys(draft), ...Object.keys(live)]);
-      dirty = [...keys].some((k) => draft[k] !== live[k]);
+      dirty = !same(draft, await this.published());
     } catch {
       // no published snapshot: treat as dirty
     }
     return { version: this.version, dirty, editors: this.ctx.getWebSockets().length, context: (await this.ctx.storage.get<EditorContext>("context")) ?? null };
   }
 
-  async announcePublished() {
+  /** Record that the current draft is now what is published. */
+  async markPublished() {
+    const files = siteToFiles(await this.load());
+    const old = await this.ctx.storage.list<string>({ prefix: PUB });
+    if (old.size) await this.ctx.storage.delete([...old.keys()]);
+    await this.ctx.storage.put(Object.fromEntries(Object.entries(files).map(([path, body]) => [PUB + path, body])));
     this.broadcast({ type: "published", version: this.version });
   }
 

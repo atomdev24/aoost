@@ -28,3 +28,6 @@ One line each: the decision, and why. Newest at the bottom.
 - Grid "drop zones" are shown as column guides in the editor; cells auto-flow and each cell can span columns/rows. "Split into 1/2/3/4/6" sets the column count for the active breakpoint.
 - Overlays live on the page (`page.overlays`), outside Puck's tree: they are added from the Layers panel, drawn on the canvas, and edited in their own right-hand panel. An overlay attached to a section sits centred on that section's top or bottom edge (straddling it) and can be nudged; attached to the screen it is `position: fixed`.
 - Hide is per breakpoint (it writes `hidden` at the active breakpoint); lock and rename are shared.
+- Publish commits to the branch in `PUBLISH_BRANCH` (set to `cms-v1` for this run, never `main`). Change that one var at cut-over. The ref update is not forced, so a publish can never overwrite someone else's commit.
+- After a publish the draft store keeps a snapshot of what it published, so "Unpublished changes" clears right away instead of waiting for the deploy.
+- Undo/redo is the editor's own site-level stack (100 steps, edits to the same field within 1.2 s merge into one step). ⌘Z/⇧⌘Z are captured before Puck's own history.

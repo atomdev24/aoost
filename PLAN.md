@@ -31,7 +31,7 @@ Tick items as they're done (`- [x]`) and commit after each one. If the run stops
 - [x] Overlays (anchored to a section or the viewport, sticky). Layers panel (lock, hide, rename, reorder).
 - [x] Theme panel: tokens, text styles and colour styles applied site-wide.
 - [x] Global components. Section and page templates, including the four starters.
-- [ ] Undo/redo, autosave, Preview, Publish (commit through the GitHub API, then the Action deploys).
+- [x] Undo/redo, autosave, Preview, Publish (commit through the GitHub API, then the Action deploys).
 
 ## Phase 3: Pages & navigation
 
