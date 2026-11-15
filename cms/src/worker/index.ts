@@ -3,6 +3,7 @@ import { editorApi, preview } from "./api";
 import type { Env } from "./env";
 import { error, html, json } from "./http";
 import { loginPage } from "./login-page";
+import { mcp } from "./mcp";
 import { serveMedia } from "./media";
 
 export { DraftStore } from "./draft-store";
@@ -36,6 +37,11 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
   if (path.startsWith("/api/editor/")) {
     if (!who) return error(401, "Sign in to the editor first.");
     return editorApi(request, env, url, who);
+  }
+
+  if (path === "/mcp" || path === "/mcp/") {
+    if (!who) return new Response(JSON.stringify({ jsonrpc: "2.0", id: null, error: { code: -32001, message: "Unauthorized. Send the editor password as a bearer token." } }), { status: 401, headers: { "Content-Type": "application/json", "WWW-Authenticate": 'Bearer realm="aoost"' } });
+    return mcp(request, env);
   }
 
   if (path === "/preview" || path.startsWith("/preview/")) {

@@ -51,9 +51,9 @@ Tick items as they're done (`- [x]`) and commit after each one. If the run stops
 
 - [x] Durable Object draft store with WebSocket broadcast. Fall back to KV plus polling if needed (log it in `DECISIONS.md`).
 - [x] Editor applies remote patches live, highlights the changed nodes, and adds them to undo as "Claude: …". Publishes the current selection and breakpoint.
-- [ ] `/mcp` remote MCP server with the SPEC §8 tools, behind Access. `publish` is gated by its tool description.
-- [ ] `get_preview_screenshot` (Browser Rendering, or capture from the editor client).
-- [ ] Write `docs/connect-claude.md`.
+- [x] `/mcp` remote MCP server with the SPEC §8 tools, behind Access. `publish` is gated by its tool description.
+- [x] `get_preview_screenshot` (Browser Rendering, or capture from the editor client).
+- [x] Write `docs/connect-claude.md`.
 
 ## Phase 6: Quick-edit mode & checks
 

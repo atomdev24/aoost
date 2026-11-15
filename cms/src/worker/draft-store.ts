@@ -143,6 +143,12 @@ export class DraftStore extends DurableObject<Env> {
     });
   }
 
+  /** The editor posts its capture back here. */
+  async deliverScreenshot(requestId: string, png: string | null) {
+    this.waiting.get(requestId)?.(png);
+    this.waiting.delete(requestId);
+  }
+
   // ------------------------------------------------------- WebSocket
 
   async fetch(request: Request): Promise<Response> {

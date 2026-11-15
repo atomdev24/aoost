@@ -36,6 +36,12 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       await draft.markPublished();
       return json({ ok: true, commit: result.commit, url: result.url, changed: result.changed });
     }
+    case "POST /screenshot": {
+      const body = await readJson<{ requestId: string; png: string | null }>(request);
+      if (!body?.requestId) return error(400, "Expected { requestId, png }.");
+      await draft.deliverScreenshot(body.requestId, typeof body.png === "string" && body.png.length < 30_000_000 ? body.png : null);
+      return json({ ok: true });
+    }
     case "GET /socket":
       return draft.fetch(request);
   }
