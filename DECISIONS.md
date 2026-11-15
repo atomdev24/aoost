@@ -34,3 +34,6 @@ One line each: the decision, and why. Newest at the bottom.
 - New pages start as Draft (Alex publishes them from Page settings), even though the mockup's sample data shows Published. Why: a half-built page should not go live with the next Publish.
 - Changing a URL keeps every earlier redirect pointing at the newest URL, and a redirect is dropped the moment a live page takes that URL again. Deleting a page redirects its URL (and its sub-pages') to home.
 - A page with sub-pages cannot itself be nested (one level deep, SPEC §5); "Place it" only offers top-level parents.
+- A mega menu's panel is stored as sections on the nav item and edited on the same canvas as a page (the editor treats it as a page with id `mega:<item id>`). Why: "built with the same editor" for free: same components, layers panel and CSS generator.
+- Simple dropdowns use the ARIA menu-button pattern (arrow keys, Home/End, Escape returns focus). Mega panels hold arbitrary content, so they are a disclosure (button with `aria-expanded`), not a `role="menu"`.
+- Search runs in the browser over `search.json`, built with the site. No search service.

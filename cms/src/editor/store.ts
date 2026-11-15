@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { applyOps, diffSite, type Op } from "../model/ops";
+import { findNavItem, updateNavItem } from "../model/nav";
 import type { Breakpoint, Page, Site } from "../schema";
 import { api, ApiError } from "./api";
 
@@ -21,6 +22,8 @@ export type EditorState = {
   unpublished: boolean;
   past: HistoryEntry[];
   future: HistoryEntry[];
+  /** The page to return to when a menu panel is being edited. */
+  returnPageId: string | null;
   /** Selected node ids. Puck selects one; Shift-click on a canvas adds more. */
   selection: string[];
   /** The overlay being edited (overlays live outside Puck's tree). */
@@ -64,6 +67,7 @@ export function initStore(site: Site, unpublished: boolean) {
     unpublished,
     past: [],
     future: [],
+    returnPageId: null,
     selection: [],
     overlayId: null,
     globalId: null,
@@ -83,7 +87,41 @@ export const subscribe = (l: () => void) => {
 export function useEditor<T>(selector: (s: EditorState) => T): T {
   return useSyncExternalStore(subscribe, () => selector(state));
 }
-export const currentPage = (s: EditorState = state): Page => s.site.pages.find((p) => p.id === s.pageId) ?? s.site.pages[0]!;
+/**
+ * A mega menu's panel is edited on the same canvas as a page. While that is
+ * happening `pageId` is "mega:<nav item id>" and the panel is presented as a
+ * page, so Puck, the layers panel and the CSS generator need no special cases.
+ */
+const MEGA = "mega:";
+export const megaItemId = (pageId: string): string | null => (pageId.startsWith(MEGA) ? pageId.slice(MEGA.length) : null);
+export const megaPageId = (itemId: string) => MEGA + itemId;
+
+function megaPage(site: Site, itemId: string): Page | null {
+  const item = findNavItem(site.nav.items, itemId);
+  if (!item || item.type !== "mega") return null;
+  return { id: megaPageId(itemId), title: `${item.label ?? "Menu"} (menu panel)`, slug: "/", parentId: null, status: "draft", template: "blank", seo: {}, isHome: false, showInNav: false, sections: item.panel ?? [], overlays: [] };
+}
+
+const pageExists = (site: Site, pageId: string) => {
+  const mega = megaItemId(pageId);
+  return mega ? !!megaPage(site, mega) : site.pages.some((p) => p.id === pageId);
+};
+
+let megaCache: { panel: unknown; page: Page } | null = null;
+export const currentPage = (s: EditorState = state): Page => {
+  const mega = megaItemId(s.pageId);
+  if (mega) {
+    const panel = findNavItem(s.site.nav.items, mega)?.panel;
+    // Keep the same object while the panel is unchanged, so subscribers don't re-render needlessly.
+    if (megaCache && megaCache.panel === panel && megaCache.page.id === s.pageId) return megaCache.page;
+    const page = megaPage(s.site, mega);
+    if (page) {
+      megaCache = { panel, page };
+      return page;
+    }
+  }
+  return s.site.pages.find((p) => p.id === s.pageId) ?? s.site.pages[0]!;
+};
 
 // ------------------------------------------------------------ editing
 
@@ -108,6 +146,19 @@ export function update(fn: (site: Site) => Site, label: string, opts: { merge?: 
 }
 
 export function updatePage(pageId: string, fn: (page: Page) => Page, label: string, opts: { merge?: string } = {}) {
+  const mega = megaItemId(pageId);
+  if (mega) {
+    update(
+      (site) => {
+        const page = megaPage(site, mega);
+        const next = page ? fn(page) : page;
+        return page && next && next !== page ? updateNavItem(site, mega, { panel: next.sections }) : site;
+      },
+      label,
+      opts,
+    );
+    return;
+  }
   update(
     (site) => {
       let changed = false;
@@ -132,7 +183,7 @@ export function undo() {
     site: entry.site,
     past: state.past.slice(0, -1),
     future: [{ site: state.site, label: entry.label, pageId: state.pageId }, ...state.future],
-    pageId: entry.site.pages.some((p) => p.id === state.pageId) ? state.pageId : entry.pageId,
+    pageId: pageExists(entry.site, state.pageId) ? state.pageId : entry.pageId,
     lastLabel: `Undid: ${entry.label}`,
     unpublished: true,
   });
@@ -147,7 +198,7 @@ export function redo() {
     site: entry.site,
     past: [...state.past, { site: state.site, label: entry.label, pageId: state.pageId }],
     future: state.future.slice(1),
-    pageId: entry.site.pages.some((p) => p.id === state.pageId) ? state.pageId : entry.pageId,
+    pageId: pageExists(entry.site, state.pageId) ? state.pageId : entry.pageId,
     lastLabel: `Redid: ${entry.label}`,
     unpublished: true,
   });
@@ -155,9 +206,11 @@ export function redo() {
 }
 
 export function setPage(pageId: string) {
-  if (pageId === state.pageId || !state.site.pages.some((p) => p.id === pageId)) return;
-  history.replaceState(null, "", `?page=${pageId}`);
-  set({ pageId, selection: [], overlayId: null, globalId: null });
+  if (pageId === state.pageId || !pageExists(state.site, pageId)) return;
+  const mega = megaItemId(pageId);
+  if (!mega) history.replaceState(null, "", `?page=${pageId}`);
+  // Remember which page to come back to after editing a menu panel.
+  set({ pageId, returnPageId: mega ? (megaItemId(state.pageId) ? state.returnPageId : state.pageId) : null, selection: [], overlayId: null, globalId: null });
 }
 export const setBreakpoint = (bp: Breakpoint) => bp !== state.bp && set({ bp });
 export const setSelection = (ids: string[]) => {
@@ -221,7 +274,7 @@ export function applyRemote(ops: Op[], label: string, changedNodeIds: string[] =
     lastLabel: label,
     highlight: changedNodeIds,
     unpublished: true,
-    pageId: next.pages.some((p) => p.id === state.pageId) ? state.pageId : (next.pages.find((p) => p.isHome) ?? next.pages[0]!).id,
+    pageId: pageExists(next, state.pageId) ? state.pageId : (next.pages.find((p) => p.isHome) ?? next.pages[0]!).id,
   });
   if (changedNodeIds.length) setTimeout(() => state.highlight === changedNodeIds && set({ highlight: [] }), 2200);
 }
@@ -229,7 +282,7 @@ export function applyRemote(ops: Op[], label: string, changedNodeIds: string[] =
 /** After a reset or publish the server state is authoritative. */
 export function replaceSite(site: Site, unpublished: boolean) {
   synced = site;
-  set({ site, past: [], future: [], unpublished, save: "idle", lastLabel: null, pageId: site.pages.some((p) => p.id === state.pageId) ? state.pageId : site.pages[0]!.id });
+  set({ site, past: [], future: [], unpublished, save: "idle", lastLabel: null, pageId: pageExists(site, state.pageId) ? state.pageId : site.pages[0]!.id });
 }
 
 window.addEventListener("beforeunload", (e) => {

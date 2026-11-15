@@ -3,7 +3,8 @@ import { makeCtx } from "../../render/context";
 import { pageCss } from "../../render/document";
 import { navRenderer } from "../../render/nav";
 import { CanvasController } from "../canvas/CanvasController";
-import { currentPage, useEditor } from "../store";
+import { updateNavItem } from "../../model/nav";
+import { currentPage, megaItemId, useEditor } from "../store";
 import { puckToPage, type PuckData } from "./adapter";
 import { canvasCss } from "./canvas.styles";
 import { EditorOverlay } from "./EditorOverlay";
@@ -20,17 +21,21 @@ export function Root({ children }: { children: ReactNode }) {
   const stored = useEditor(currentPage);
   const data = usePuck((s) => s.appState.data) as unknown as PuckData;
   const page = useMemo(() => puckToPage(data, stored), [data, stored]);
-  const css = useMemo(() => pageCss({ ...site, pages: site.pages.map((p) => (p.id === page.id ? page : p)) }, page), [site, page]);
+  const mega = megaItemId(page.id);
+  // The CSS is generated from what is on the canvas right now, not from the last saved state.
+  const css = useMemo(() => pageCss(mega ? updateNavItem(site, mega, { panel: page.sections }) : { ...site, pages: site.pages.map((p) => (p.id === page.id ? page : p)) }, mega ? { ...page, sections: [] } : page), [site, page, mega]);
   const ctx = useMemo(() => makeCtx(site, page, { editing: true }), [site, page]);
   const Nav = navRenderer(site.nav.style).Render;
   return (
     <>
       <style>{css}</style>
       <style>{canvasCss}</style>
-      <div className="ed-nav-preview" inert>
-        <Nav ctx={ctx} />
-      </div>
-      <main id="main">
+      {mega ? null : (
+        <div className="ed-nav-preview" inert>
+          <Nav ctx={ctx} />
+        </div>
+      )}
+      <main id="main" className={mega ? "ed-mega-stage" : undefined}>
         {children}
         {page.overlays
           .filter((o) => o.anchor === "viewport")

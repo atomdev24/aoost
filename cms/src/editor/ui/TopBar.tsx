@@ -3,7 +3,7 @@ import { DESIGN_WIDTH, type Breakpoint } from "../../schema";
 import { api, ApiError } from "../api";
 import { PuckSync } from "../puck/PuckSync";
 import { usePuck } from "../puck/usePuck";
-import { currentPage, flush, redo, setUnpublished, undo, useEditor } from "../store";
+import { currentPage, flush, megaItemId, redo, setPage, setUnpublished, undo, useEditor } from "../store";
 import { Button } from "./kit";
 
 const SunMark = () => (
@@ -23,6 +23,8 @@ export function TopBar() {
   const canRedo = useEditor((s) => s.future.length > 0);
   const lastLabel = useEditor((s) => s.lastLabel);
   const page = useEditor(currentPage);
+  const returnPageId = useEditor((s) => s.returnPageId);
+  const editingMenu = !!megaItemId(page.id);
   const [publishing, setPublishing] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -33,7 +35,7 @@ export function TopBar() {
 
   const preview = async () => {
     await flush();
-    window.open(`/preview${page.slug === "/" ? "/" : page.slug}`, "aoost-preview");
+    window.open(`/preview${editingMenu || page.slug === "/" ? "/" : page.slug}`, "aoost-preview");
   };
 
   const publish = async () => {
@@ -59,6 +61,11 @@ export function TopBar() {
         <SunMark />
         <strong>aoost</strong>
         <span>/ Editor</span>
+        {editingMenu ? (
+          <button type="button" className="ed-btn ed-btn-primary ed-btn-sm" onClick={() => returnPageId && setPage(returnPageId)}>
+            Done editing menu panel
+          </button>
+        ) : null}
       </div>
       <div className="ed-seg ed-seg-lg" role="group" aria-label="Breakpoint">
         <button type="button" aria-pressed={bp === "desktop"} onClick={() => setBp("desktop")}>

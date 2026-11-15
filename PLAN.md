@@ -38,7 +38,7 @@ Tick items as they're done (`- [x]`) and commit after each one. If the run stops
 - [x] Pages panel matching the Editor artboard: new page flow, nesting, and the nav toggle per page.
 - [x] Page settings: rename, slug edit with automatic redirect and child updates, status, SEO, duplicate, delete with confirmation.
 - [x] Floating pill nav renderer (SPEC §6): hide on scroll down and show on scroll up, active pill, hover/press states, the mobile full-screen menu with stagger, and reduced motion.
-- [ ] All ten nav item types and the item settings panel. Mega menu panels built in the editor. Accessible menu-button behaviour. Accordions on mobile.
+- [x] All ten nav item types and the item settings panel. Mega menu panels built in the editor. Accessible menu-button behaviour. Accordions on mobile.
 
 ## Phase 4: Media & embeds
 

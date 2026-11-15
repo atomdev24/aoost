@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { deletePage, duplicatePage, renamePage, reorderPage, setParent, setSeo, setSlug, setStatus } from "../../model/pages";
 import type { Page } from "../../schema";
 import { MediaInput } from "../fields/media";
-import { currentPage, getState, setPage, update, useEditor } from "../store";
+import { currentPage, getState, megaItemId, setPage, update, useEditor } from "../store";
 import { Button, Select, TextInput } from "./kit";
+import { NavPanel } from "./NavPanel";
 
 /**
  * Page settings (right panel, when nothing on the canvas is selected):
@@ -11,6 +12,7 @@ import { Button, Select, TextInput } from "./kit";
  */
 export function PageSettings() {
   const page = useEditor(currentPage);
+  const editingMenu = useEditor((s) => !!megaItemId(s.pageId));
   const pages = useEditor((s) => s.site.pages);
   const redirects = useEditor((s) => s.site.redirects);
   const siteTitle = useEditor((s) => s.site.settings.title);
@@ -26,6 +28,23 @@ export function PageSettings() {
   const movedFrom = redirects.find((r) => r.to === page.slug && r.from === original.current.slug)?.from;
   const children = pages.filter((p) => p.parentId === page.id);
   const canNest = !page.isHome && !children.length;
+
+  if (editingMenu) {
+    return (
+      <div className="ed-side">
+        <header className="ed-side-head">
+          <div>
+            <h3>Menu panel</h3>
+            <span>{page.title}</span>
+          </div>
+        </header>
+        <div className="ed-side-body">
+          <p className="ed-hint">This panel opens under the nav item. Build it like a page: add sections and drop in links, images, video or embeds. On phones its columns stack inside the menu.</p>
+        </div>
+        <NavPanel />
+      </div>
+    );
+  }
 
   return (
     <div className="ed-side">
@@ -146,6 +165,7 @@ export function PageSettings() {
           </p>
         ) : null}
       </div>
+      <NavPanel />
     </div>
   );
 }

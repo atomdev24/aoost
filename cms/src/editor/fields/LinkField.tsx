@@ -3,29 +3,29 @@ import { useEditor } from "../store";
 import { Select, TextInput } from "../ui/kit";
 
 /** Choose what a link points to: a page, a section on a page, a URL or an email. */
-export function LinkField({ value, onChange }: { value: LinkTarget | undefined; onChange: (v: LinkTarget) => void }) {
+export function LinkField({ value, onChange, kinds }: { value: LinkTarget | undefined; onChange: (v: LinkTarget) => void; kinds?: LinkTarget["kind"][] }) {
   const pages = useEditor((s) => s.site.pages);
   const v: LinkTarget = value ?? { kind: "url", url: "" };
   const firstPage = pages[0]?.id ?? "";
   const page = v.kind === "page" || v.kind === "section" ? pages.find((p) => p.id === v.pageId) : undefined;
   return (
     <div className="ed-stack">
-      <Select
+      {kinds?.length === 1 ? null : <Select
         ariaLabel="Link type"
         value={v.kind}
         options={[
-          { value: "page", label: "Page" },
-          { value: "section", label: "Section on a page" },
-          { value: "url", label: "URL" },
-          { value: "email", label: "Email" },
-        ]}
+          { value: "page" as const, label: "Page" },
+          { value: "section" as const, label: "Section on a page" },
+          { value: "url" as const, label: "URL" },
+          { value: "email" as const, label: "Email" },
+        ].filter((o) => !kinds || kinds.includes(o.value))}
         onChange={(kind) => {
           if (kind === "page") onChange({ kind, pageId: firstPage });
           else if (kind === "section") onChange({ kind, pageId: firstPage, sectionId: pages[0]?.sections[0]?.id ?? "" });
           else if (kind === "email") onChange({ kind, email: "" as string });
           else onChange({ kind: "url", url: "" });
         }}
-      />
+      />}
       {v.kind === "page" || v.kind === "section" ? (
         <Select
           ariaLabel="Page"
