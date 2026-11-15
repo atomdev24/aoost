@@ -17,7 +17,8 @@ export function EmbedFrame({ url, compact, editing }: { url: string; compact?: b
   return (
     <div className="embed" data-provider={info.provider} style={info.height ? { height: info.height } : { aspectRatio: info.aspect }}>
       <iframe
-        src={info.src}
+        // On the site the frame gets its address only when scrolled near (runtime/lazy.ts); the editor shows it right away.
+        {...(editing ? { src: info.src } : { "data-src": info.src })}
         title={info.title}
         loading="lazy"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"

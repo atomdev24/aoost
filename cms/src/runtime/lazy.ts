@@ -32,22 +32,44 @@ export function initLazy() {
     facade.replaceWith(frame);
   });
 
-  const lotties = document.querySelectorAll<HTMLElement>("[data-lottie]");
-  if (lotties.length) {
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /** Run `load` the first time an element comes within a screen or so of the viewport. */
+  const whenNear = (els: Iterable<Element>, load: (el: Element) => void) => {
+    const list = [...els];
+    if (!list.length) return;
+    if (!("IntersectionObserver" in window)) return list.forEach(load);
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          io.unobserve(e.target);
+          load(e.target);
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+    list.forEach((el) => io.observe(el));
+  };
+
+  // Third-party players (Spotify, YouTube, Maps…) cost nothing until scrolled to.
+  whenNear(document.querySelectorAll("iframe[data-src]"), (el) => {
+    (el as HTMLIFrameElement).src = (el as HTMLElement).dataset.src!;
+    el.removeAttribute("data-src");
+  });
+
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  whenNear(document.querySelectorAll("[data-lottie]"), (node) => {
+    const el = node as HTMLElement;
     void loadScript("/assets/lottie.js").then(() => {
       const lottie = (window as unknown as { lottie?: LottiePlayer }).lottie;
       if (!lottie) return;
-      lotties.forEach((el) => {
-        const auto = el.hasAttribute("data-autoplay") && !still;
-        const anim = lottie.loadAnimation({ container: el, renderer: "svg", loop: el.hasAttribute("data-loop"), autoplay: auto, path: el.dataset.lottie! });
-        if (!auto && !still) {
-          el.addEventListener("pointerenter", () => anim.play());
-          el.addEventListener("pointerleave", () => anim.stop());
-        }
-      });
+      const auto = el.hasAttribute("data-autoplay") && !still;
+      const anim = lottie.loadAnimation({ container: el, renderer: "svg", loop: el.hasAttribute("data-loop"), autoplay: auto, path: el.dataset.lottie! });
+      if (!auto && !still) {
+        el.addEventListener("pointerenter", () => anim.play());
+        el.addEventListener("pointerleave", () => anim.stop());
+      }
     });
-  }
+  });
 
-  if (document.querySelector("model-viewer")) void loadScript("/assets/model-viewer.js", true);
+  whenNear(document.querySelectorAll("model-viewer"), () => void loadScript("/assets/model-viewer.js", true));
 }

@@ -11,3 +11,13 @@ Each entry: what is needed, exact steps, and what is stubbed meanwhile.
   2. GitHub → `atomdev24/aoost` → Settings → Secrets and variables → Actions → New repository secret → name `CLOUDFLARE_API_TOKEN`, paste the token.
   3. If the deploy then asks which account to use, add a second secret `CLOUDFLARE_ACCOUNT_ID` (Cloudflare dashboard → Workers & Pages → Account ID on the right).
 - Until then the workflow runs the tests and the build and prints a warning instead of deploying. Publishing from the editor still commits to `cms-v1`; deploy by hand with `cd cms && npm run deploy:preview`.
+
+## Social profile links
+- The footer, the nav's social icons and the Links page point at `https://www.instagram.com/` and `https://open.spotify.com/` because your profile URLs are not in the repo. Until there is a Site settings panel, set them in `content/site.json` under `settings.socials` (and the Instagram button on the Links page in the editor), then publish.
+
+## Rodeo page
+- `/rodeo` links to `https://alexoostendurp.com/` (the current site, where the game lives). Moving the game itself into the new site is outside this run (SPEC §10).
+
+## After the run (from PLAN Phase 0)
+- Cloudflare Access for the editor and the connector: steps are in `docs/auth.md`. Until then the editor, `/api/editor` and `/mcp` are protected by `EDITOR_PASSWORD` only.
+- Cut-over to the real domain is not part of this run. When you do it, change `PUBLISH_BRANCH` in `cms/wrangler.toml` and the branch in `.github/workflows/deploy-cms.yml`.

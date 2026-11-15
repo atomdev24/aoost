@@ -36,11 +36,16 @@ for (const { name, viewport } of widths) {
       await page.locator(".n-sample-video").scrollIntoViewIfNeeded();
       await expect.poll(() => page.locator(".n-sample-video video").evaluate((v: HTMLVideoElement) => !v.paused && v.muted)).toBe(true);
       await expect(page.locator(".n-sample-audio audio")).toHaveAttribute("preload", "none");
+      await page.locator(".n-sample-lottie").scrollIntoViewIfNeeded();
       await expect(page.locator(".n-sample-lottie svg")).toBeAttached();
+      await page.locator("model-viewer").scrollIntoViewIfNeeded();
       await expect.poll(() => page.locator("model-viewer").evaluate((m) => !!customElements.get("model-viewer") && !!m.shadowRoot)).toBe(true);
       await expect(page.locator(".n-sample-file a")).toHaveAttribute("download", "");
 
       // embeds and code
+      // third-party frames load nothing until scrolled near
+      await expect(page.locator(".n-sample-map iframe")).toHaveAttribute("data-src", /google\.com\/maps/);
+      await page.locator(".n-sample-spotify").scrollIntoViewIfNeeded();
       await expect(page.locator(".n-sample-spotify iframe")).toHaveAttribute("src", /open\.spotify\.com\/embed\/playlist/);
       await expect(page.locator(".n-sample-map iframe")).toHaveAttribute("src", /google\.com\/maps/);
       await page.locator(".n-sample-code").scrollIntoViewIfNeeded();

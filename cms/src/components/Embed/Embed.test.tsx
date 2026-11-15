@@ -28,9 +28,10 @@ describe("embedFor", () => {
 });
 
 describe("Embed component", () => {
-  it("renders a lazy, sandboxed iframe sized for the provider", () => {
+  it("renders a sandboxed iframe sized for the provider, which loads only when scrolled near", () => {
     const html = renderNode("Embed", { url: "https://youtu.be/dQw4w9WgXcQ" });
-    expect(html).toContain('src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"');
+    expect(html).toContain('<iframe data-src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"');
+    expect(renderNode("Embed", { url: "https://youtu.be/dQw4w9WgXcQ" }, { editing: true })).toContain('<iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"');
     expect(html).toContain('loading="lazy"');
     expect(html).toContain("aspect-ratio:16/9");
     expect(html).toContain("sandbox=");

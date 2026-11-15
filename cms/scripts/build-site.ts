@@ -3,10 +3,12 @@
 //   src/runtime     →  dist/assets/site.js
 //   static/, ../art, ../assets/fonts are copied as they are. dist/admin is left alone.
 import { build } from "esbuild";
+import sharp from "sharp";
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildSite } from "../src/render/build";
+import { STATIC_WIDTHS, staticVariant } from "../src/render/media";
 import { siteToFiles } from "../src/schema";
 import { loadSite } from "../src/schema/load-node";
 
@@ -29,7 +31,15 @@ for (const [path, body] of Object.entries(files)) {
 writeFileSync(resolve(dist, "_published.json"), JSON.stringify(siteToFiles(site)));
 
 cpSync(resolve(cms, "static"), dist, { recursive: true });
-if (existsSync(resolve(repo, "art"))) cpSync(resolve(repo, "art"), resolve(dist, "art"), { recursive: true });
+if (existsSync(resolve(repo, "art"))) {
+  cpSync(resolve(repo, "art"), resolve(dist, "art"), { recursive: true });
+  // The repo's own artwork gets resized WebP copies (never enlarged), like uploads do in the editor.
+  for (const file of readdirSync(resolve(repo, "art")).filter((f) => /\.(jpe?g|png|webp|avif)$/i.test(f))) {
+    for (const width of STATIC_WIDTHS) {
+      await sharp(resolve(repo, "art", file)).resize({ width, withoutEnlargement: true }).webp({ quality: 80 }).toFile(resolve(dist, "art", staticVariant(file, width)));
+    }
+  }
+}
 if (existsSync(resolve(repo, "assets/fonts"))) {
   cpSync(resolve(repo, "assets/fonts"), resolve(dist, "fonts"), { recursive: true, filter: (src) => !src.endsWith(".txt") && !src.endsWith(".DS_Store") });
 }

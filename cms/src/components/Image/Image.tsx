@@ -42,6 +42,7 @@ export const Image = defineComponent<ImageContent>({
         width={content.width}
         height={content.height}
         loading={content.eager ? "eager" : "lazy"}
+        fetchPriority={content.eager ? "high" : undefined}
         decoding="async"
         draggable={false}
       />

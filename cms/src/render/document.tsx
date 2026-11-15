@@ -71,7 +71,9 @@ function fontLinks(site: Site): string {
   const families = site.theme.googleFonts.map((f) => `family=${encodeURIComponent(f).replace(/%20/g, "+").replace(/%3A/g, ":").replace(/%40/g, "@").replace(/%3B/g, ";")}`).join("&");
   return (
     `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>` +
-    `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${esc(families)}&display=swap">`
+    // Loaded without blocking first paint: text shows in the fallback font, then swaps.
+    `<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?${esc(families)}&display=swap" onload="this.onload=null;this.rel='stylesheet'">` +
+    `<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?${esc(families)}&display=swap"></noscript>`
   );
 }
 

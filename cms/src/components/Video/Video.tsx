@@ -59,7 +59,7 @@ export const Video = defineComponent<VideoContent>({
       }
       return (
         <div className="frame vid">
-          <iframe className="media" src={`${info.src}${params}`} title={label} loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" />
+          <iframe className="media" {...(ctx.editing ? { src: `${info.src}${params}` } : { "data-src": `${info.src}${params}` })} title={label} loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" />
         </div>
       );
     }

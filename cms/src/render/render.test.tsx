@@ -148,10 +148,12 @@ describe("links and inline text", () => {
     const html = renderToStaticMarkup(<p>{inline("a **b** *c* [d](https://x.y)\n<i>")}</p>);
     expect(html).toBe('<p>a <strong>b</strong> <em>c</em> <a href="https://x.y" target="_blank" rel="noopener">d</a><br/>&lt;i&gt;</p>');
   });
-  it("gives uploaded raster images a srcset only", () => {
+  it("gives raster images a srcset; vectors are served as they are", () => {
     expect(imageSources("/media/a.jpg").srcSet).toContain("/media/a.jpg?w=480 480w");
     expect(imageSources("/media/a.svg")).toEqual({ src: "/media/a.svg" });
-    expect(imageSources("/art/a.jpg")).toEqual({ src: "/art/a.jpg" });
+    // the repo's own artwork uses the WebP copies made at build time
+    expect(imageSources("/art/a.jpg")).toEqual({ src: "/art/a.960.webp", srcSet: "/art/a.480.webp 480w, /art/a.960.webp 960w, /art/a.1600.webp 1600w" });
+    expect(imageSources("/seed/desert.svg")).toEqual({ src: "/seed/desert.svg" });
   });
   it("keeps sandboxed code from closing its script early", () => {
     expect(sandboxDoc({ js: "x='</script><b>'" }, "f1")).not.toContain("x='</script>");

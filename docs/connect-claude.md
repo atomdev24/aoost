@@ -6,7 +6,7 @@ Everything Claude does changes the **draft** only. Nothing goes live until you p
 
 ## What you need
 
-- The editor's address: `https://<preview>.workers.dev` (see the README for the current preview URL).
+- The editor address: `https://aoost-cms.aoost-cms.workers.dev` (the preview deployment).
 - The editor password (the `EDITOR_PASSWORD` you chose). Claude sends it as a bearer token.
 
 ## Claude Code (works today)
@@ -14,7 +14,7 @@ Everything Claude does changes the **draft** only. Nothing goes live until you p
 Run this once in a terminal, with your own URL and password:
 
 ```sh
-claude mcp add --transport http aoost https://<preview>.workers.dev/mcp \
+claude mcp add --transport http aoost https://aoost-cms.aoost-cms.workers.dev/mcp \
   --header "Authorization: Bearer <your editor password>"
 ```
 
@@ -26,7 +26,7 @@ To remove it: `claude mcp remove aoost`.
 
 The connector dialog in claude.ai (Settings → Connectors → Add custom connector) signs in with OAuth and cannot send a fixed password header, so it does not work with the password setup. It becomes possible after the planned switch to Cloudflare Access (`docs/auth.md`), which puts a proper sign-in in front of `/mcp`. That step is on the list for after this run; check then whether the claude.ai dialog accepts the Access sign-in.
 
-Any other MCP client that lets you set an `Authorization` header works the same way as Claude Code: URL `https://<preview>.workers.dev/mcp`, transport "streamable HTTP", header `Authorization: Bearer <password>`.
+Any other MCP client that lets you set an `Authorization` header works the same way as Claude Code: URL `https://aoost-cms.aoost-cms.workers.dev/mcp`, transport "streamable HTTP", header `Authorization: Bearer <password>`.
 
 ## Using it
 
