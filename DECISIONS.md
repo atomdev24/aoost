@@ -23,3 +23,6 @@ One line each: the decision, and why. Newest at the bottom.
 - The draft lives in a SQLite-backed Durable Object (free plan) as the same files as `content/`; changes travel as page-granular ops (last write wins per page). Why: publishing becomes "commit these files", and live sync stays simple.
 - The editor uses Puck's own layout (plugin rail, canvas zoom, fields) re-themed dark, with our top bar and panels plugged in, instead of a hand-built layout. Why: Puck's drag and overlay maths depend on its own canvas zoom.
 - The editor keeps its own undo stack at site level (it must also hold page, nav, theme and Claude edits); Puck is a view of the current page.
+- Free canvas: Puck keeps selection, but dragging/resizing layers is our own pointer controller inside the preview iframe (Puck's list drag is switched off for canvas layers). Moves commit to the editor store as one undo step. Resize ignores a layer's rotation (handles act on the unrotated box).
+- Puck selects one item, so multi-select exists only on a canvas (Shift-click). Align works on one layer (to the artboard) or several (to each other); distribute needs three or more.
+- Grid "drop zones" are shown as column guides in the editor; cells auto-flow and each cell can span columns/rows. "Split into 1/2/3/4/6" sets the column count for the active breakpoint.

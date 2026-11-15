@@ -1,7 +1,9 @@
 import type { ComponentConfig, PuckContext, SlotComponent } from "@puckeditor/core";
 import type { Responsive, Section, SectionLayout } from "../../schema";
 import { SectionBackground } from "../../render/SectionView";
+import { resolve } from "../../responsive/resolve";
 import { newId } from "../../schema/ids";
+import { useEditor } from "../store";
 import { itemToSection, SECTION_TYPES, type PuckItem } from "./adapter";
 import { layoutField } from "./fields";
 
@@ -38,17 +40,26 @@ function sectionConfig(kind: Section["kind"]): ComponentConfig {
     },
     defaultProps: { layout: DEFAULT_LAYOUT[kind], items: [] },
     resolvePermissions: (data) => (data.props?.locked ? { drag: false, delete: false, duplicate: false } : {}),
-    render: (props) => {
-      const { id, items: Items, puck } = props as unknown as SectionProps;
-      const section = itemToSection({ type: SECTION_TYPES[kind], props: { ...(props as object), id, items: [] } } as PuckItem);
-      return (
-        <section ref={puck.dragRef} id={id} className={`s s-${id}`} data-kind={kind} data-section-id={id}>
-          <SectionBackground section={section} />
-          <Items className="si" minEmptyHeight={kind === "canvas" ? 0 : 120} />
-        </section>
-      );
-    },
+    render: (props) => <EditorSection kind={kind} {...(props as unknown as SectionProps)} />,
   };
+}
+
+function EditorSection({ kind, ...props }: SectionProps & { kind: Section["kind"] }) {
+  const { id, items: Items, puck } = props;
+  const bp = useEditor((s) => s.bp);
+  const section = itemToSection({ type: SECTION_TYPES[kind], props: { ...props, items: [] } } as unknown as PuckItem);
+  const layout = resolve(section.layout, bp);
+  // Column guides for grid sections: the drop zones Alex splits the section into.
+  const guides =
+    kind === "grid"
+      ? ({ "--ed-gap": `${layout.gap}px`, "--ed-col": `calc((100% - ${(layout.columns - 1) * layout.gap}px) / ${layout.columns})` } as React.CSSProperties)
+      : undefined;
+  return (
+    <section ref={puck.dragRef} id={id} className={`s s-${id}`} data-kind={kind} data-section-id={id}>
+      <SectionBackground section={section} />
+      <Items className="si" style={guides} minEmptyHeight={kind === "canvas" ? 0 : 120} />
+    </section>
+  );
 }
 
 export const sectionComponents = {

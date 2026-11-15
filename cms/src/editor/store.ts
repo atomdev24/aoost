@@ -21,6 +21,8 @@ export type EditorState = {
   unpublished: boolean;
   past: HistoryEntry[];
   future: HistoryEntry[];
+  /** Selected node ids. Puck selects one; Shift-click on a canvas adds more. */
+  selection: string[];
   /** Node ids to flash (changes made by Claude). */
   highlight: string[];
   /** Label of the last history step, for the status line. */
@@ -58,6 +60,7 @@ export function initStore(site: Site, unpublished: boolean) {
     unpublished,
     past: [],
     future: [],
+    selection: [],
     highlight: [],
     lastLabel: null,
     clientId: crypto.randomUUID(),
@@ -151,6 +154,9 @@ export function setPage(pageId: string) {
   set({ pageId });
 }
 export const setBreakpoint = (bp: Breakpoint) => bp !== state.bp && set({ bp });
+export const setSelection = (ids: string[]) => {
+  if (ids.length !== state.selection.length || ids.some((id, i) => id !== state.selection[i])) set({ selection: ids });
+};
 export const setUnpublished = (unpublished: boolean) => set({ unpublished });
 
 // ---------------------------------------------------------- autosave

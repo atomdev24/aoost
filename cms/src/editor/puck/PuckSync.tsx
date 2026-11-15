@@ -2,7 +2,7 @@ import { useGetPuck } from "@puckeditor/core";
 import { useEffect } from "react";
 import { deepEqual } from "../../responsive/resolve";
 import { DESIGN_WIDTH } from "../../schema";
-import { currentPage, getState, setBreakpoint, subscribe } from "../store";
+import { currentPage, getState, setBreakpoint, setSelection, subscribe } from "../store";
 import { pageToPuck, puckToPage, type PuckData } from "./adapter";
 import { usePuck } from "./usePuck";
 
@@ -25,6 +25,13 @@ export function PuckSync() {
   useEffect(() => {
     setBreakpoint(width === DESIGN_WIDTH.mobile ? "mobile" : "desktop");
   }, [width]);
+
+  // Puck's single selection seeds ours (Shift-click on a canvas can then add to it).
+  const selectedId = usePuck((s) => (s.selectedItem?.props.id as string | undefined) ?? null);
+  useEffect(() => {
+    if (!selectedId) setSelection([]);
+    else if (!getState().selection.includes(selectedId)) setSelection([selectedId]);
+  }, [selectedId]);
 
   useEffect(() => {
     let last = currentPage();

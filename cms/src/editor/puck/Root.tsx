@@ -2,6 +2,7 @@ import { useMemo, type ReactNode } from "react";
 import { makeCtx } from "../../render/context";
 import { pageCss } from "../../render/document";
 import { navRenderer } from "../../render/nav";
+import { CanvasController } from "../canvas/CanvasController";
 import { currentPage, useEditor } from "../store";
 import { puckToPage, type PuckData } from "./adapter";
 import { canvasCss } from "./canvas.styles";
@@ -29,6 +30,7 @@ export function Root({ children }: { children: ReactNode }) {
         <Nav ctx={ctx} />
       </div>
       <main id="main">{children}</main>
+      <CanvasController />
     </>
   );
 }

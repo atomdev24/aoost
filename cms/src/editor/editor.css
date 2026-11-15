@@ -520,3 +520,32 @@ body {
   padding: 24px;
   color: var(--ed-muted);
 }
+
+/* ---- canvas tools ---- */
+.ed-align {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.ed-align-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--ed-line);
+  border-radius: 10px;
+  background: var(--ed-bg);
+}
+.ed-align-row .ed-icon {
+  width: 32px;
+  height: 32px;
+}
+.ed-seg-fill {
+  display: flex;
+  width: 100%;
+}
+.ed-seg-fill button {
+  flex: 1;
+  justify-content: center;
+}

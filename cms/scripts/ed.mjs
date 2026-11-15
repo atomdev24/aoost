@@ -20,7 +20,7 @@ const password = /^EDITOR_PASSWORD=(.*)$/m.exec(readFileSync(new URL("../.dev.va
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width, height } });
 const page = await context.newPage();
-page.on("console", (m) => (m.type() === "error" || m.type() === "warning") && console.log(`[${m.type()}]`, m.text().slice(0, 400)));
+page.on("console", (m) => (m.type() === "error" || m.type() === "warning" || m.text().startsWith("DBG")) && console.log(`[${m.type()}]`, m.text().slice(0, 400)));
 page.on("pageerror", (e) => console.log("[pageerror]", e.message.slice(0, 600)));
 const login = await context.request.post(`${base}/api/login`, { data: { password } });
 if (!login.ok()) throw new Error(`login failed: ${login.status()}`);
