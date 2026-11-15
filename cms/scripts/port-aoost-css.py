@@ -45,7 +45,8 @@ def scope_selector(sel: str) -> str:
         return ".ao section:not(.s)"  # .s is the CMS's own section wrapper
     for c in HTML_CLASSES:
         if s.startswith("." + c + " "):
-            return "html." + c + " " + scope_selector(s[len(c) + 2:])
+            # the condition applies to every alternative the rest of the selector expands to
+            return ",".join("html." + c + " " + alt for alt in scope_selector(s[len(c) + 2:]).split(","))
     if s.startswith(".wrap"):
         return ".ao" + s
     if s.startswith(".editing "):

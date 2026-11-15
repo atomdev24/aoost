@@ -103,7 +103,7 @@ function fontPreload(site: Site): string {
   return `<link rel="preload" as="font" type="${type}" href="${esc(face.src)}" crossorigin>`;
 }
 
-function fontLinks(site: Site, extra: string[] = []): string {
+function fontLinks(site: Site, extra: string[] = [], blocking = false): string {
   // Families the page's components need join the theme's; the same family is requested once, with all its weights.
   const byFamily = new Map<string, Set<string>>();
   for (const spec of [...site.theme.googleFonts, ...extra]) {
@@ -117,9 +117,11 @@ function fontLinks(site: Site, extra: string[] = []): string {
   const families = specs.map((f) => `family=${encodeURIComponent(f).replace(/%20/g, "+").replace(/%3A/g, ":").replace(/%40/g, "@").replace(/%3B/g, ";")}`).join("&");
   return (
     `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>` +
-    // Loaded without blocking first paint: text shows in the fallback font, then swaps.
-    `<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?${esc(families)}&display=swap" onload="this.onload=null;this.rel='stylesheet'">` +
-    `<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?${esc(families)}&display=swap"></noscript>`
+    (blocking
+      ? `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${esc(families)}&display=swap">`
+      : // Loaded without blocking first paint: text shows in the fallback font, then swaps.
+        `<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?${esc(families)}&display=swap" onload="this.onload=null;this.rel='stylesheet'">` +
+        `<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?${esc(families)}&display=swap"></noscript>`)
   );
 }
 
@@ -178,7 +180,7 @@ export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): st
     `<meta name="theme-color" content="${esc(site.theme.colors.bone ?? "#F3EFE6")}">`,
     site.settings.favicon ? `<link rel="icon" href="${esc(site.settings.favicon)}">` : `<link rel="icon" href="/seed/sun.svg" type="image/svg+xml">`,
     fontPreload(site),
-    fontLinks(site, kits.flatMap((k) => k.googleFonts ?? [])),
+    fontLinks(site, kits.flatMap((k) => k.googleFonts ?? []), kits.some((k) => k.blockingFonts)),
     `<style>${pageCss(site, page)}</style>`,
     `<script>document.documentElement.classList.add("js")</script>`,
     `<script defer src="/assets/site.js${v}"></script>`,

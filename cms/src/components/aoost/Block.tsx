@@ -15,10 +15,11 @@ export function Block({ name, mat, data, hidden, children }: { name: string; mat
 }
 
 /** Section heading with the hand-drawn underline (the runtime draws the line into [data-underline]). */
-export function Head({ id, title, children }: { id: string; title: string; children?: ReactNode }) {
+export function Head({ id, title, index, className, children }: { id: string; title: string; index: number; className?: string; children?: ReactNode }) {
   return (
-    <div className="head">
-      <h2 id={id} data-underline="">
+    <div className={className ? `head ${className}` : "head"}>
+      {/* the number is this heading's place on the original page: it picks the same hand-drawn line */}
+      <h2 id={id} data-underline={index}>
         {title}
       </h2>
       {children}

@@ -17,7 +17,9 @@ import { fields as SpotifyEmbed } from "./SpotifyEmbed/SpotifyEmbed.puck";
 import { fields as Text } from "./Text/Text.puck";
 import { fields as Video } from "./Video/Video.puck";
 import { fields as AoostHero } from "./aoost/AoostHero/AoostHero.puck";
+import { fields as AoostProjects } from "./aoost/AoostProjects/AoostProjects.puck";
+import { fields as AoostViewer } from "./aoost/AoostViewer/AoostViewer.puck";
 
 /** Editor-only: each component's content fields. Kept apart from registry.ts so the Worker never bundles editor UI. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const contentFields: Record<string, Record<string, any>> = { Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, DiaryList, PlaylistCard, Footer, Global, AoostHero };
+export const contentFields: Record<string, Record<string, any>> = { Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, DiaryList, PlaylistCard, Footer, Global, AoostHero, AoostProjects, AoostViewer };

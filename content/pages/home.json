@@ -66,6 +66,87 @@
           }
         }
       ]
+    },
+    {
+      "id": "home-projects",
+      "kind": "flow",
+      "name": "Projects",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "home-projects-block",
+          "type": "AoostProjects",
+          "content": {
+            "mat": "light",
+            "intro": "Alex · Cape Town",
+            "heading": "projects",
+            "projects": [
+              {
+                "image": "/art/hero.jpg"
+              },
+              {
+                "image": "/art/grillz.jpg"
+              },
+              {
+                "image": "/art/monkey-figure.jpg"
+              },
+              {
+                "image": "/art/storefront.png"
+              },
+              {
+                "image": "/art/hear-no-evil-3d.png"
+              },
+              {
+                "image": "/art/flower-skull.png"
+              },
+              {
+                "image": "/art/hear-no-evil-ring.png"
+              }
+            ],
+            "note": {
+              "show": true
+            },
+            "keychain": {
+              "show": true,
+              "image": "/art/keychain.png",
+              "label": "Monkey keychain, give it a swing"
+            },
+            "showCactus": false,
+            "showSkull": false
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-viewer",
+      "kind": "flow",
+      "name": "Artwork viewer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "home-viewer-block",
+          "type": "AoostViewer",
+          "content": {},
+          "style": {
+            "base": {}
+          }
+        }
+      ]
     }
   ],
   "overlays": []

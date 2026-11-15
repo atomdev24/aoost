@@ -10,10 +10,15 @@ import { kitBaseCss } from "./kit.base.styles";
  * scripts live in ./runtime, bundled as /assets/aoost.js and loaded only on pages that use a block.
  */
 
-/** Hand-written glue between the CMS page shell and the original page's assumptions. */
+/**
+ * Hand-written glue between the CMS page shell and the original page's assumptions.
+ * --display: the original lists "Facile Sans" after Lexend but never loads it, so it always shows Lexend.
+ * The CMS theme does load Facile Sans, which would flash in (all caps) while Lexend loads; leave it out here.
+ */
 const bridgeCss = `
 html:has(.ao.wrap){scroll-behavior:auto;scroll-padding-top:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 main.ao.wrap{overflow:visible}
+.ao{--display:"Lexend",ui-sans-serif,system-ui,sans-serif}
 .ao [hidden]{display:none!important}
 .ao svg,.ao video,.ao iframe,.ao canvas{max-width:none}
 .ao .ao-b{position:relative}
@@ -39,6 +44,8 @@ export const aoostKit: ComponentKit = {
   cssAfter: kitAfterCss,
   // The fonts the original page loads.
   googleFonts: ["Inter:wght@500;600", "Lexend:wght@300;400;500", "JetBrains Mono:wght@400;500", "Manrope:wght@400;500", "IBM Plex Mono:wght@400"],
+  // The original loads its fonts with a normal (render-blocking) stylesheet; do the same so type doesn't jump.
+  blockingFonts: true,
   script: "/assets/aoost.js",
   mainClass: "ao wrap",
 };

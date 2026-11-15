@@ -17,6 +17,11 @@ export function openViewer(st){ensure();lastFocus=document.activeElement;vStage.
   if(st.item.src){const img=new Image();img.alt=st.item.alt||'Artwork';img.src=st.item.src;vStage.appendChild(img);}
   else if(st.item.fnArt){const cv=document.createElement('canvas');cv.width=800;cv.height=1000;st.item.fnArt(cv.getContext('2d'),800,1000);vStage.appendChild(cv);}
   else{vStage.appendChild(placeholderCanvas(st.item.ph,1000));}
+  /* a project with details (title, year, medium, tags, link) gets a caption; with none the viewer is the image alone, as before */
+  const p=st.item.caption||{},bits=[p.title,p.year,p.medium].filter(Boolean),tags=(p.tags||[]).filter(Boolean);
+  if(bits.length||tags.length||p.link){const cap=document.createElement('p');cap.className='vcap';cap.textContent=bits.concat(tags.map(t=>'#'+t)).join(' · ');
+    if(p.link&&/^(https?:\/\/|\/)/.test(p.link)){const a=document.createElement('a');a.href=p.link;a.textContent='open ↗';if(/^https?:/.test(p.link)){a.target='_blank';a.rel='noopener';}if(cap.textContent)cap.append(' · ');cap.append(a);}
+    vStage.appendChild(cap);}
   viewer.hidden=false;viewer.querySelector('#vClose').focus();}
 export function closeViewer(){if(!viewer)return;viewer.hidden=true;vStage.innerHTML='';if(lastFocus)lastFocus.focus();}
 export const viewerOpen=()=>!!viewer&&!viewer.hidden;

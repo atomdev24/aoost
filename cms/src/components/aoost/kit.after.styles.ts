@@ -4,9 +4,9 @@ export const kitAfterCss = `
 html.late body:has(.ao){background:#111213}
 html.late .ao .hero-rect{filter:brightness(.62) saturate(.75) contrast(1.05)}
 html.late .ao .mat-light{background:#18191A url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22100%22%20height%3D%22100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%2318191A%22/%3E%3Cpath%20d%3D%22M20%200V100M0%2020H100%22%20stroke%3D%22%2326282A%22%20stroke-width%3D%221%22/%3E%3Cpath%20d%3D%22M40%200V100M0%2040H100%22%20stroke%3D%22%2326282A%22%20stroke-width%3D%221%22/%3E%3Cpath%20d%3D%22M60%200V100M0%2060H100%22%20stroke%3D%22%2326282A%22%20stroke-width%3D%221%22/%3E%3Cpath%20d%3D%22M80%200V100M0%2080H100%22%20stroke%3D%22%2326282A%22%20stroke-width%3D%221%22/%3E%3Cpath%20d%3D%22M0%200.5H100M0.5%200V100%22%20stroke%3D%22%23383B3E%22%20stroke-width%3D%221.4%22/%3E%3C/svg%3E") 0 0/100px 100px;color:#EDEDE8;--ink:#EDEDE8;--ink-2:#9A9C98;--rule:#3A3D40;--white:#232527;--paper:#18191A;--paper-2:#202224}
-html.late .ao .mat-light .table,.ao .ao-b[data-mat="light"] .table{--white:#E9E8E2;--paper:#E9E8E2;--paper-2:#DEDDD6;--ink:#141516;--ink-2:#55575A;filter:brightness(.88)}
-html.late .ao .mat-light .mat-ruler,.ao .ao-b[data-mat="light"] .mat-ruler{color:#55595C}
-html.late .ao .mat-light .mat-angle,.ao .ao-b[data-mat="light"] .mat-angle{color:#34373A}
+html.late .ao .mat-light .table,html.late .ao .ao-b[data-mat="light"] .table{--white:#E9E8E2;--paper:#E9E8E2;--paper-2:#DEDDD6;--ink:#141516;--ink-2:#55575A;filter:brightness(.88)}
+html.late .ao .mat-light .mat-ruler,html.late .ao .ao-b[data-mat="light"] .mat-ruler{color:#55595C}
+html.late .ao .mat-light .mat-angle,html.late .ao .ao-b[data-mat="light"] .mat-angle{color:#34373A}
 html.late .ao .ticker{background:#0B0B0C;border-color:#222}
 html.late .ao .tk-c{color:#7C5CFF}
 .ao .ghosts{position:absolute;left:0;top:0;width:0;height:0;z-index:60;pointer-events:none}

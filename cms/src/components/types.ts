@@ -28,6 +28,8 @@ export type ComponentKit = {
   cssAfter?: string;
   /** Google Fonts families these components need, e.g. "Lexend:wght@300;400;500". */
   googleFonts?: string[];
+  /** Load this page's fonts with a plain stylesheet link (render-blocking), not the deferred one. */
+  blockingFonts?: boolean;
   /** A deferred script loaded only on pages that use the kit. */
   script?: string;
   /** Classes added to <main> on pages that use the kit. */
