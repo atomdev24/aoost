@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Page, Site } from "../schema";
-import { seedSite } from "../seed/site";
+import { fixtureSite as seedSite } from "../seed/fixture";
 import { addNode, addSection, createNode, createOverlay, createSection, duplicate, isHidden, locate, moveNode, moveSection, nudgeOrder, remove, rename, setHidden, setLocked, updateNode, updateOverlay } from "./page-ops";
 
 const home = Site.parse(seedSite).pages[0]!;

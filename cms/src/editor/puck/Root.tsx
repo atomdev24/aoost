@@ -1,6 +1,6 @@
 import { useMemo, type ReactNode } from "react";
 import { makeCtx } from "../../render/context";
-import { pageCss } from "../../render/document";
+import { pageCss, pageKits } from "../../render/document";
 import { navRenderer } from "../../render/nav";
 import { CanvasController } from "../canvas/CanvasController";
 import { updateNavItem } from "../../model/nav";
@@ -26,16 +26,17 @@ export function Root({ children }: { children: ReactNode }) {
   const css = useMemo(() => pageCss(mega ? updateNavItem(site, mega, { panel: page.sections }) : { ...site, pages: site.pages.map((p) => (p.id === page.id ? page : p)) }, mega ? { ...page, sections: [] } : page), [site, page, mega]);
   const ctx = useMemo(() => makeCtx(site, page, { editing: true }), [site, page]);
   const Nav = navRenderer(site.nav.style).Render;
+  const kitClass = useMemo(() => pageKits(site, page).map((k) => k.mainClass).filter(Boolean).join(" "), [site, page]);
   return (
     <>
       <style>{css}</style>
       <style>{canvasCss}</style>
-      {mega ? null : (
+      {mega || page.hideNav ? null : (
         <div className="ed-nav-preview" inert>
           <Nav ctx={ctx} />
         </div>
       )}
-      <main id="main" className={mega ? "ed-mega-stage" : undefined}>
+      <main id="main" className={mega ? "ed-mega-stage" : kitClass || undefined}>
         {children}
         {page.overlays
           .filter((o) => o.anchor === "viewport")

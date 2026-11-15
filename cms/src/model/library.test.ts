@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import "../components/registry";
 import { Site, validateSite } from "../schema";
-import { seedSite } from "../seed/site";
+import { fixtureSite as seedSite } from "../seed/fixture";
 import { detachGlobal, globalUses, insertTemplate, instantiate, makeGlobal, removeGlobal, removeTemplate, saveTemplate, STARTER_TEMPLATES, updateGlobal } from "./library";
 import { locate } from "./page-ops";
 

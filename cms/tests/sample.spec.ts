@@ -77,10 +77,10 @@ test.describe("lightbox and clean URLs", () => {
   test("an image opens full screen and closes with Escape", async ({ page }) => {
     await page.goto("/work");
     await page.locator(".gal .frame").first().click();
-    await expect(page.locator("dialog.lb")).toBeVisible();
-    await expect(page.locator("dialog.lb img")).toHaveAttribute("alt", "Studio piece");
+    await expect(page.locator("dialog.lbx")).toBeVisible();
+    await expect(page.locator("dialog.lbx img")).toHaveAttribute("alt", "Studio piece");
     await page.keyboard.press("Escape");
-    await expect(page.locator("dialog.lb")).toBeHidden();
+    await expect(page.locator("dialog.lbx")).toBeHidden();
   });
 
   test("pages are served at clean URLs, with a real 404", async ({ request }) => {

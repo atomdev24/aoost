@@ -3,7 +3,7 @@ import { z } from "zod";
 import "../components/registry";
 import { locate } from "../model/page-ops";
 import { Site, validateSite } from "../schema";
-import { seedSite } from "../seed/site";
+import { fixtureSite as seedSite } from "../seed/fixture";
 import { runTool, tools, type ToolContext } from "./tools";
 
 const site = Site.parse(seedSite);

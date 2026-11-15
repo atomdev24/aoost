@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import "../components/registry";
 import { flattenRedirects } from "../render/redirects";
 import { Site, validateSite } from "../schema";
-import { seedSite } from "../seed/site";
+import { fixtureSite as seedSite } from "../seed/fixture";
 import { createPage, deletePage, duplicatePage, renamePage, reorderPage, setParent, setSeo, setShowInNav, setSlug, setStatus, slugify, uniqueSlug } from "./pages";
 
 const site = Site.parse(seedSite);

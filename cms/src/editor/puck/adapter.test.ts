@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Site } from "../../schema";
-import { seedSite } from "../../seed/site";
+import { fixtureSite as seedSite } from "../../seed/fixture";
 import { itemToNode, nodeToItem, pageToPuck, puckToPage } from "./adapter";
 
 const site = Site.parse(seedSite);

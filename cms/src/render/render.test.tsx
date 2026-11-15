@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Site, type Site as SiteT } from "../schema";
-import { seedSite } from "../seed/site";
+import { fixtureSite as seedSite } from "../seed/fixture";
 import { buildSite, outputPath, searchIndex } from "./build";
 import { makeCtx } from "./context";
 import { pageCss, pageTitle, renderPage } from "./document";

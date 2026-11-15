@@ -17,11 +17,12 @@ import { Spacer } from "./Spacer/Spacer";
 import { SpotifyEmbed } from "./SpotifyEmbed/SpotifyEmbed";
 import { Text } from "./Text/Text";
 import { Video } from "./Video/Video";
+import { AoostHero } from "./aoost/AoostHero/AoostHero";
 import type { ComponentDef } from "./types";
 
 /** Every component the renderer and the editor know about. Add new ones here (and in fields.ts). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, DiaryList, PlaylistCard, Footer, Global];
+export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, DiaryList, PlaylistCard, Footer, Global, AoostHero];
 
 export const componentMap = new Map(components.map((c) => [c.type, c]));
 for (const c of components) registerContentSchema(c.type, c.schema);

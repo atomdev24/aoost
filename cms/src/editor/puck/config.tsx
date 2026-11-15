@@ -44,6 +44,7 @@ export const puckConfig: Config = {
     media: { title: "Media", components: byCategory("media") },
     embed: { title: "Embeds and code", components: byCategory("embed") },
     site: { title: "Site", components: byCategory("site") },
+    aoost: { title: "aoost (homepage blocks)", components: byCategory("aoost") },
   },
   components: {
     ...sectionComponents,

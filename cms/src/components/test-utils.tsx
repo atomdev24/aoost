@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { NodeContent } from "../render/NodeView";
 import { makeCtx } from "../render/context";
 import { Site, type Node } from "../schema";
-import { seedSite } from "../seed/site";
+import { fixtureSite as seedSite } from "../seed/fixture";
 import "./registry";
 
 const site = Site.parse(seedSite);

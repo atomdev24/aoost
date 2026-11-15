@@ -3,7 +3,7 @@ import { deletePage, duplicatePage, renamePage, reorderPage, setParent, setSeo, 
 import type { Page } from "../../schema";
 import { MediaInput } from "../fields/media";
 import { currentPage, getState, megaItemId, setPage, update, useEditor } from "../store";
-import { Button, Select, TextInput } from "./kit";
+import { Button, Select, TextInput, Toggle } from "./kit";
 import { NavPanel } from "./NavPanel";
 
 /**
@@ -97,6 +97,13 @@ export function PageSettings() {
             {!canNest && children.length ? <span className="ed-hint">This page has sub-pages, so it stays at the top level.</span> : null}
           </label>
         )}
+
+        <div className="ed-row">
+          <span className="ed-label">Site navigation on this page</span>
+          <div className="ed-control">
+            <Toggle label="Site navigation on this page" checked={!page.hideNav} onChange={(show) => update((s) => ({ ...s, pages: s.pages.map((p) => (p.id === page.id ? { ...p, hideNav: show ? undefined : true } : p)) }), show ? "Show the nav on this page" : "Hide the nav on this page")} />
+          </div>
+        </div>
 
         <button type="button" className="ed-disclosure" aria-expanded={seoOpen} onClick={() => setSeoOpen(!seoOpen)}>
           Search &amp; share <span>Title, description, image</span>

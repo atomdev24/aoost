@@ -7,10 +7,11 @@
   "template": "blank",
   "seo": {
     "title": "aoost",
-    "description": "A visual diary, for people in the know."
+    "description": "Alex, Cape Town. Projects, playlists and a wall to draw on."
   },
   "isHome": true,
   "showInNav": false,
+  "hideNav": true,
   "sections": [
     {
       "id": "home-hero",
@@ -19,290 +20,46 @@
       "layout": {
         "base": {
           "columns": 1,
-          "gap": 18,
-          "padding": "120px 20px 24px",
-          "maxWidth": 1160
-        },
-        "desktop": {
-          "padding": "180px 56px 40px"
-        }
-      },
-      "children": [
-        {
-          "id": "home-kicker",
-          "type": "Text",
-          "content": {
-            "text": "Diary · entry 014",
-            "styleId": "label",
-            "tag": "p"
-          },
-          "style": {
-            "base": {
-              "color": "token:muted"
-            }
-          }
-        },
-        {
-          "id": "home-title",
-          "type": "Text",
-          "content": {
-            "text": "A visual diary, for people in the know.",
-            "styleId": "hero",
-            "tag": "h1"
-          },
-          "style": {
-            "base": {}
-          }
-        },
-        {
-          "id": "home-lede",
-          "type": "Text",
-          "content": {
-            "text": "Drawings, objects, playlists and a rodeo. Mostly made late at night.",
-            "styleId": "body",
-            "tag": "p"
-          },
-          "style": {
-            "base": {
-              "maxWidth": "520px",
-              "color": "token:text"
-            }
-          }
-        },
-        {
-          "id": "home-cta",
-          "type": "Button",
-          "content": {
-            "label": "See the work",
-            "target": {
-              "kind": "page",
-              "pageId": "work"
-            },
-            "variant": "filled"
-          },
-          "style": {
-            "base": {
-              "margin": "8px 0 0"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "home-art",
-      "kind": "canvas",
-      "name": "Line art",
-      "layout": {
-        "base": {
-          "columns": 1,
-          "gap": 18,
-          "padding": "0px",
-          "maxWidth": 1160,
-          "height": 440
-        },
-        "desktop": {
-          "height": 540
-        }
-      },
-      "children": [
-        {
-          "id": "home-desert",
-          "type": "Image",
-          "content": {
-            "src": "/seed/desert.svg",
-            "alt": "Line drawing of a cactus, a dune and a sun",
-            "lightbox": false
-          },
-          "style": {
-            "base": {
-              "x": 0,
-              "y": 40,
-              "w": 390,
-              "h": 300,
-              "z": 1
-            },
-            "desktop": {
-              "x": 60,
-              "y": 60,
-              "w": 560,
-              "h": 430
-            }
-          }
-        },
-        {
-          "id": "home-photo",
-          "type": "Image",
-          "content": {
-            "src": "/art/hero.jpg",
-            "alt": "Artwork from the studio",
-            "lightbox": true
-          },
-          "style": {
-            "base": {
-              "x": 150,
-              "y": 250,
-              "w": 220,
-              "h": 160,
-              "rotation": -3,
-              "z": 2,
-              "radius": [
-                18,
-                18,
-                18,
-                18
-              ],
-              "shadow": "hard"
-            },
-            "desktop": {
-              "x": 760,
-              "y": 70,
-              "w": 520,
-              "h": 372,
-              "rotation": 2
-            }
-          }
-        },
-        {
-          "id": "home-note",
-          "type": "Text",
-          "content": {
-            "text": "Scroll, or tap Menu.",
-            "styleId": "small",
-            "tag": "p"
-          },
-          "style": {
-            "base": {
-              "x": 20,
-              "y": 0,
-              "w": 200,
-              "h": 24,
-              "z": 3,
-              "color": "token:muted"
-            },
-            "desktop": {
-              "x": 60,
-              "y": 10,
-              "w": 240,
-              "h": 24
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "home-latest",
-      "kind": "grid",
-      "name": "Lately",
-      "layout": {
-        "base": {
-          "columns": 1,
-          "gap": 14,
-          "padding": "56px 20px",
-          "maxWidth": 1160,
-          "background": {
-            "color": "token:sand"
-          }
-        },
-        "desktop": {
-          "columns": 3,
-          "padding": "72px 56px"
-        }
-      },
-      "children": [
-        {
-          "id": "home-latest-h",
-          "type": "Text",
-          "content": {
-            "text": "Lately",
-            "styleId": "h2",
-            "tag": "h2"
-          },
-          "style": {
-            "base": {},
-            "desktop": {
-              "colSpan": 3
-            }
-          }
-        },
-        {
-          "id": "home-g1",
-          "type": "Image",
-          "content": {
-            "src": "/art/grillz.jpg",
-            "alt": "Grillz",
-            "lightbox": true
-          },
-          "style": {
-            "base": {
-              "aspectRatio": "4/3",
-              "radius": [
-                6,
-                6,
-                6,
-                6
-              ]
-            }
-          }
-        },
-        {
-          "id": "home-g2",
-          "type": "Image",
-          "content": {
-            "src": "/art/monkey-figure.jpg",
-            "alt": "Monkey figure",
-            "lightbox": true
-          },
-          "style": {
-            "base": {
-              "aspectRatio": "4/3",
-              "radius": [
-                6,
-                6,
-                6,
-                6
-              ]
-            }
-          }
-        },
-        {
-          "id": "home-g3",
-          "type": "Image",
-          "content": {
-            "src": "/art/storefront.png",
-            "alt": "Storefront",
-            "lightbox": true
-          },
-          "style": {
-            "base": {
-              "aspectRatio": "4/3",
-              "radius": [
-                6,
-                6,
-                6,
-                6
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "home-footer",
-      "kind": "flow",
-      "name": "Footer",
-      "layout": {
-        "base": {
-          "columns": 1,
-          "gap": 18,
+          "gap": 0,
           "padding": "0px"
         }
       },
       "children": [
         {
-          "id": "home-footer-ref",
-          "type": "Global",
+          "id": "home-hero-block",
+          "type": "AoostHero",
           "content": {
-            "globalId": "footer"
+            "label": "aoost / portfolio",
+            "clockLabel": "CPT",
+            "timeZone": "Africa/Johannesburg",
+            "reel": [
+              {
+                "src": "/art/hero.jpg",
+                "alt": ""
+              }
+            ],
+            "reelSeconds": 5.2,
+            "ticker": [
+              {
+                "text": "welcome",
+                "mode": "day"
+              },
+              {
+                "text": "pick a playlist",
+                "mode": "both"
+              },
+              {
+                "text": "you're up late",
+                "mode": "late"
+              },
+              {
+                "text": "the station's still on",
+                "mode": "late"
+              }
+            ],
+            "tickerTopScore": true,
+            "tickerVisitors": true,
+            "lateMode": true
           },
           "style": {
             "base": {}

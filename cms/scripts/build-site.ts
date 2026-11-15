@@ -57,4 +57,9 @@ await build({
 await build({ entryPoints: [resolve(cms, "src/runtime/lottie-entry.ts")], outfile: resolve(dist, "assets/lottie.js"), bundle: true, minify: true, format: "iife", target: "es2020" });
 await build({ entryPoints: [resolve(cms, "src/runtime/model-viewer-entry.ts")], outfile: resolve(dist, "assets/model-viewer.js"), bundle: true, minify: true, format: "esm", target: "es2020" });
 
+// The aoost homepage's own scripts (the ported original), loaded only on pages that use those blocks.
+await build({ entryPoints: [resolve(cms, "src/components/aoost/runtime/index.js")], outfile: resolve(dist, "assets/aoost.js"), bundle: true, minify: true, format: "iife", target: "es2020" });
+// The rodeo's horse-and-rider sprite sheet sits at the repo root; the game loads it from /rider.png.
+if (existsSync(resolve(repo, "rider.png"))) cpSync(resolve(repo, "rider.png"), resolve(dist, "rider.png"));
+
 console.log(`build-site: ${Object.keys(files).filter((f) => f.endsWith(".html")).length} pages → dist/`);

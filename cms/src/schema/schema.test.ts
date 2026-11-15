@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { resolve } from "node:path";
 import { filesToSite, Length, Site, siteToFiles, Slug, validateSite } from "./index";
 import { loadSite } from "./load-node";
-import { seedSite } from "../seed/site";
+import { fixtureSite as seedSite } from "../seed/fixture";
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 const issues = (site: unknown) => {

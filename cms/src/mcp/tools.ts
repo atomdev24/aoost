@@ -249,6 +249,7 @@ export const tools: Tool[] = [
       status: z.enum(["published", "draft", "unlisted"]).optional(),
       seo: z.object({ title: z.string().optional(), description: z.string().optional(), image: z.string().optional() }).optional(),
       show_in_nav: z.boolean().optional(),
+      hide_nav: z.boolean().optional().describe("true leaves the site navigation off this page (the homepage brings its own header)."),
       parent: z.string().nullable().optional().describe("Parent page id, or null for top level."),
     }),
     (a, ctx) => {
@@ -260,6 +261,7 @@ export const tools: Tool[] = [
       if (a.status !== undefined) site = setStatus(site, id, a.status);
       if (a.seo) site = setSeo(site, id, a.seo);
       if (a.show_in_nav !== undefined) site = setShowInNav(site, id, a.show_in_nav);
+      if (a.hide_nav !== undefined) site = { ...site, pages: site.pages.map((p) => (p.id === id ? { ...p, hideNav: a.hide_nav || undefined } : p)) };
       const page = site.pages.find((p) => p.id === id)!;
       return { site, text: json({ ...pageSummary(page), redirects: site.redirects.filter((r) => r.to === page.slug) }), summary: `Update settings of ${page.title}` };
     },

@@ -6,8 +6,8 @@ export function initLightbox() {
   const open = (src: string, caption: string) => {
     if (!dialog) {
       dialog = document.createElement("dialog");
-      dialog.className = "lb";
-      dialog.innerHTML = '<button type="button" class="lb-close" aria-label="Close">×</button><img alt=""><p></p>';
+      dialog.className = "lbx";
+      dialog.innerHTML = '<button type="button" class="lbx-close" aria-label="Close">×</button><img alt=""><p></p>';
       document.body.appendChild(dialog);
       dialog.addEventListener("click", (e) => {
         if ((e.target as Element).tagName !== "IMG") dialog!.close();

@@ -1,6 +1,7 @@
 import { blocksPlugin, Puck, type Plugin } from "@puckeditor/core";
 import "@puckeditor/core/puck.css";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { components } from "../components/registry";
 import { deepEqual } from "../responsive/resolve";
 import { DESIGN_WIDTH } from "../schema";
 import "./editor.css";
@@ -91,7 +92,9 @@ function useUndoKeys(doc: Document | undefined) {
 
 /** Runs inside the preview iframe: load the site's fonts and forward undo keys. */
 function Frame({ children, document: doc }: { children: ReactNode; document?: Document }) {
-  const fonts = useEditor((s) => s.site.theme.googleFonts);
+  const themeFonts = useEditor((s) => s.site.theme.googleFonts);
+  // The canvas also needs the fonts of any component kit (their pages bring those fonts on the site).
+  const fonts = useMemo(() => [...new Set([...themeFonts, ...components.flatMap((c) => c.kit?.googleFonts ?? [])])], [themeFonts]);
   useUndoKeys(doc);
   useEffect(() => {
     if (!doc || !fonts.length) return;

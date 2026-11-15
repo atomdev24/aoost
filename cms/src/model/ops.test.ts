@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import "../components/registry";
 import { Site, validateSite } from "../schema";
-import { seedSite } from "../seed/site";
+import { fixtureSite as seedSite } from "../seed/fixture";
 import { applyOps, diffSite, touchedPages } from "./ops";
 
 const site = Site.parse(seedSite);

@@ -5,7 +5,7 @@ import { makeCtx } from "../render/context";
 import { pageCss } from "../render/document";
 import { navRenderer } from "../render/nav";
 import { NAV_ITEM_TYPES, Site, validateSite } from "../schema";
-import { seedSite } from "../seed/site";
+import { fixtureSite as seedSite } from "../seed/fixture";
 import { addNavItem, findNavItem, moveNavItem, NAV_TYPE_LABELS, removeNavItem, setNavBehaviour, updateNavItem } from "./nav";
 
 const site = Site.parse(seedSite);

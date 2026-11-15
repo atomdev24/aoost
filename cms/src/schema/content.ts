@@ -118,6 +118,8 @@ export const Page = z.object({
   seo: Seo,
   isHome: z.boolean(),
   showInNav: z.boolean(),
+  /** Leave the site navigation off this page (a one-page layout that brings its own header). */
+  hideNav: z.boolean().optional(),
   sections: z.array(Section),
   overlays: z.array(Overlay).default([]),
 });
