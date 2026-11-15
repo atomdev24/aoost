@@ -140,7 +140,7 @@ describe("nesting", () => {
   });
   it("reorders among siblings and keeps sub-pages with their parent", () => {
     const next = reorderPage(site, "diary", -1);
-    expect(next.pages.map((p) => p.id)).toEqual(["home", "diary", "work", "digital", "physical", "playlists", "rodeo", "about", "links"]);
+    expect(next.pages.map((p) => p.id)).toEqual(["home", "diary", "work", "digital", "physical", "playlists", "rodeo", "about", "links", "sample"]);
     expect(reorderPage(site, "physical", -1).pages.map((p) => p.id).slice(1, 4)).toEqual(["work", "physical", "digital"]);
     expect(reorderPage(site, "work", -1)).toBe(site); // nothing goes above home
   });
@@ -160,7 +160,7 @@ describe("duplicate and delete", () => {
   });
   it("deletes a page with its sub-pages and nav entries, leaving redirects home", () => {
     const next = deletePage(site, "work");
-    expect(slugs(next)).toEqual(["/", "/diary", "/playlists", "/rodeo", "/about", "/links"]);
+    expect(slugs(next)).toEqual(["/", "/diary", "/playlists", "/rodeo", "/about", "/links", "/sample"]);
     expect(navPages(next)).toEqual(["diary", "playlists", "rodeo", "about"]);
     expect(next.redirects).toEqual([
       { from: "/work", to: "/" },

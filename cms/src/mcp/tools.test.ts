@@ -35,7 +35,7 @@ describe("MCP tool list", () => {
 
 describe("read tools", () => {
   it("lists pages and reads one by id or URL", () => {
-    expect(JSON.parse(runTool("list_pages", {}, ctx()).text)).toHaveLength(9);
+    expect(JSON.parse(runTool("list_pages", {}, ctx()).text)).toHaveLength(10);
     expect(JSON.parse(runTool("get_page", { page: "/work/digital" }, ctx()).text).id).toBe("digital");
     expect(runTool("get_page", { page: "ghost" }, ctx())).toMatchObject({ isError: true });
   });

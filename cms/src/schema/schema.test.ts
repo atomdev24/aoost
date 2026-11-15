@@ -17,7 +17,7 @@ describe("content schema", () => {
 
   it("has the seed pages from the plan", () => {
     const slugs = seedSite.pages.map((p) => p.slug);
-    expect(slugs).toEqual(["/", "/work", "/work/digital", "/work/physical", "/diary", "/playlists", "/rodeo", "/about", "/links"]);
+    expect(slugs).toEqual(["/", "/work", "/work/digital", "/work/physical", "/diary", "/playlists", "/rodeo", "/about", "/links", "/sample"]);
     expect(seedSite.pages.find((p) => p.id === "links")?.showInNav).toBe(false);
   });
 
@@ -35,7 +35,7 @@ describe("content schema", () => {
 
   it("the committed content/ folder is valid", () => {
     const site = loadSite(resolve(__dirname, "../../.."));
-    expect(site.pages.length).toBeGreaterThanOrEqual(9);
+    expect(site.pages.length).toBeGreaterThanOrEqual(10);
   });
 
   it("validates slugs", () => {

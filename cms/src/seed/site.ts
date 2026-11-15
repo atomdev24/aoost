@@ -1,6 +1,7 @@
 import type { Page, Site } from "../schema";
 import { image, node, section, text } from "./build";
 import { seedTheme } from "./theme";
+import { samplePage } from "./sample";
 import { starterTemplates } from "./templates";
 
 const page = (p: Partial<Page> & Pick<Page, "id" | "title" | "slug" | "sections">): Page => ({
@@ -224,6 +225,7 @@ export const seedSite: Site = {
       ],
       { showInNav: false, seo: { title: "aoost links" } },
     ),
+    samplePage,
   ],
   redirects: [],
 };

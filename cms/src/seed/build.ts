@@ -1,4 +1,4 @@
-import type { Node, Section, SectionLayout, Style } from "../schema";
+import { DEFAULT_FRAME_FIT, type FrameFit, type Node, type Section, type SectionLayout, type Style } from "../schema";
 
 /** Small builders so seeds and templates read like the page they describe. */
 type StyleInput = Style | { base: Style; desktop?: Style };
@@ -15,8 +15,8 @@ function defaultTag(style: string) {
   return style === "hero" || style === "h1" ? "h1" : style === "h2" ? "h2" : style === "h3" ? "h3" : "p";
 }
 
-export const image = (id: string, src: string, alt: string, s: StyleInput = {}, content: Record<string, unknown> = {}) =>
-  node(id, "Image", { src, alt, lightbox: true, ...content }, s);
+export const image = (id: string, src: string, alt: string, s: StyleInput = {}, content: Record<string, unknown> = {}, fit?: Partial<FrameFit>) =>
+  node(id, "Image", { src, alt, lightbox: true, ...content }, s, fit ? { frame: { base: { ...DEFAULT_FRAME_FIT, ...fit } } } : {});
 
 const baseLayout: SectionLayout = { columns: 1, gap: 18, padding: "56px 20px", maxWidth: 1160 };
 
