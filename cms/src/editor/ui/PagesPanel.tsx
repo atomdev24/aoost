@@ -1,25 +1,71 @@
-import { setPage, useEditor } from "../store";
+import { useState } from "react";
+import { setShowInNav } from "../../model/pages";
+import { setPage, update, useEditor } from "../store";
+import { NewPageModal } from "./NewPageModal";
 
-/** The pages list (left panel). New-page flow and nav toggles arrive in Phase 3. */
+const HomeIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
+    <path d="M2.500 7.500L8 3l5.500 4.500V13h-11z" />
+  </svg>
+);
+const PageIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 1.500h5.500L12.500 4.500V14.500H4z" />
+  </svg>
+);
+
+/** The pages list from the Editor artboard: home, nested sub-pages, and a nav toggle per page. */
 export function PagesPanel() {
   const pages = useEditor((s) => s.site.pages);
   const pageId = useEditor((s) => s.pageId);
+  const [creating, setCreating] = useState(false);
   const ordered = pages.filter((p) => !p.parentId).flatMap((p) => [p, ...pages.filter((c) => c.parentId === p.id)]);
+
   return (
     <div className="ed-panel">
       <div className="ed-panel-head">
         <span className="ed-caps">{pages.length} pages</span>
+        <button type="button" className="ed-btn ed-btn-primary ed-btn-sm" onClick={() => setCreating(true)}>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+            <path d="M6 1.500v9M1.500 6h9" />
+          </svg>
+          New page
+        </button>
       </div>
       <ul className="ed-pages">
         {ordered.map((p) => (
-          <li key={p.id} className={p.parentId ? "ed-page-child" : undefined}>
+          <li key={p.id} className={`ed-page-row${p.parentId ? " ed-page-child" : ""}${p.id === pageId ? " is-selected" : ""}`}>
             <button type="button" className="ed-page" aria-current={p.id === pageId ? "page" : undefined} onClick={() => setPage(p.id)}>
-              <span className="ed-page-title">{p.title}</span>
-              <span className="ed-page-slug">{p.slug}</span>
+              <span className="ed-page-icon">{p.isHome ? <HomeIcon /> : <PageIcon />}</span>
+              <span className="ed-page-text">
+                <span className="ed-page-title">
+                  {p.title}
+                  {p.status !== "published" ? <em>{p.status === "draft" ? "Draft" : "Unlisted"}</em> : null}
+                </span>
+                <span className="ed-page-slug">{p.slug}</span>
+              </span>
             </button>
+            {p.isHome ? (
+              <span className="ed-page-note">Logo link</span>
+            ) : (
+              <button
+                type="button"
+                className="ed-navtoggle"
+                aria-pressed={p.showInNav}
+                aria-label={`Show ${p.title} in navigation`}
+                onClick={() => update((site) => setShowInNav(site, p.id, !p.showInNav), p.showInNav ? `Hide ${p.title} from the nav` : `Show ${p.title} in the nav`)}
+              >
+                {p.showInNav ? "In nav" : "Hidden"}
+                <span className="ed-toggle" data-on={p.showInNav || undefined}>
+                  <span />
+                </span>
+              </button>
+            )}
           </li>
         ))}
       </ul>
+      <p className="ed-panel-note">Pages left out of the nav still work at their URL, so you can keep secret pages like /links for your Instagram bio.</p>
+      {creating ? <NewPageModal onClose={() => setCreating(false)} /> : null}
     </div>
   );
 }

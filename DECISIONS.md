@@ -31,3 +31,6 @@ One line each: the decision, and why. Newest at the bottom.
 - Publish commits to the branch in `PUBLISH_BRANCH` (set to `cms-v1` for this run, never `main`). Change that one var at cut-over. The ref update is not forced, so a publish can never overwrite someone else's commit.
 - After a publish the draft store keeps a snapshot of what it published, so "Unpublished changes" clears right away instead of waiting for the deploy.
 - Undo/redo is the editor's own site-level stack (100 steps, edits to the same field within 1.2 s merge into one step). ⌘Z/⇧⌘Z are captured before Puck's own history.
+- New pages start as Draft (Alex publishes them from Page settings), even though the mockup's sample data shows Published. Why: a half-built page should not go live with the next Publish.
+- Changing a URL keeps every earlier redirect pointing at the newest URL, and a redirect is dropped the moment a live page takes that URL again. Deleting a page redirects its URL (and its sub-pages') to home.
+- A page with sub-pages cannot itself be nested (one level deep, SPEC §5); "Place it" only offers top-level parents.

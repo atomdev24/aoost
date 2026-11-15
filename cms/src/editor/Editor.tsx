@@ -12,6 +12,7 @@ import { GlobalPanel } from "./ui/GlobalPanel";
 import { LayersPanel } from "./ui/LayersPanel";
 import { LibraryPanel } from "./ui/LibraryPanel";
 import { OverlayPanel } from "./ui/OverlayPanel";
+import { PageSettings } from "./ui/PageSettings";
 import { PagesPanel } from "./ui/PagesPanel";
 import { ThemePanel } from "./ui/ThemePanel";
 import { TopBar } from "./ui/TopBar";
@@ -49,12 +50,14 @@ const ThemeIcon = () => (
   </svg>
 );
 
-/** The right-hand panel: an overlay's settings when one is selected, otherwise Puck's fields. */
-function Fields({ children }: { children: ReactNode }) {
+/** The right-hand panel: overlay or global settings, page settings when nothing is selected, otherwise Puck's fields. */
+function Fields({ children, itemSelector }: { children: ReactNode; itemSelector?: unknown }) {
   const overlayId = useEditor((s) => s.overlayId);
   const globalId = useEditor((s) => s.globalId);
   if (overlayId) return <OverlayPanel overlayId={overlayId} />;
   if (globalId) return <GlobalPanel globalId={globalId} />;
+  // Nothing selected on the canvas: the panel is about the page itself.
+  if (!itemSelector) return <PageSettings />;
   return <>{children}</>;
 }
 
