@@ -43,4 +43,8 @@ await build({
   target: "es2020",
 });
 
+// Players that only some pages need: separate files, loaded on demand by runtime/lazy.ts.
+await build({ entryPoints: [resolve(cms, "src/runtime/lottie-entry.ts")], outfile: resolve(dist, "assets/lottie.js"), bundle: true, minify: true, format: "iife", target: "es2020" });
+await build({ entryPoints: [resolve(cms, "src/runtime/model-viewer-entry.ts")], outfile: resolve(dist, "assets/model-viewer.js"), bundle: true, minify: true, format: "esm", target: "es2020" });
+
 console.log(`build-site: ${Object.keys(files).filter((f) => f.endsWith(".html")).length} pages → dist/`);

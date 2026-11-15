@@ -48,7 +48,8 @@ export function MediaInput({ value, onChange, kind, label }: { value: string | u
   );
 }
 
-export const mediaField = (label: string, kind: MediaKind): CustomField<string> => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mediaField = (label: string, kind: MediaKind): CustomField<any> => ({
   type: "custom",
   label,
   render: ({ value, onChange }) => (

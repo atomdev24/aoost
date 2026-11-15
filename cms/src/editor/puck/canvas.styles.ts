@@ -26,6 +26,7 @@ html.ed-dragging [data-puck-overlay-portal],html.ed-dragging [class*="DraggableC
 .ov[data-anchor="viewport"]{position:fixed}
 .ed-mega-stage{width:min(1100px,calc(100% - 48px));margin:40px auto;background:#F3EFE6;color:#141414;border:1.5px solid #141414;border-radius:14px;box-shadow:5px 5px 0 #141414;overflow:hidden}
 body:has(.ed-mega-stage){background:var(--c-sand)}
+.n iframe,.n video,.n audio,.n model-viewer{pointer-events:none}
 .ed-flash{animation:ed-flash 2s ease-out}
 @keyframes ed-flash{0%,60%{outline:3px solid #E2683A;outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}
 .ed-locked{cursor:not-allowed}
