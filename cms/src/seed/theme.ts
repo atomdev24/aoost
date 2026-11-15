@@ -17,7 +17,8 @@ export const seedTheme: Theme = {
     body: "Inter, system-ui, sans-serif",
     mono: "'JetBrains Mono', ui-monospace, monospace",
   },
-  fontFaces: [],
+  // Alex's display face. One weight exists, so it covers 400-700 (no fake bold on headings).
+  fontFaces: [{ family: "Facile Sans", src: "/fonts/FacileSans-Regular.otf", weight: "400 700", style: "normal" }],
   googleFonts: ["Inter:wght@400;500;600", "Space Grotesk:wght@500;700"],
   typeStyles: {
     hero: { name: "Hero", font: "display", size: { base: 44, desktop: 88 }, weight: 700, lineHeight: 1.02, tracking: -0.03 },

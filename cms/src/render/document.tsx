@@ -58,6 +58,14 @@ export function pageTitle(site: Site, page: Page): string {
   return page.isHome ? (site.settings.defaultSeo.title ?? site.settings.title) : `${page.title} · ${site.settings.title}`;
 }
 
+/** Preload the first uploaded font: it is the display face, used above the fold. */
+function fontPreload(site: Site): string {
+  const face = site.theme.fontFaces[0];
+  if (!face) return "";
+  const type = /\.woff2(\?|$)/.test(face.src) ? "font/woff2" : /\.woff(\?|$)/.test(face.src) ? "font/woff" : /\.ttf(\?|$)/.test(face.src) ? "font/ttf" : "font/otf";
+  return `<link rel="preload" as="font" type="${type}" href="${esc(face.src)}" crossorigin>`;
+}
+
 function fontLinks(site: Site): string {
   if (!site.theme.googleFonts.length) return "";
   const families = site.theme.googleFonts.map((f) => `family=${encodeURIComponent(f).replace(/%20/g, "+").replace(/%3A/g, ":").replace(/%40/g, "@").replace(/%3B/g, ";")}`).join("&");
@@ -112,6 +120,7 @@ export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): st
     image ? `<meta property="og:image" content="${esc(abs(image))}"><meta name="twitter:card" content="summary_large_image">` : "",
     `<meta name="theme-color" content="${esc(site.theme.colors.bone ?? "#F3EFE6")}">`,
     site.settings.favicon ? `<link rel="icon" href="${esc(site.settings.favicon)}">` : `<link rel="icon" href="/seed/sun.svg" type="image/svg+xml">`,
+    fontPreload(site),
     fontLinks(site),
     `<style>${pageCss(site, page)}</style>`,
     `<script>document.documentElement.classList.add("js")</script>`,

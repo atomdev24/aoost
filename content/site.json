@@ -34,7 +34,14 @@
       "body": "Inter, system-ui, sans-serif",
       "mono": "'JetBrains Mono', ui-monospace, monospace"
     },
-    "fontFaces": [],
+    "fontFaces": [
+      {
+        "family": "Facile Sans",
+        "src": "/fonts/FacileSans-Regular.otf",
+        "weight": "400 700",
+        "style": "normal"
+      }
+    ],
     "googleFonts": [
       "Inter:wght@400;500;600",
       "Space Grotesk:wght@500;700"

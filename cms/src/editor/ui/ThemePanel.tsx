@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Theme, TypeStyle } from "../../schema";
 import { update, useEditor } from "../store";
+import { FontsPanel } from "./FontsPanel";
 import { NumberInput, Select, TextInput, Toggle } from "./kit";
 
 /** Tokens the built-in components rely on; these can be changed but not removed. */
@@ -76,15 +77,7 @@ export function ThemePanel() {
       <div className="ed-panel-head">
         <span className="ed-caps">Fonts</span>
       </div>
-      <div className="ed-theme-block">
-        {(["display", "body", "mono"] as const).map((slot) => (
-          <label key={slot} className="ed-field">
-            <span className="ed-field-label">{slot === "display" ? "Display (headings)" : slot === "body" ? "Body" : "Mono (code)"}</span>
-            <TextInput value={theme.fonts[slot]} onCommit={(v) => v && setTheme((t) => ({ ...t, fonts: { ...t.fonts, [slot]: v } }), `Change ${slot} font`)} />
-          </label>
-        ))}
-        <p className="ed-hint">A font stack: the first family that is loaded wins. Upload fonts or add Google Fonts in Assets.</p>
-      </div>
+      <FontsPanel />
 
       <div className="ed-panel-head">
         <span className="ed-caps">Text styles</span>
