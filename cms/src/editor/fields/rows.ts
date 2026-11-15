@@ -1,7 +1,7 @@
 import type { FrameFit, SectionLayout, Style } from "../../schema";
 
 /** A declarative description of one property row in a responsive panel. */
-export type RowKind = "length" | "text" | "number" | "select" | "color" | "toggle" | "corners" | "border" | "filter" | "background";
+export type RowKind = "aspect" | "length" | "text" | "number" | "select" | "color" | "toggle" | "corners" | "border" | "filter" | "background";
 export type RowDef<T> = {
   key: keyof T & string;
   label: string;
@@ -39,7 +39,7 @@ export const STYLE_ROWS: RowDef<Style>[] = [
   { key: "height", label: "Height", group: "Size", kind: "length", placeholder: "auto", when: notCanvas },
   { key: "minHeight", label: "Min height", group: "Size", kind: "length", placeholder: "none", when: notCanvas },
   { key: "maxWidth", label: "Max width", group: "Size", kind: "length", placeholder: "none", when: notCanvas },
-  { key: "aspectRatio", label: "Aspect ratio", group: "Size", kind: "text", placeholder: "4/3", when: notCanvas },
+  { key: "aspectRatio", label: "Aspect ratio", group: "Size", kind: "aspect", placeholder: "4/3", when: notCanvas },
   { key: "colSpan", label: "Column span", group: "Grid cell", kind: "number", min: 1, max: 12, when: (c) => c.parentKind === "grid" },
   { key: "rowSpan", label: "Row span", group: "Grid cell", kind: "number", min: 1, max: 12, when: (c) => c.parentKind === "grid" },
   { key: "alignSelf", label: "Align", group: "Grid cell", kind: "select", options: ALIGN, when: notCanvas },

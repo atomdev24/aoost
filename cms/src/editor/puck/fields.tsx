@@ -2,6 +2,7 @@ import type { CustomField } from "@puckeditor/core";
 import { resolve, setAt } from "../../responsive/resolve";
 import type { FrameFit, Node, Responsive, Section, SectionLayout, Style } from "../../schema";
 import { DEFAULT_FRAME_FIT } from "../../schema";
+import { FocalPicker } from "../fields/FocalPicker";
 import { ResponsiveEditor } from "../fields/ResponsiveEditor";
 import { FRAME_ROWS, SECTION_ROWS, STYLE_ROWS } from "../fields/rows";
 import { useEditor } from "../store";
@@ -74,11 +75,38 @@ export const styleField = (framed: boolean): CustomField<Responsive<Style>> => (
   render: ({ value, onChange }) => <StylePanel value={value} onChange={onChange} framed={framed} />,
 });
 
+/**
+ * InDesign-style frame vs content: the frame's size, ratio, corners, border
+ * and shadow live in "Layout and look"; this panel fits the content inside it.
+ */
 function FramePanel({ value, onChange }: { value: Responsive<FrameFit> | undefined; onChange: (v: Responsive<FrameFit>) => void }) {
   const bp = useEditor((s) => s.bp);
+  // The picture to aim at: the image itself, or a video's poster frame.
+  const src = usePuck((s) => (s.selectedItem?.props.src as string) || (s.selectedItem?.props.poster as string) || "");
   const v = value ?? { base: DEFAULT_FRAME_FIT };
-  const fit = (bp === "desktop" ? (v.desktop?.fit ?? v.base.fit) : v.base.fit) as FrameFit["fit"];
-  return <ResponsiveEditor value={v} onChange={onChange} rows={FRAME_ROWS} ctx={{ fit }} />;
+  const now = resolve(v, bp);
+  const preview = src && /\.(jpe?g|png|webp|avif|gif|svg)(\?|$)/i.test(src) ? src : "";
+  return (
+    <>
+      <div className="ed-seg ed-seg-fill" role="group" aria-label="Content fit">
+        {(["fill", "fit", "free"] as const).map((fit) => (
+          <button key={fit} type="button" aria-pressed={now.fit === fit} title={fit === "free" ? "Pan and zoom the content freely" : undefined} onClick={() => onChange(setAt(v, bp, { fit }))}>
+            {fit === "fill" ? "Fill" : fit === "fit" ? "Fit" : "Free"}
+          </button>
+        ))}
+      </div>
+      {preview ? <FocalPicker src={preview} x={now.focalX} y={now.focalY} onChange={(focalX, focalY) => onChange(setAt(v, bp, { focalX, focalY }))} /> : null}
+      {now.fit === "free" ? (
+        <div className="ed-row">
+          <span className="ed-label">Zoom</span>
+          <div className="ed-control">
+            <input className="ed-range" type="range" min={0.5} max={4} step={0.05} value={now.zoom} aria-label="Zoom" onChange={(e) => onChange(setAt(v, bp, { zoom: Number(e.target.value) }))} />
+          </div>
+        </div>
+      ) : null}
+      <ResponsiveEditor value={v} onChange={onChange} rows={FRAME_ROWS.filter((r) => r.key !== "fit")} ctx={{ fit: now.fit }} />
+    </>
+  );
 }
 
 export const frameField: CustomField<Responsive<FrameFit>> = {

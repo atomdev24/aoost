@@ -54,6 +54,8 @@ function Control<T>({ row, value, onChange, id }: { row: RowDef<T>; value: unkno
   switch (row.kind) {
     case "length":
       return <TextInput id={id} value={(value as string) ?? ""} placeholder={row.placeholder} validate={(v) => Length.safeParse(v).success} onCommit={(v) => onChange(v || undefined)} />;
+    case "aspect":
+      return <AspectControl id={id} value={value as string | undefined} onChange={onChange} />;
     case "text":
       return <TextInput id={id} value={(value as string) ?? ""} placeholder={row.placeholder} onCommit={(v) => onChange(v || undefined)} />;
     case "number":
@@ -75,6 +77,22 @@ function Control<T>({ row, value, onChange, id }: { row: RowDef<T>; value: unkno
   }
 }
 
+const RATIOS = ["1/1", "4/3", "3/2", "16/9", "3/4", "2/3", "9/16"];
+function AspectControl({ value, onChange, id }: { value: string | undefined; onChange: (v: unknown) => void; id: string }) {
+  const preset = value === undefined ? "" : RATIOS.includes(value.replace(/\s/g, "")) ? value.replace(/\s/g, "") : "custom";
+  return (
+    <div className="ed-inline">
+      <Select
+        id={id}
+        value={preset}
+        options={[{ value: "", label: "Free" }, ...RATIOS.map((r) => ({ value: r, label: r.replace("/", " : ") })), { value: "custom", label: "Custom" }]}
+        onChange={(v) => onChange(v === "" ? undefined : v === "custom" ? (value ?? "5/4") : v)}
+      />
+      {preset === "custom" ? <TextInput ariaLabel="Custom aspect ratio" value={value ?? ""} placeholder="5/4" validate={(v) => /^\d+(\.\d+)?\s*\/\s*\d+(\.\d+)?$/.test(v)} onCommit={(v) => onChange(v || undefined)} /> : null}
+    </div>
+  );
+}
+
 const CORNERS = ["Top left", "Top right", "Bottom right", "Bottom left"];
 function Corners({ value, onChange }: { value: Style["radius"]; onChange: (v: unknown) => void }) {
   const r = value ?? [0, 0, 0, 0];
@@ -89,7 +107,7 @@ function Corners({ value, onChange }: { value: Style["radius"]; onChange: (v: un
           min={0}
           onCommit={(n) => {
             const next = [...r] as [number, number, number, number];
-            // While all four match, editing one keeps them linked; hold a different value in any to unlink.
+            // While all four corners match, the first box sets them together; edit another box to split them.
             if (same && i === 0) next.fill(n ?? 0);
             else next[i] = n ?? 0;
             onChange(next.every((x) => x === 0) ? undefined : next);
