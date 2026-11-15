@@ -42,7 +42,7 @@ Tick items as they're done (`- [x]`) and commit after each one. If the run stops
 
 ## Phase 4: Media & embeds
 
-- [ ] R2 upload from the editor (drag and drop, plus a media library). Resizing to WebP/AVIF on delivery.
+- [x] R2 upload from the editor (drag and drop, plus a media library). Resizing to WebP/AVIF on delivery.
 - [ ] Image, Video, Audio, Spotify/YouTube/SoundCloud/Instagram/Maps embeds, Lottie, 3D `.glb`, File download.
 - [ ] Code block: sandboxed iframe (default, auto height) or inline (opt-in with a warning).
 - [ ] Font upload plus the Google Fonts picker. Facile Sans wired in if the files are there.

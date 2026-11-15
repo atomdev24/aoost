@@ -4,10 +4,12 @@ import { searchIndex } from "../render/build";
 import type { Identity } from "./auth";
 import { draftStub, readDraft, type Env } from "./env";
 import { error, html, json, readJson } from "./http";
+import { mediaApi } from "./media";
 import { publishToGitHub } from "./publish";
 
 /** /api/editor/*: every route here is already authenticated. */
 export async function editorApi(request: Request, env: Env, url: URL, who: Identity): Promise<Response> {
+  if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
   const draft = draftStub(env);
   const route = `${request.method} ${url.pathname.replace(/^\/api\/editor/, "")}`;
 

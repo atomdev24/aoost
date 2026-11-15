@@ -1197,3 +1197,112 @@ body {
   font-size: 13px;
   text-align: right;
 }
+
+/* ---- media library ---- */
+.ed-library {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 12px 16px;
+  border-radius: 10px;
+}
+.ed-modal .ed-library {
+  padding: 0;
+}
+.ed-library.is-over .ed-drop {
+  border-color: var(--ed-accent);
+  background: rgba(226, 104, 58, 0.08);
+}
+.ed-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 12px;
+  border: 1.5px dashed var(--ed-line-strong);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ed-text);
+  font: 500 13px Inter, system-ui, sans-serif;
+  text-align: center;
+  cursor: pointer;
+}
+.ed-drop small {
+  color: var(--ed-muted);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.ed-assets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
+}
+.ed-library.is-compact .ed-assets {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.ed-assets li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.ed-asset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: 8px;
+  background: #0f0f11;
+  overflow: hidden;
+  cursor: pointer;
+}
+.ed-asset:disabled {
+  cursor: default;
+}
+.ed-asset:not(:disabled):hover {
+  border-color: var(--ed-accent);
+}
+.ed-asset img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #e7e0d2; /* sand, so dark line art stays visible */
+}
+.ed-asset-glyph {
+  font: 600 22px Inter, system-ui, sans-serif;
+  color: var(--ed-muted);
+}
+.ed-asset-name {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ed-asset-meta {
+  font-size: 11px;
+  color: var(--ed-muted);
+}
+.ed-asset-tools {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+  border-radius: 7px;
+  background: rgba(20, 20, 22, 0.85);
+  opacity: 0;
+}
+.ed-assets li:hover .ed-asset-tools,
+.ed-assets li:focus-within .ed-asset-tools {
+  opacity: 1;
+}
+.ed-media.is-busy {
+  opacity: 0.6;
+}

@@ -10,6 +10,8 @@ import { markFromPuck } from "./puck/PuckSync";
 import { currentPage, getState, redo, undo, updatePage, useEditor } from "./store";
 import { GlobalPanel } from "./ui/GlobalPanel";
 import { LayersPanel } from "./ui/LayersPanel";
+import { MediaLibrary } from "./ui/MediaLibrary";
+import { MediaPickerHost } from "./ui/MediaPicker";
 import { LibraryPanel } from "./ui/LibraryPanel";
 import { OverlayPanel } from "./ui/OverlayPanel";
 import { PageSettings } from "./ui/PageSettings";
@@ -31,6 +33,14 @@ const PagesIcon = () => (
 const LayersIcon = () => (
   <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
     <path d="M8 2l6 3-6 3-6-3zM2 8l6 3 6-3M2 11l6 3 6-3" />
+  </svg>
+);
+
+const AssetsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
+    <rect x="2" y="2.500" width="12" height="11" rx="1.500" />
+    <circle cx="5.500" cy="6" r="1.200" />
+    <path d="M2.500 12l3.500-3.500 2.500 2.500 2-2 3 3" />
   </svg>
 );
 
@@ -109,6 +119,19 @@ export function Editor() {
       { name: "pages", label: "Pages", icon: <PagesIcon />, render: () => <PagesPanel /> },
       blocksPlugin({ label: "Add" }),
       { name: "outline", label: "Layers", icon: <LayersIcon />, render: () => <LayersPanel /> },
+      {
+        name: "assets",
+        label: "Assets",
+        icon: <AssetsIcon />,
+        render: () => (
+          <div className="ed-panel ed-theme">
+            <div className="ed-panel-head">
+              <span className="ed-caps">Media library</span>
+            </div>
+            <MediaLibrary compact />
+          </div>
+        ),
+      },
       { name: "library", label: "Library", icon: <LibraryIcon />, render: () => <LibraryPanel /> },
       { name: "theme", label: "Theme", icon: <ThemeIcon />, render: () => <ThemePanel /> },
     ],
@@ -116,6 +139,8 @@ export function Editor() {
   );
 
   return (
+    <>
+    <MediaPickerHost />
     <Puck
       key={pageId}
       config={puckConfig}
@@ -149,5 +174,6 @@ export function Editor() {
         updatePage(page.id, () => next, step.label, { merge: step.merge });
       }}
     />
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { editorApi, preview } from "./api";
 import type { Env } from "./env";
 import { error, html, json } from "./http";
 import { loginPage } from "./login-page";
+import { serveMedia } from "./media";
 
 export { DraftStore } from "./draft-store";
 
@@ -25,6 +26,8 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
   if (path === "/api/login" && request.method === "POST") return login(request, env);
   if (path === "/api/logout" && request.method === "POST") return logout(request);
   if (path === "/_published.json") return new Response("Not found", { status: 404 });
+
+  if (path.startsWith("/media/")) return serveMedia(request, env, url);
 
   const who = await authenticate(request, env);
 
@@ -52,6 +55,6 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
     return new Response(res.body, { status: res.status, headers });
   }
 
-  if (path.startsWith("/api/") || path.startsWith("/mcp") || path.startsWith("/media/")) return error(404, "Not built yet.");
+  if (path.startsWith("/api/") || path.startsWith("/mcp")) return error(404, "Not built yet.");
   return env.ASSETS.fetch(request);
 }
