@@ -22,6 +22,8 @@ export function TopBar() {
   const canUndo = useEditor((s) => s.past.length > 0);
   const canRedo = useEditor((s) => s.future.length > 0);
   const lastLabel = useEditor((s) => s.lastLabel);
+  const live = useEditor((s) => s.live);
+  const remote = lastLabel && /^(Claude|Another window): /.test(lastLabel) ? lastLabel : null;
   const page = useEditor(currentPage);
   const returnPageId = useEditor((s) => s.returnPageId);
   const editingMenu = !!megaItemId(page.id);
@@ -85,8 +87,9 @@ export function TopBar() {
       </div>
       <div className="ed-top-actions">
         <span className={`ed-status${save === "error" ? " ed-status-error" : ""}`} role="status" title={lastLabel ?? undefined}>
-          {notice ?? status}
+          {notice ?? remote ?? status}
         </span>
+        <span className={`ed-live${live ? " is-on" : ""}`} title={live ? "Live: changes from Claude appear here as they happen" : "Reconnecting to live sync…"} aria-label={live ? "Live sync connected" : "Live sync reconnecting"} role="img" />
         <button type="button" className="ed-icon" onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (⌘Z)">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M5 3L2 6l3 3M2 6h7.5a4 4 0 0 1 0 8H7" />

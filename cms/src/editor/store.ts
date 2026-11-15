@@ -32,6 +32,8 @@ export type EditorState = {
   globalId: string | null;
   /** Node ids to flash (changes made by Claude). */
   highlight: string[];
+  /** Connected to the draft store for live sync. */
+  live: boolean;
   /** Label of the last history step, for the status line. */
   lastLabel: string | null;
   clientId: string;
@@ -47,6 +49,10 @@ let synced: Site;
 const listeners = new Set<() => void>();
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let saving = false;
+let onSaved: ((version: number) => void) | null = null;
+export const setOnSaved = (fn: (version: number) => void) => {
+  onSaved = fn;
+};
 let lastMerge: { key: string; at: number } | null = null;
 
 const set = (patch: Partial<EditorState>) => {
@@ -72,6 +78,7 @@ export function initStore(site: Site, unpublished: boolean) {
     overlayId: null,
     globalId: null,
     highlight: [],
+    live: false,
     lastLabel: null,
     clientId: crypto.randomUUID(),
   };
@@ -218,6 +225,10 @@ export const setSelection = (ids: string[]) => {
 };
 export const setOverlay = (overlayId: string | null) => overlayId !== state.overlayId && set({ overlayId, globalId: null });
 export const setGlobalEdit = (globalId: string | null) => globalId !== state.globalId && set({ globalId, overlayId: null });
+export const setLive = (live: boolean) => live !== state.live && set({ live });
+/** The draft store names each connection; saves carry that name so our own edits aren't echoed back. */
+export const setClientId = (clientId: string) => set({ clientId });
+export const hasUnsavedChanges = () => diffSite(synced, state.site).length > 0;
 export const setUnpublished = (unpublished: boolean) => set({ unpublished });
 
 // ---------------------------------------------------------- autosave
@@ -243,7 +254,8 @@ export async function flush(): Promise<boolean> {
   saving = true;
   set({ save: "saving", saveError: null });
   try {
-    await api.ops(ops, state.clientId, state.lastLabel ?? undefined);
+    const { version } = await api.ops(ops, state.clientId, state.lastLabel ?? undefined);
+    onSaved?.(version);
     synced = target;
     set({ save: state.site === target ? "saved" : "saving" });
     if (state.site !== target) scheduleSave();

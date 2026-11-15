@@ -1306,3 +1306,16 @@ body {
 .ed-media.is-busy {
   opacity: 0.6;
 }
+
+/* ---- live sync ---- */
+.ed-live {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-radius: 999px;
+  background: var(--ed-line-strong);
+}
+.ed-live.is-on {
+  background: #6fcf97;
+}

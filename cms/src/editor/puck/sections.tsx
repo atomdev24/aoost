@@ -49,6 +49,7 @@ function EditorSection({ kind, ...props }: SectionProps & { kind: Section["kind"
   const { id, items: Items, puck } = props;
   const bp = useEditor((s) => s.bp);
   const overlays = useEditor((s) => currentPage(s).overlays);
+  const flash = useEditor((s) => s.highlight.includes(id));
   const section = itemToSection({ type: SECTION_TYPES[kind], props: { ...props, items: [] } } as unknown as PuckItem);
   const layout = resolve(section.layout, bp);
   // Column guides for grid sections: the drop zones Alex splits the section into.
@@ -57,7 +58,7 @@ function EditorSection({ kind, ...props }: SectionProps & { kind: Section["kind"
       ? ({ "--ed-gap": `${layout.gap}px`, "--ed-col": `calc((100% - ${(layout.columns - 1) * layout.gap}px) / ${layout.columns})` } as React.CSSProperties)
       : undefined;
   return (
-    <section ref={puck.dragRef} id={id} className={`s s-${id}`} data-kind={kind} data-section-id={id}>
+    <section ref={puck.dragRef} id={id} className={`s s-${id}${flash ? " ed-flash" : ""}`} data-kind={kind} data-section-id={id}>
       <SectionBackground section={section} />
       <Items className="si" style={guides} minEmptyHeight={kind === "canvas" ? 0 : 120} />
       {overlays

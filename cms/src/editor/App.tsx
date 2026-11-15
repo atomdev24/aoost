@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import "../components/registry";
 import { api } from "./api";
 import { Editor } from "./Editor";
-import { initStore } from "./store";
+import { noteVersion, startSync } from "./socket";
+import { initStore, setOnSaved } from "./store";
 
 export function App() {
   const [ready, setReady] = useState(false);
@@ -12,6 +13,8 @@ export function App() {
     Promise.all([api.site(), api.state()])
       .then(([{ site }, state]) => {
         initStore(site, state.dirty);
+        setOnSaved(noteVersion);
+        startSync();
         setReady(true);
       })
       .catch((e: Error) => setError(e.message));
