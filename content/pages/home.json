@@ -279,6 +279,214 @@
       ]
     },
     {
+      "id": "home-playlistband",
+      "kind": "flow",
+      "name": "Playlists",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "home-playlistband-block",
+          "type": "AoostPlaylistBand",
+          "content": {
+            "mat": "dark",
+            "heading": "playlists",
+            "crumbBold": "aoost",
+            "crumb": " / Page 1 / playlist",
+            "hint": "Tap play on the player below. Tap a disc to switch playlists.",
+            "playlists": [
+              {
+                "title": "Rock",
+                "spotify": "2FeVxQ6ZPLOAuoejGJj9Fb",
+                "cover": "/art/cover-disc1.jpg"
+              },
+              {
+                "title": "Alt",
+                "spotify": "3PbXJWUZ4RooUU0aSSdDi0",
+                "cover": "/art/cover-disc2.jpg"
+              },
+              {
+                "title": "H | T | R",
+                "spotify": "6KYCNr0X6Zt189pYxHMx1j",
+                "cover": "/art/cover-disc3.jpg"
+              }
+            ]
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-drawingwall",
+      "kind": "flow",
+      "name": "The wall",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "home-drawingwall-block",
+          "type": "AoostDrawingWall",
+          "content": {
+            "mat": "dark",
+            "show": false,
+            "heading": "the wall",
+            "paint": [
+              {
+                "name": "Black",
+                "color": "#141516"
+              },
+              {
+                "name": "White",
+                "color": "#FFFFFF"
+              },
+              {
+                "name": "Blue",
+                "color": "#2236F2"
+              },
+              {
+                "name": "Pink",
+                "color": "#D9559E"
+              },
+              {
+                "name": "Lime",
+                "color": "#86E06F"
+              },
+              {
+                "name": "Orange",
+                "color": "#F1A23B"
+              }
+            ],
+            "noteColors": [
+              {
+                "name": "Yellow",
+                "color": "#F2E36B"
+              },
+              {
+                "name": "Pink",
+                "color": "#D9559E"
+              },
+              {
+                "name": "Lime",
+                "color": "#86E06F"
+              },
+              {
+                "name": "Blue",
+                "color": "#7FA9E6"
+              },
+              {
+                "name": "White",
+                "color": "#FFFFFF"
+              }
+            ],
+            "backgrounds": [
+              {
+                "name": "White",
+                "color": "#FFFFFF"
+              },
+              {
+                "name": "Paper",
+                "color": "#EFF0EC"
+              },
+              {
+                "name": "Black",
+                "color": "#141516"
+              },
+              {
+                "name": "Neon pink",
+                "color": "#FF2D95"
+              },
+              {
+                "name": "Lime",
+                "color": "#86E06F"
+              },
+              {
+                "name": "Sky",
+                "color": "#7FA9E6"
+              },
+              {
+                "name": "Orange",
+                "color": "#F1A23B"
+              },
+              {
+                "name": "Yellow",
+                "color": "#F2E36B"
+              }
+            ]
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-rodeo",
+      "kind": "flow",
+      "name": "Rodeo",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "home-rodeo-block",
+          "type": "AoostRodeo",
+          "content": {
+            "mat": "dark",
+            "heading": "rodeo",
+            "copy": "",
+            "showLeaderboard": true,
+            "leaderboardTitle": "Leaderboard"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-footer",
+      "kind": "flow",
+      "name": "Footer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "home-footer-block",
+          "type": "AoostFooter",
+          "content": {
+            "mat": "dark",
+            "text": "aoost · 2026",
+            "showScorpion": true,
+            "showSocials": false
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
       "id": "home-viewer",
       "kind": "flow",
       "name": "Artwork viewer",

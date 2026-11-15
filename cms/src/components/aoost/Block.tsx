@@ -5,9 +5,9 @@ import type { Mat } from "./kit";
  * The shell every aoost block renders into: a scoping hook for the runtime (`data-ao`), the mat it
  * sits on, and the block's content as JSON for the ported scripts to read.
  */
-export function Block({ name, mat, data, hidden, children }: { name: string; mat: Mat; data?: unknown; hidden?: boolean; children: ReactNode }) {
+export function Block({ name, mat, data, off, children }: { name: string; mat: Mat; data?: unknown; /** switched off: takes no room on the page */ off?: boolean; children: ReactNode }) {
   return (
-    <div className="ao-b" data-ao={name} data-mat={mat} hidden={hidden || undefined}>
+    <div className="ao-b" data-ao={name} data-mat={mat} data-off={off ? "" : undefined}>
       {children}
       {data === undefined ? null : <script type="application/json" data-ao-data="" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }} />}
     </div>

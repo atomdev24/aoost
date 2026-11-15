@@ -23,6 +23,7 @@ main.ao.wrap{overflow:visible}
 .ao svg,.ao video,.ao iframe,.ao canvas{max-width:none}
 .ao .ao-b{position:relative}
 .ao .ao-b>script{display:none}
+.ao .mat>.s:has(>.si>.n>.ao-b[data-off]),main.ao.wrap>.s:has(>.si>.n>.ao-b[data-off]){display:none}
 .ao.ao-overlays{position:static;font-family:var(--body)}
 .ao .ao-b[data-mat="dark"]{--ink:#EDEDE8;--ink-2:#9A9C98;--rule:#3A3D40;--white:#232527;--paper:#18191A;--paper-2:#202224;color:#EDEDE8}
 `;
