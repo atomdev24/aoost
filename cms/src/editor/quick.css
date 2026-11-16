@@ -24,7 +24,7 @@
   line-height: 1.2;
 }
 .qe-brand strong {
-  font: 700 17px "Space Grotesk", Inter, sans-serif;
+  font: 600 15px var(--ed-font);
 }
 .qe-brand span {
   font-size: 12px;
@@ -60,7 +60,7 @@
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--ed-muted);
-  font: 500 15px Inter, system-ui, sans-serif;
+  font: 500 15px var(--ed-font);
   cursor: pointer;
 }
 .qe-tabs button[aria-selected="true"] {

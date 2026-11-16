@@ -6,7 +6,7 @@ import { activateBreakpoint } from "./bridge";
 import { LiveFrame } from "./LiveFrame";
 import { countMobileOverrides } from "./overrides";
 import { frameRects, getBoard, openPage, panBy, setSize, useBoard } from "./store";
-import { isVisible, slotRect } from "./viewport";
+import { FRAME_GAP, isVisible, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
 import { ZoomBar } from "./ZoomBar";
 import "./board.css";
@@ -112,12 +112,13 @@ export function Board() {
           key={f.bp}
           type="button"
           className={`bd-label${f.bp === bp ? " is-active" : ""}`}
-          style={{ ...screen(f.x, f.y), maxWidth: Math.max(120, f.w * view.zoom) }}
+          style={{ ...screen(f.x, f.y), maxWidth: Math.max(180, (f.w + FRAME_GAP * 0.9) * view.zoom) }}
           onClick={() => activateBreakpoint(f.bp)}
           aria-pressed={f.bp === bp}
           aria-label={`Edit the ${NAME[f.bp]} frame`}
         >
           <strong>{NAME[f.bp]}</strong> {f.w}
+          {f.bp === "desktop" ? " · base for wide screens" : null}
           {f.bp === "mobile" && overrides ? <span className="bd-badge">{overrides === 1 ? "1 override" : `${overrides} overrides`}</span> : null}
         </button>
       ))}

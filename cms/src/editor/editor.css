@@ -171,7 +171,7 @@ body {
 .ed-btn-accent {
   border-color: var(--ed-accent);
   background: var(--ed-accent);
-  color: var(--ed-ink);
+  color: #fff;
   font-weight: 600;
 }
 .ed-btn-accent:hover:not(:disabled) {
@@ -185,7 +185,7 @@ body {
 .ed-btn-danger {
   border-color: var(--ed-accent);
   background: var(--ed-accent);
-  color: var(--ed-ink);
+  color: #fff;
 }
 .ed-btn:disabled,
 .ed-icon:disabled {

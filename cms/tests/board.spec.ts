@@ -1,5 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { draftSite, editorPassword, mcpCall, onBoard, resetDraft, signIn } from "./helpers";
+
+const shots = resolve(dirname(fileURLToPath(import.meta.url)), "../../docs/screenshots/editor-redesign");
 
 /**
  * The side-by-side breakpoint board: Desktop and Mobile frames of one draft,
@@ -129,5 +133,32 @@ test.describe("breakpoint board", () => {
     const slot = page.locator(".bd-slot");
     await expect(slot).toHaveAttribute("aria-disabled", "true");
     await expect(slot).toHaveAttribute("title", "Coming soon: tablet and custom widths");
+  });
+});
+
+test.describe("editor screenshots for the docs", () => {
+  test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("Home open at 1440×900: fitted, and with a block selected on Mobile", async ({ page, request }) => {
+    await resetDraft(request, password!);
+    await signIn(page, password!);
+    // Never write to the live Supabase project from a test.
+    await page.context().route(/supabase\.co|cdn\.jsdelivr\.net\/npm\/@supabase/, (route) => route.abort());
+    await page.goto("/admin/");
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await expect(editable(page).locator('.ao-b[data-ao="projects"] h2')).toBeVisible();
+    await expect(live(page, "mobile").locator('.ao-b[data-ao="projects"]')).toBeVisible();
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `${shots}/editor-home-1440.png` });
+
+    const b = await onBoard(page, live(page, "mobile").locator('.ao-b[data-ao="projects"] h2'));
+    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    await expect(bpSwitch(page, "Mobile")).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "Fit all" }).click();
+    await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${shots}/editor-home-mobile-selected-1440.png` });
+    await resetDraft(request, password!);
   });
 });

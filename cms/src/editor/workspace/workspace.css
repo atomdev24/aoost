@@ -529,6 +529,10 @@
   min-height: 30px;
   gap: 8px;
 }
+.ed-row.ed-row-stack {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
 .ed-label,
 .ed-field-label {
   color: var(--ed-sub);

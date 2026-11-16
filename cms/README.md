@@ -34,7 +34,7 @@ docs/                    connect-claude.md, auth.md, screenshots/
 
 **Editing flow.** The editor works on a *draft* held in a Durable Object. Every change (yours, or Claude's through `/mcp`) is validated against the schema, saved, and pushed to open editors over a WebSocket. **Publish** commits the draft's `content/` files to GitHub; the `Deploy CMS preview` Action then rebuilds the static site and deploys the Worker. Version history is git history.
 
-**Responsive rule.** The base is mobile. Desktop (900px and up) stores only the values that differ. In the editor a dot marks a property that differs from mobile; click it to reset.
+**Responsive rule.** The base is mobile. Desktop (900px and up) stores only the values that differ. The editor presents it the other way round, as a designer thinks of it: Desktop is the reference, and an edit made while Mobile is active changes Mobile only (it gets a blue dot; the dot or "Reset to desktop" brings back the desktop value). The stored format is the same either way.
 
 ## Local development
 
@@ -91,9 +91,10 @@ Lighthouse, mobile, on the deployed preview (15 Nov 2026): `/sample` performance
 
 ## Using the editor
 
-- **Top bar:** Desktop/Mobile switch (edits apply to the active breakpoint), save status, undo/redo, Preview (the draft, rendered like the live site), Publish.
-- **Left rail:** Pages, Add (drag in sections and components), Layers (select, rename, lock, hide per breakpoint, reorder, overlays), Assets (media library: drop files to upload), Library (global components and templates), Theme (colours, fonts, text styles).
-- **Right panel:** properties of what is selected. With nothing selected: page settings, navigation items and nav behaviour.
+- **Top bar:** site mark, page switcher (`Home ▾`) and save state; the tools (Select V, Frame F: add a free-layout section, Section, Text T, Image, Ask Claude); Claude's status (it says "Claude not connected" until the connector has made an authenticated call in the last 15 minutes), Preview and Publish. Undo/redo sit next to the save state.
+- **Board (the middle):** the page once per breakpoint, side by side: Desktop 1440 and Mobile 390. One draft, many views: an edit in any frame shows in every frame. Click a block in either frame to select it there; it is outlined in the other frame too, and that frame's breakpoint becomes the one you edit. Scroll to pan, pinch or ⌘-scroll to zoom, Space-drag to pan; ⌘+ / ⌘− / ⌘0 zoom, ⇧1 or "Fit all" shows everything. The view is remembered per page. The dashed "Add a breakpoint" slot is a placeholder: tablet and custom widths are not in the data model yet.
+- **Left panel:** Pages, Layers (select, rename, lock, hide per breakpoint, reorder, overlays, "+ Add section") and Assets (Blocks to drag onto the frame you're editing, Media, Saved global components and templates, Theme).
+- **Inspector (right):** the selected block's name and type, the Desktop/Mobile switch, then Layout, Frame, Content (shared by every breakpoint), Motion and Visible on. With nothing selected: page settings, navigation items and nav behaviour.
 - **Sections:** flow (stacked), grid (split into columns; cells can span), free canvas (drag anywhere; snapping and guides; Shift locks an axis or keeps the ratio when resizing; Alt turns snapping off; arrows nudge; Shift-click selects several, then align or distribute).
 - **Frames:** media sits in a frame. The frame has size, aspect ratio, corners, border, shadow; the content has Fill/Fit/Free, a draggable focal point, zoom and pan.
 - **On a phone** the editor becomes quick edit: text, image swaps, diary entries, playlists, publish.
