@@ -102,7 +102,7 @@ test.describe("navigation with all ten item types (draft preview)", () => {
       ...site.nav,
       items: [
         item("t-page", "page", { target: { kind: "page", pageId: "work" } }),
-        item("t-section", "section", { label: "Lately", target: { kind: "section", pageId: "home", sectionId: "home-latest" } }),
+        item("t-section", "section", { label: "Lately", target: { kind: "section", pageId: "work", sectionId: "work-gallery" } }),
         item("t-ext", "external", { label: "Shop", target: { kind: "url", url: "https://example.com" }, newTab: true, icon: { name: "arrow", position: "right" } }),
         item("t-dd", "dropdown", { label: "More", source: "manual", children: [item("t-dd-l", "label", { label: "Elsewhere" }), item("t-dd-1", "page", { target: { kind: "page", pageId: "about" } }), item("t-dd-2", "page", { target: { kind: "page", pageId: "rodeo" } })] }),
         item("t-mega", "mega", {
@@ -134,7 +134,7 @@ test.describe("navigation with all ten item types (draft preview)", () => {
 
     // desktop
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/preview/");
+    await page.goto("/preview/about"); // the home page shows no nav
     await expect(page.locator(".pill-links .nav-badge")).toHaveText("New");
     await expect(page.locator(".pill-cta")).toHaveAttribute("href", "mailto:howdy@example.com");
     await expect(page.locator(".pill-links iframe.nav-embed")).toHaveAttribute("sandbox", "allow-scripts");
@@ -156,7 +156,7 @@ test.describe("navigation with all ten item types (draft preview)", () => {
 
     // mobile: dropdowns become accordions, the mega menu stacks
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/preview/");
+    await page.goto("/preview/work"); // the home page shows no nav; on About the "More" accordion is already open
     await page.locator(".pill-menu").click();
     await page.getByRole("button", { name: "More submenu" }).click();
     await expect(page.locator("#nav-sheet .sheet-sub a", { hasText: "Rodeo" })).toBeVisible();

@@ -55,7 +55,7 @@ npm run dev          # builds, then serves everything at http://localhost:8787
 
 ```sh
 npm test             # unit tests (vitest): schema, responsive resolution, slugs/redirects, save, publish, components, MCP tools
-npm run test:e2e     # browser tests (Playwright): site, nav, editor, live sync, quick edit; rewrites docs/screenshots
+npm run test:e2e     # browser tests (Playwright): site, homepage, nav, editor, live sync, quick edit; rewrites docs/screenshots
 npm run typecheck
 npm run build        # typecheck + editor + static site (what CI runs)
 ```
@@ -154,6 +154,16 @@ Each component lives in its own folder under `cms/src/components/`. Say you want
 6. Check it at 390px, then run `npm test` and `npm run build`.
 
 If the component needs JavaScript on the public site, add a small module under `src/runtime/` and call it from `src/runtime/index.ts`; load anything heavy on demand (see `runtime/lazy.ts`).
+
+## The homepage (aoost blocks)
+
+The home page is the original `index.html`, rebuilt from the blocks in `src/components/aoost/` (see `HOMEPAGE.md` and the "Homepage port" section of `DECISIONS.md`).
+
+- `kit.ts` holds what the blocks share: the original CSS scoped under `.ao`, the fonts, and the script `/assets/aoost.js`.
+- `*.styles.ts` and `kit.*.styles.ts` are generated from `index.html` by `python3 scripts/port-aoost-css.py`. Don't edit them by hand.
+- `runtime/*.js` is the original JavaScript, one file per section. Each block passes its fields to the script as JSON.
+- To compare with the original: `node scripts/compare-home.mjs` (captures both at 390 and 1440 into `docs/screenshots/homepage-compare/`), then `node scripts/diff-home.mjs` (counts differing pixels and writes `diff-*.png`).
+- Local servers and the draft preview never write to Supabase (visits, presence, scores); the deployed site does.
 
 ## Other things you might change
 

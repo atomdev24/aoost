@@ -12,7 +12,7 @@ test.describe("floating pill nav, desktop", () => {
   test.use({ viewport: desktop });
 
   test("floats 16px from the top, centred, dark capsule", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about"); // the home page is the original aoost page, which has no nav
     const box = (await page.locator(".pill").boundingBox())!;
     expect(Math.round(box.y)).toBe(16);
     expect(Math.abs(box.x + box.width / 2 - 720)).toBeLessThan(1);
@@ -20,7 +20,7 @@ test.describe("floating pill nav, desktop", () => {
   });
 
   test("hides past 140px on scroll down, returns on any scroll up, with hysteresis", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/sample"); // a tall page with the nav (the home page is the original aoost page, which has none)
     await scrollTo(page, 100);
     expect(await isHidden(page)).toBe(false); // not yet past 140px
     await scrollTo(page, 400);
@@ -43,12 +43,12 @@ test.describe("floating pill nav, desktop", () => {
   });
 
   test("links are at least 44px tall and press scales", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about"); // the home page is the original aoost page, which has no nav
     for (const link of await page.locator(".pill-links .pill-link").all()) expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   });
 
   test("dropdown opens on hover after a short delay and closes on Escape", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about"); // the home page is the original aoost page, which has no nav
     const menu = page.locator(".has-menu .menu");
     await expect(menu).toBeHidden();
     await page.locator(".has-menu").hover();
@@ -59,7 +59,7 @@ test.describe("floating pill nav, desktop", () => {
   });
 
   test("dropdown works from the keyboard (menu-button pattern)", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about"); // the home page is the original aoost page, which has no nav
     const caret = page.getByRole("button", { name: "Work submenu" });
     await caret.focus();
     await expect(caret).toHaveAttribute("aria-expanded", "false");
@@ -76,7 +76,7 @@ test.describe("floating pill nav, desktop", () => {
   });
 
   test("keyboard focus brings a hidden nav back", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/sample"); // a tall page with the nav (the home page is the original aoost page, which has none)
     await scrollTo(page, 500);
     expect(await isHidden(page)).toBe(true);
     await page.locator(".pill .pill-logo").focus();
@@ -88,7 +88,7 @@ test.describe("floating pill nav, mobile", () => {
   test.use({ viewport: phone });
 
   test("shows the logo and a Menu button only", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about"); // the home page is the original aoost page, which has no nav
     await expect(page.locator(".pill .pill-logo")).toBeVisible();
     await expect(page.locator(".pill-menu")).toBeVisible();
     await expect(page.locator(".pill-links")).toBeHidden();
@@ -96,7 +96,7 @@ test.describe("floating pill nav, mobile", () => {
   });
 
   test("opens a full-screen ink menu with big links, an accordion, and socials at the bottom", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about"); // the home page is the original aoost page, which has no nav
     const opener = page.locator(".pill-menu");
     await opener.click();
     const sheet = page.locator("#nav-sheet");
@@ -121,14 +121,14 @@ test.describe("floating pill nav, mobile", () => {
   });
 
   test("staggers the links by 60ms", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about"); // the home page is the original aoost page, which has no nav
     await page.locator(".pill-menu").click();
     const delays = await page.locator(".sheet-links > *").evaluateAll((els) => els.map((el) => getComputedStyle(el).animationDelay));
     expect(delays.slice(0, 3)).toEqual(["0s", "0.06s", "0.12s"]);
   });
 
   test("a menu link navigates", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about"); // the home page is the original aoost page, which has no nav
     await page.locator(".pill-menu").click();
     await page.locator("#nav-sheet a.sheet-link", { hasText: "Playlists" }).click();
     await expect(page).toHaveURL(/\/playlists$/);
@@ -147,7 +147,7 @@ test.describe("reduced motion", () => {
   test.use({ viewport: desktop, reducedMotion: "reduce" });
 
   test("the nav stays put and nothing animates", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about"); // the home page is the original aoost page, which has no nav
     await scrollTo(page, 600);
     expect(await page.locator(".nav").evaluate((n) => getComputedStyle(n).transform)).toBe("none");
     expect(await page.locator(".nav").evaluate((n) => getComputedStyle(n).transitionDuration)).toBe("0s");

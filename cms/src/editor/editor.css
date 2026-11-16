@@ -1319,3 +1319,8 @@ body {
 .ed-live.is-on {
   background: #6fcf97;
 }
+
+/* Right panel header: a long component name wraps under its breadcrumb instead of running into it. */
+[class*="SidebarSection-breadcrumbs"]{flex-wrap:wrap;gap:2px 10px}
+[class*="SidebarSection-breadcrumbs"] [class*="Breadcrumbs_"]{flex-shrink:0}
+[class*="Breadcrumbs-breadcrumbLabel"]{white-space:nowrap}

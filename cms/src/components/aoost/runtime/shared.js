@@ -26,7 +26,9 @@ export const C = { blue: tok('blue') || '#2236F2', ink: '#141516', paper: '#FBFB
 export const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 export const IN_CLAUDE = typeof window.claude === 'object' && window.claude !== null; // false on your own host
 /** The draft preview inside the editor: look and behave the same, but never write to Supabase. */
-export const DRAFT_PREVIEW = document.documentElement.hasAttribute('data-preview');
+/* The editor's draft preview and a local dev server never write to the live Supabase project
+   (visitor count, presence, scores); they only read from it. */
+export const DRAFT_PREVIEW = document.documentElement.hasAttribute('data-preview') || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 
 export function rng(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return((s>>>0)%1e9)/1e9;};}
 export function noise2(seed){const r=rng(seed),p=Array.from({length:256},r),h=(x,y)=>p[(x*73856093^y*19349663)&255],sm=t=>t*t*(3-2*t);

@@ -8,7 +8,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const password = editorPassword();
 const shots = resolve(__dirname, "../../docs/screenshots");
 const canvas = (page: Page) => page.frameLocator("#preview-frame");
-const headline = async (request: Parameters<typeof draftSite>[0]) => (await draftSite(request, password!)).pages[0].sections[0].children[1];
+// The editor tests work on the sample page: it has plain text and a free canvas. (The home page is made of the aoost blocks; see home-editor.spec.ts.)
+const samplePage = async (request: Parameters<typeof draftSite>[0]) => (await draftSite(request, password!)).pages.find((p: { id: string }) => p.id === "sample");
+const headline = async (request: Parameters<typeof draftSite>[0]) => (await samplePage(request)).sections[0].children[1];
 
 test.describe("editor", () => {
   test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
@@ -17,8 +19,8 @@ test.describe("editor", () => {
   test.beforeEach(async ({ page, request }) => {
     await resetDraft(request, password!);
     await signIn(page, password!);
-    await page.goto("/admin/");
-    await expect(canvas(page).locator(".n-home-title")).toBeVisible();
+    await page.goto("/admin/?page=sample");
+    await expect(canvas(page).locator(".n-sample-title")).toBeVisible();
   });
   test.afterAll(async ({ request }) => {
     await resetDraft(request, password!);
@@ -34,20 +36,20 @@ test.describe("editor", () => {
   });
 
   test("edits text, autosaves the draft, and undoes", async ({ page, request }) => {
-    const box = (await canvas(page).locator(".n-home-title").boundingBox())!;
+    const box = (await canvas(page).locator(".n-sample-title").boundingBox())!;
     await page.mouse.click(box.x + 20, box.y + 20);
     await page.locator("textarea:visible").first().fill("Edited in the test.");
-    await expect(canvas(page).locator(".n-home-title")).toHaveText("Edited in the test.");
+    await expect(canvas(page).locator(".n-sample-title")).toHaveText("Edited in the test.");
     await expect.poll(async () => (await headline(request)).content.text).toBe("Edited in the test.");
     await expect(page.locator(".ed-status")).toHaveText("Unpublished changes");
     await page.screenshot({ path: `${shots}/editor-1440.png` });
     await page.getByRole("button", { name: "Undo" }).click();
-    await expect(canvas(page).locator(".n-home-title")).toHaveText("A visual diary, for people in the know.");
-    await expect.poll(async () => (await headline(request)).content.text).toBe("A visual diary, for people in the know.");
+    await expect(canvas(page).locator(".n-sample-title")).toHaveText("Dust and neon.");
+    await expect.poll(async () => (await headline(request)).content.text).toBe("Dust and neon.");
   });
 
   test("desktop edits store overrides only; the dot resets to mobile", async ({ page, request }) => {
-    const box = (await canvas(page).locator(".n-home-title").boundingBox())!;
+    const box = (await canvas(page).locator(".n-sample-title").boundingBox())!;
     await page.mouse.click(box.x + 20, box.y + 20);
     await expect(page.locator(".ed-bp-note:visible").first()).toContainText("Desktop overrides");
     const width = page.locator(".ed-row", { hasText: /^Width/ }).locator("input:visible").first();
@@ -61,7 +63,7 @@ test.describe("editor", () => {
   test("the Mobile switch narrows the preview to 390px and edits the base", async ({ page }) => {
     await page.getByRole("button", { name: "Mobile" }).click();
     await expect.poll(() => canvas(page).locator("html").evaluate((el) => el.ownerDocument.defaultView!.innerWidth)).toBe(390);
-    const box = (await canvas(page).locator(".n-home-title").boundingBox())!;
+    const box = (await canvas(page).locator(".n-sample-title").boundingBox())!;
     await page.mouse.click(box.x + 20, box.y + 20);
     await expect(page.locator(".ed-bp-note:visible").first()).toContainText("Mobile (base)");
   });
@@ -69,39 +71,39 @@ test.describe("editor", () => {
   test("drags a canvas layer with snapping; the move is stored per breakpoint", async ({ page, request }) => {
     await page.getByRole("button", { name: "Mobile" }).click();
     await page.waitForTimeout(800);
-    const layer = canvas(page).locator(".n-home-photo");
+    const layer = canvas(page).locator(".n-sample-photo");
     await layer.scrollIntoViewIfNeeded();
     const b = (await layer.boundingBox())!;
     const [sx, sy] = [b.x + b.width / 2, b.y + b.height / 2];
     await page.mouse.move(sx, sy);
     await page.mouse.down();
-    for (let i = 1; i <= 10; i++) await page.mouse.move(sx - 4 * i, sy - 6 * i);
+    for (let i = 1; i <= 10; i++) await page.mouse.move(sx - 4 * i, sy + 6 * i);
     await page.mouse.up();
     await expect
       .poll(async () => {
-        const style = (await draftSite(request, password!)).pages[0].sections[1].children[1].style;
+        const style = (await samplePage(request)).sections[2].children[1].style;
         return [style.base.x, style.base.y, style.desktop.x];
       })
-      .toEqual([110, 190, 760]); // moved on mobile only; desktop untouched
-    await expect(canvas(page).locator(".n-home-photo.ed-selected")).toBeVisible();
+      .toEqual([130, 80, 820]); // moved on mobile only; desktop untouched
+    await expect(canvas(page).locator(".n-sample-photo.ed-selected")).toBeVisible();
   });
 
   test("an edit made through /mcp appears live, highlighted, and can be undone", async ({ page, request }) => {
     await expect(page.locator(".ed-live.is-on")).toBeVisible();
-    const box = (await canvas(page).locator(".n-home-photo").boundingBox())!;
+    const box = (await canvas(page).locator(".n-sample-photo").boundingBox())!;
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
     await expect
       .poll(async () => JSON.parse((await mcpCall(request, password!, "get_editor_context")).content[0]!.text!).selected?.[0]?.id)
-      .toBe("home-photo");
+      .toBe("sample-photo");
 
-    const result = await mcpCall(request, password!, "update_node", { node_id: "home-photo", style: { radius: [48, 48, 48, 48] } });
+    const result = await mcpCall(request, password!, "update_node", { node_id: "sample-photo", style: { radius: [48, 48, 48, 48] } });
     expect(result.isError).toBeFalsy();
-    await expect(canvas(page).locator(".n-home-photo")).toHaveCSS("border-top-left-radius", "48px", { timeout: 2000 });
-    await expect(canvas(page).locator(".n-home-photo.ed-flash")).toBeVisible();
-    await expect(page.locator(".ed-status")).toHaveText("Claude: Update Image on Home");
+    await expect(canvas(page).locator(".n-sample-photo")).toHaveCSS("border-top-left-radius", "48px", { timeout: 2000 });
+    await expect(canvas(page).locator(".n-sample-photo.ed-flash")).toBeVisible();
+    await expect(page.locator(".ed-status")).toHaveText("Claude: Update Image on Sample");
 
     await page.getByRole("button", { name: "Undo" }).click();
-    await expect(canvas(page).locator(".n-home-photo")).toHaveCSS("border-top-left-radius", "18px");
+    await expect(canvas(page).locator(".n-sample-photo")).toHaveCSS("border-top-left-radius", "18px");
   });
 
   test("the connector returns a screenshot of the draft from the open editor", async ({ request }) => {
@@ -137,7 +139,7 @@ test.describe("quick edit on a phone", () => {
   test("edits text and adds a diary entry", async ({ page, request }) => {
     await resetDraft(request, password!);
     await signIn(page, password!);
-    await page.goto("/admin/");
+    await page.goto("/admin/?page=about");
     await expect(page.locator(".qe-brand span")).toHaveText("Quick edit");
     await page.locator(".qe-card textarea").nth(1).fill("Edited on a phone.");
     await page.getByRole("tab", { name: "Diary" }).click();
@@ -147,7 +149,7 @@ test.describe("quick edit on a phone", () => {
     await expect
       .poll(async () => {
         const site = await draftSite(request, password!);
-        return [site.pages[0].sections[0].children[1].content.text, site.collections.diary[0].title];
+        return [site.pages.find((p: { id: string }) => p.id === "about").sections[0].children[1].content.text, site.collections.diary[0].title];
       })
       .toEqual(["Edited on a phone.", "Phone entry"]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
