@@ -32,10 +32,10 @@ new_sqlite_classes = ["DraftStore"]
 
 [vars]
 # "password" (EDITOR_PASSWORD secret) or "access" (Cloudflare Access JWT). See docs/auth.md.
-AUTH_MODE = "password"
+AUTH_MODE = "access"
 # Only used when AUTH_MODE = "access".
-ACCESS_TEAM_DOMAIN = ""
-ACCESS_AUD = ""
+ACCESS_TEAM_DOMAIN = "rapid-cake-bd62.cloudflareaccess.com"
+ACCESS_AUD = "8274ee917aeec4c517c1ddabc3f660e31bf17c7566644f500bb591bcdcb780db"
 GITHUB_REPO = "atomdev24/aoost"
 PUBLISH_BRANCH = "main"
 
