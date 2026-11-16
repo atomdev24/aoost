@@ -3,7 +3,7 @@
   "title": "Diary",
   "slug": "/diary",
   "parentId": null,
-  "status": "published",
+  "status": "draft",
   "template": "diary",
   "seo": {},
   "isHome": false,

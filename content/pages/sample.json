@@ -3,7 +3,7 @@
   "title": "Sample",
   "slug": "/sample",
   "parentId": null,
-  "status": "unlisted",
+  "status": "draft",
   "template": "blank",
   "seo": {
     "title": "aoost sample page",

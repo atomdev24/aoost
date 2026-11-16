@@ -3,7 +3,7 @@
   "title": "Playlists",
   "slug": "/playlists",
   "parentId": null,
-  "status": "published",
+  "status": "draft",
   "template": "playlist",
   "seo": {},
   "isHome": false,

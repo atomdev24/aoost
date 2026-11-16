@@ -3,7 +3,7 @@
   "title": "About",
   "slug": "/about",
   "parentId": null,
-  "status": "published",
+  "status": "draft",
   "template": "blank",
   "seo": {},
   "isHome": false,
