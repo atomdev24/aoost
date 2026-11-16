@@ -1,10 +1,9 @@
-# Builds the aoost CMS (editor + static site) and deploys it to its *.workers.dev preview.
+# Builds the aoost CMS (editor + static site) and deploys the Worker (alexoostendurp.com once its custom domain is attached, plus the *.workers.dev preview).
 # Runs when content is published from the editor (a commit under content/) or the CMS code changes.
-# It never touches the GitHub Pages site, DNS or the production domain.
-name: Deploy CMS preview
+name: Deploy CMS
 on:
   push:
-    branches: [cms-v1]
+    branches: [main]
     paths:
       - "content/**"
       - "cms/**"

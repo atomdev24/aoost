@@ -33,6 +33,6 @@ AUTH_MODE = "password"
 ACCESS_TEAM_DOMAIN = ""
 ACCESS_AUD = ""
 GITHUB_REPO = "atomdev24/aoost"
-PUBLISH_BRANCH = "cms-v1"
+PUBLISH_BRANCH = "main"
 
 # Secrets (wrangler secret put / .dev.vars): EDITOR_PASSWORD, GITHUB_TOKEN
