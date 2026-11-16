@@ -238,6 +238,8 @@ export const setUnpublished = (unpublished: boolean) => set({ unpublished });
 
 function scheduleSave() {
   clearTimeout(saveTimer);
+  // Unsaved edits read as "saving…" straight away, so the status never claims a save that hasn't happened.
+  if (state.save !== "saving" && state.save !== "error") set({ save: "saving" });
   saveTimer = setTimeout(() => void flush(), SAVE_DELAY);
 }
 

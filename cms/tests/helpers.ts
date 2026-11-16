@@ -59,3 +59,27 @@ export async function fullPageShot(page: Page, path: string) {
   await page.screenshot({ path });
   await page.setViewportSize(size);
 }
+
+/**
+ * The editor shows pages on a pan/zoom board, so a block can sit outside the
+ * window. Pan the board (with the wheel, as a person would) until the block
+ * is in view, and return its on-screen box.
+ */
+export async function onBoard(page: Page, target: import("@playwright/test").Locator) {
+  const board = (await page.locator(".bd").boundingBox())!;
+  for (let i = 0; i < 30; i++) {
+    const b = await target.boundingBox();
+    if (!b) throw new Error("block not on the board");
+    const h = Math.min(b.height, 160);
+    const w = Math.min(b.width, 160);
+    const top = board.y + 40;
+    const bottom = board.y + board.height - 90; // above the zoom bar
+    if (b.y >= top && b.y + h <= bottom && b.x >= board.x + 8 && b.x + w <= board.x + board.width - 8) return b;
+    const dy = b.y < top || b.y + h > bottom ? b.y + h / 2 - (board.y + board.height / 2) : 0;
+    const dx = b.x < board.x + 8 || b.x + w > board.x + board.width - 8 ? b.x + w / 2 - (board.x + board.width / 2) : 0;
+    await page.mouse.move(board.x + board.width - 4, board.y + 4);
+    await page.mouse.wheel(dx, dy);
+    await page.waitForTimeout(60);
+  }
+  throw new Error("could not bring the block into view");
+}

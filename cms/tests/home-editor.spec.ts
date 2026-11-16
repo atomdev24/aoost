@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { draftSite, editorPassword, mcpCall, resetDraft, signIn } from "./helpers";
+import { draftSite, editorPassword, mcpCall, onBoard, resetDraft, signIn } from "./helpers";
 
 const password = editorPassword();
 const shots = resolve(dirname(fileURLToPath(import.meta.url)), "../../docs/screenshots");
@@ -15,9 +15,7 @@ const homeBlocks = async (request: Parameters<typeof draftSite>[0]) => {
 
 /** Click a block on the editor canvas to select it. */
 async function select(page: Page, selector: string) {
-  const el = canvas(page).locator(selector);
-  await el.evaluate((e) => e.scrollIntoView({ block: "center" }));
-  const b = (await el.boundingBox())!;
+  const b = await onBoard(page, canvas(page).locator(selector));
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2); // the middle: the corner can sit under the selection toolbar
 }
 
@@ -40,7 +38,8 @@ test.describe("homepage in the editor", () => {
   });
 
   test("the aoost blocks sit in their own group in the Add panel", async ({ page }) => {
-    await page.getByText("Add", { exact: true }).first().click();
+    await page.getByRole("tab", { name: "Assets" }).click();
+    await page.getByRole("tab", { name: "Blocks" }).click();
     await expect(page.getByText("aoost (homepage blocks)").first()).toBeVisible();
   });
 
@@ -72,14 +71,14 @@ test.describe("homepage in the editor", () => {
     await expect(canvas(page).locator("#discs .cv-fl").nth(3)).toHaveText("Disc 4 · Sunday");
 
     // 4. skills above journals, 5. then hide the skills (on desktop and on mobile)
-    await page.getByText("Layers", { exact: true }).first().click();
+    await page.getByRole("tab", { name: "Layers" }).click();
     await page.getByRole("button", { name: "Move Skills up" }).click();
     await expect.poll(async () => (await homeBlocks(request)).sections.map((s) => s.id).slice(1, 4)).toEqual(["home-projects", "home-tools", "home-journals"]);
     await page.screenshot({ path: `${shots}/editor-home-1440.png` });
     await page.getByRole("button", { name: "Hide Skills on desktop" }).click();
-    await page.getByRole("button", { name: "Mobile" }).click();
+    await page.locator(".ed-bpswitch").getByRole("button", { name: "Mobile" }).click();
     await page.getByRole("button", { name: "Hide Skills on mobile" }).click();
-    await expect(page.locator(".ed-status")).toHaveText("Unpublished changes");
+    await expect(page.locator(".ed-status")).toHaveText("Draft · saved just now");
 
     // The draft, rendered like the live site
     await page.goto("/preview/");
