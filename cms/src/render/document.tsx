@@ -125,8 +125,9 @@ function fontLinks(site: Site, extra: string[] = [], blocking = false): string {
   );
 }
 
-export function PageBody({ site, page, opts = {} }: { site: Site; page: Page; opts?: RenderOptions }) {
-  const ctx = makeCtx(site, page, { prefix: opts.preview?.prefix });
+/** The page's body. `editing` draws the editor's first-paint versions (the editor's side-by-side frames use it). */
+export function PageBody({ site, page, opts = {}, editing = false }: { site: Site; page: Page; opts?: RenderOptions; editing?: boolean }) {
+  const ctx = makeCtx(site, page, { prefix: opts.preview?.prefix, editing });
   const Nav = navRenderer(site.nav.style).Render;
   const mainClass = pageKits(site, page).map((k) => k.mainClass).filter(Boolean).join(" ") || undefined;
   const view = (s: Section) => <SectionView key={s.id} section={s} ctx={ctx} overlays={page.overlays.filter((o) => o.anchor !== "viewport" && o.anchor.sectionId === s.id)} />;

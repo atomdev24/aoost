@@ -2,6 +2,7 @@ import { useMemo, type ReactNode } from "react";
 import { makeCtx } from "../../render/context";
 import { pageCss, pageKits } from "../../render/document";
 import { navRenderer } from "../../render/nav";
+import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT } from "../board/frame-css";
 import { CanvasController } from "../canvas/CanvasController";
 import { updateNavItem } from "../../model/nav";
 import { currentPage, megaItemId, useEditor } from "../store";
@@ -19,18 +20,19 @@ import { usePuck } from "./usePuck";
 export function Root({ children }: { children: ReactNode }) {
   const site = useEditor((s) => s.site);
   const stored = useEditor(currentPage);
+  const bp = useEditor((s) => s.bp);
   const data = usePuck((s) => s.appState.data) as unknown as PuckData;
   const page = useMemo(() => puckToPage(data, stored), [data, stored]);
   const mega = megaItemId(page.id);
   // The CSS is generated from what is on the canvas right now, not from the last saved state.
-  const css = useMemo(() => pageCss(mega ? updateNavItem(site, mega, { panel: page.sections }) : { ...site, pages: site.pages.map((p) => (p.id === page.id ? page : p)) }, mega ? { ...page, sections: [] } : page), [site, page, mega]);
+  const css = useMemo(() => pinViewportUnits(pageCss(mega ? updateNavItem(site, mega, { panel: page.sections }) : { ...site, pages: site.pages.map((p) => (p.id === page.id ? page : p)) }, mega ? { ...page, sections: [] } : page), SCREEN_HEIGHT[bp]), [site, page, mega, bp]);
   const ctx = useMemo(() => makeCtx(site, page, { editing: true }), [site, page]);
   const Nav = navRenderer(site.nav.style).Render;
   const kitClass = useMemo(() => pageKits(site, page).map((k) => k.mainClass).filter(Boolean).join(" "), [site, page]);
   return (
     <>
       <style>{css}</style>
-      <style>{canvasCss}</style>
+      <style>{canvasCss + frameBaseCss}</style>
       {mega || page.hideNav ? null : (
         <div className="ed-nav-preview" inert>
           <Nav ctx={ctx} />

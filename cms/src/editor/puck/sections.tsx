@@ -6,7 +6,7 @@ import { newId } from "../../schema/ids";
 import { currentPage, useEditor } from "../store";
 import { EditorOverlay } from "./EditorOverlay";
 import { itemToSection, SECTION_TYPES, type PuckItem } from "./adapter";
-import { layoutField } from "./fields";
+import { layoutField, visibleOnField } from "./fields";
 
 type SectionProps = { id: string; name?: string; locked?: boolean; layout: Responsive<SectionLayout>; customDesktop?: boolean; items: SlotComponent; puck: PuckContext };
 
@@ -23,7 +23,6 @@ function sectionConfig(kind: Section["kind"]): ComponentConfig {
     label: LABEL[kind],
     inline: true,
     fields: {
-      name: { type: "text", label: "Section name" },
       layout: layoutField(kind),
       ...(kind === "canvas"
         ? {
@@ -37,6 +36,8 @@ function sectionConfig(kind: Section["kind"]): ComponentConfig {
             },
           }
         : {}),
+      __visible: visibleOnField,
+      name: { type: "text", label: "Section name" },
       items: { type: "slot", disallow: Object.values(SECTION_TYPES) },
     },
     defaultProps: { layout: DEFAULT_LAYOUT[kind], items: [] },

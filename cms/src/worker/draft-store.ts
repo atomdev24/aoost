@@ -117,6 +117,16 @@ export class DraftStore extends DurableObject<Env> {
     return { version: this.version, dirty, editors: this.ctx.getWebSockets().length, context: (await this.ctx.storage.get<EditorContext>("context")) ?? null };
   }
 
+  /** The Claude connector made an authenticated call (shown as "Claude connected" in the editor). */
+  async noteConnector(now = Date.now()) {
+    const last = (await this.ctx.storage.get<number>("connectorSeenAt")) ?? 0;
+    if (now - last > 30_000) await this.ctx.storage.put("connectorSeenAt", now);
+  }
+
+  async connectorSeenAt(): Promise<number | null> {
+    return (await this.ctx.storage.get<number>("connectorSeenAt")) ?? null;
+  }
+
   /** Record that the current draft is now what is published. */
   async markPublished() {
     const files = siteToFiles(await this.load());

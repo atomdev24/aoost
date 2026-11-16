@@ -7,6 +7,9 @@ import { error, html, json, readJson } from "./http";
 import { mediaApi } from "./media";
 import { publishToGitHub } from "./publish";
 
+/** How recently the connector must have called for the editor to show "Claude connected". */
+const CONNECTOR_FRESH_MS = 15 * 60_000;
+
 /** /api/editor/*: every route here is already authenticated. */
 export async function editorApi(request: Request, env: Env, url: URL, who: Identity): Promise<Response> {
   if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
@@ -41,6 +44,11 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       if (!body?.requestId) return error(400, "Expected { requestId, png }.");
       await draft.deliverScreenshot(body.requestId, typeof body.png === "string" && body.png.length < 30_000_000 ? body.png : null);
       return json({ ok: true });
+    }
+    case "GET /claude": {
+      // "Connected" means the connector has credentials that work: it made an authenticated call recently.
+      const seenAt = await draft.connectorSeenAt();
+      return json({ ok: true, connected: !!seenAt && Date.now() - seenAt < CONNECTOR_FRESH_MS, seenAt });
     }
     case "GET /socket":
       return draft.fetch(request);

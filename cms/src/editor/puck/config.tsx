@@ -4,7 +4,7 @@ import { components } from "../../components/registry";
 import type { ComponentDef } from "../../components/types";
 import { DEFAULT_FRAME_FIT } from "../../schema";
 import { EditorNode } from "./EditorNode";
-import { effectsField, frameField, styleField } from "./fields";
+import { contentHeading, effectsField, frameField, styleField, visibleOnField } from "./fields";
 import { Root } from "./Root";
 import { sectionComponents } from "./sections";
 
@@ -12,11 +12,14 @@ function nodeConfig(def: ComponentDef): ComponentConfig {
   return {
     label: def.label,
     inline: true,
+    // Inspector order: Layout and Frame (per breakpoint), then Content (shared), Motion, Visible on.
     fields: {
-      ...contentFields[def.type],
-      ...(def.framed ? { frame: frameField } : {}),
       style: styleField(!!def.framed),
+      ...(def.framed ? { frame: frameField } : {}),
+      ...(Object.keys(contentFields[def.type] ?? {}).length ? { __content: contentHeading } : {}),
+      ...contentFields[def.type],
       effects: effectsField,
+      __visible: visibleOnField,
       name: { type: "text", label: "Layer name" },
     },
     defaultProps: {
