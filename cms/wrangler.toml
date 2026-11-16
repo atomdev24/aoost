@@ -1,10 +1,14 @@
 # aoost CMS: one Worker serves the public site (static assets), /admin, /api/* and /mcp.
-# Preview deploys only (*.workers.dev). Never add routes or custom domains here.
+# Serves alexoostendurp.com and www (custom domains) plus the *.workers.dev preview.
 name = "aoost-cms"
 main = "src/worker/index.ts"
 compatibility_date = "2026-11-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
+routes = [
+  { pattern = "alexoostendurp.com", custom_domain = true },
+  { pattern = "www.alexoostendurp.com", custom_domain = true },
+]
 
 [assets]
 directory = "./dist"
