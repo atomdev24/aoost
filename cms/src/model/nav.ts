@@ -93,7 +93,7 @@ export function newNavItem(site: Site, type: NavItem["type"]): NavItem {
     case "mega":
       return { ...base, label: "Menu", panel: megaStarter(site) };
     case "button":
-      return { ...base, label: "Say howdy", target: { kind: "url", url: "/" }, variant: "filled" };
+      return { ...base, label: "Get in touch", target: { kind: "url", url: "/" }, variant: "filled" };
     case "embed":
       return { ...base, label: "Embed", code: '<div style="font:600 12px Inter,sans-serif;color:#F3EFE6;padding:14px 12px;white-space:nowrap">NOW SHOWING · DUST AND NEON</div>' };
     case "label":

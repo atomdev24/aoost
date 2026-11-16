@@ -5,7 +5,7 @@ Design reference: the "aoost — nav bar & page editor mockup" canvas (nav, nav 
 
 ## 1. What this is
 
-aoost is Alex's personal art site: a visual diary for people in the know, not a corporate portfolio. Most visitors come from an Instagram bio link, so **mobile comes first**. The look is edgy-artistic but clean, with Western-themed line art (cowboys, cacti, scorpions), clean modern type and clean animation.
+aoost is Alex's personal art site: a visual diary for people in the know, not a corporate portfolio. Most visitors come from an Instagram bio link, so **mobile comes first**. The look is edgy-artistic but clean, with clean modern type and clean animation. Western line art (cowboys, cacti, scorpions) appears only on the original homepage and in the rodeo mini game; the rest of the site is not cowboy-themed.
 
 This project adds a **Framer-style visual editor and CMS** so Alex can design and publish pages without a developer. It needs real design freedom (frames, layout splits, a grid/freeform mix, overlays, separate mobile and desktop layouts) without turning into a rigid WordPress/HubSpot page builder.
 

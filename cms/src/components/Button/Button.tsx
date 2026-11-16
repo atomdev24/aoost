@@ -17,7 +17,7 @@ export const Button = defineComponent<ButtonContent>({
   label: "Button",
   category: "basic",
   schema: ButtonContent,
-  defaults: { content: { label: "Say howdy", target: { kind: "url", url: "/" }, variant: "outline" } },
+  defaults: { content: { label: "Get in touch", target: { kind: "url", url: "/" }, variant: "outline" } },
   css,
   Render: ({ content, ctx }) => {
     const href = ctx.href(content.target);

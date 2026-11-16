@@ -40,7 +40,7 @@ export function searchIndex(site: Site): SearchEntry[] {
 
 const notFound = (site: Site): Page => ({
   id: "not-found",
-  title: "Nothing here, partner",
+  title: "Page not found",
   slug: "/",
   parentId: null,
   status: "unlisted",
@@ -56,8 +56,9 @@ const notFound = (site: Site): Page => ({
       layout: { base: { columns: 1, gap: 18, padding: "140px 20px 96px", maxWidth: 1160 }, desktop: { padding: "200px 56px 140px" } },
       children: [
         { id: "nf-k", type: "Text", content: { text: "404", styleId: "label", tag: "p" }, style: { base: { color: "token:muted" } } },
-        { id: "nf-t", type: "Text", content: { text: "Nothing here, partner.", styleId: "h1", tag: "h1" }, style: { base: {} } },
-        { id: "nf-b", type: "Button", content: { label: "Back home", target: { kind: "url", url: "/" }, variant: "filled" }, style: { base: { margin: "12px 0 0" } } },
+        { id: "nf-t", type: "Text", content: { text: "Page not found", styleId: "h1", tag: "h1" }, style: { base: {} } },
+        { id: "nf-d", type: "Text", content: { text: "This page doesn't exist or isn't available yet.", styleId: "body", tag: "p" }, style: { base: { color: "token:text" } } },
+        { id: "nf-b", type: "Button", content: { label: "Back to home", target: { kind: "url", url: "/" }, variant: "filled" }, style: { base: { margin: "12px 0 0" } } },
       ],
     },
   ],

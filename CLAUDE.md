@@ -21,6 +21,7 @@ You're building the aoost CMS and visual editor. `SPEC.md` is the source of trut
 
 ## Taste
 
-- The site is a visual diary for people in the know: edgy-artistic but clean, Western line art, clean type, clean motion. Avoid generic template looks.
+- The site is a visual diary for people in the know: edgy-artistic but clean, clean type, clean motion. Avoid generic template looks.
+- **Not cowboy-themed.** The Western line art belongs only to the original homepage and the rodeo mini game. Everything else (new pages, templates, system pages like 404, sign-in, empty states, default labels) stays clean and neutral, with plain wording and no Western references.
 - The editor UI is the dark Photoshop-style workspace from the mockups. Keep it calm and clear.
 - Mobile first, always. Check every public component at 390px.
