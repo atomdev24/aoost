@@ -64,6 +64,39 @@ export function resetToMobile<T extends object>(r: Responsive<T>, key?: keyof T)
   return prune({ base: r.base, desktop });
 }
 
+/**
+ * The side-by-side editor's rule: an edit made while a breakpoint is active
+ * changes that breakpoint only. Desktop edits are plain overrides. A mobile
+ * edit writes the base, so desktop first keeps the value it shows now as its
+ * own override. A key with no value on desktop has nothing to keep, so it
+ * follows the new base (the stored format has no "unset on desktop").
+ */
+export function setOnly<T extends object>(r: Responsive<T>, bp: Breakpoint, patch: Partial<T>): Responsive<T> {
+  if (bp === "desktop") return setAt(r, "desktop", patch);
+  const shown = resolve(r, "desktop") as Record<string, unknown>;
+  const keep: Record<string, unknown> = {};
+  for (const k of Object.keys(patch)) if (shown[k] !== undefined) keep[k] = shown[k];
+  const next = setAt(r, "mobile", patch);
+  return prune({ base: next.base, desktop: { ...(r.desktop ?? {}), ...keep } as Partial<T> });
+}
+
+/** Keys whose mobile value differs from desktop: the mobile overrides in the editor. */
+export const mobileOverrides = overriddenKeys;
+
+/** "Reset to desktop": mobile takes desktop's value for one key, or for every key. */
+export function resetToDesktop<T extends object>(r: Responsive<T>, key?: keyof T): Responsive<T> {
+  if (!r.desktop) return r;
+  const keys = key === undefined ? (Object.keys(r.desktop) as (keyof T)[]) : [key];
+  const base = { ...r.base } as Record<string, unknown>;
+  const desktop = { ...r.desktop } as Record<string, unknown>;
+  for (const k of keys as string[]) {
+    if (desktop[k] === undefined) continue;
+    base[k] = desktop[k];
+    delete desktop[k];
+  }
+  return prune({ base: base as T, desktop: desktop as Partial<T> });
+}
+
 function prune<T extends object>(r: Responsive<T>): Responsive<T> {
   if (!r.desktop) return { base: r.base };
   const desktop: Record<string, unknown> = {};

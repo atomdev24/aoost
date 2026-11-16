@@ -1,6 +1,6 @@
 import { getComponent } from "../components/registry";
 import { setAt } from "../responsive/resolve";
-import { DEFAULT_FRAME_FIT, newId, type Breakpoint, type Node, type Overlay, type Page, type Section, type SectionLayout, type Style } from "../schema";
+import { DEFAULT_FRAME_FIT, newId, type Breakpoint, type Node, type Overlay, type Page, type Responsive, type Section, type SectionLayout, type Style } from "../schema";
 
 /**
  * Pure edits to one page: used by the layers panel, the overlay panel and
@@ -124,11 +124,20 @@ export function setLocked(page: Page, id: string, locked: boolean): Page {
 export function setHidden(page: Page, id: string, bp: Breakpoint, hidden: boolean): Page {
   const at = locate(page, id);
   if (!at) return page;
-  // On desktop "shown" must be stored explicitly when mobile hides it.
-  const baseHidden = at.kind === "section" ? !!at.section.layout.base.hidden : !!at.node.style.base.hidden;
-  const value = hidden ? true : bp === "desktop" && baseHidden ? false : undefined;
-  if (at.kind === "section") return updateSection(page, id, (s) => ({ ...s, layout: setAt(s.layout, bp, { hidden: value } as Partial<SectionLayout>) }));
-  return updateNode(page, at.node.id, (n) => ({ ...n, style: setAt(n.style, bp, { hidden: value } as Partial<Style>) }));
+  const r: Responsive<{ hidden?: boolean }> = at.kind === "section" ? at.section.layout : at.node.style;
+  const baseHidden = !!r.base.hidden;
+  const desktopHidden = r.desktop?.hidden ?? baseHidden;
+  let next: Responsive<{ hidden?: boolean }>;
+  if (bp === "desktop") {
+    // On desktop "shown" must be stored explicitly when mobile hides it.
+    next = setAt(r, "desktop", { hidden: hidden ? true : baseHidden ? false : undefined });
+  } else {
+    // A change on mobile leaves desktop as it was.
+    next = setAt(r, "mobile", { hidden: hidden || undefined });
+    next = setAt(next, "desktop", { hidden: desktopHidden === hidden ? undefined : desktopHidden });
+  }
+  if (at.kind === "section") return updateSection(page, id, (s) => ({ ...s, layout: next as Responsive<SectionLayout> }));
+  return updateNode(page, at.node.id, (n) => ({ ...n, style: next as Responsive<Style> }));
 }
 
 export function isHidden(item: Section | Node, bp: Breakpoint): boolean {

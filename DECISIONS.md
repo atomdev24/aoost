@@ -79,3 +79,11 @@ One line each: the decision, and why. Newest at the bottom.
 - The CMS's own image lightbox class was renamed from `.lb` to `.lbx`, because the original leaderboard already uses `.lb`.
 - Quick edit on a phone lists the aoost blocks but does not edit their fields; use the full editor (900px and wider) or Claude for those.
 - The older browser tests were moved off the home page: nav tests use `/about`, `/work` and `/sample`, editor tests use the sample page. New tests: `tests/home.spec.ts` (behaviour and the pixel comparison) and `tests/home-editor.spec.ts` (editing, preview, `/mcp`).
+
+## Editor redesign (EDITOR-REDESIGN.md)
+
+- The stored format is unchanged: the base is still mobile and desktop stores overrides (SPEC §3), so public pages render byte for byte as before. The editor presents desktop as the reference and mobile differences as "mobile overrides" (blue dots, "Reset to desktop"), as the brief asks. An edit made while Mobile is active writes the base and first keeps desktop's current value as a desktop override (`setOnly` in `cms/src/responsive/resolve.ts`), so desktop does not change. Why: the brief wants per-frame edits "following the existing responsive model" and a schema change would alter stored content.
+- Limitation of that rule: a property with no value anywhere (for example an unset padding) that is set on Mobile also shows on Desktop, because the stored format cannot say "unset on desktop". Desktop can still override it.
+- Hiding a block on Mobile now leaves it visible on Desktop (before, hiding on mobile also hid desktop unless desktop had its own setting). Why: same "this breakpoint only" rule.
+- Browser tests start the local Worker with `--var AUTH_MODE:password` (production stays on Cloudflare Access) and take `E2E_PORT` when 8787 is busy. Why: the tests sign in with the editor password; production settings are not touched.
+- Before this work, 14 browser tests already failed on `main` because every page except the homepage is a draft (commit 6af6862), so `/about`, `/sample` and friends are 404 on the built site, plus the Cape Town clock test. They are unrelated to the editor and were left as they are.
