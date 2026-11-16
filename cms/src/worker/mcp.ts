@@ -1,0 +1,151 @@
+import { z } from "zod";
+import { diffSite } from "../model/ops";
+import { tools, toolByName, runTool, type ToolContext } from "../mcp/tools";
+import { validateSite } from "../schema";
+import { draftStub, readDraft, type Env } from "./env";
+import { extOf, MAX_UPLOAD, MEDIA_TYPES, storeMedia } from "./media";
+import { publishToGitHub } from "./publish";
+import { screenshot } from "./screenshot";
+
+/**
+ * A remote MCP server over streamable HTTP (SPEC §8), stateless: every POST
+ * carries one JSON-RPC message (or a batch) and gets a JSON answer. Auth is
+ * done before this is reached (bearer token now, Cloudflare Access later).
+ */
+const PROTOCOL_VERSIONS = ["2025-06-18", "2025-03-26", "2024-11-05"];
+const SERVER = { name: "aoost-cms", title: "aoost site editor", version: "1.0.0" };
+const INSTRUCTIONS =
+  "Tools for editing Alex's site, aoost. Every tool changes the DRAFT only; the open editor shows changes live and Alex can undo them. " +
+  "Start with get_editor_context to see the page and selection Alex means, and get_site for theme tokens and component types. " +
+  "The base layout is mobile (390px); desktop stores only overrides (set_responsive_override). Check mobile first. " +
+  "Never call publish unless Alex explicitly asks you to publish in the chat.";
+
+type Rpc = { jsonrpc: "2.0"; id?: string | number | null; method?: string; params?: Record<string, unknown> };
+type Content = { type: "text"; text: string } | { type: "image"; data: string; mimeType: string };
+type CallResult = { content: Content[]; isError?: boolean };
+
+const result = (id: Rpc["id"], value: unknown) => ({ jsonrpc: "2.0" as const, id, result: value });
+const rpcError = (id: Rpc["id"], code: number, message: string) => ({ jsonrpc: "2.0" as const, id: id ?? null, error: { code, message } });
+const text = (t: string, isError = false): CallResult => ({ content: [{ type: "text", text: t }], ...(isError ? { isError: true } : {}) });
+
+export const toolList = () =>
+  tools.map((t) => {
+    const { $schema: _schema, ...inputSchema } = z.toJSONSchema(t.input, { io: "input" }) as Record<string, unknown>;
+    return { name: t.name, description: t.description, inputSchema };
+  });
+
+async function callTool(name: string, args: Record<string, unknown>, env: Env, origin: string): Promise<CallResult> {
+  const tool = toolByName(name);
+  if (!tool) return text(`Unknown tool "${name}".`, true);
+  const parsed = tool.input.safeParse(args ?? {});
+  if (!parsed.success) return text(`Invalid arguments: ${parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; ")}`, true);
+  const draft = draftStub(env);
+
+  if (name === "upload_media_from_url") {
+    const a = parsed.data as { url: string; name?: string };
+    const url = new URL(a.url);
+    if (url.protocol !== "https:" || /^(localhost|127\.|10\.|192\.168\.|169\.254\.|\[?::1)/.test(url.hostname)) return text("Only public https URLs can be fetched.", true);
+    const res = await fetch(url, { redirect: "follow" });
+    if (!res.ok) return text(`Could not fetch that URL (${res.status}).`, true);
+    const length = Number(res.headers.get("Content-Length") ?? 0);
+    if (length > MAX_UPLOAD) return text("That file is over 95 MB.", true);
+    let fileName = a.name ?? decodeURIComponent(url.pathname.split("/").pop() || "file");
+    if (!MEDIA_TYPES[extOf(fileName)]) {
+      // No usable extension in the URL: take it from the content type.
+      const type = (res.headers.get("Content-Type") ?? "").split(";")[0]!.trim();
+      const ext = Object.entries(MEDIA_TYPES).find(([, v]) => v.mime === type)?.[0];
+      if (!ext) return text(`Unsupported file type (${type || "unknown"}). Pass a name with an extension such as .jpg, .png, .mp4, .pdf.`, true);
+      fileName = `${fileName.replace(/\.[^.]*$/, "")}.${ext}`;
+    }
+    const body = await res.arrayBuffer();
+    try {
+      const item = await storeMedia(env, { name: fileName, body, size: body.byteLength });
+      return text(JSON.stringify({ url: item.url, name: item.name, kind: item.kind, bytes: item.size, note: "Use this url as the src of an Image, Video, Audio, FileDownload, Lottie or Model3D node." }));
+    } catch (e) {
+      return text(e instanceof Error ? e.message : "Upload failed.", true);
+    }
+  }
+
+  if (name === "get_preview_screenshot") {
+    const a = parsed.data as { page?: string; breakpoint: "mobile" | "desktop" };
+    const { site } = await readDraft(env);
+    const state = await draft.state();
+    const page = site.pages.find((p) => p.id === a.page || p.slug === a.page) ?? site.pages.find((p) => p.id === state.context?.pageId) ?? site.pages.find((p) => p.isHome)!;
+    const shot = await screenshot(env, page, a.breakpoint);
+    if (!shot.ok) return text(shot.error, true);
+    return { content: [{ type: "image", data: shot.png, mimeType: "image/png" }, { type: "text", text: `Draft of ${page.title} (${page.slug}) at ${a.breakpoint === "mobile" ? "390" : "1440"}px, captured by ${shot.via}.` }] };
+  }
+
+  if (name === "publish") {
+    if (!env.GITHUB_TOKEN) return text("Publishing is not set up yet (GITHUB_TOKEN is missing). Alex can publish from the editor once it is.", true);
+    const a = parsed.data as { message?: string };
+    const published = await publishToGitHub(await draft.getFiles(), { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN, message: a.message });
+    if (!published.ok) return text(published.error, true);
+    await draft.markPublished();
+    return text(published.commit ? `Published ${published.changed.length} file(s). The site rebuilds and deploys in about a minute. Commit: ${published.url}` : "Nothing to publish: the draft matches what is live.");
+  }
+
+  // Everything else is a pure function of the draft.
+  const [{ site }, state] = await Promise.all([readDraft(env), draft.state()]);
+  const ctx: ToolContext = { site, editor: state.context && state.editors > 0 ? state.context : null };
+  const out = runTool(name, args, ctx);
+  if (out.isError || !out.site) return text(out.text, out.isError);
+  const checked = validateSite(out.site);
+  if (!checked.ok) return text(`That change would make the site invalid, so nothing was changed: ${checked.issues.slice(0, 5).map((i) => `${i.path}: ${i.message}`).join("; ")}`, true);
+  const ops = diffSite(site, out.site);
+  if (!ops.length) return text(`${out.text} (No change was needed.)`);
+  const applied = await draft.apply(JSON.stringify(ops), origin, out.summary, out.changed);
+  if (!applied.ok) return text(`The draft store rejected the change: ${applied.issues.slice(0, 5).map((i) => `${i.path}: ${i.message}`).join("; ")}`, true);
+  return text(`${out.text}\n(Draft updated${state.editors > 0 ? "; it is showing in Alex's editor now" : ""}. Not published.)`);
+}
+
+async function handleMessage(msg: Rpc, env: Env): Promise<object | null> {
+  if (msg?.jsonrpc !== "2.0" || typeof msg.method !== "string") return rpcError(msg?.id, -32600, "Invalid JSON-RPC request.");
+  const isNotification = msg.id === undefined;
+  switch (msg.method) {
+    case "initialize": {
+      const wanted = String(msg.params?.protocolVersion ?? "");
+      return result(msg.id, { protocolVersion: PROTOCOL_VERSIONS.includes(wanted) ? wanted : PROTOCOL_VERSIONS[0], capabilities: { tools: { listChanged: false } }, serverInfo: SERVER, instructions: INSTRUCTIONS });
+    }
+    case "ping":
+      return result(msg.id, {});
+    case "tools/list":
+      return result(msg.id, { tools: toolList() });
+    case "tools/call": {
+      const name = String(msg.params?.name ?? "");
+      try {
+        return result(msg.id, await callTool(name, (msg.params?.arguments ?? {}) as Record<string, unknown>, env, "mcp"));
+      } catch (e) {
+        console.error(e);
+        return result(msg.id, text(`The tool failed: ${e instanceof Error ? e.message : "unknown error"}`, true));
+      }
+    }
+    case "resources/list":
+      return result(msg.id, { resources: [] });
+    case "prompts/list":
+      return result(msg.id, { prompts: [] });
+    default:
+      return isNotification ? null : rpcError(msg.id, -32601, `Method not found: ${msg.method}`);
+  }
+}
+
+export async function mcp(request: Request, env: Env): Promise<Response> {
+  const headers = { "Content-Type": "application/json", "Cache-Control": "no-store" };
+  if (request.method === "GET" || request.method === "DELETE") {
+    // No server-initiated stream and no sessions to end: this server is stateless.
+    return new Response(JSON.stringify(rpcError(null, -32000, "This MCP endpoint answers POST requests only.")), { status: 405, headers: { ...headers, Allow: "POST" } });
+  }
+  if (request.method !== "POST") return new Response(null, { status: 405, headers: { Allow: "POST" } });
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify(rpcError(null, -32700, "Could not parse JSON.")), { status: 400, headers });
+  }
+  if (Array.isArray(body)) {
+    const answers = (await Promise.all(body.map((m) => handleMessage(m as Rpc, env)))).filter(Boolean);
+    return answers.length ? new Response(JSON.stringify(answers), { headers }) : new Response(null, { status: 202 });
+  }
+  const answer = await handleMessage(body as Rpc, env);
+  return answer ? new Response(JSON.stringify(answer), { headers }) : new Response(null, { status: 202 });
+}

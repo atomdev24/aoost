@@ -1,0 +1,150 @@
+{
+  "id": "physical",
+  "title": "Physical",
+  "slug": "/work/physical",
+  "parentId": "work",
+  "status": "draft",
+  "template": "gallery",
+  "seo": {},
+  "isHome": false,
+  "showInNav": true,
+  "sections": [
+    {
+      "id": "physical-head",
+      "kind": "flow",
+      "name": "Heading",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "120px 20px 12px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "160px 56px 20px"
+        }
+      },
+      "children": [
+        {
+          "id": "physical-kicker",
+          "type": "Text",
+          "content": {
+            "text": "/work/physical",
+            "styleId": "label",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "color": "token:muted"
+            }
+          }
+        },
+        {
+          "id": "physical-title",
+          "type": "Text",
+          "content": {
+            "text": "Physical",
+            "styleId": "h1",
+            "tag": "h1"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "physical-blurb",
+          "type": "Text",
+          "content": {
+            "text": "Ink, metal and print.",
+            "styleId": "body",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "maxWidth": "560px",
+              "color": "token:text"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "physical-gallery",
+      "kind": "flow",
+      "name": "Gallery",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "12px 20px 64px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "20px 56px 96px"
+        }
+      },
+      "children": [
+        {
+          "id": "physical-grid",
+          "type": "GalleryGrid",
+          "content": {
+            "items": [
+              {
+                "src": "/art/grillz.jpg",
+                "alt": "Grillz",
+                "title": "Grillz"
+              },
+              {
+                "src": "/art/monkey-figure.jpg",
+                "alt": "Monkey figure",
+                "title": "Monkey figure"
+              },
+              {
+                "src": "/art/hear-no-evil-ring.png",
+                "alt": "Hear no evil ring",
+                "title": "Hear no evil ring"
+              },
+              {
+                "src": "/art/keychain.png",
+                "alt": "Keychain",
+                "title": "Keychain"
+              }
+            ],
+            "columns": 2,
+            "columnsDesktop": 3,
+            "gap": 12,
+            "lightbox": true
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "physical-footer",
+      "kind": "flow",
+      "name": "Footer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "physical-footer-ref",
+          "type": "Global",
+          "content": {
+            "globalId": "footer"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": []
+}

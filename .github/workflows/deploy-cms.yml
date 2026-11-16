@@ -1,0 +1,44 @@
+# Builds the aoost CMS (editor + static site) and deploys the Worker (alexoostendurp.com once its custom domain is attached, plus the *.workers.dev preview).
+# Runs when content is published from the editor (a commit under content/) or the CMS code changes.
+name: Deploy CMS
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/**"
+      - "cms/**"
+      - "art/**"
+      - "assets/fonts/**"
+      - ".github/workflows/deploy-cms.yml"
+  workflow_dispatch:
+concurrency:
+  group: deploy-cms
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cms
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cms/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Deploy to workers.dev
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npx wrangler deploy
+      - name: Explain the missing secret
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: |
+          echo "::warning::CLOUDFLARE_API_TOKEN is not set as a repository secret, so nothing was deployed. See BLOCKERS.md."

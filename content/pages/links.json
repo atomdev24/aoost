@@ -1,0 +1,154 @@
+{
+  "id": "links",
+  "title": "Links",
+  "slug": "/links",
+  "parentId": null,
+  "status": "draft",
+  "template": "blank",
+  "seo": {
+    "title": "aoost links"
+  },
+  "isHome": false,
+  "showInNav": false,
+  "sections": [
+    {
+      "id": "links-head",
+      "kind": "flow",
+      "name": "Content",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "120px 20px 64px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "160px 56px 96px"
+        }
+      },
+      "children": [
+        {
+          "id": "links-kicker",
+          "type": "Text",
+          "content": {
+            "text": "/links",
+            "styleId": "label",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "color": "token:muted"
+            }
+          }
+        },
+        {
+          "id": "links-title",
+          "type": "Text",
+          "content": {
+            "text": "Links",
+            "styleId": "h1",
+            "tag": "h1"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "links-ig",
+          "type": "Button",
+          "content": {
+            "label": "Instagram",
+            "target": {
+              "kind": "url",
+              "url": "https://www.instagram.com/"
+            },
+            "variant": "outline",
+            "newTab": true
+          },
+          "style": {
+            "base": {
+              "width": "100%",
+              "margin": "16px 0 0"
+            }
+          }
+        },
+        {
+          "id": "links-work",
+          "type": "Button",
+          "content": {
+            "label": "Work",
+            "target": {
+              "kind": "page",
+              "pageId": "work"
+            },
+            "variant": "outline"
+          },
+          "style": {
+            "base": {
+              "width": "100%"
+            }
+          }
+        },
+        {
+          "id": "links-diary",
+          "type": "Button",
+          "content": {
+            "label": "Diary",
+            "target": {
+              "kind": "page",
+              "pageId": "diary"
+            },
+            "variant": "outline"
+          },
+          "style": {
+            "base": {
+              "width": "100%"
+            }
+          }
+        },
+        {
+          "id": "links-playlists",
+          "type": "Button",
+          "content": {
+            "label": "Playlists",
+            "target": {
+              "kind": "page",
+              "pageId": "playlists"
+            },
+            "variant": "filled"
+          },
+          "style": {
+            "base": {
+              "width": "100%"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "links-footer",
+      "kind": "flow",
+      "name": "Footer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "links-footer-ref",
+          "type": "Global",
+          "content": {
+            "globalId": "footer"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": []
+}

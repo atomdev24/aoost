@@ -1,0 +1,718 @@
+{
+  "id": "sample",
+  "title": "Sample",
+  "slug": "/sample",
+  "parentId": null,
+  "status": "draft",
+  "template": "blank",
+  "seo": {
+    "title": "aoost sample page",
+    "description": "Every section kind and media type on one page."
+  },
+  "isHome": false,
+  "showInNav": false,
+  "sections": [
+    {
+      "id": "sample-hero",
+      "kind": "flow",
+      "name": "Flow section",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "120px 20px 40px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "180px 56px 64px"
+        }
+      },
+      "children": [
+        {
+          "id": "sample-kicker",
+          "type": "Text",
+          "content": {
+            "text": "Sample · everything on one page",
+            "styleId": "label",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "color": "token:muted"
+            }
+          }
+        },
+        {
+          "id": "sample-title",
+          "type": "Text",
+          "content": {
+            "text": "Dust and neon.",
+            "styleId": "hero",
+            "tag": "h1"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "sample-lede",
+          "type": "Text",
+          "content": {
+            "text": "A flow section stacks its content. This one has **bold**, *italic* and a [link](/work), a button, and scroll effects further down.",
+            "styleId": "body",
+            "tag": "p"
+          },
+          "style": {
+            "base": {
+              "maxWidth": "560px",
+              "color": "token:text"
+            }
+          }
+        },
+        {
+          "id": "sample-cta",
+          "type": "Button",
+          "content": {
+            "label": "Back home",
+            "target": {
+              "kind": "page",
+              "pageId": "home"
+            },
+            "variant": "filled"
+          },
+          "style": {
+            "base": {
+              "margin": "8px 0 0"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sample-grid",
+      "kind": "grid",
+      "name": "Grid section",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 16,
+          "padding": "56px 20px",
+          "maxWidth": 1160,
+          "background": {
+            "color": "token:sand"
+          }
+        },
+        "desktop": {
+          "columns": 3,
+          "padding": "72px 56px"
+        }
+      },
+      "children": [
+        {
+          "id": "sample-grid-h",
+          "type": "Text",
+          "content": {
+            "text": "A grid section",
+            "styleId": "h2",
+            "tag": "h2"
+          },
+          "style": {
+            "base": {},
+            "desktop": {
+              "colSpan": 3
+            }
+          }
+        },
+        {
+          "id": "sample-img-fill",
+          "type": "Image",
+          "content": {
+            "src": "/art/grillz.jpg",
+            "alt": "Grillz, filling its frame",
+            "lightbox": true,
+            "caption": "Fill, focal point lower left"
+          },
+          "style": {
+            "base": {
+              "aspectRatio": "4/3",
+              "radius": [
+                18,
+                18,
+                18,
+                18
+              ],
+              "border": {
+                "width": 1.5,
+                "style": "solid",
+                "color": "token:ink"
+              },
+              "shadow": "hard"
+            }
+          },
+          "frame": {
+            "base": {
+              "fit": "fill",
+              "focalX": 20,
+              "focalY": 80,
+              "zoom": 1,
+              "panX": 0,
+              "panY": 0
+            }
+          }
+        },
+        {
+          "id": "sample-img-duo",
+          "type": "Image",
+          "content": {
+            "src": "/art/monkey-figure.jpg",
+            "alt": "Monkey figure in duotone",
+            "lightbox": true,
+            "caption": "Duotone"
+          },
+          "style": {
+            "base": {
+              "aspectRatio": "4/3",
+              "radius": [
+                18,
+                0,
+                18,
+                0
+              ],
+              "filter": {
+                "kind": "duotone",
+                "dark": "token:ink",
+                "light": "token:rustOnDark"
+              }
+            }
+          }
+        },
+        {
+          "id": "sample-img-fit",
+          "type": "Image",
+          "content": {
+            "src": "/art/flower-skull.png",
+            "alt": "Flower skull, fitted inside its frame",
+            "lightbox": true,
+            "caption": "Fit"
+          },
+          "style": {
+            "base": {
+              "aspectRatio": "4/3",
+              "radius": [
+                6,
+                6,
+                6,
+                6
+              ],
+              "background": "token:bone"
+            }
+          },
+          "frame": {
+            "base": {
+              "fit": "fit",
+              "focalX": 50,
+              "focalY": 50,
+              "zoom": 1,
+              "panX": 0,
+              "panY": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sample-canvas",
+      "kind": "canvas",
+      "name": "Canvas section",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "0px",
+          "maxWidth": 1160,
+          "height": 430
+        },
+        "desktop": {
+          "height": 540
+        }
+      },
+      "children": [
+        {
+          "id": "sample-desert",
+          "type": "Image",
+          "content": {
+            "src": "/seed/desert.svg",
+            "alt": "Line drawing of a desert",
+            "lightbox": false
+          },
+          "style": {
+            "base": {
+              "x": 0,
+              "y": 60,
+              "w": 390,
+              "h": 300,
+              "z": 1
+            },
+            "desktop": {
+              "x": 80,
+              "y": 40,
+              "w": 600,
+              "h": 462
+            }
+          }
+        },
+        {
+          "id": "sample-photo",
+          "type": "Image",
+          "content": {
+            "src": "/art/hero.jpg",
+            "alt": "Studio piece",
+            "lightbox": true
+          },
+          "style": {
+            "base": {
+              "x": 170,
+              "y": 20,
+              "w": 200,
+              "h": 143,
+              "rotation": 4,
+              "z": 2,
+              "radius": [
+                18,
+                18,
+                18,
+                18
+              ],
+              "shadow": "hard"
+            },
+            "desktop": {
+              "x": 820,
+              "y": 60,
+              "w": 480,
+              "h": 343,
+              "rotation": -2
+            }
+          }
+        },
+        {
+          "id": "sample-canvas-t",
+          "type": "Text",
+          "content": {
+            "text": "A free canvas",
+            "styleId": "h2",
+            "tag": "h2"
+          },
+          "style": {
+            "base": {
+              "x": 20,
+              "y": 372,
+              "w": 300,
+              "h": 40,
+              "z": 3
+            },
+            "desktop": {
+              "x": 820,
+              "y": 440,
+              "w": 480,
+              "h": 50
+            }
+          }
+        },
+        {
+          "id": "sample-lottie",
+          "type": "Lottie",
+          "content": {
+            "src": "/seed/spin.json",
+            "loop": true,
+            "autoplay": true,
+            "alt": "A turning square"
+          },
+          "style": {
+            "base": {
+              "x": 20,
+              "y": 0,
+              "w": 72,
+              "h": 72,
+              "z": 4
+            },
+            "desktop": {
+              "x": 700,
+              "y": 380,
+              "w": 96,
+              "h": 96
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sample-media",
+      "kind": "grid",
+      "name": "Media",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 16,
+          "padding": "56px 20px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "columns": 2,
+          "padding": "72px 56px"
+        }
+      },
+      "children": [
+        {
+          "id": "sample-media-h",
+          "type": "Text",
+          "content": {
+            "text": "Video, audio, 3D",
+            "styleId": "h2",
+            "tag": "h2"
+          },
+          "style": {
+            "base": {},
+            "desktop": {
+              "colSpan": 2
+            }
+          }
+        },
+        {
+          "id": "sample-video",
+          "type": "Video",
+          "content": {
+            "source": "upload",
+            "src": "/seed/sunrise.webm",
+            "alt": "A sun crossing the desert",
+            "autoplay": true,
+            "loop": true,
+            "controls": false,
+            "playInView": true
+          },
+          "style": {
+            "base": {
+              "aspectRatio": "16/9",
+              "radius": [
+                12,
+                12,
+                12,
+                12
+              ]
+            }
+          },
+          "frame": {
+            "base": {
+              "fit": "fill",
+              "focalX": 50,
+              "focalY": 50,
+              "zoom": 1,
+              "panX": 0,
+              "panY": 0
+            }
+          },
+          "effects": {
+            "enter": "slide-up"
+          }
+        },
+        {
+          "id": "sample-model",
+          "type": "Model3D",
+          "content": {
+            "src": "/seed/cube.glb",
+            "alt": "A rust-coloured cube",
+            "autoRotate": true,
+            "controls": true
+          },
+          "style": {
+            "base": {
+              "aspectRatio": "16/9",
+              "radius": [
+                12,
+                12,
+                12,
+                12
+              ],
+              "background": "token:sand"
+            }
+          }
+        },
+        {
+          "id": "sample-audio",
+          "type": "Audio",
+          "content": {
+            "src": "/seed/tone.wav",
+            "title": "Desert static",
+            "artist": "A short test tone"
+          },
+          "style": {
+            "base": {}
+          },
+          "effects": {
+            "enter": "fade"
+          }
+        },
+        {
+          "id": "sample-file",
+          "type": "FileDownload",
+          "content": {
+            "src": "/seed/desert.svg",
+            "label": "Desert line art",
+            "note": "vector"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "sample-embeds",
+      "kind": "flow",
+      "name": "Embeds and code",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "56px 20px",
+          "maxWidth": 760
+        },
+        "desktop": {
+          "padding": "72px 56px 96px"
+        }
+      },
+      "children": [
+        {
+          "id": "sample-embeds-h",
+          "type": "Text",
+          "content": {
+            "text": "Embeds and code",
+            "styleId": "h2",
+            "tag": "h2"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "sample-spotify",
+          "type": "SpotifyEmbed",
+          "content": {
+            "url": "2FeVxQ6ZPLOAuoejGJj9Fb",
+            "compact": true
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "sample-youtube",
+          "type": "Video",
+          "content": {
+            "source": "link",
+            "src": "",
+            "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+            "poster": "/art/storefront.png",
+            "alt": "Big Buck Bunny",
+            "autoplay": false,
+            "loop": false,
+            "controls": true
+          },
+          "style": {
+            "base": {
+              "aspectRatio": "16/9",
+              "radius": [
+                12,
+                12,
+                12,
+                12
+              ]
+            }
+          }
+        },
+        {
+          "id": "sample-map",
+          "type": "Embed",
+          "content": {
+            "url": "https://www.google.com/maps/place/Marfa,+TX"
+          },
+          "style": {
+            "base": {
+              "radius": [
+                12,
+                12,
+                12,
+                12
+              ]
+            }
+          }
+        },
+        {
+          "id": "sample-divider",
+          "type": "Divider",
+          "content": {
+            "variant": "drawn"
+          },
+          "style": {
+            "base": {
+              "margin": "12px 0"
+            }
+          }
+        },
+        {
+          "id": "sample-code",
+          "type": "Code",
+          "content": {
+            "html": "<div class=\"ticker\"><span>NOW SHOWING · DUST AND NEON · NOW SHOWING · DUST AND NEON · </span></div>",
+            "css": ".ticker{overflow:hidden;white-space:nowrap;font:600 14px Inter,system-ui,sans-serif;letter-spacing:.12em;color:#141414;padding:10px 0}.ticker span{display:inline-block;animation:slide 12s linear infinite}@keyframes slide{to{transform:translateX(-50%)}}@media (prefers-reduced-motion:reduce){.ticker span{animation:none}}",
+            "js": "",
+            "mode": "sandboxed"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "sample-spacer",
+          "type": "Spacer",
+          "content": {},
+          "style": {
+            "base": {
+              "height": "16px"
+            },
+            "desktop": {
+              "height": "40px"
+            }
+          }
+        },
+        {
+          "id": "sample-gallery",
+          "type": "GalleryGrid",
+          "content": {
+            "items": [
+              {
+                "src": "/art/keychain.png",
+                "alt": "Keychain",
+                "title": "Keychain"
+              },
+              {
+                "src": "/art/hear-no-evil-3d.png",
+                "alt": "Hear no evil, 3D",
+                "title": "Hear no evil"
+              },
+              {
+                "src": "/art/j-star1.jpg",
+                "alt": "Sketchbook 01",
+                "title": "Sketchbook 01"
+              },
+              {
+                "src": "/art/j-star3.jpg",
+                "alt": "Sketchbook 03",
+                "title": "Sketchbook 03"
+              }
+            ],
+            "columns": 2,
+            "columnsDesktop": 4,
+            "gap": 12,
+            "lightbox": true
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "sample-diary",
+          "type": "DiaryList",
+          "content": {
+            "limit": 1,
+            "showImages": false
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "sample-playlist",
+          "type": "PlaylistCard",
+          "content": {
+            "source": "one",
+            "playlistId": "pl-rock"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "sample-footer",
+      "kind": "flow",
+      "name": "Footer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "sample-footer-ref",
+          "type": "Global",
+          "content": {
+            "globalId": "footer"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": [
+    {
+      "id": "sample-badge",
+      "node": {
+        "id": "sample-badge-text",
+        "type": "Text",
+        "content": {
+          "text": "Overlay · straddles two sections",
+          "styleId": "label",
+          "tag": "p"
+        },
+        "style": {
+          "base": {
+            "padding": "8px 14px",
+            "radius": [
+              999,
+              999,
+              999,
+              999
+            ],
+            "background": "token:rust",
+            "color": "token:bone",
+            "textAlign": "center"
+          }
+        }
+      },
+      "anchor": {
+        "sectionId": "sample-grid",
+        "edge": "top"
+      },
+      "place": {
+        "base": {
+          "h": "center",
+          "v": "top",
+          "dx": 0,
+          "dy": 0,
+          "width": 280
+        },
+        "desktop": {
+          "h": "right",
+          "dx": -56,
+          "width": 300
+        }
+      },
+      "z": 6
+    }
+  ]
+}
