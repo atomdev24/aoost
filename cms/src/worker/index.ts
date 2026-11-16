@@ -10,6 +10,16 @@ export { DraftStore } from "./draft-store";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    // www.alexoostendurp.com → alexoostendurp.com (keeps the path), so the editor lock and links have one address.
+    {
+      const u = new URL(request.url);
+      if (u.hostname.startsWith("www.")) {
+        u.hostname = u.hostname.slice(4);
+        return Response.redirect(u.toString(), 301);
+      }
+    }
+    // Public pages and files go straight to the static site (no sign-in work on every visit).
+    if (!/^\/(admin|api|mcp|media|preview|_published\.json)(\/|$)/.test(new URL(request.url).pathname)) return env.ASSETS.fetch(request);
     const url = new URL(request.url);
     const path = url.pathname;
     try {

@@ -16,7 +16,8 @@ binding = "ASSETS"
 html_handling = "auto-trailing-slash"
 not_found_handling = "404-page"
 # The Worker runs first for everything that needs auth or is dynamic.
-run_worker_first = ["/admin", "/admin/*", "/api/*", "/mcp", "/mcp/*", "/media/*", "/preview", "/preview/*", "/_published.json"]
+# Every request reaches the Worker first so www can forward to the plain address; public pages are handed straight to the static assets.
+run_worker_first = true
 
 [[r2_buckets]]
 binding = "MEDIA"
