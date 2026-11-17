@@ -2,6 +2,7 @@ import { useState } from "react";
 import { components, getComponent } from "../../components/registry";
 import { createOverlay, isHidden, nudgeOrder, remove, rename, setHidden, setLocked } from "../../model/page-ops";
 import type { Node, Section } from "../../schema";
+import { revealBlock } from "../board/bridge";
 import { usePuck } from "../puck/usePuck";
 import { currentPage, getState, setOverlay, updatePage, useEditor } from "../store";
 import { Select } from "./kit";
@@ -47,8 +48,7 @@ export function LayersPanel() {
     setOverlay(null);
     const selector = getSelectorForId(id);
     if (selector) dispatch({ type: "setUi", ui: { itemSelector: selector } });
-    const frame = document.querySelector<HTMLIFrameElement>("#preview-frame");
-    frame?.contentDocument?.querySelector(`[data-node-id="${CSS.escape(id)}"], [data-section-id="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    revealBlock(id, getState().bp);
   };
   const selectOverlay = (id: string) => {
     dispatch({ type: "setUi", ui: { itemSelector: null } });
@@ -112,12 +112,13 @@ export function LayersPanel() {
   return (
     <div className="ed-panel">
       <div className="ed-panel-head">
-        <span className="ed-caps">Layers · {bp}</span>
+        <span className="ed-caps">{page.title}</span>
       </div>
       <ul className="ed-layers">
         {page.sections.flatMap((s, i) => [
           row(s, { id: s.id, label: s.name ?? `Section ${i + 1}`, meta: KIND_LABEL[s.kind], depth: 0, selected: selection.includes(s.id), onSelect: () => select(s.id) }),
-          ...s.children.map((n) =>
+          // One-block sections (the homepage) show just the section until it is selected; bigger ones always list their blocks.
+          ...(s.children.length > 1 || selection.some((id) => id === s.id || s.children.some((n) => n.id === id)) ? s.children : []).map((n) =>
             row(n, { id: n.id, label: n.name ?? getComponent(n.type)?.label ?? n.type, meta: n.type === "Text" ? String(n.content.text ?? "").slice(0, 24) : "", depth: 1, selected: selection.includes(n.id), onSelect: () => select(n.id) }),
           ),
         ])}

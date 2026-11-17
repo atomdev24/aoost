@@ -1,6 +1,6 @@
 import { authenticate, login, logout } from "./auth";
 import { editorApi, preview } from "./api";
-import type { Env } from "./env";
+import { draftStub, type Env } from "./env";
 import { error, html, json } from "./http";
 import { loginPage } from "./login-page";
 import { mcp } from "./mcp";
@@ -51,6 +51,8 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
 
   if (path === "/mcp" || path === "/mcp/") {
     if (!who) return new Response(JSON.stringify({ jsonrpc: "2.0", id: null, error: { code: -32001, message: "Unauthorized. Send the editor password as a bearer token." } }), { status: 401, headers: { "Content-Type": "application/json", "WWW-Authenticate": 'Bearer realm="aoost"' } });
+    // Remember that the connector reached us with valid credentials (the editor's "Claude connected" pill).
+    if (who.via !== "session") await draftStub(env).noteConnector().catch(() => {});
     return mcp(request, env);
   }
 

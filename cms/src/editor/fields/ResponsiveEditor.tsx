@@ -1,41 +1,61 @@
 import { Fragment, useId } from "react";
-import { isOverridden, resetToMobile, resolve, setAt } from "../../responsive/resolve";
+import { isOverridden, resetToDesktop, resolve, setAt, setOnly } from "../../responsive/resolve";
 import { Length, type Responsive, type SectionLayout, type Style } from "../../schema";
 import { useEditor } from "../store";
 import { ColorInput, NumberInput, Row, Select, TextInput, Toggle } from "../ui/kit";
 import type { RowContext, RowDef } from "./rows";
 
+const BOX = new Set(["x", "y", "w", "h"]);
+
 /**
- * Edits a Responsive<T> at the active breakpoint (SPEC §3): on Mobile it
- * writes the base, on Desktop it writes overrides only. A property that
- * differs from mobile shows a dot; clicking it resets to mobile.
+ * Edits a Responsive<T> at the active breakpoint. Desktop is the reference:
+ * an edit on Mobile changes Mobile only (setOnly) and the value gets a blue
+ * dot; the dot, or "Reset to desktop", brings back the desktop value. The
+ * stored format stays mobile-base + desktop overrides (SPEC §3).
  */
-export function ResponsiveEditor<T extends object>({ value, onChange, rows, ctx = {} }: { value: Responsive<T>; onChange: (next: Responsive<T>) => void; rows: RowDef<T>[]; ctx?: RowContext }) {
+export function ResponsiveEditor<T extends object>({
+  value,
+  onChange,
+  rows,
+  ctx = {},
+  groups: onlyGroups,
+  hideHeads,
+}: {
+  value: Responsive<T>;
+  onChange: (next: Responsive<T>) => void;
+  rows: RowDef<T>[];
+  ctx?: RowContext;
+  /** Show only these row groups (in this order). */
+  groups?: string[];
+  /** Groups whose subheading the surrounding panel already shows. */
+  hideHeads?: string[];
+}) {
   const bp = useEditor((s) => s.bp);
   const uid = useId();
   const safe: Responsive<T> = value ?? ({ base: {} } as Responsive<T>);
   const current = resolve(safe, bp) as Record<string, unknown>;
-  const visible = rows.filter((r) => !r.when || r.when(ctx));
-  const groups = [...new Set(visible.map((r) => r.group))];
-  const set = (key: string, v: unknown) => onChange(setAt(safe, bp, { [key]: v } as Partial<T>));
+  // Visibility has its own "Visible on" switches.
+  const visible = rows.filter((r) => r.key !== "hidden" && (!r.when || r.when(ctx)) && (!onlyGroups || onlyGroups.includes(r.group)));
+  const groups = onlyGroups ? onlyGroups.filter((g) => visible.some((r) => r.group === g)) : [...new Set(visible.map((r) => r.group))];
+  // A free-canvas layer's position and size on mobile also drive desktop's scaled layout, as dragging does.
+  const drivesDesktop = (key: string) => ctx.parentKind === "canvas" && BOX.has(key);
+  const set = (key: string, v: unknown) => onChange((drivesDesktop(key) ? setAt : setOnly)(safe, bp, { [key]: v } as Partial<T>));
+  const overridden = visible.filter((r) => isOverridden(safe, r.key as keyof T));
 
   return (
     <div className="ed-responsive">
-      <p className="ed-bp-note">
-        Editing <strong>{bp === "mobile" ? "Mobile (base)" : "Desktop overrides"}</strong>
-      </p>
       {groups.map((group) => (
         <Fragment key={group}>
-          <h5 className="ed-subhead">{group}</h5>
+          {groups.length > 1 && !hideHeads?.includes(group) ? <h5 className="ed-subhead">{group}</h5> : null}
           {visible
             .filter((r) => r.group === group)
             .map((row) => {
               const over = isOverridden(safe, row.key as keyof T);
               const dot =
-                bp === "desktop" && over ? (
-                  <button type="button" className="ed-dot" title="Differs from mobile. Click to reset to mobile." aria-label={`Reset ${row.label} to mobile`} onClick={() => onChange(resetToMobile(safe, row.key as keyof T))} />
-                ) : bp === "mobile" && over ? (
-                  <span className="ed-dot ed-dot-hollow" title="Desktop has its own value for this" />
+                bp === "mobile" && over ? (
+                  <button type="button" className="ed-dot" title="Mobile-only change. Click to reset to desktop." aria-label={`Reset ${row.label} to desktop`} onClick={() => onChange(resetToDesktop(safe, row.key as keyof T))} />
+                ) : bp === "desktop" && over ? (
+                  <span className="ed-dot ed-dot-hollow" title="Mobile has its own value for this" />
                 ) : null;
               const id = `${uid}-${row.key}`;
               return (
@@ -46,6 +66,18 @@ export function ResponsiveEditor<T extends object>({ value, onChange, rows, ctx 
             })}
         </Fragment>
       ))}
+      {bp === "mobile" && overridden.length ? (
+        <p className="ed-override-note">
+          Blue dots are mobile-only changes.{" "}
+          <button
+            type="button"
+            className="ed-link"
+            onClick={() => onChange(overridden.reduce((r, row) => resetToDesktop(r, row.key as keyof T), safe))}
+          >
+            Reset to desktop
+          </button>
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -46,6 +46,10 @@ describe("page ops", () => {
     expect([isHidden(n2, "mobile"), isHidden(n2, "desktop")]).toEqual([true, false]);
     const section = setHidden(home, "home-latest", "mobile", true).sections[2]!;
     expect(isHidden(section, "mobile")).toBe(true);
+    // hiding on mobile leaves desktop visible, and showing it again leaves no trace
+    expect(isHidden(section, "desktop")).toBe(false);
+    const again = setHidden(setHidden(home, "home-latest", "mobile", true), "home-latest", "mobile", false).sections[2]!;
+    expect(again.layout).toEqual(home.sections[2]!.layout);
   });
   it("adds sections and nodes with component defaults", () => {
     const section = createSection("grid");

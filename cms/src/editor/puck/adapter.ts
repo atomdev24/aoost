@@ -30,7 +30,9 @@ export function nodeToItem(node: Node): PuckItem {
 }
 
 export function itemToNode(item: PuckItem): Node {
-  const { id, name, locked, style, frame, effects, puck: _puck, editMode: _editMode, ...content } = item.props as Record<string, unknown> & { id: string };
+  const { id, name, locked, style, frame, effects, puck: _puck, editMode: _editMode, ...rest } = item.props as Record<string, unknown> & { id: string };
+  // "__" props are inspector-only headings and switches, never content.
+  const content = Object.fromEntries(Object.entries(rest).filter(([k]) => !k.startsWith("__")));
   return defined({
     id,
     type: item.type,

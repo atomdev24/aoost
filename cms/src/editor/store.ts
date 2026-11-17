@@ -18,6 +18,8 @@ export type EditorState = {
   bp: Breakpoint;
   save: SaveStatus;
   saveError: string | null;
+  /** When the draft last reached the server (for "saved just now"). */
+  savedAt: number | null;
   /** The draft differs from what is published. */
   unpublished: boolean;
   past: HistoryEntry[];
@@ -70,6 +72,7 @@ export function initStore(site: Site, unpublished: boolean) {
     bp: window.innerWidth < 900 ? "mobile" : "desktop",
     save: "idle",
     saveError: null,
+    savedAt: null,
     unpublished,
     past: [],
     future: [],
@@ -235,6 +238,8 @@ export const setUnpublished = (unpublished: boolean) => set({ unpublished });
 
 function scheduleSave() {
   clearTimeout(saveTimer);
+  // Unsaved edits read as "saving…" straight away, so the status never claims a save that hasn't happened.
+  if (state.save !== "saving" && state.save !== "error") set({ save: "saving" });
   saveTimer = setTimeout(() => void flush(), SAVE_DELAY);
 }
 
@@ -257,7 +262,7 @@ export async function flush(): Promise<boolean> {
     const { version } = await api.ops(ops, state.clientId, state.lastLabel ?? undefined);
     onSaved?.(version);
     synced = target;
-    set({ save: state.site === target ? "saved" : "saving" });
+    set({ save: state.site === target ? "saved" : "saving", savedAt: Date.now() });
     if (state.site !== target) scheduleSave();
     return true;
   } catch (e) {

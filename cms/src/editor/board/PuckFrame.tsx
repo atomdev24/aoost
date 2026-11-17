@@ -1,0 +1,55 @@
+import { useEffect, useMemo, type ReactNode } from "react";
+import { components } from "../../components/registry";
+import { getState, useEditor } from "../store";
+import { attachKeys } from "./keys";
+import { frameOrigin, getBoard, setHeight } from "./store";
+import { onBoardWheel } from "./wheel";
+
+/**
+ * Runs inside Puck's editable frame (Puck's `iframe` override): loads the
+ * site's fonts, forwards keys and the wheel to the board, and reports the
+ * page's height so the frame is exactly as tall as the page.
+ */
+export function PuckFrame({ children, document: doc }: { children: ReactNode; document?: Document }) {
+  const themeFonts = useEditor((s) => s.site.theme.googleFonts);
+  // The canvas also needs the fonts of any component kit (their pages bring those fonts on the site).
+  const fonts = useMemo(() => [...new Set([...themeFonts, ...components.flatMap((c) => c.kit?.googleFonts ?? [])])], [themeFonts]);
+
+  useEffect(() => {
+    if (!doc || !fonts.length) return;
+    const link = doc.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?${fonts.map((f) => `family=${f.replace(/ /g, "+")}`).join("&")}&display=swap`;
+    doc.head.appendChild(link);
+    doc.documentElement.classList.add("js");
+    return () => link.remove();
+  }, [doc, fonts]);
+
+  useEffect(() => {
+    if (!doc) return;
+    const detach = attachKeys(doc);
+    const wheel = (e: WheelEvent) => {
+      const { view } = getBoard();
+      const o = frameOrigin(getState().bp);
+      onBoardWheel(e, { x: (o.x + e.clientX) * view.zoom + view.x, y: (o.y + e.clientY) * view.zoom + view.y });
+    };
+    doc.addEventListener("wheel", wheel, { passive: false });
+    const RO = doc.defaultView!.ResizeObserver;
+    const measure = () => {
+      const main = doc.getElementById("main");
+      if (main) setHeight(getState().bp, doc.documentElement.scrollHeight);
+    };
+    const ro = new RO(measure);
+    ro.observe(doc.body);
+    const mo = new (doc.defaultView!.MutationObserver)(measure);
+    mo.observe(doc.body, { childList: true });
+    return () => {
+      detach();
+      doc.removeEventListener("wheel", wheel);
+      ro.disconnect();
+      mo.disconnect();
+    };
+  }, [doc]);
+
+  return <>{children}</>;
+}

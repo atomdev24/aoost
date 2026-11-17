@@ -14,8 +14,11 @@ import {
   isOverridden,
   layerBox,
   overriddenKeys,
+  mobileOverrides,
+  resetToDesktop,
   resetToMobile,
   resolve,
+  setOnly,
   safe,
   setAt,
   Sheet,
@@ -190,5 +193,39 @@ describe("css generation", () => {
     expect(css).toContain("--c-bone:#F3EFE6");
     expect(css).toContain(".t-h1{font-family:var(--font-display);font-size:calc(var(--cs, 1px) * 36)");
     expect(css).toMatch(/@media \(min-width:900px\)\{[^]*\.t-h1\{font-size:calc\(var\(--cs, 1px\) \* 64\)\}/);
+  });
+});
+
+describe("setOnly and resetToDesktop (side-by-side editing)", () => {
+  type L = { columns: number; gap: number; padding?: string };
+  const grid: Responsive<L> = { base: { columns: 1, gap: 14 }, desktop: { columns: 3 } };
+
+  it("a desktop edit is a plain override", () => {
+    expect(setOnly(grid, "desktop", { gap: 20 })).toEqual({ base: { columns: 1, gap: 14 }, desktop: { columns: 3, gap: 20 } });
+  });
+
+  it("a mobile edit leaves desktop showing what it showed", () => {
+    const flow: Responsive<L> = { base: { columns: 1, gap: 18 } };
+    const next = setOnly(flow, "mobile", { columns: 2 });
+    expect(next).toEqual({ base: { columns: 2, gap: 18 }, desktop: { columns: 1 } });
+    expect(resolve(next, "desktop").columns).toBe(1);
+    expect(resolve(next, "mobile").columns).toBe(2);
+    expect(mobileOverrides(next)).toEqual(["columns"]);
+  });
+
+  it("setting mobile back to the desktop value drops the override", () => {
+    expect(setOnly(grid, "mobile", { columns: 3 })).toEqual({ base: { columns: 3, gap: 14 } });
+  });
+
+  it("a key desktop has no value for follows the base", () => {
+    const flow: Responsive<L> = { base: { columns: 1, gap: 18 } };
+    expect(setOnly(flow, "mobile", { padding: "8px" })).toEqual({ base: { columns: 1, gap: 18, padding: "8px" } });
+  });
+
+  it("reset to desktop copies desktop's value into mobile", () => {
+    expect(resetToDesktop(grid, "columns")).toEqual({ base: { columns: 3, gap: 14 } });
+    const two: Responsive<L> = { base: { columns: 1, gap: 8 }, desktop: { columns: 4, gap: 20 } };
+    expect(resetToDesktop(two)).toEqual({ base: { columns: 4, gap: 20 } });
+    expect(resetToDesktop({ base: { columns: 1, gap: 8 } }, "gap")).toEqual({ base: { columns: 1, gap: 8 } });
   });
 });

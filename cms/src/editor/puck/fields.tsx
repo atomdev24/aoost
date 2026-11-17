@@ -1,11 +1,12 @@
 import type { CustomField } from "@puckeditor/core";
-import { resolve, setAt } from "../../responsive/resolve";
+import { resolve, setOnly } from "../../responsive/resolve";
 import type { FrameFit, Node, Responsive, Section, SectionLayout, Style } from "../../schema";
 import { DEFAULT_FRAME_FIT } from "../../schema";
 import { FocalPicker } from "../fields/FocalPicker";
 import { ResponsiveEditor } from "../fields/ResponsiveEditor";
 import { FRAME_ROWS, SECTION_ROWS, STYLE_ROWS } from "../fields/rows";
-import { useEditor } from "../store";
+import { isHidden, locate, setHidden } from "../../model/page-ops";
+import { currentPage, updatePage, useEditor } from "../store";
 import { alignSelection, distributeSelection } from "../canvas/actions";
 import type { AlignMode } from "../canvas/geometry";
 import { Select, Toggle } from "../ui/kit";
@@ -59,21 +60,85 @@ function AlignBar() {
   );
 }
 
+/** The block's style, as two inspector groups: Layout (where and how big) and Frame (how it looks). */
 function StylePanel({ value, onChange, framed }: { value: Responsive<Style>; onChange: (v: Responsive<Style>) => void; framed: boolean }) {
   const parentKind = useParentKind();
   return (
     <>
-      {parentKind === "canvas" ? <AlignBar /> : null}
-      <ResponsiveEditor value={value} onChange={onChange} rows={STYLE_ROWS} ctx={{ parentKind, framed }} />
+      <InspectorGroup title="Layout">
+        {parentKind === "canvas" ? <AlignBar /> : null}
+        <ResponsiveEditor value={value} onChange={onChange} rows={STYLE_ROWS} ctx={{ parentKind, framed }} groups={["Position", "Size", "Grid cell", "Spacing"]} />
+      </InspectorGroup>
+      <InspectorGroup title="Frame">
+        <ResponsiveEditor value={value} onChange={onChange} rows={STYLE_ROWS} ctx={{ parentKind, framed }} groups={["Frame", "Look"]} hideHeads={["Frame"]} />
+      </InspectorGroup>
     </>
   );
 }
 
 export const styleField = (framed: boolean): CustomField<Responsive<Style>> => ({
   type: "custom",
-  label: "Layout and look",
+  label: "Layout",
   render: ({ value, onChange }) => <StylePanel value={value} onChange={onChange} framed={framed} />,
 });
+
+/** A titled group in the inspector: 11px semibold label, then its rows. */
+export function InspectorGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="ed-igroup">
+      <h4 className="ed-igroup-title">{title}</h4>
+      {children}
+    </section>
+  );
+}
+
+/** "Content": the heading above a block's own fields (text, images, links). Content is shared by every breakpoint. */
+export const contentHeading: CustomField<undefined> = {
+  type: "custom",
+  label: "Content",
+  render: () => (
+    <h4 className="ed-igroup-title ed-igroup-solo">
+      Content <span>same on every breakpoint</span>
+    </h4>
+  ),
+};
+
+/** "Visible on": one switch per breakpoint. Each changes only its own breakpoint. */
+function VisibleOn() {
+  const id = usePuck((s) => s.selectedItem?.props.id as string | undefined);
+  const page = useEditor(currentPage);
+  const at = id ? locate(page, id) : null;
+  if (!id || !at || at.kind === "overlay") return null;
+  const item = at.kind === "section" ? at.section : at.node;
+  return (
+    <InspectorGroup title="Visible on">
+      <div className="ed-visible" role="group" aria-label="Visible on">
+        {(["desktop", "mobile"] as const).map((bp) => {
+          const shown = !isHidden(item, bp);
+          const name = bp === "desktop" ? "Desktop" : "Mobile";
+          return (
+            <button
+              key={bp}
+              type="button"
+              className="ed-chip"
+              aria-pressed={shown}
+              aria-label={`Visible on ${name}`}
+              onClick={() => updatePage(page.id, (p) => setHidden(p, id, bp, shown), `${shown ? "Hide on" : "Show on"} ${name}`)}
+            >
+              {name} {shown ? "✓" : "hidden"}
+            </button>
+          );
+        })}
+      </div>
+    </InspectorGroup>
+  );
+}
+
+export const visibleOnField: CustomField<undefined> = {
+  type: "custom",
+  label: "Visible on",
+  render: () => <VisibleOn />,
+};
 
 /**
  * InDesign-style frame vs content: the frame's size, ratio, corners, border
@@ -90,17 +155,17 @@ function FramePanel({ value, onChange }: { value: Responsive<FrameFit> | undefin
     <>
       <div className="ed-seg ed-seg-fill" role="group" aria-label="Content fit">
         {(["fill", "fit", "free"] as const).map((fit) => (
-          <button key={fit} type="button" aria-pressed={now.fit === fit} title={fit === "free" ? "Pan and zoom the content freely" : undefined} onClick={() => onChange(setAt(v, bp, { fit }))}>
+          <button key={fit} type="button" aria-pressed={now.fit === fit} title={fit === "free" ? "Pan and zoom the content freely" : undefined} onClick={() => onChange(setOnly(v, bp, { fit }))}>
             {fit === "fill" ? "Fill" : fit === "fit" ? "Fit" : "Free"}
           </button>
         ))}
       </div>
-      {preview ? <FocalPicker src={preview} x={now.focalX} y={now.focalY} onChange={(focalX, focalY) => onChange(setAt(v, bp, { focalX, focalY }))} /> : null}
+      {preview ? <FocalPicker src={preview} x={now.focalX} y={now.focalY} onChange={(focalX, focalY) => onChange(setOnly(v, bp, { focalX, focalY }))} /> : null}
       {now.fit === "free" ? (
         <div className="ed-row">
           <span className="ed-label">Zoom</span>
           <div className="ed-control">
-            <input className="ed-range" type="range" min={0.5} max={4} step={0.05} value={now.zoom} aria-label="Zoom" onChange={(e) => onChange(setAt(v, bp, { zoom: Number(e.target.value) }))} />
+            <input className="ed-range" type="range" min={0.5} max={4} step={0.05} value={now.zoom} aria-label="Zoom" onChange={(e) => onChange(setOnly(v, bp, { zoom: Number(e.target.value) }))} />
           </div>
         </div>
       ) : null}
@@ -111,8 +176,12 @@ function FramePanel({ value, onChange }: { value: Responsive<FrameFit> | undefin
 
 export const frameField: CustomField<Responsive<FrameFit>> = {
   type: "custom",
-  label: "Content in frame",
-  render: ({ value, onChange }) => <FramePanel value={value} onChange={onChange} />,
+  label: "Picture in frame",
+  render: ({ value, onChange }) => (
+    <InspectorGroup title="Picture in frame">
+      <FramePanel value={value} onChange={onChange} />
+    </InspectorGroup>
+  ),
 };
 
 const ENTER = [
@@ -134,8 +203,8 @@ export const effectsField: CustomField<Node["effects"]> = {
       onChange(Object.keys(next).length ? (next as Node["effects"]) : undefined);
     };
     return (
+      <InspectorGroup title="Motion">
       <div className="ed-responsive">
-        <h5 className="ed-subhead">Scroll effects</h5>
         <div className="ed-row">
           <span className="ed-label">On enter</span>
           <div className="ed-control">
@@ -156,6 +225,7 @@ export const effectsField: CustomField<Node["effects"]> = {
         </div>
         <p className="ed-hint">Effects are skipped for visitors who prefer reduced motion.</p>
       </div>
+      </InspectorGroup>
     );
   },
 };
@@ -169,7 +239,7 @@ function SplitBar({ value, onChange }: { value: Responsive<SectionLayout>; onCha
       <span className="ed-label">Split into columns</span>
       <div className="ed-seg ed-seg-fill" role="group" aria-label="Split into columns">
         {[1, 2, 3, 4, 6].map((n) => (
-          <button key={n} type="button" aria-pressed={columns === n} onClick={() => onChange(setAt(value, bp, { columns: n }))}>
+          <button key={n} type="button" aria-pressed={columns === n} onClick={() => onChange(setOnly(value, bp, { columns: n }))}>
             {n}
           </button>
         ))}
@@ -183,8 +253,13 @@ export const layoutField = (kind: Section["kind"]): CustomField<Responsive<Secti
   label: "Section layout",
   render: ({ value, onChange }) => (
     <>
-      {kind === "grid" ? <SplitBar value={value} onChange={onChange} /> : null}
-      <ResponsiveEditor value={value} onChange={onChange} rows={SECTION_ROWS} ctx={{ parentKind: kind }} />
+      <InspectorGroup title="Layout">
+        {kind === "grid" ? <SplitBar value={value} onChange={onChange} /> : null}
+        <ResponsiveEditor value={value} onChange={onChange} rows={SECTION_ROWS} ctx={{ parentKind: kind }} groups={["Layout"]} />
+      </InspectorGroup>
+      <InspectorGroup title="Frame">
+        <ResponsiveEditor value={value} onChange={onChange} rows={SECTION_ROWS} ctx={{ parentKind: kind }} groups={["Background"]} />
+      </InspectorGroup>
     </>
   ),
 });

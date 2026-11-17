@@ -30,5 +30,6 @@ export const api = {
   ops: (ops: Op[], clientId: string, summary?: string) => call<{ version: number }>("/api/editor/ops", { method: "POST", body: JSON.stringify({ ops, clientId, summary }) }),
   reset: () => call<{ version: number }>("/api/editor/reset", { method: "POST" }),
   publish: (message?: string) => call<{ commit: string | null; url: string | null; changed: string[] }>("/api/editor/publish", { method: "POST", body: JSON.stringify({ message }) }),
+  claude: () => call<{ connected: boolean; seenAt: number | null }>("/api/editor/claude"),
   logout: () => call("/api/logout", { method: "POST" }),
 };

@@ -1,15 +1,26 @@
 /* aoost editor: the dark, Photoshop-style workspace from the mockups (SPEC §9). */
 :root {
-  --ed-bg: #141416;
-  --ed-panel: #1c1c1f;
-  --ed-raised: #222226;
-  --ed-selected: #2c2c31;
-  --ed-line: #34343a;
-  --ed-line-strong: #45454c;
-  --ed-text: #ece9e3;
-  --ed-text-2: #cfc8bb;
-  --ed-muted: #a8a39a;
-  --ed-accent: #e2683a;
+  /* Direction B, "dark Pro" (EDITOR-REDESIGN.md §1). */
+  --ed-canvas: #161618;
+  --ed-dot: #2c2c30;
+  --ed-panel: #1e1e21;
+  --ed-bar: #232326;
+  --ed-line: #3a3a3e;
+  --ed-text: #f5f5f7;
+  --ed-sub: #a1a1a6;
+  --ed-accent: #0a84ff;
+  --ed-accent-soft: rgba(10, 132, 255, 0.18);
+  --ed-seg: #2e2e32;
+  --ed-seg-on: #48484d;
+  --ed-input: #2c2c30;
+  --ed-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif;
+  /* Older names used across the panels, mapped onto the tokens above. */
+  --ed-bg: var(--ed-canvas);
+  --ed-raised: var(--ed-input);
+  --ed-selected: #36363b;
+  --ed-line-strong: var(--ed-seg-on);
+  --ed-text-2: #d1d1d6;
+  --ed-muted: var(--ed-sub);
   --ed-ink: #141414;
   color-scheme: dark;
 }
@@ -20,41 +31,43 @@ body,
   margin: 0;
 }
 body {
-  background: var(--ed-bg);
+  background: var(--ed-canvas);
   color: var(--ed-text);
-  font: 14px/1.45 Inter, system-ui, sans-serif;
+  font: 13px/1.4 var(--ed-font);
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ---- Puck, re-themed dark. Its neutral scale is flipped; its accent becomes rust. ---- */
+/* ---- Puck, re-themed: its neutral scale is flipped onto the dark greys, its accent is the system blue. ---- */
 .Puck,
 :root {
-  --puck-color-white: #1c1c1f;
-  --puck-color-black: #ece9e3;
-  --puck-color-grey-01: #f5f2ec;
-  --puck-color-grey-02: #ece9e3;
-  --puck-color-grey-03: #cfc8bb;
-  --puck-color-grey-04: #bdb7ad;
-  --puck-color-grey-05: #a8a39a;
-  --puck-color-grey-06: #8a867f;
-  --puck-color-grey-07: #6b6862;
-  --puck-color-grey-08: #45454c;
-  --puck-color-grey-09: #34343a;
-  --puck-color-grey-10: #2c2c31;
-  --puck-color-grey-11: #222226;
-  --puck-color-grey-12: #1c1c1f;
-  --puck-color-azure-01: #fff3ec;
-  --puck-color-azure-02: #ffe0d1;
-  --puck-color-azure-03: #f6a886;
-  --puck-color-azure-04: #e2683a;
-  --puck-color-azure-05: #e2683a;
-  --puck-color-azure-06: #c9582f;
-  --puck-color-azure-07: #a34624;
-  --puck-color-azure-08: #7a351c;
-  --puck-color-azure-09: #53261605;
-  --puck-color-azure-10: #3a231b;
-  --puck-color-azure-11: #2a1f1b;
-  --puck-color-azure-12: #231d1b;
-  --puck-font-family: Inter, system-ui, sans-serif;
+  --puck-color-white: #1e1e21;
+  --puck-color-black: #f5f5f7;
+  --puck-color-grey-01: #f5f5f7;
+  --puck-color-grey-02: #e5e5ea;
+  --puck-color-grey-03: #d1d1d6;
+  --puck-color-grey-04: #c7c7cc;
+  --puck-color-grey-05: #a1a1a6;
+  --puck-color-grey-06: #8e8e93;
+  --puck-color-grey-07: #6e6e73;
+  --puck-color-grey-08: #48484d;
+  --puck-color-grey-09: #3a3a3e;
+  --puck-color-grey-10: #2e2e32;
+  --puck-color-grey-11: #2c2c30;
+  --puck-color-grey-12: #1e1e21;
+  --puck-color-azure-01: #eaf4ff;
+  --puck-color-azure-02: #cfe6ff;
+  --puck-color-azure-03: #8cc4ff;
+  --puck-color-azure-04: #0a84ff;
+  --puck-color-azure-05: #0a84ff;
+  --puck-color-azure-06: #0a74e0;
+  --puck-color-azure-07: #0862bd;
+  --puck-color-azure-08: #064c93;
+  --puck-color-azure-09: rgba(10, 132, 255, 0.04);
+  --puck-color-azure-10: #10273f;
+  --puck-color-azure-11: #142233;
+  --puck-color-azure-12: #161d27;
+  --puck-font-family: var(--ed-font);
 }
 .Puck {
   color: var(--ed-text);
@@ -85,7 +98,7 @@ body {
   min-width: 0;
 }
 .ed-brand strong {
-  font: 700 17px "Space Grotesk", Inter, sans-serif;
+  font: 700 17px var(--ed-font);
 }
 .ed-brand span {
   color: var(--ed-muted);
@@ -129,7 +142,7 @@ body {
   border-radius: 7px;
   background: transparent;
   color: var(--ed-muted);
-  font: 500 13px Inter, system-ui, sans-serif;
+  font: 500 13px var(--ed-font);
   cursor: pointer;
 }
 .ed-seg-lg button {
@@ -148,7 +161,7 @@ body {
   border-radius: 8px;
   background: transparent;
   color: var(--ed-text);
-  font: 500 14px Inter, system-ui, sans-serif;
+  font: 500 14px var(--ed-font);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -158,11 +171,11 @@ body {
 .ed-btn-accent {
   border-color: var(--ed-accent);
   background: var(--ed-accent);
-  color: var(--ed-ink);
+  color: #fff;
   font-weight: 600;
 }
 .ed-btn-accent:hover:not(:disabled) {
-  background: #f08a5d;
+  background: #409cff;
 }
 .ed-btn-primary {
   border-color: var(--ed-accent);
@@ -172,7 +185,7 @@ body {
 .ed-btn-danger {
   border-color: var(--ed-accent);
   background: var(--ed-accent);
-  color: var(--ed-ink);
+  color: #fff;
 }
 .ed-btn:disabled,
 .ed-icon:disabled {
@@ -203,7 +216,7 @@ body {
   border-radius: 7px;
   background: var(--ed-bg);
   color: var(--ed-text);
-  font: 13px Inter, system-ui, sans-serif;
+  font: 13px var(--ed-font);
 }
 .ed-input[aria-invalid="true"] {
   border-color: var(--ed-accent);
@@ -630,7 +643,7 @@ body {
   border: 0;
   background: transparent;
   color: var(--ed-text);
-  font: 500 13px Inter, system-ui, sans-serif;
+  font: 500 13px var(--ed-font);
   text-align: left;
   cursor: pointer;
 }
@@ -820,7 +833,7 @@ body {
 }
 .ed-style-head small {
   color: var(--ed-muted);
-  font: 12px Inter, system-ui, sans-serif;
+  font: 12px var(--ed-font);
   white-space: nowrap;
 }
 .ed-style-body {
@@ -926,7 +939,7 @@ body {
   border: 0;
   background: transparent;
   color: var(--ed-muted);
-  font: 12px Inter, system-ui, sans-serif;
+  font: 12px var(--ed-font);
   cursor: pointer;
 }
 .ed-navtoggle[aria-pressed="true"] {
@@ -979,7 +992,7 @@ body {
   border-radius: 10px;
   background: var(--ed-bg);
   color: var(--ed-text);
-  font: 500 13px Inter, system-ui, sans-serif;
+  font: 500 13px var(--ed-font);
   text-align: left;
   cursor: pointer;
 }
@@ -1145,7 +1158,7 @@ body {
   border: 0;
   background: transparent;
   color: var(--ed-text);
-  font: 500 14px Inter, system-ui, sans-serif;
+  font: 500 14px var(--ed-font);
   text-align: left;
   cursor: pointer;
 }
@@ -1211,7 +1224,7 @@ body {
 }
 .ed-library.is-over .ed-drop {
   border-color: var(--ed-accent);
-  background: rgba(226, 104, 58, 0.08);
+  background: rgba(10, 132, 255, 0.08);
 }
 .ed-drop {
   display: flex;
@@ -1223,7 +1236,7 @@ body {
   border-radius: 10px;
   background: transparent;
   color: var(--ed-text);
-  font: 500 13px Inter, system-ui, sans-serif;
+  font: 500 13px var(--ed-font);
   text-align: center;
   cursor: pointer;
 }
@@ -1276,7 +1289,7 @@ body {
   background: #e7e0d2; /* sand, so dark line art stays visible */
 }
 .ed-asset-glyph {
-  font: 600 22px Inter, system-ui, sans-serif;
+  font: 600 22px var(--ed-font);
   color: var(--ed-muted);
 }
 .ed-asset-name {
