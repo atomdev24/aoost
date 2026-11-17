@@ -13,7 +13,16 @@ const same = (a: ContentFiles, b: ContentFiles) => {
 export type ApplyResult = { ok: true; version: number } | { ok: false; issues: Issue[] };
 export type DraftState = { version: number; dirty: boolean; editors: number; context: EditorContext | null };
 
+/** A short fingerprint of a set of content files (order-independent). */
+async function fingerprint(files: ContentFiles): Promise<string> {
+  const text = JSON.stringify(Object.keys(files).sort().map((k) => [k, files[k]]));
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 const FILE = "file:";
+/** Fingerprint of the deployed build at the moment we last published. */
+const PUB_BASE = "pubBase";
 /** Snapshot of what was last published from here, until the next deploy catches up. */
 const PUB = "pub:";
 const PUBLISHED_URL = "https://assets.local/_published.json";
@@ -36,8 +45,17 @@ export class DraftStore extends DurableObject<Env> {
       const built = await this.built().catch(() => null);
       const files: ContentFiles = {};
       for (const [key, value] of snapshot) files[key.slice(PUB.length)] = value;
-      // Once a deploy contains exactly this snapshot, it is no longer needed.
-      if (built && same(built, files)) await this.ctx.storage.delete([...snapshot.keys()]);
+      if (built) {
+        // Once a deploy contains exactly this snapshot, it is no longer needed.
+        // And if a newer deploy has landed since we published (content changed in
+        // git, not through this editor), the deploy is the truth: drop the snapshot.
+        const base = await this.ctx.storage.get<string>(PUB_BASE);
+        const movedOn = base === undefined || base !== (await fingerprint(built));
+        if (same(built, files) || movedOn) {
+          await this.ctx.storage.delete([...snapshot.keys(), PUB_BASE]);
+          return built;
+        }
+      }
       return files;
     }
     return this.built();
@@ -133,6 +151,8 @@ export class DraftStore extends DurableObject<Env> {
     const old = await this.ctx.storage.list<string>({ prefix: PUB });
     if (old.size) await this.ctx.storage.delete([...old.keys()]);
     await this.ctx.storage.put(Object.fromEntries(Object.entries(files).map(([path, body]) => [PUB + path, body])));
+    const built = await this.built().catch(() => null);
+    if (built) await this.ctx.storage.put(PUB_BASE, await fingerprint(built));
     this.broadcast({ type: "published", version: this.version });
   }
 
