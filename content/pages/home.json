@@ -80,7 +80,8 @@
                 "image": "/art/grillz.jpg"
               },
               {
-                "image": "/art/monkey-figure.jpg"
+                "image": "/art/monkey-figure.jpg",
+                "hidden": true
               },
               {
                 "image": "/art/storefront.png"
