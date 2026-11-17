@@ -80,6 +80,17 @@ export function TopBar() {
     }
   };
 
+  const discard = async () => {
+    if (!window.confirm("Discard the draft and reload exactly what is live on alexoostendurp.com? Unpublished changes on every page will be lost.")) return;
+    setNotice("Discarding draft…");
+    try {
+      await api.reset();
+      window.location.reload();
+    } catch (e) {
+      setNotice(e instanceof ApiError || e instanceof Error ? e.message : "Couldn't discard the draft.");
+    }
+  };
+
   return (
     <header className="ed-top">
       <PuckSync />
@@ -109,6 +120,11 @@ export function TopBar() {
       <ToolGroup />
       <div className="ed-top-actions">
         <ClaudePill />
+        {unpublished ? (
+          <button type="button" className="ed-btn" onClick={discard} title="Throw away unpublished changes and reload what is live">
+            Discard draft
+          </button>
+        ) : null}
         <button type="button" className="ed-btn" onClick={preview}>
           Preview
         </button>
