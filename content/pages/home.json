@@ -33,29 +33,12 @@
             "timeZone": "Africa/Johannesburg",
             "reel": [
               {
-                "src": "/media/2026/hero-banner-2400x1000-1-he1o.png",
+                "src": "/media/2026/hero-banner-2400x1000-v2-1z6m.png",
                 "alt": ""
               }
             ],
             "reelSeconds": 5.2,
-            "ticker": [
-              {
-                "text": "welcome",
-                "mode": "day"
-              },
-              {
-                "text": "pick a playlist",
-                "mode": "both"
-              },
-              {
-                "text": "you're up late",
-                "mode": "late"
-              },
-              {
-                "text": "the station's still on",
-                "mode": "late"
-              }
-            ],
+            "ticker": [],
             "tickerTopScore": true,
             "tickerVisitors": true,
             "lateMode": true
