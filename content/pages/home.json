@@ -33,6 +33,10 @@
             "timeZone": "Africa/Johannesburg",
             "reel": [
               {
+                "src": "/media/2026/hero-banner-2400x1000-1-he1o.png",
+                "alt": ""
+              },
+              {
                 "src": "/art/hero.jpg",
                 "alt": ""
               }
