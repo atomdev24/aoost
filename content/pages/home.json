@@ -66,6 +66,10 @@
           },
           "style": {
             "base": {}
+          },
+          "effects": {
+            "enter": "slide-right",
+            "parallax": 0.15
           }
         }
       ]
