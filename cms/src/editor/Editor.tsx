@@ -7,6 +7,7 @@ import { Board } from "./board/Board";
 import { connectPuck } from "./board/bridge";
 import { attachKeys } from "./board/keys";
 import { PuckFrame } from "./board/PuckFrame";
+import { useBoard } from "./board/store";
 import "./editor.css";
 import { pageToPuck, puckToPage, type PuckData } from "./puck/adapter";
 import { puckConfig } from "./puck/config";
@@ -40,6 +41,7 @@ function PuckBridge() {
 export function Editor() {
   const pageId = useEditor((s) => s.pageId);
   const bp = useEditor((s) => s.bp);
+  const interacting = useBoard((s) => s.interacting);
   useEffect(() => attachKeys(document), []);
 
   // Initial data per page; later store changes reach Puck through <PuckSync>.
@@ -75,7 +77,7 @@ export function Editor() {
         }}
       >
         <PuckBridge />
-        <div className="ed-shell">
+        <div className={`ed-shell${interacting ? " is-interacting" : ""}`}>
           <TopBar />
           <LeftPanel />
           <Board />

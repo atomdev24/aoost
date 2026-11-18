@@ -5,7 +5,7 @@ import { currentPage, useEditor } from "../store";
 import { activateBreakpoint } from "./bridge";
 import { LiveFrame } from "./LiveFrame";
 import { countMobileOverrides } from "./overrides";
-import { frameRects, getBoard, openPage, panBy, setSize, useBoard } from "./store";
+import { frameRects, getBoard, openPage, panBy, setInteracting, setSize, useBoard } from "./store";
 import { FRAME_GAP, isVisible, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
 import { ZoomBar } from "./ZoomBar";
@@ -56,6 +56,7 @@ export function Board() {
     e.preventDefault();
     const target = e.currentTarget as HTMLElement;
     target.setPointerCapture(e.pointerId);
+    setInteracting(true);
     let last = { x: e.clientX, y: e.clientY };
     target.classList.add("is-grabbing");
     const move = (m: PointerEvent) => {
@@ -63,6 +64,7 @@ export function Board() {
       last = { x: m.clientX, y: m.clientY };
     };
     const up = () => {
+      setInteracting(false);
       target.classList.remove("is-grabbing");
       target.removeEventListener("pointermove", move);
       target.removeEventListener("pointerup", up);

@@ -1,44 +1,122 @@
-/* Direction B workspace: 52px top bar, 248px left panel, the board, 284px inspector.
+/* aoost editor workspace: floating islands, icon rail & flyouts, free canvas, floating inspector.
    Loaded after editor.css; restyles the shared controls and every Puck surface. */
 
 .ed-shell {
-  display: grid;
-  grid-template-areas:
-    "top top top"
-    "left board right";
-  grid-template-columns: 248px minmax(0, 1fr) 284px;
-  grid-template-rows: 52px minmax(0, 1fr);
+  position: relative;
+  width: 100vw;
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
   background: var(--ed-canvas);
-  font: 13px/1.4 var(--ed-font);
+  font: 12px/1.4 var(--ed-font);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
 }
 .ed-shell > .bd {
-  grid-area: board;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
 
-/* ---------------------------------------------------------------- top bar */
-.ed-top {
-  grid-area: top;
-  position: relative;
-  height: 52px;
+/* ---------------------------------------------------------------- floating islands (top bar) */
+.ed-islands {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  height: 38px;
   box-sizing: border-box;
-  padding: 0 14px 0 18px;
-  gap: 12px;
-  background: var(--ed-bar);
-  border-bottom: 1px solid var(--ed-line);
+  padding: 0 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 100;
+  background: transparent;
+  border: 0;
 }
-.ed-top-left {
+.ed-island {
+  pointer-events: auto;
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 0;
-  flex: 1 1 0;
+  gap: 8px;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  border-radius: var(--ed-glass-radius);
+  box-shadow: var(--ed-glass-shadow);
+  color: var(--ed-text);
+  font: 12px/1.4 var(--ed-font);
+  transition: opacity 150ms ease;
 }
-.ed-top-actions {
-  flex: 1 1 0;
-  justify-content: flex-end;
+.ed-shell.is-interacting .ed-island,
+.is-dragging .ed-island,
+.is-grabbing .ed-island {
+  opacity: 0.7;
+}
+
+.ed-island-left {
+  flex: none;
+  gap: 8px;
+}
+.ed-island-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 6px;
+  padding: 0 6px;
+}
+.ed-island-right {
+  flex: none;
+  gap: 8px;
+}
+.ed-island-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 2px;
+}
+.ed-island-bps {
+  display: flex;
+  align-items: center;
+  background: var(--ed-seg);
+  border-radius: 7px;
+  padding: 2px;
+  gap: 2px;
+}
+.ed-tool-bp {
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ed-sub);
+  font: 500 12px var(--ed-font);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 120ms ease, color 120ms ease;
+}
+.ed-tool-bp:hover {
+  color: var(--ed-text);
+}
+.ed-tool-bp.is-active {
+  background: var(--ed-seg-on);
+  color: var(--ed-text);
+}
+.ed-tool-bp.is-hidden {
+  opacity: 0.45;
+}
+.ed-btn.ed-pill {
+  border-radius: 999px;
+  padding: 0 14px;
 }
 .ed-mark {
   flex: none;
@@ -105,17 +183,19 @@
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  z-index: 50;
+  z-index: 150;
   min-width: 240px;
   max-height: 60vh;
   overflow: auto;
   margin: 0;
   padding: 4px;
   list-style: none;
-  background: #2a2a2d;
-  border: 1px solid var(--ed-line);
-  border-radius: 10px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  border-radius: var(--ed-glass-radius);
+  box-shadow: var(--ed-glass-shadow);
 }
 .ed-menu-up {
   top: auto;
@@ -195,14 +275,16 @@
   position: absolute;
   top: calc(100% + 8px);
   left: 50%;
-  z-index: 50;
+  z-index: 150;
   transform: translateX(-50%);
   width: 300px;
   padding: 14px;
-  border-radius: 12px;
-  background: #2a2a2d;
-  border: 1px solid var(--ed-line);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  border-radius: var(--ed-glass-radius);
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  box-shadow: var(--ed-glass-shadow);
 }
 .ed-popover strong {
   display: block;
@@ -277,16 +359,32 @@
 .ed-inspector {
   min-height: 0;
   box-sizing: border-box;
-  background: var(--ed-panel);
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  border-radius: var(--ed-glass-radius);
+  box-shadow: var(--ed-glass-shadow);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  z-index: 90;
 }
 .ed-left {
-  grid-area: left;
-  border-right: 1px solid var(--ed-line);
+  position: absolute;
+  top: 58px;
+  left: 10px;
+  width: 248px;
+  max-height: calc(100vh - 68px);
   padding: 12px 0 12px;
   gap: 12px;
+}
+.ed-inspector {
+  position: absolute;
+  top: 58px;
+  right: 10px;
+  width: 284px;
+  max-height: calc(100vh - 68px);
 }
 .ed-left > .ed-segctl {
   margin: 0 12px;

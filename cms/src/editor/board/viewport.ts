@@ -96,19 +96,53 @@ export function isVisible(view: View, rect: Rect, width: number, height: number,
 
 const KEY = (pageId: string) => `aoost.board.${pageId}`;
 
-export function loadView(pageId: string): View | null {
+export type SavedBoardPage = {
+  view: View;
+  hidden?: Record<Breakpoint, boolean>;
+  positions?: Partial<Record<Breakpoint, { x: number; y: number }>>;
+};
+
+export function loadPageBoard(pageId: string): SavedBoardPage | null {
   try {
-    const v = JSON.parse(localStorage.getItem(KEY(pageId)) ?? "null") as View | null;
-    return v && [v.x, v.y, v.zoom].every(Number.isFinite) ? { x: v.x, y: v.y, zoom: clampZoom(v.zoom) } : null;
+    const raw = JSON.parse(localStorage.getItem(KEY(pageId)) ?? "null");
+    if (!raw) return null;
+    // Backwards compatibility: old format was { x, y, zoom }
+    if ([raw.x, raw.y, raw.zoom].every(Number.isFinite)) {
+      return { view: { x: raw.x, y: raw.y, zoom: clampZoom(raw.zoom) } };
+    }
+    if (raw.view && [raw.view.x, raw.view.y, raw.view.zoom].every(Number.isFinite)) {
+      return {
+        view: { x: raw.view.x, y: raw.view.y, zoom: clampZoom(raw.view.zoom) },
+        hidden: raw.hidden,
+        positions: raw.positions,
+      };
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
-export function saveView(pageId: string, view: View) {
+export function loadView(pageId: string): View | null {
+  return loadPageBoard(pageId)?.view ?? null;
+}
+
+export function savePageBoard(pageId: string, data: SavedBoardPage) {
   try {
-    localStorage.setItem(KEY(pageId), JSON.stringify({ x: Math.round(view.x), y: Math.round(view.y), zoom: Math.round(view.zoom * 1000) / 1000 }));
+    localStorage.setItem(
+      KEY(pageId),
+      JSON.stringify({
+        view: { x: Math.round(data.view.x), y: Math.round(data.view.y), zoom: Math.round(data.view.zoom * 1000) / 1000 },
+        hidden: data.hidden,
+        positions: data.positions,
+      })
+    );
   } catch {
-    /* private window: the view just isn't remembered */
+    /* private window */
   }
+}
+
+export function saveView(pageId: string, view: View) {
+  const existing = loadPageBoard(pageId);
+  savePageBoard(pageId, { ...existing, view });
 }
