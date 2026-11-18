@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PX_PER_STEP, scrubUnit } from "./ScrubField";
+import { PX_PER_STEP, scrubUnit } from "./scrub";
 
 describe("scrubbing", () => {
   it("moves one step per ~3px, Shift ×10, Alt ×0.1 for decimal fields", () => {
