@@ -34,6 +34,7 @@ export function initHero(){
   }
 
   /* ---- ticker, visitors, ghosts, late mode ---- */
+  /* the strip is absent when the block switches the ticker off (showTicker:false); everything below copes with that */
   const tk=document.getElementById('ticker');
   const CLOVER_SVG=(document.querySelector('.ao .tk-c')||{}).innerHTML||'';
   let tkSig='';
@@ -41,15 +42,15 @@ export function initHero(){
   function tickerBuild(){
     if(!tk)return;
     const own=(D.ticker||[]).filter(t=>t&&t.text&&(t.mode==='both'||t.mode===(TK.late?'late':'day'))).map(t=>t.text);
-    const items=(own.length?own:(TK.late?["you're up late","the station's still on"]:['welcome','pick a disc'])).concat(D.tickerTopScore===false?[]:[TK.top]);
+    const items=own.concat(D.tickerTopScore===false||!TK.top?[]:[TK.top]);
     if(TK.visitor&&D.tickerVisitors!==false)items.push("you're visitor #"+String(TK.visitor).padStart(4,'0'));
     const pres=[];if(TK.last)pres.push('last here '+ago(TK.last));if(TK.here)pres.push(TK.here>1?TK.here+' here now':'just you here');
     if(pres.length&&D.tickerVisitors!==false)items.push(pres.join(' · '));
     const sig=items.join('|');if(sig===tkSig)return;tkSig=sig;
     const one=items.map(w=>{const sp=document.createElement('span');sp.className='tk-w';sp.textContent=w;return sp.outerHTML+'<span class="tk-c">'+CLOVER_SVG+'</span>';}).join('');
-    const rep=Math.max(1,Math.ceil(9/items.length)),html=one.repeat(rep);
+    const rep=items.length?Math.ceil(9/items.length):0,html=one.repeat(rep);
     document.querySelectorAll('#ticker .tk-half').forEach(h=>h.innerHTML=html);
-    tk.setAttribute('aria-label',items.join('. ')+'.');}
+    if(items.length)tk.setAttribute('aria-label',items.join('. ')+'.');else tk.removeAttribute('aria-label');}
   TK.build=tickerBuild;
   /* late mode: midnight to 5am in the clock's time zone (or ?late=1 to preview it) */
   function lateCheck(){const h=+new Intl.DateTimeFormat('en-GB',{timeZone:TZ,hour:'numeric',hourCycle:'h23'}).format(new Date());

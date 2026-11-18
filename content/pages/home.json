@@ -41,7 +41,8 @@
             "ticker": [],
             "tickerTopScore": true,
             "tickerVisitors": true,
-            "lateMode": false
+            "lateMode": false,
+            "showTicker": false
           },
           "style": {
             "base": {},
@@ -100,7 +101,8 @@
               }
             ],
             "note": {
-              "show": true
+              "show": true,
+              "style": "plain"
             },
             "keychain": {
               "show": true,
@@ -134,10 +136,10 @@
           "content": {
             "mat": "light",
             "heading": "journals",
-            "sub": "tap a book to open it",
+            "sub": "",
             "journals": [
               {
-                "title": "sketchbook 01",
+                "title": "sketchbook 1",
                 "year": "2025",
                 "cover": "/art/j-star1.jpg",
                 "band": "#141516",
@@ -171,7 +173,7 @@
                 ]
               },
               {
-                "title": "hear no evil",
+                "title": "sketchbook 2",
                 "year": "2025",
                 "coverColor": "#B48A5C",
                 "sticker": "/art/hear-no-evil-ring.png",
@@ -180,7 +182,7 @@
                 "pages": []
               },
               {
-                "title": "stars & static",
+                "title": "sketchbook 3",
                 "year": "2026",
                 "cover": "/art/j-star2.jpg",
                 "band": "#1B2BA0",
@@ -188,7 +190,7 @@
                 "pages": []
               },
               {
-                "title": "late nights",
+                "title": "sketchbook 4",
                 "year": "2026",
                 "coverColor": "#141516",
                 "sticker": "/art/j-monkey.png",
@@ -213,7 +215,8 @@
         "base": {
           "columns": 1,
           "gap": 0,
-          "padding": "0px"
+          "padding": "0px",
+          "hidden": true
         }
       },
       "children": [

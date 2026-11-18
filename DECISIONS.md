@@ -202,3 +202,14 @@ Left / known:
 2. Not covered by browser tests: adjusting project pieces, playlist covers and journal covers on the canvas (unit-tested only). The sticky note image is drawn by the script, so in the editor it can be framed from the inspector only.
 3. Tablet and widescreen will need the breakpoint list to grow. Item frames use the same `Responsive` helpers, so they follow automatically.
 4. Gemini (`ask-gemini`) was out of quota (resets in about 7 days), so Claude wrote all the code.
+
+## Homepage clean-up (19 Nov 2026, SITE-CLEANUP.md)
+
+- Ticker: `showTicker` is optional and missing means on, so older content still shows the strip. When it's off, the strip isn't rendered at all and `hero.js` already returns early when `#ticker` is missing.
+- Ticker: "no fallback lines" also covers the late-mode fallback ("you're up late" / "the station's still on"), so the runtime only shows lines Alex wrote plus the optional live lines. An empty list renders an empty strip. This also fixes a crash: `9 / 0` repeats used to give `Infinity`.
+- Sticky note: `note.style` is optional and missing means "eye". A custom note image still wins over either style, because it's Alex's own design. "plain" only stops the drawn eye.
+- Journals: an empty or whitespace-only `sub` renders no `<p class="jr-sub">`.
+- Skills: the page model already hides sections (`layout.base.hidden`, the editor's hide toggle), so `home-tools` is hidden that way and not parked. Its content stays in `home.json`, and it ships as `display:none`.
+- Nav: the Menu button and its sheet only render when the mobile items include a real link (page, section, external, button, a dropdown holding one, or a mega panel). Social, label, embed and search don't count. In the editor, draft pages count as live, so the Menu still shows there. Drafts were already dropped from the public menu by `resolveItem`.
+- Nav: with no page links, the desktop pill is just the logo. The empty `<nav class="pill-links">` stays so the markup is stable.
+- Browser specs in `home.spec.ts` were updated for these changes but not run, because port 8787 was in use by another build. Unit tests and `npm run build` pass.

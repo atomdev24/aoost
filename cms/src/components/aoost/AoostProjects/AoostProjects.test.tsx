@@ -39,4 +39,11 @@ describe("AoostProjects", () => {
     expect(html).not.toContain("table-note");
     expect(html).not.toContain('id="keychain"');
   });
+  it("draws the eye on the note by default, and nothing on a plain note", () => {
+    expect(d.note.style).toBe("eye");
+    expect(renderNode("AoostProjects", { ...d, note: { show: true } })).toContain('<div class="sticky table-note" aria-hidden="true" data-note="0"></div>');
+    const plain = renderNode("AoostProjects", { ...d, note: { show: true, style: "plain" } });
+    expect(plain).toContain('<div class="sticky table-note" aria-hidden="true" data-note="0" data-note-style="plain"></div>');
+    expect(AoostProjects.schema.safeParse({ ...d, note: { show: true, style: "doodle" } }).success).toBe(false);
+  });
 });

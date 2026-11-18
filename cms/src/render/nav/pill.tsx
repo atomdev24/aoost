@@ -3,7 +3,7 @@ import type { RenderCtx } from "../../components/types";
 import { Icon } from "../icons";
 import { sandboxDoc } from "../sandbox";
 import { SectionView } from "../SectionView";
-import { resolveNav, type ResolvedItem } from "./model";
+import { hasMenuLinks, resolveNav, type ResolvedItem } from "./model";
 import { css } from "./pill.styles";
 import type { NavRenderer } from "./types";
 
@@ -232,6 +232,8 @@ function PillNav({ ctx }: { ctx: RenderCtx }): ReactElement {
   const desktop = items.filter((i) => i.showOn !== "mobile");
   const mobile = items.filter((i) => i.showOn !== "desktop");
   const hasSearch = items.some((i) => i.type === "search");
+  // No page to go to yet (e.g. every other page is still a draft): just the logo, and no Menu that opens onto nothing.
+  const hasMenu = hasMenuLinks(mobile);
   return (
     <>
       <header className="nav" data-nav="pill" data-hide={nav.hideOnScroll ? "" : undefined} data-marker={nav.currentMarker}>
@@ -242,29 +244,33 @@ function PillNav({ ctx }: { ctx: RenderCtx }): ReactElement {
               <PillItem key={i.id} item={i} ctx={ctx} />
             ))}
           </nav>
-          <button type="button" className="pill-menu" aria-expanded="false" aria-controls="nav-sheet">
-            Menu
-          </button>
+          {hasMenu ? (
+            <button type="button" className="pill-menu" aria-expanded="false" aria-controls="nav-sheet">
+              Menu
+            </button>
+          ) : null}
         </div>
       </header>
-      <div className="sheet" id="nav-sheet" role="dialog" aria-modal="true" aria-label="Menu" hidden>
-        <div className="sheet-top">
-          <Logo ctx={ctx} />
-          <button type="button" className="sheet-close" aria-label="Close menu">
-            <Icon name="close" />
-          </button>
-        </div>
-        <nav className="sheet-links" aria-label="Main, mobile">
-          {mobile.map((i) => (
-            <SheetItem key={i.id} item={i} ctx={ctx} />
-          ))}
-        </nav>
-        {ctx.site.settings.socials.length ? (
-          <div className="sheet-foot">
-            <Socials ctx={ctx} labelled />
+      {hasMenu ? (
+        <div className="sheet" id="nav-sheet" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+          <div className="sheet-top">
+            <Logo ctx={ctx} />
+            <button type="button" className="sheet-close" aria-label="Close menu">
+              <Icon name="close" />
+            </button>
           </div>
-        ) : null}
-      </div>
+          <nav className="sheet-links" aria-label="Main, mobile">
+            {mobile.map((i) => (
+              <SheetItem key={i.id} item={i} ctx={ctx} />
+            ))}
+          </nav>
+          {ctx.site.settings.socials.length ? (
+            <div className="sheet-foot">
+              <Socials ctx={ctx} labelled />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
       {hasSearch ? (
         <div className="search" id="nav-search" role="dialog" aria-modal="true" aria-label="Search" hidden>
           <div className="search-box">

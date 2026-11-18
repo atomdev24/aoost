@@ -42,28 +42,21 @@ test.describe("homepage: the original page, from aoost blocks", () => {
     await expect(page.locator('section[aria-labelledby="h-wall"]')).toBeHidden(); // the wall is off, as on the live site
   });
 
-  test("the clock shows Cape Town time and the ticker moves", async ({ page }) => {
+  test("the clock shows Cape Town time", async ({ page }) => {
     await home(page);
     const now = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Johannesburg" }).format(new Date());
     const shown = await page.locator("#clock").textContent();
     expect(shown).toMatch(/^CPT \d\d:\d\d$/);
     expect(Math.abs(Number(shown!.slice(-2)) - Number(now.slice(-2))) % 59).toBeLessThanOrEqual(1);
-
-    await expect(page.locator(".tk-track")).toHaveCSS("animation-name", "tk");
-    const x = () => page.locator(".tk-track").evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
-    const before = await x();
-    await page.waitForTimeout(600);
-    expect(await x()).toBeLessThan(before);
-    await expect(page.locator("#ticker .tk-w").first()).toHaveText("welcome");
-    await expect(page.locator("#ticker")).toContainText("pick a playlist");
   });
 
-  test("the ticker picks up the live top score from the leaderboard, which loads for everyone", async ({ page }) => {
+  test("the ticker strip is switched off: no strip, and the leaderboard still loads for everyone", async ({ page }) => {
     await home(page);
+    await expect(page.locator("#ticker")).toHaveCount(0);
+    await expect(page.locator(".tk-track")).toHaveCount(0);
     await expect(page.locator("#lbScope")).toHaveText("everyone");
     expect(await page.locator("#lbList li").count()).toBeGreaterThan(0);
     await expect(page.locator("#lbList li").first().locator(".n")).toHaveText("01");
-    await expect(page.locator("#ticker")).toContainText(/beat the game, top score \d+ by /);
   });
 
   test("tapping the reel or a project opens the viewer; dragging a piece moves it instead", async ({ page }) => {
@@ -91,25 +84,27 @@ test.describe("homepage: the original page, from aoost blocks", () => {
     await expect(page.locator("#viewer")).toBeHidden();
   });
 
-  test("the keychain swings and the skills bars grow when seen", async ({ page }) => {
+  test("the keychain swings, the note is plain, and the skills section is hidden", async ({ page }) => {
     await home(page);
     // it sways all the time, so it never "holds still" for Playwright's own scroll and click
     await page.locator("#keychain").evaluate((el) => el.scrollIntoView({ block: "center" }));
     await page.locator("#keychain").dispatchEvent("click");
     await expect(page.locator("#keychain")).toHaveClass(/kick/);
-    await page.locator(".skills").scrollIntoViewIfNeeded();
-    await expect(page.locator(".skills")).toHaveClass(/seen/);
-    expect(await page.locator(".sk-bar i").first().evaluate((el) => getComputedStyle(el).width)).not.toBe("0px");
+    await expect(page.locator(".table-note")).toHaveAttribute("data-note-style", "plain");
+    await expect(page.locator(".table-note canvas")).toHaveCount(0);
+    await expect(page.locator(".skills")).toBeHidden(); // parked for an About page later
   });
 
   test("a journal opens in the 3D viewer, turns pages and closes", async ({ page }) => {
     await home(page);
     await expect(page.locator("#jrShelf .jr")).toHaveCount(4);
+    await expect(page.locator("#jrShelf .jr .jr-lbl")).toHaveText(["sketchbook 1", "sketchbook 2", "sketchbook 3", "sketchbook 4"]);
+    await expect(page.locator(".jr-sub")).toHaveCount(0);
     await page.locator("#jrShelf .jr").first().scrollIntoViewIfNeeded();
     await page.locator("#jrShelf .jr").first().click();
     const viewer = page.locator(".jv");
     await expect(viewer).toHaveClass(/on/);
-    await expect(viewer.locator(".jv-t")).toHaveText("sketchbook 01");
+    await expect(viewer.locator(".jv-t")).toHaveText("sketchbook 1");
     await expect(viewer.locator(".jv-lf.fl")).toHaveCount(1, { timeout: 4000 }); // the cover opens by itself
     await expect(viewer.locator(".ct")).toContainText("inside cover");
     await expect(viewer.locator(".ji-sticker img")).toHaveCount(1); // the sticker placed in Atom
@@ -170,11 +165,9 @@ test.describe("homepage: the original page, from aoost blocks", () => {
     expect(styles.some((s) => s === "")).toBe(true);
   });
 
-  test("late mode: after midnight the page goes dark and the ticker changes", async ({ page }) => {
+  test("late mode: after midnight the page goes dark", async ({ page }) => {
     await home(page, "/?late=1");
     await expect(page.locator("html")).toHaveClass(/late/);
-    await expect(page.locator("#ticker")).toContainText("you're up late");
-    await expect(page.locator("#ticker")).toContainText("the station's still on");
     expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(17, 18, 19)");
   });
 
