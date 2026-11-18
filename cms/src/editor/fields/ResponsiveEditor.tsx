@@ -1,5 +1,6 @@
-import { Fragment, useId } from "react";
-import { isOverridden, resetToDesktop, resolve, setAt, setOnly } from "../../responsive/resolve";
+import { Fragment, useId, useState } from "react";
+import { anchorOf, Menu, type Anchor } from "../ui/Popover";
+import { isOverridden, resetToDesktop, resetToMobile, resolve, setAt, setOnly } from "../../responsive/resolve";
 import { Length, type Responsive, type SectionLayout, type Style } from "../../schema";
 import { useEditor } from "../store";
 import { ColorInput, NumberInput, Select, TextInput, Toggle } from "../ui/kit";
@@ -12,9 +13,9 @@ const BOX = new Set(["x", "y", "w", "h"]);
 
 /**
  * Edits a Responsive<T> at the active breakpoint. Desktop is the reference:
- * an edit on Mobile changes Mobile only (setOnly) and the value gets a blue
- * dot; the dot, or "Reset to desktop", brings back the desktop value. The
- * stored format stays mobile-base + desktop overrides (SPEC §3).
+ * an edit on Mobile changes Mobile only (setOnly), and that field turns blue.
+ * Its label opens a menu: "Reset to desktop", "Use on all sizes", and the
+ * desktop value. The stored format stays mobile-base + desktop overrides (SPEC §3).
  */
 export function ResponsiveEditor<T extends object>({
   value,
@@ -43,7 +44,6 @@ export function ResponsiveEditor<T extends object>({
   // A free-canvas layer's position and size on mobile also drive desktop's scaled layout, as dragging does.
   const drivesDesktop = (key: string) => ctx.parentKind === "canvas" && BOX.has(key);
   const set = (key: string, v: unknown) => onChange((drivesDesktop(key) ? setAt : setOnly)(safe, bp, { [key]: v } as Partial<T>));
-  const overridden = visible.filter((r) => isOverridden(safe, r.key as keyof T));
 
   // Dense rows: rows that share a pair label sit side by side under that label.
   const lines = (group: string) => {
@@ -66,23 +66,26 @@ export function ResponsiveEditor<T extends object>({
           {groups.length > 1 && !hideHeads?.includes(group) ? <h5 className="ed-subhead">{group}</h5> : null}
           {lines(group).map((line) => {
             const keys = line.rows.flatMap((r) => (r.alignKeys ? [r.alignKeys.x, r.alignKeys.y] : [r.key])) as (keyof T)[];
-            const over = keys.some((k) => isOverridden(safe, k));
-            const dot =
-              bp === "mobile" && over ? (
-                <button type="button" className="ed-dot" title="Mobile-only change. Click to reset to desktop." aria-label={`Reset ${line.label} to desktop`} onClick={() => onChange(keys.reduce((r, k) => resetToDesktop(r, k), safe))} />
-              ) : bp === "desktop" && over ? (
-                <span className="ed-dot ed-dot-hollow" title="Mobile has its own value for this" />
-              ) : null;
+            const over = bp === "mobile" && keys.some((k) => isOverridden(safe, k));
+            const tinted = (row: RowDef<T>) => bp === "mobile" && (row.alignKeys ? [row.alignKeys.x, row.alignKeys.y] : [row.key]).some((k) => isOverridden(safe, k as keyof T));
             const id = `${uid}-${line.rows[0]!.key}`;
             return (
               <div key={line.label + line.rows[0]!.key} className="ed-rowset">
                 <div className={`ed-row${line.rows.length > 1 ? " ed-row-pair" : ""}`}>
-                  <label className="ed-label" htmlFor={id} title={line.rows.length > 1 ? line.rows.map((r) => r.label).join(" · ") : line.label}>
-                    <span>{line.label}</span>
-                    {dot}
-                  </label>
+                  {over ? (
+                    <OverrideLabel
+                      label={line.label}
+                      desktop={describe(keys.map((k) => resolve(safe, "desktop")[k]))}
+                      onReset={() => onChange(keys.reduce((r, k) => resetToDesktop(r, k), safe))}
+                      onUseEverywhere={() => onChange(keys.reduce((r, k) => resetToMobile(r, k), safe))}
+                    />
+                  ) : (
+                    <label className="ed-label" htmlFor={id} title={line.rows.length > 1 ? line.rows.map((r) => r.label).join(" · ") : line.label}>
+                      <span>{line.label}</span>
+                    </label>
+                  )}
                   {line.rows.map((row, i) => (
-                    <div key={row.key} className={`ed-cell${line.rows.length === 1 ? " ed-cell-wide" : ""}`}>
+                    <div key={row.key} className={`ed-cell${line.rows.length === 1 ? " ed-cell-wide" : ""}${tinted(row) ? " is-over" : ""}`}>
                       {row.alignKeys ? (
                         <AlignControl x={current[row.alignKeys.x] as AlignValue} y={current[row.alignKeys.y] as AlignValue} onChange={(patch) => onChange(setOnly(safe, bp, { ...(patch.x !== null ? { [row.alignKeys!.x]: patch.x } : {}), ...(patch.y !== null ? { [row.alignKeys!.y]: patch.y } : {}) } as Partial<T>))} />
                       ) : (
@@ -99,18 +102,6 @@ export function ResponsiveEditor<T extends object>({
           })}
         </Fragment>
       ))}
-      {bp === "mobile" && overridden.length ? (
-        <p className="ed-override-note">
-          Blue dots are mobile-only changes.{" "}
-          <button
-            type="button"
-            className="ed-link"
-            onClick={() => onChange(overridden.reduce((r, row) => resetToDesktop(r, row.key as keyof T), safe))}
-          >
-            Reset to desktop
-          </button>
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -304,5 +295,47 @@ function BackgroundControl({ value, onChange }: { value: SectionLayout["backgrou
       <TextInput ariaLabel="Poster image" placeholder="Still image for phones" value={bg.poster ?? ""} onCommit={(v) => set({ poster: v })} />
       <TextInput ariaLabel="Tint over the background" placeholder="Tint, e.g. rgba(20,20,20,.4)" value={bg.overlay ?? ""} onCommit={(v) => set({ overlay: v })} />
     </div>
+  );
+}
+
+/** A value as words, for "Desktop: …" notes. */
+function describe(values: unknown[]): string {
+  const one = (v: unknown): string => {
+    if (v === undefined || v === null || v === "") return "not set";
+    if (Array.isArray(v)) return v.every((x) => x === v[0]) ? String(v[0]) : v.join(" ");
+    if (typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      if ("width" in o && "style" in o) return `${o.width}px ${o.style}`;
+      if ("kind" in o) return String(o.kind);
+      return Object.values(o).filter((x) => typeof x === "string" || typeof x === "number").join(" ") || "set";
+    }
+    if (typeof v === "string" && v.startsWith("token:")) return v.slice(6);
+    if (typeof v === "boolean") return v ? "on" : "off";
+    return String(v);
+  };
+  return values.map(one).join(" · ");
+}
+
+/** The accent label of a field that differs on this breakpoint. Clicking it offers the ways back. */
+function OverrideLabel({ label, desktop, onReset, onUseEverywhere }: { label: string; desktop: string; onReset: () => void; onUseEverywhere: () => void }) {
+  const [menu, setMenu] = useState<Anchor | null>(null);
+  return (
+    <>
+      <button type="button" className="ed-label is-over" aria-haspopup="menu" aria-expanded={!!menu} title={`Mobile has its own ${label.toLowerCase()}. Click for options.`} onClick={(e) => setMenu(menu ? null : anchorOf(e.currentTarget))}>
+        <span>{label}</span>
+      </button>
+      {menu ? (
+        <Menu
+          anchor={menu}
+          label={`${label} on this size`}
+          onClose={() => setMenu(null)}
+          items={[
+            { label: "Reset to desktop", onSelect: onReset },
+            { label: "Use on all sizes", onSelect: onUseEverywhere },
+            { label: `Desktop: ${desktop}`, note: true },
+          ]}
+        />
+      ) : null}
+    </>
   );
 }

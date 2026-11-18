@@ -1734,3 +1734,68 @@ body:has(.ed-scrub.is-scrubbing) {
 .ed-inspector .ed-align-fine-row .ed-seg button {
   font-size: 11px;
 }
+
+/* ---------------------------------------------------------------- breakpoint scope bar and overridden fields */
+.ed-scope {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  margin: 0 14px 6px;
+  padding: 0 4px 0 8px;
+  border-radius: 7px;
+  background: var(--ed-seg);
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.ed-scope.is-override {
+  background: rgba(10, 132, 255, 0.14);
+  color: #8cc4ff;
+}
+.ed-scope-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ed-scope-reset {
+  flex: none;
+  height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #409cff;
+  font: 600 11px var(--ed-font);
+  cursor: pointer;
+}
+.ed-scope-reset:hover {
+  background: rgba(10, 132, 255, 0.2);
+}
+.ed-inspector button.ed-label {
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.ed-inspector .ed-label.is-over {
+  color: #409cff;
+}
+.ed-inspector .ed-label.is-over:hover span {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ed-inspector .ed-cell.is-over .ed-scrub,
+.ed-inspector .ed-cell.is-over .ed-input,
+.ed-inspector .ed-cell.is-over .ed-select,
+.ed-inspector .ed-cell.is-over .ed-colorrow,
+.ed-inspector .ed-cell.is-over .ed-align-grid,
+.ed-inspector .ed-cell.is-over .ed-pair .ed-scrub {
+  background: rgba(10, 132, 255, 0.16);
+}
