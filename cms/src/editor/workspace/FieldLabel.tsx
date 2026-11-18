@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 export function FieldLabel({ children, label, el = "label", readOnly }: { children?: ReactNode; label: string; el?: "label" | "div"; readOnly?: boolean; icon?: ReactNode; className?: string }) {
   const El = el;
   return (
-    <El className={`ed-prow${el === "div" ? " is-stack" : ""}${readOnly ? " is-readonly" : ""}`}>
+    <El className={`ed-prow${el === "div" || label.length > 16 ? " is-stack" : ""}${readOnly ? " is-readonly" : ""}`}>
       <span className="ed-label" title={label}>
         <span>{label}</span>
       </span>

@@ -1799,3 +1799,186 @@ body:has(.ed-scrub.is-scrubbing) {
 .ed-inspector .ed-cell.is-over .ed-pair .ed-scrub {
   background: rgba(10, 132, 255, 0.16);
 }
+
+/* ---------------------------------------------------------------- adjust image (on the canvas) */
+.ed-adjust {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+}
+.ed-adjust-ghost {
+  position: absolute;
+  opacity: 0.35;
+  outline: 1px dashed rgba(255, 255, 255, 0.9);
+  outline-offset: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.ed-adjust-frame {
+  position: absolute;
+  box-shadow: 0 0 0 1.5px var(--ed-accent);
+  pointer-events: none;
+}
+.ed-adjust-hit {
+  position: absolute;
+  cursor: move;
+  touch-action: none;
+}
+.ed-adjust-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
+  background: #fff;
+  border: 1px solid #b8860b;
+  box-sizing: border-box;
+}
+.ed-adjust-handle.is-nw { left: 0; top: 0; cursor: nwse-resize; }
+.ed-adjust-handle.is-ne { right: 0; top: 0; margin-right: -4px; cursor: nesw-resize; }
+.ed-adjust-handle.is-se { right: 0; bottom: 0; margin-right: -4px; margin-bottom: -4px; cursor: nwse-resize; }
+.ed-adjust-handle.is-sw { left: 0; bottom: 0; margin-bottom: -4px; cursor: nesw-resize; }
+.ed-adjust-tag {
+  position: absolute;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #ffd60a;
+  color: #1c1c1e;
+  font: 600 11px var(--ed-font);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.ed-inspector .ed-field.is-long {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 4px;
+}
+.ed-inspector .ed-field.is-long > .ed-field-label {
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------------- media rows and the media popover */
+.ed-mediarow {
+  min-width: 0;
+}
+.ed-mediarow-main {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  height: 30px;
+  padding: 0 7px 0 3px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ed-text);
+  font: 12px var(--ed-font);
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.ed-mediarow-main:hover,
+.ed-mediarow-main[aria-expanded="true"] {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.ed-mediarow.is-busy .ed-mediarow-main {
+  opacity: 0.6;
+}
+.ed-mediarow-thumb {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.ed-mediarow-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ed-mediarow-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ed-mediarow-fit {
+  flex: none;
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.ed-mediapop {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+.ed-mediapop-preview {
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+}
+.ed-mediapop-preview > img {
+  display: block;
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+}
+.ed-mediapop-preview .ed-focal {
+  margin: 0;
+}
+.ed-mediapop-glyph {
+  display: block;
+  padding: 24px 10px;
+  color: var(--ed-sub);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.ed-mediapop-actions {
+  display: flex;
+  gap: 6px;
+}
+.ed-mediapop-actions .ed-btn {
+  flex: 1;
+}
+.ed-mediapop-field {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.ed-mediapop .ed-input {
+  height: 26px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.ed-mediapop .ed-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.ed-mediapop .ed-hint {
+  margin: 0;
+}
+.ed-mediapop .ed-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0 7px;
+}
+.ed-inspector [class*="Input-radioGroupItems"] {
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+.ed-inspector [class*="Input-radioInner"] {
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}

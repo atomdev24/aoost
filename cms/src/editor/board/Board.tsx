@@ -1,6 +1,7 @@
 import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Breakpoint } from "../../schema";
+import { AdjustImage } from "../canvas/AdjustImage";
 import { currentPage, useEditor } from "../store";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { activateBreakpoint } from "./bridge";
@@ -189,6 +190,7 @@ export function Board() {
         </div>
       ) : null}
 
+      <AdjustImage />
       {spaceDown ? <div className="bd-shield" onPointerDown={startPan} /> : null}
       <ZoomBar />
     </div>

@@ -34,4 +34,6 @@ body:has(.ed-mega-stage){background:var(--c-sand)}
 @keyframes ed-flash{0%,60%{outline:3px solid #0A84FF;outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}
 .ed-locked{cursor:not-allowed}
 a{cursor:default}
+.ed-drop-target{outline:calc(2px * var(--ed-px,1)) solid #0A84FF!important;outline-offset:calc(-2px * var(--ed-px,1))}
+.ed-drop-target::before{content:"Drop to replace";position:absolute;z-index:5;left:50%;top:50%;translate:-50% -50%;padding:calc(4px * var(--ed-px,1)) calc(10px * var(--ed-px,1));border-radius:999px;background:#0A84FF;color:#fff;font:600 calc(12px * var(--ed-px,1)) -apple-system,Inter,sans-serif;pointer-events:none}
 `;
