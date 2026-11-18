@@ -644,10 +644,6 @@
 }
 
 /* ---------------------------------------------------------------- inspector */
-.ed-inspector {
-  grid-area: right;
-  border-left: 1px solid var(--ed-line);
-}
 .ed-inspector-head {
   flex: none;
   display: flex;
@@ -1047,4 +1043,65 @@
   background: var(--ed-panel);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
   font: 13px/1.4 var(--ed-font);
+}
+
+/* ------------------------------------------- step 3: inspector appears on selection */
+.ed-inspector {
+  overflow: hidden;
+  animation: ed-inspector-in 150ms ease-out both;
+}
+@keyframes ed-inspector-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ed-inspector {
+    animation: none;
+  }
+}
+.ed-inspector-body {
+  overscroll-behavior: contain;
+}
+.ed-inspector .ed-igroup + .ed-igroup {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Page settings inside the Pages flyout */
+.ed-page-settings-btn {
+  flex: none;
+  color: var(--ed-sub);
+  opacity: 0.7;
+}
+.ed-page-row:hover .ed-page-settings-btn,
+.ed-page-settings-btn:focus-visible {
+  opacity: 1;
+}
+.ed-page-settings .ed-side {
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.ed-page-settings .ed-side-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 6px;
+}
+.ed-page-settings .ed-side-head h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.ed-page-settings .ed-side-head span {
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.ed-page-settings .ed-side-body {
+  padding: 4px 12px 14px;
 }

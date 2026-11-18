@@ -6,7 +6,6 @@ import { activateBreakpoint } from "../board/bridge";
 import { currentPage, useEditor } from "../store";
 import { GlobalPanel } from "../ui/GlobalPanel";
 import { OverlayPanel } from "../ui/OverlayPanel";
-import { PageSettings } from "../ui/PageSettings";
 
 const KIND: Record<Section["kind"], string> = { flow: "Section", grid: "Grid section", canvas: "Free-layout section" };
 
@@ -51,8 +50,19 @@ export function BreakpointSwitch() {
   );
 }
 
-/** The 284px inspector: what is selected, which breakpoint is being edited, and its settings. */
+/**
+ * The floating 284px inspector: what is selected, which breakpoint is being edited, and its settings.
+ * It only shows while something is selected; page settings live in the Pages flyout.
+ */
 export function Inspector() {
+  const overlayId = useEditor((s) => s.overlayId);
+  const globalId = useEditor((s) => s.globalId);
+  const selected = useEditor((s) => s.selection.length > 0);
+  if (!selected && !overlayId && !globalId) return null;
+  return <InspectorPanel />;
+}
+
+function InspectorPanel() {
   const overlayId = useEditor((s) => s.overlayId);
   const globalId = useEditor((s) => s.globalId);
   const selected = useEditor((s) => s.selection.length > 0);
@@ -69,7 +79,7 @@ export function Inspector() {
       </header>
       {bp === "mobile" && (selected || overlayId) ? <p className="ed-inspector-note">Layout and frame changes apply to Mobile only. Content is shared.</p> : null}
       <div className="ed-inspector-body">
-        {overlayId ? <OverlayPanel overlayId={overlayId} /> : globalId ? <GlobalPanel globalId={globalId} /> : selected ? <Puck.Fields /> : <PageSettings />}
+        {overlayId ? <OverlayPanel overlayId={overlayId} /> : globalId ? <GlobalPanel globalId={globalId} /> : <Puck.Fields />}
       </div>
     </aside>
   );

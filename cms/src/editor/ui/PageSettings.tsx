@@ -7,13 +7,14 @@ import { Button, Select, TextInput, Toggle } from "./kit";
 import { NavPanel } from "./NavPanel";
 
 /**
- * Page settings (right panel, when nothing on the canvas is selected):
- * rename, URL with automatic redirect, status, search & share, duplicate, delete.
+ * Page settings: rename, URL with automatic redirect, status, search & share, duplicate, delete.
+ * Shown inside the Pages flyout via the "Page settings" action.
  */
-export function PageSettings() {
-  const page = useEditor(currentPage);
-  const editingMenu = useEditor((s) => !!megaItemId(s.pageId));
+export function PageSettings({ targetPageId, onBack }: { targetPageId?: string; onBack?: () => void } = {}) {
+  const current = useEditor(currentPage);
   const pages = useEditor((s) => s.site.pages);
+  const page = targetPageId ? (pages.find((p) => p.id === targetPageId) ?? current) : current;
+  const editingMenu = !!megaItemId(page.id);
   const redirects = useEditor((s) => s.site.redirects);
   const siteTitle = useEditor((s) => s.site.settings.title);
   const [seoOpen, setSeoOpen] = useState(false);
@@ -33,6 +34,11 @@ export function PageSettings() {
     return (
       <div className="ed-side">
         <header className="ed-side-head">
+          {onBack ? (
+            <button type="button" className="ed-mini ed-back-btn" onClick={onBack} aria-label="Back to pages" title="Back to pages">
+              ←
+            </button>
+          ) : null}
           <div>
             <h3>Menu panel</h3>
             <span>{page.title}</span>
@@ -49,9 +55,14 @@ export function PageSettings() {
   return (
     <div className="ed-side">
       <header className="ed-side-head">
+        {onBack ? (
+          <button type="button" className="ed-mini ed-back-btn" onClick={onBack} aria-label="Back to pages" title="Back to pages">
+            ←
+          </button>
+        ) : null}
         <div>
           <h3>Page settings</h3>
-          <span>Pick any page on the left to edit it</span>
+          <span>{page.title}</span>
         </div>
       </header>
       <div className="ed-side-body">
@@ -160,6 +171,7 @@ export function PageSettings() {
               update((s) => deletePage(s, page.id), `Delete ${page.title}`);
               if (home) setPage(home.id);
               setConfirming(false);
+              onBack?.();
             }}
           >
             {confirming ? "Click again to delete" : "Delete"}
