@@ -1,5 +1,6 @@
-import { flush, redo, undo } from "../store";
-import { selectBlock } from "./bridge";
+import { flush, getState, redo, undo } from "../store";
+import { closeUnpinnedFlyout, getRailState } from "../workspace/rail-store";
+import { activateBreakpoint, selectBlock } from "./bridge";
 import { fit, getBoard, setSpaceDown, toggleDotGrid, zoomStep, zoomTo } from "./store";
 import { runTool, type Tool } from "./tools";
 
@@ -36,6 +37,20 @@ export function attachKeys(doc: Document): () => void {
       return;
     }
     if (typing(doc)) return;
+    if (key === "escape") {
+      const rail = getRailState();
+      if (!rail.pinned && rail.active) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeUnpinnedFlyout();
+        return;
+      }
+      if (getState().selection.length > 0 || getState().overlayId || getState().globalId) {
+        e.preventDefault();
+        activateBreakpoint(getState().bp, null);
+        return;
+      }
+    }
     if (mod && key === "z") {
       e.preventDefault();
       e.stopImmediatePropagation();

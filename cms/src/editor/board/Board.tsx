@@ -2,6 +2,7 @@ import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import type { Breakpoint } from "../../schema";
 import { currentPage, useEditor } from "../store";
+import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { activateBreakpoint } from "./bridge";
 import { LiveFrame } from "./LiveFrame";
 import { countMobileOverrides } from "./overrides";
@@ -84,6 +85,7 @@ export function Board() {
       style={{ backgroundPosition: `${view.x}px ${view.y}px` }}
       onPointerDown={startPan}
       onPointerDownCapture={(e) => {
+        closeUnpinnedFlyout();
         // A click on empty board clears the selection, as in any canvas app.
         if (e.target === host.current && !spaceDown && e.button === 0) activateBreakpoint(bp, null);
       }}
