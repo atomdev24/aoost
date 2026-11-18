@@ -37,7 +37,7 @@ function sectionConfig(kind: Section["kind"]): ComponentConfig {
           }
         : {}),
       __visible: visibleOnField,
-      name: { type: "text", label: "Section name" },
+      name: { type: "text", label: "Name" },
       items: { type: "slot", disallow: Object.values(SECTION_TYPES) },
     },
     defaultProps: { layout: DEFAULT_LAYOUT[kind], items: [] },

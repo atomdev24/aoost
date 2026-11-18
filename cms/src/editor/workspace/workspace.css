@@ -1160,3 +1160,217 @@
 .ed-page-settings .ed-side-body {
   padding: 4px 12px 14px;
 }
+
+/* ---------------------------------------------------------------- Section 2: dense inspector rows (Figma style) */
+.ed-inspector .ed-igroup {
+  gap: 0;
+  padding: 10px 0 8px;
+  border-top: 1px solid var(--ed-line);
+}
+.ed-inspector .ed-igroup:first-child,
+.ed-inspector [class*="PuckFields-field_"]:first-child .ed-igroup {
+  border-top: 0;
+}
+.ed-inspector .ed-igroup-title {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ed-sub);
+}
+.ed-inspector .ed-igroup-solo {
+  margin: 0;
+  padding: 10px 0 4px;
+  border-top: 1px solid var(--ed-line);
+}
+.ed-inspector .ed-subhead {
+  margin: 6px 0 2px;
+  font-size: 11px;
+  color: #6e6e73;
+}
+.ed-inspector .ed-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.ed-inspector .ed-row {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 6px;
+  min-height: 26px;
+  padding: 3px 0;
+  box-sizing: content-box;
+}
+.ed-inspector .ed-row.ed-row-stack {
+  grid-template-columns: 62px minmax(0, 1fr) minmax(0, 1fr);
+}
+.ed-inspector .ed-row > .ed-control,
+.ed-inspector .ed-row > .ed-cell-wide,
+.ed-inspector .ed-row > .ed-stack {
+  grid-column: 2 / span 2;
+  min-width: 0;
+}
+.ed-inspector .ed-cell {
+  min-width: 0;
+}
+.ed-inspector .ed-label,
+.ed-inspector .ed-field-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  color: var(--ed-sub);
+  font-size: 11px;
+  line-height: 1.2;
+}
+.ed-inspector .ed-label > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ed-inspector .ed-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+}
+.ed-inspector .ed-input,
+.ed-inspector .ed-select,
+.ed-scrub {
+  height: 26px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ed-text);
+  font: 12px var(--ed-font);
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+.ed-inspector .ed-input,
+.ed-inspector .ed-select {
+  padding: 0 7px;
+}
+.ed-scrub {
+  display: flex;
+  align-items: center;
+  padding: 0 6px 0 0;
+}
+.ed-scrub:focus-within {
+  border-color: var(--ed-accent);
+  box-shadow: 0 0 0 2px var(--ed-accent-soft);
+}
+.ed-scrub-glyph {
+  flex: none;
+  width: 20px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6e6e73;
+  font-size: 10px;
+  font-weight: 600;
+  user-select: none;
+}
+.ed-scrub-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 0 0 6px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.ed-scrub-glyph + .ed-scrub-input {
+  padding-left: 0;
+}
+.ed-scrub-suffix {
+  flex: none;
+  color: #6e6e73;
+  font-size: 11px;
+}
+.ed-scrub-input[aria-invalid="true"] {
+  color: #ff6961;
+}
+.ed-inspector .ed-corners {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+.ed-inspector .ed-corners .ed-number,
+.ed-inspector .ed-corners .ed-input {
+  height: 26px;
+}
+.ed-inspector .ed-inline {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+.ed-inspector .ed-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ed-inspector .ed-seg button {
+  height: 22px;
+  font-size: 11px;
+}
+.ed-inspector .ed-toggle {
+  justify-self: start;
+}
+
+/* Puck's own fields (content) as dense rows: label column, value beside it. */
+.ed-inspector .ed-prow {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 6px;
+  padding: 3px 0;
+}
+.ed-inspector .ed-prow > .ed-label {
+  min-height: 26px;
+}
+.ed-inspector .ed-prow.is-stack {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 4px;
+}
+.ed-inspector .ed-prow.is-stack > .ed-label {
+  min-height: 0;
+}
+.ed-inspector .ed-prow [class*="Input-input_"],
+.ed-inspector .ed-prow textarea {
+  min-height: 26px;
+  padding: 4px 7px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+}
+.ed-inspector [class*="PuckFields-field_"] {
+  padding: 0;
+}
+.ed-inspector [class*="PuckFields-field_"] + [class*="PuckFields-field_"] {
+  border-top: 0;
+}
+.ed-inspector .ed-field {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 6px;
+  padding: 3px 0;
+}
+.ed-inspector .ed-field > .ed-field-label {
+  min-height: 26px;
+}
+.ed-inspector .ed-row:has(> .ed-cell-wide > .ed-stack),
+.ed-inspector .ed-row:has(> .ed-cell-wide > .ed-corners) {
+  align-items: start;
+}
+.ed-inspector .ed-row:has(> .ed-cell-wide > .ed-stack) > .ed-label {
+  min-height: 26px;
+}
+/* Dense rows carry their own labels; the old sub-headings inside a group are dropped. */
+.ed-inspector .ed-responsive > .ed-subhead {
+  display: none;
+}
