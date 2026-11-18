@@ -119,7 +119,7 @@ function Control<T>({ row, value, onChange, id }: { row: RowDef<T>; value: unkno
     case "text":
       return <TextInput id={id} ariaLabel={row.label} value={(value as string) ?? ""} placeholder={row.placeholder} onCommit={(v) => onChange(v || undefined)} />;
     case "number":
-      return <ScrubNumber id={id} ariaLabel={row.label} glyph={row.glyph} value={value as number | undefined} min={row.min} max={row.max} step={row.step} suffix={row.suffix} placeholder={row.placeholder} onChange={(n) => (n === undefined && row.required ? undefined : onChange(n))} />;
+      return <ScrubNumber id={id} ariaLabel={row.label} glyph={row.glyph} value={value as number | undefined} min={row.min} max={row.max} step={row.step} suffix={row.suffix} placeholder={row.placeholder} spacing={row.spacing} onChange={(n) => (n === undefined && row.required ? undefined : onChange(n))} />;
     case "select":
       return <Select id={id} ariaLabel={row.label} value={(value as string) ?? ""} options={row.options ?? []} onChange={(v) => onChange(v || undefined)} />;
     case "color":
@@ -212,8 +212,8 @@ function SpacingControl({ value, onChange, id, label, required }: { value: strin
   const write = (next: { v: number; h: number }) => onChange(!required && next.v === 0 && next.h === 0 ? undefined : formatSpacing(next));
   return (
     <div className="ed-pair">
-      <ScrubNumber id={id} ariaLabel={`${label} vertical`} glyph="↕" value={vh.v} min={label === "Margin" ? undefined : 0} onChange={(n) => write({ ...vh, v: n ?? 0 })} />
-      <ScrubNumber ariaLabel={`${label} horizontal`} glyph="↔" value={vh.h} min={label === "Margin" ? undefined : 0} onChange={(n) => write({ ...vh, h: n ?? 0 })} />
+      <ScrubNumber id={id} ariaLabel={`${label} vertical`} glyph="↕" spacing value={vh.v} min={label === "Margin" ? undefined : 0} onChange={(n) => write({ ...vh, v: n ?? 0 })} />
+      <ScrubNumber ariaLabel={`${label} horizontal`} glyph="↔" spacing value={vh.h} min={label === "Margin" ? undefined : 0} onChange={(n) => write({ ...vh, h: n ?? 0 })} />
     </div>
   );
 }
