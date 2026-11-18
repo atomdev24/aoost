@@ -160,24 +160,29 @@ function Extra<T>({ row, value, onChange }: { row: RowDef<T>; value: unknown; on
     const b = value as Style["border"];
     if (!b || b.width <= 0) return null;
     return (
-      <div className="ed-row ed-row-pair">
-        <span className="ed-label">Border</span>
-        <div className="ed-cell">
-          <Select
-            ariaLabel="Border style"
-            value={b.style}
-            options={[
-              { value: "solid", label: "Solid" },
-              { value: "dashed", label: "Dashed" },
-              { value: "dotted", label: "Dotted" },
-            ]}
-            onChange={(v) => onChange(borderWith(b, { style: (v || "solid") as "solid" }))}
-          />
+      <>
+        <div className="ed-row">
+          <span className="ed-label">Stroke</span>
+          <div className="ed-cell ed-cell-wide">
+            <ColorInput label="Border colour" value={b.color} onChange={(c) => onChange(borderWith(b, { color: c ?? "token:ink" }))} />
+          </div>
         </div>
-        <div className="ed-cell">
-          <ColorInput label="Border colour" value={b.color} onChange={(c) => onChange(borderWith(b, { color: c ?? "token:ink" }))} />
+        <div className="ed-row">
+          <span className="ed-label">Style</span>
+          <div className="ed-cell">
+            <Select
+              ariaLabel="Border style"
+              value={b.style}
+              options={[
+                { value: "solid", label: "Solid" },
+                { value: "dashed", label: "Dashed" },
+                { value: "dotted", label: "Dotted" },
+              ]}
+              onChange={(v) => onChange(borderWith(b, { style: (v || "solid") as "solid" }))}
+            />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
   return null;

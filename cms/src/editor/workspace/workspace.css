@@ -1443,3 +1443,193 @@
 body:has(.ed-scrub.is-scrubbing) {
   cursor: ew-resize;
 }
+
+/* ---------------------------------------------------------------- colour rows and the picker */
+.ed-colorrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 7px 0 3px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+.ed-colorrow:focus-within {
+  border-color: var(--ed-accent);
+}
+.ed-colorrow-swatch {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: repeating-conic-gradient(#555 0 25%, #333 0 50%) 0 0 / 8px 8px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.ed-colorrow-swatch > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+.ed-colorrow-swatch > span.is-none {
+  background: linear-gradient(135deg, transparent 45%, #ff453a 45% 55%, transparent 55%), #2a2a2e !important;
+}
+.ed-colorrow-value {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ed-text);
+  font: 12px var(--ed-font);
+  outline: none;
+}
+.ed-colorrow-alpha {
+  flex: none;
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.ed-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+.ed-picker-sv {
+  position: relative;
+  height: 150px;
+  border-radius: 6px;
+  background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent) !important;
+  background-blend-mode: normal;
+  cursor: crosshair;
+  touch-action: none;
+}
+.ed-picker-sv {
+  background-image: linear-gradient(to top, #000, rgba(0, 0, 0, 0)), linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
+}
+.ed-picker-knob,
+.ed-picker-thumb {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+.ed-picker-thumb {
+  top: 50%;
+}
+.ed-picker-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ed-picker-hue,
+.ed-picker-alpha {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  cursor: ew-resize;
+  touch-action: none;
+}
+.ed-picker-hue {
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+.ed-picker-alpha {
+  background: linear-gradient(to right, transparent, var(--c)), repeating-conic-gradient(#666 0 25%, #333 0 50%) 0 0 / 8px 8px;
+}
+.ed-picker-inputs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ed-picker-inputs > * {
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ed-text);
+  font: 12px var(--ed-font);
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+}
+.ed-picker-eye {
+  flex: none;
+  width: 26px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.ed-picker-format {
+  flex: none;
+  width: 56px;
+  padding: 0 4px;
+}
+.ed-picker-value {
+  flex: 1;
+  min-width: 0;
+  padding: 0 6px;
+  outline: none;
+}
+.ed-picker-pct {
+  flex: none;
+  display: flex;
+  align-items: center;
+  width: 46px;
+  padding-right: 6px;
+  color: var(--ed-sub);
+}
+.ed-picker-pct input {
+  width: 100%;
+  min-width: 0;
+  padding: 0 0 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--ed-text);
+  font: inherit;
+  outline: none;
+}
+.ed-picker-swatches {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.ed-picker-title {
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.ed-picker-swatches > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.ed-picker-swatch {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+}
+.ed-picker-swatch[aria-pressed="true"] {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 1px;
+}
+.ed-picker-foot {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 11px;
+}
