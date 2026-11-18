@@ -21,3 +21,8 @@ Each entry: what is needed, exact steps, and what is stubbed meanwhile.
 ## After the run (from PLAN Phase 0)
 - Cloudflare Access for the editor and the connector: steps are in `docs/auth.md`. Until then the editor, `/api/editor` and `/mcp` are protected by `EDITOR_PASSWORD` only.
 - Cut-over to the real domain is not part of this run. When you do it, change `PUBLISH_BRANCH` in `cms/wrangler.toml` and the branch in `.github/workflows/deploy-cms.yml`.
+
+## Publish progress: let the token read GitHub Actions (optional)
+- Since Editor Sections 2 and 3 the Publish button shows "Rebuilding…" until the deploy Action for that commit finishes, then "Live". It reads the run's status through `GET /api/editor/publish/status`, using the same `GITHUB_TOKEN` the editor publishes with.
+- If the token can't read Actions, the editor waits about 25 seconds, then shows "Live" with the note "GitHub didn't report the rebuild. It usually takes about a minute." Nothing breaks.
+- To get the real status: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → the editor's token → Repository permissions → **Actions: Read-only** → Save. (A classic token with the `repo` scope can already read it.) No new secret is needed.
