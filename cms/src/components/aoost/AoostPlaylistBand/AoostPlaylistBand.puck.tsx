@@ -11,7 +11,7 @@ export const fields: Fields<AoostPlaylistBandContent> = {
     arrayFields: {
       title: { type: "text", label: "Title (Spotify's own name replaces it on the site)" },
       spotify: { type: "text", label: "Spotify playlist link or id" },
-      cover: mediaField("Your cover (square); empty = Spotify's cover", "image"),
+      cover: mediaField("Your cover (square); empty = Spotify's cover", "image", { framed: true }),
       color: hexField("Frame colour behind the cover"),
       hidden: onOff("Hidden"),
     },
