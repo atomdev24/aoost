@@ -33,6 +33,8 @@ export type BoardState = {
   positions: Partial<Record<Breakpoint, { x: number; y: number }>>;
   /** Dot grid toggle. False by default. */
   dotGrid: boolean;
+  /** Each frame has drawn the page that is open (until then its last snapshot shows). */
+  ready: Record<Breakpoint, boolean>;
 };
 
 let state: BoardState = {
@@ -46,6 +48,7 @@ let state: BoardState = {
   hidden: { desktop: false, mobile: false },
   positions: {},
   dotGrid: loadDotGridPref(),
+  ready: { desktop: false, mobile: false },
 };
 const listeners = new Set<() => void>();
 const set = (patch: Partial<BoardState>) => {
@@ -112,6 +115,7 @@ export function openPage(pageId: string) {
   const saved = loadPageBoard(pageId);
   set({
     pageId,
+    ready: { desktop: false, mobile: false },
     ...(saved
       ? {
           view: saved.view,
@@ -124,6 +128,11 @@ export function openPage(pageId: string) {
         }),
   });
   if (!saved && state.size.w) fit();
+}
+
+/** A frame has drawn the open page. */
+export function setReady(bp: Breakpoint) {
+  if (!state.ready[bp]) set({ ready: { ...state.ready, [bp]: true } });
 }
 
 export function setHeight(bp: Breakpoint, h: number) {

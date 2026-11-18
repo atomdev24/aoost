@@ -3,7 +3,7 @@ import { components } from "../../components/registry";
 import { getState, useEditor } from "../store";
 import { attachCanvasDrops } from "../canvas/drops";
 import { attachKeys } from "./keys";
-import { frameOrigin, getBoard, setHeight, useBoard } from "./store";
+import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
 import { onBoardWheel } from "./wheel";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 
@@ -42,7 +42,11 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     const RO = doc.defaultView!.ResizeObserver;
     const measure = () => {
       const main = doc.getElementById("main");
-      if (main) setHeight(getState().bp, doc.documentElement.scrollHeight);
+      if (main) {
+        setHeight(getState().bp, doc.documentElement.scrollHeight);
+        // The page has drawn once its blocks (or its empty root) are in the frame.
+        if (main.childElementCount > 0) setReady(getState().bp);
+      }
     };
     const ro = new RO(measure);
     ro.observe(doc.body);
