@@ -25,5 +25,9 @@ function placeDecls(o: Overlay, p: Place): Decls {
 }
 
 export function addOverlayCss(sheet: Sheet, o: Overlay) {
-  sheet.add(`.ov-${o.id}`, placeDecls(o, resolve(o.place, "mobile")), placeDecls(o, resolve(o.place, "desktop")));
+  const extra = {
+    tablet: o.place.tablet ? placeDecls(o, resolve(o.place, "tablet")) : undefined,
+    widescreen: o.place.widescreen ? placeDecls(o, resolve(o.place, "widescreen")) : undefined,
+  };
+  sheet.add(`.ov-${o.id}`, placeDecls(o, resolve(o.place, "mobile")), placeDecls(o, resolve(o.place, "desktop")), extra);
 }
