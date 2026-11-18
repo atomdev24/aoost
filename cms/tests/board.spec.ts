@@ -63,17 +63,18 @@ test.describe("breakpoint board", () => {
     await expect(live(page, "mobile").locator(".n-sample-lede")).toHaveCSS("outline-color", "rgb(10, 132, 255)");
   });
 
-  test("changing columns while Mobile is active writes only the mobile override and shows the blue dot", async ({ page, request }) => {
+  test("changing columns while Mobile is active writes only the mobile override and tints the field", async ({ page, request }) => {
     const id = await addTestGrid(page, request);
     await bpSwitch(page, "Mobile").click();
-    const columnsRow = page.locator(".ed-row", { hasText: /^Columns/ });
-    await expect(columnsRow.locator(".ed-dot")).toHaveCount(0);
+    const columnsLabel = page.locator(".ed-inspector .ed-label.is-over", { hasText: "Columns" });
+    await expect(columnsLabel).toHaveCount(0);
     await page.getByRole("group", { name: "Split into columns" }).getByRole("button", { name: "2", exact: true }).click();
     await expect.poll(async () => {
       const l = await sectionLayout(request, id);
       return [l.base.columns, l.desktop?.columns];
     }).toEqual([2, 3]);
-    await expect(columnsRow.getByRole("button", { name: "Reset Columns to desktop" })).toBeVisible();
+    await expect(columnsLabel).toBeVisible();
+    await expect(page.locator(".ed-scope")).toContainText(/Editing Mobile · \d+ changes?/);
     await expect(page.locator(".bd-badge")).toContainText("override");
     // Desktop still shows three columns; Mobile shows two.
     await expect(live(page, "desktop").locator(`.s#${id} > .si`)).toHaveCSS("grid-template-columns", /^(\S+\s){2}\S+$/);
@@ -85,12 +86,13 @@ test.describe("breakpoint board", () => {
     await bpSwitch(page, "Mobile").click();
     await page.getByRole("group", { name: "Split into columns" }).getByRole("button", { name: "2", exact: true }).click();
     await expect.poll(async () => (await sectionLayout(request, id)).base.columns).toBe(2);
-    await page.locator(".ed-override-note").getByRole("button", { name: "Reset to desktop" }).click();
+    await page.locator(".ed-inspector .ed-label.is-over", { hasText: "Columns" }).click();
+    await page.getByRole("menuitem", { name: "Reset to desktop" }).click();
     await expect.poll(async () => {
       const l = await sectionLayout(request, id);
       return [l.base.columns, l.desktop?.columns];
     }).toEqual([3, undefined]);
-    await expect(page.locator(".ed-row", { hasText: /^Columns/ }).locator(".ed-dot")).toHaveCount(0);
+    await expect(page.locator(".ed-inspector .ed-label.is-over", { hasText: "Columns" })).toHaveCount(0);
   });
 
   test("text edits show up in both frames", async ({ page }) => {

@@ -56,6 +56,15 @@ export const setOnSaved = (fn: (version: number) => void) => {
   onSaved = fn;
 };
 let lastMerge: { key: string; at: number } | null = null;
+/** A drag in progress (scrubbing a number, adjusting an image): all its edits become one undo step. */
+let gesture: { first: boolean } | null = null;
+export const beginGesture = () => {
+  gesture = { first: true };
+};
+export const endGesture = () => {
+  gesture = null;
+  lastMerge = null;
+};
 
 const set = (patch: Partial<EditorState>) => {
   state = { ...state, ...patch };
@@ -143,7 +152,8 @@ export function update(fn: (site: Site) => Site, label: string, opts: { merge?: 
   const next = fn(state.site);
   if (next === state.site) return;
   const now = Date.now();
-  const merging = !!opts.merge && lastMerge?.key === opts.merge && now - lastMerge.at < MERGE_WINDOW && state.past.length > 0;
+  const merging = gesture ? !gesture.first && state.past.length > 0 : !!opts.merge && lastMerge?.key === opts.merge && now - lastMerge.at < MERGE_WINDOW && state.past.length > 0;
+  if (gesture) gesture.first = false;
   lastMerge = opts.merge ? { key: opts.merge, at: now } : null;
   set({
     site: next,

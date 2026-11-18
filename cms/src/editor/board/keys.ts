@@ -1,3 +1,5 @@
+import { isAdjusting } from "../canvas/AdjustImage";
+import { openQuickInsert } from "../insert/QuickInsert";
 import { flush, getState, redo, undo } from "../store";
 import { closeUnpinnedFlyout, getRailState } from "../workspace/rail-store";
 import { activateBreakpoint, selectBlock } from "./bridge";
@@ -87,6 +89,11 @@ export function attachKeys(doc: Document): () => void {
     if (key === "'" || e.code === "Quote") {
       e.preventDefault();
       toggleDotGrid();
+      return;
+    }
+    if (e.key === "/" && !isAdjusting()) {
+      e.preventDefault();
+      openQuickInsert();
       return;
     }
     if (e.shiftKey) return;

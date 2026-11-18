@@ -5,7 +5,7 @@ import type { Identity } from "./auth";
 import { draftStub, readDraft, type Env } from "./env";
 import { error, html, json, readJson } from "./http";
 import { mediaApi } from "./media";
-import { publishToGitHub } from "./publish";
+import { buildStatus, publishToGitHub } from "./publish";
 
 /** How recently the connector must have called for the editor to show "Claude connected". */
 const CONNECTOR_FRESH_MS = 15 * 60_000;
@@ -38,6 +38,15 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       if (!result.ok) return error(result.status === 401 || result.status === 403 ? 502 : result.status === 422 ? 409 : 502, result.error);
       await draft.markPublished();
       return json({ ok: true, commit: result.commit, url: result.url, changed: result.changed });
+    }
+    case "GET /published":
+      return new Response(`{"ok":true,"site":${await draft.getPublishedJson()}}`, { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+    case "GET /publish/status": {
+      // The deploy Action that rebuilds the site after a publish: queued, running, done or failed.
+      const sha = url.searchParams.get("sha") ?? "";
+      if (!/^[0-9a-f]{7,40}$/.test(sha)) return error(400, "Expected ?sha=<commit>.");
+      if (!env.GITHUB_TOKEN) return json({ ok: true, state: "unknown" });
+      return json({ ok: true, state: await buildStatus(sha, { repo: env.GITHUB_REPO, token: env.GITHUB_TOKEN }) });
     }
     case "POST /screenshot": {
       const body = await readJson<{ requestId: string; png: string | null }>(request);

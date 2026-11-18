@@ -42,10 +42,11 @@ test.describe("homepage in the editor", () => {
     await resetDraft(request, password!);
   });
 
-  test("the aoost blocks sit in their own group in the Add panel", async ({ page }) => {
+  test("the aoost blocks are in the block library under Layout", async ({ page }) => {
     await page.locator(".ed-rail").getByRole("button", { name: "Insert", exact: true }).click();
-    await page.getByRole("tab", { name: "Blocks" }).click();
-    await expect(page.getByText("aoost (homepage blocks)").first()).toBeVisible();
+    await page.getByRole("tab", { name: "Layout" }).click();
+    await expect(page.locator(".ed-card-name", { hasText: /^Projects$/ }).first()).toBeVisible();
+    await expect(page.locator(".ed-card-name", { hasText: /^Journals$/ }).first()).toBeVisible();
   });
 
   test("change a project title, swap a reel image, add a playlist, reorder two sections, hide the skills: all of it shows in the preview", async ({ page, request }) => {
@@ -58,9 +59,11 @@ test.describe("homepage in the editor", () => {
     // 2. the first reel image
     await select(page, '.ao-b[data-ao="hero"] #reel');
     await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: "hero.jpg" }).click();
-    const image = page.locator('input[aria-label="Image"]:visible').first();
+    await page.locator(".ed-mediarow-main:visible").first().click();
+    const image = page.getByLabel("Image URL");
     await image.fill("/art/grillz.jpg");
-    await image.press("Tab");
+    await image.press("Enter");
+    await page.keyboard.press("Escape");
     await expect.poll(async () => (await homeBlocks(request)).block("AoostHero").content.reel[0].src).toBe("/art/grillz.jpg");
     await expect(canvas(page).locator("#reel img").first()).toHaveAttribute("src", /grillz/);
 
@@ -83,7 +86,7 @@ test.describe("homepage in the editor", () => {
     await page.getByRole("button", { name: "Hide Skills on desktop" }).click();
     await page.locator(".ed-island-bps").getByRole("button", { name: "Mobile" }).click();
     await page.getByRole("button", { name: "Hide Skills on mobile" }).click();
-    await expect(page.locator(".ed-status")).toHaveText("Draft · saved just now");
+    await expect(page.locator(".ed-savedot")).toHaveAttribute("data-state", "saved");
 
     // The draft, rendered like the live site
     await page.goto("/preview/");

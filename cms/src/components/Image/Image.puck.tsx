@@ -3,7 +3,7 @@ import { mediaField } from "../../editor/fields/media";
 import type { ImageContent } from "./Image";
 
 export const fields: Partial<Fields<ImageContent>> = {
-  src: mediaField("Image", "image"),
+  src: mediaField("Image", "image", { owner: true }),
   alt: { type: "text", label: "Alt text (describe the image)" },
   caption: { type: "text", label: "Caption" },
   lightbox: {

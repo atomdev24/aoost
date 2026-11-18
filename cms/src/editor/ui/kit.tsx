@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
-import { useEditor } from "../store";
+import { ColorField } from "../color/ColorField";
 
 /** Small dark-workspace form controls shared by every editor panel. */
 
@@ -164,24 +164,9 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
   );
 }
 
-/** Pick a theme colour token, or a custom colour. "" means not set. */
+/** A colour row (swatch, value, opacity) that opens the full colour picker. "" means not set. */
 export function ColorInput({ value, onChange, label }: { value: string | undefined; onChange: (v: string | undefined) => void; label: string }) {
-  const colors = useEditor((s) => s.site.theme.colors);
-  const token = value?.startsWith("token:") ? value.slice(6) : null;
-  const mode = value === undefined ? "" : token && token in colors ? value : "custom";
-  const hex = token ? (colors[token] ?? "#000000") : (value ?? "#141414");
-  return (
-    <span className="ed-color">
-      <span className="ed-swatch" style={{ background: value === undefined ? "transparent" : hex }} aria-hidden="true" />
-      <Select
-        ariaLabel={label}
-        value={mode}
-        options={[{ value: "", label: "None" }, ...Object.keys(colors).map((k) => ({ value: `token:${k}`, label: k })), { value: "custom", label: "Custom" }]}
-        onChange={(v) => onChange(v === "" ? undefined : v === "custom" ? hex : v)}
-      />
-      {mode === "custom" ? <TextInput ariaLabel={`${label} value`} value={value ?? ""} onCommit={(v) => onChange(v || undefined)} placeholder="#141414" /> : null}
-    </span>
-  );
+  return <ColorField value={value} onChange={onChange} label={label} />;
 }
 
 export function Button({ children, onClick, variant = "ghost", disabled, title, type = "button" }: { children: ReactNode; onClick?: () => void; variant?: "ghost" | "primary" | "accent" | "danger"; disabled?: boolean; title?: string; type?: "button" | "submit" }) {

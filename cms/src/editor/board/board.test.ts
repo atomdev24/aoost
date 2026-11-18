@@ -77,3 +77,14 @@ describe("mobile overrides count", () => {
     expect(countMobileOverrides(page)).toBe(3);
   });
 });
+
+describe("block overrides", () => {
+  it("counts and resets one block's mobile changes", async () => {
+    const { blockOverrides, resetBlockOverrides } = await import("./overrides");
+    const node = { id: "n1", type: "Text", content: {}, style: { base: { padding: "4px", opacity: 0.5 }, desktop: { padding: "20px", opacity: 1 } } };
+    const page = { id: "p", title: "P", slug: "/", parentId: null, status: "draft", template: "blank", seo: {}, isHome: false, showInNav: false, overlays: [], sections: [{ id: "s1", kind: "flow", layout: { base: { columns: 1, gap: 0, padding: "0px" } }, children: [node] }] } as never;
+    expect(blockOverrides(page, "n1")).toBe(2);
+    const reset = resetBlockOverrides(page, "n1") as unknown as { sections: { children: { style: unknown }[] }[] };
+    expect(reset.sections[0]!.children[0]!.style).toEqual({ base: { padding: "20px", opacity: 1 } });
+  });
+});

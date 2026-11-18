@@ -1,18 +1,53 @@
 import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Breakpoint } from "../../schema";
+import { AdjustImage } from "../canvas/AdjustImage";
+import { EmptyPage } from "../insert/EmptyPage";
+import { takeSnapshots, useSnapshot, watchSnapshots } from "./snapshots";
 import { currentPage, useEditor } from "../store";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { activateBreakpoint } from "./bridge";
 import { LiveFrame } from "./LiveFrame";
 import { countMobileOverrides } from "./overrides";
-import { frameRects, getBoard, openPage, panBy, resetFramePositions, setFrameHidden, setFramePosition, setInteracting, setSize, toggleFrameHidden, useBoard, visibleFrameRects } from "./store";
+import { frameRects, getBoard, openPage, panBy, resetFramePositions, setFrameHidden, setFramePosition, setHeight, setInteracting, setSize, toggleFrameHidden, useBoard, visibleFrameRects } from "./store";
 import { FRAME_GAP, isVisible, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
 import { ZoomBar } from "./ZoomBar";
 import "./board.css";
 
 const NAME: Record<Breakpoint, string> = { desktop: "Desktop", mobile: "Mobile" };
+/** ?snapshot=hold keeps the loading view up (for screenshots of it). */
+const hold = new URLSearchParams(location.search).get("snapshot") === "hold";
+
+/**
+ * While a frame hasn't drawn the open page yet, it shows that page's last
+ * snapshot at 55%, then crossfades to the live frame. With no snapshot the
+ * frame stays plain. A first snapshot is taken once the page has loaded.
+ */
+function LoadingCover({ bp, pageId, slug, ready }: { bp: Breakpoint; pageId: string; slug: string; ready: boolean }) {
+  const snap = useSnapshot(pageId, bp);
+  const [gone, setGone] = useState(false);
+  useEffect(() => setGone(false), [pageId]);
+  useEffect(() => {
+    if (!ready) return;
+    const t = setTimeout(() => setGone(true), 320);
+    if (snap === null) {
+      const s = setTimeout(() => void takeSnapshots(pageId, slug), 4000);
+      return () => (clearTimeout(t), clearTimeout(s));
+    }
+    return () => clearTimeout(t);
+  }, [ready, snap, pageId, slug]);
+  // Until the frame has drawn, it takes the snapshot's height.
+  useEffect(() => {
+    if (!ready && snap) setHeight(bp, snap.height);
+  }, [ready, snap, bp]);
+  if (gone) return null;
+  return (
+    <div className={`bd-cover${ready ? " is-done" : ""}`} aria-hidden="true">
+      {snap ? <img src={snap.url} alt="" draggable={false} /> : null}
+    </div>
+  );
+}
 
 /**
  * The breakpoint board: an infinite pan/zoom canvas showing the page once per
@@ -38,6 +73,9 @@ export function Board() {
   const active = allFrames.find((f) => f.bp === bp)!;
   const hiddenBps = (Object.keys(hidden) as Breakpoint[]).filter((b) => hidden[b]);
   const overrides = useMemo(() => countMobileOverrides(page), [page]);
+  const ready = useBoard((s) => s.ready);
+  const loading = hold || frames.some((f) => !ready[f.bp] && (f.bp === bp || !size.w || isVisible(view, f, size.w, size.h)));
+  useEffect(() => watchSnapshots(), []);
 
   useLayoutEffect(() => openPage(pageId), [pageId]);
 
@@ -134,12 +172,14 @@ export function Board() {
         {/* Puck's editable frame. It stays the same element (moving an iframe reloads it) and slides to the active slot. */}
         <div className="bd-frame bd-frame-active" data-bp={bp} style={{ left: active.x, top: active.y, width: active.w, height: active.h, display: hidden[bp] ? "none" : undefined }}>
           <Puck.Preview />
+          <LoadingCover bp={bp} pageId={pageId} slug={page.slug} ready={ready[bp] && !hold} />
         </div>
         {frames
           .filter((f) => f.bp !== bp)
           .map((f) => (
             <div key={f.bp} className="bd-frame" data-bp={f.bp} style={{ left: f.x, top: f.y, width: f.w, height: f.h }}>
               <LiveFrame bp={f.bp} visible={!size.w || isVisible(view, f, size.w, size.h)} />
+              <LoadingCover bp={f.bp} pageId={pageId} slug={page.slug} ready={ready[f.bp] && !hold} />
             </div>
           ))}
         <div className="bd-slot" style={{ left: slot.x, top: slot.y, width: slot.w, height: slot.h }} title="Coming soon: tablet and custom widths" aria-disabled="true" role="button" tabIndex={-1}>
@@ -189,6 +229,13 @@ export function Board() {
         </div>
       ) : null}
 
+      <AdjustImage />
+      {!hidden[bp] ? <EmptyPage rect={{ ...screen(active.x, active.y), width: active.w * view.zoom, height: active.h * view.zoom }} /> : null}
+      {loading ? (
+        <div className="bd-loading-chip" role="status">
+          <span className="ed-spinner" aria-hidden="true" /> Loading latest…
+        </div>
+      ) : null}
       {spaceDown ? <div className="bd-shield" onPointerDown={startPan} /> : null}
       <ZoomBar />
     </div>

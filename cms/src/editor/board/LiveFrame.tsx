@@ -8,7 +8,7 @@ import { currentPage, megaItemId, useEditor } from "../store";
 import { activateBreakpoint } from "./bridge";
 import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT } from "./frame-css";
 import { attachKeys } from "./keys";
-import { frameOrigin, getBoard, setHeight, useBoard } from "./store";
+import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
 import { onBoardWheel } from "./wheel";
 import { ZoomVar } from "./PuckFrame";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
@@ -120,7 +120,11 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     // A press inside a frame is a canvas click: unpinned flyouts close.
     doc.addEventListener("pointerdown", closeUnpinnedFlyout, true);
     const RO = doc.defaultView!.ResizeObserver;
-    const ro = new RO(() => shown.current && doc.body.childElementCount > 0 && setHeight(bp, doc.documentElement.scrollHeight));
+    const ro = new RO(() => {
+      if (!shown.current || doc.body.childElementCount === 0) return;
+      setHeight(bp, doc.documentElement.scrollHeight);
+      setReady(bp);
+    });
     ro.observe(doc.body);
     return () => {
       detach();
@@ -130,6 +134,13 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
       ro.disconnect();
     };
   }, [doc, bp]);
+
+  // Once this frame has drawn the open page, its loading snapshot can fade away.
+  useEffect(() => {
+    if (!doc || !visible) return;
+    const r = requestAnimationFrame(() => doc.body.childElementCount > 0 && setReady(bp));
+    return () => cancelAnimationFrame(r);
+  }, [doc, visible, page.id, bp]);
 
   const model = useMemo(() => frameModel(site, page), [site, page]);
   const css = useMemo(() => pinViewportUnits(pageCss(model.site, model.page), SCREEN_HEIGHT[bp]), [model, bp]);

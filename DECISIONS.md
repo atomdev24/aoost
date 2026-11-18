@@ -132,3 +132,51 @@ Not done / known failures, none caused by this branch:
 2. `home.spec.ts`, `nav.spec.ts` and `sample.spec.ts` (26 tests) fail on the public site for content reasons. Examples: the home page has 6 projects because one is hidden (the test expects 7), and the other pages are drafts. These tests only read the public build, which is byte-identical to before.
 3. Those tests need updating to the current published content, or the content needs changing; that's Alex's call.
 4. Not checked: how the glass reads over very bright page content when zoomed in. It's legible in the screenshots, but low contrast over white pages.
+
+## Editor Sections 2 and 3 (inspector controls; adding things and feedback), branch `editor-section2-3`, 18 Nov 2026
+
+- Dense rows: each row is `62px 1fr 1fr`. Pairs: X/Y, W/H, padding vertical/horizontal, columns and gap, radius and border, opacity and blend, focal X/Y, pan X/Y, nudge X/Y. When only one value of a pair applies (a flow section has no columns), the row uses that value's own label. Labels longer than 16 characters (several aoost media fields) sit above their value, so the hints in them aren't cut off. Puck's own fields use the same rows through its `fieldLabel` override. Lists and groups stay full width.
+- Padding and margin are stored as CSS shorthand. The inspector edits them as vertical and horizontal numbers, and writes `"Vpx"` or `"Vpx Hpx"`. Values with four different sides or other units stay as a text field, so nothing is lost.
+- Radius: one number sets all four corners. Once the corners are rounded, the four separate boxes show on the line below, so a single corner can still be set (an existing feature).
+- Scrubbing: drag the glyph, 1 step per 3px, Shift ×10, Alt ×0.1 (only on fields whose step is below 1). The store has a gesture mode (`beginGesture` and `endGesture`), so a whole drag is exactly one undo step however long it takes. The colour sliders and adjust-image drags use it too.
+- Spacing steps for the right-click menu come from the theme's existing scale: None = 0, S = `sm` 8px, M = `md` 16px, L = `lg` 28px, XL = `xl` 48px. No new theme values were needed.
+- Colours: the picker stores hex (`#rrggbb`, or `#rrggbbaa` when see-through). The Hex/RGB/HSL switch changes only how the value is shown and typed, so switching formats never changes the stored value (HSL shows whole numbers). Theme colours stay `token:name` until the colour is changed by hand. "No colour" clears it. "On this page" lists colours set on the page's blocks and sections, most used first.
+- Alignment: the layout model has `align` and `justify` (start, center, end, stretch) for section cells, and `alignSelf` and `justifySelf` for blocks. The 3×3 grid and the fine controls map onto those. There is no direction, wrap or space-between in the schema, so they aren't offered (the brief says to show only what the model supports). Clicking the active fine option returns it to the default.
+- Overrides: Desktop is the reference, so the tint, the label menu, the count and Reset all appear on Mobile only. On Desktop the scope bar says "Editing Desktop". "Use on all sizes" keeps the mobile value and drops the desktop override (`resetToMobile`). The scope bar's title keeps the old note ("Layout and frame changes here apply to Mobile only. Content is shared."). The bar is written per breakpoint, so tablet and other widths can slot in later.
+- Media rows: the popover offers Cover / Fit / Free, which map onto the schema's `fill` / `fit` / `free`. The schema has no stretch mode, so "Fill" in the brief became "Cover" (it covers the frame). The Picture-in-frame group in the inspector is kept as well. The URL box from the old field moved into the popover.
+- Adjust image: the frame already has focal point, pan and zoom, so nothing went to BLOCKERS. Dragging moves the focal point in Fill or Fit, and the pan in Free. Scaling switches to Free, which starts out pixel-identical to Fill. Edits go to the active breakpoint, like every other frame edit.
+- Drops on the canvas: an image file or a library item dropped on an Image block replaces it. Dropped anywhere else, it's placed as a new block after the block under the pointer (or in a new section). Each drop is one undo step.
+- Block library chips: Layout = section kinds, Spacer, Divider, the site blocks and the aoost homepage blocks. Media = media and embeds. Text = Text, Button and Custom code. Saved = the site's templates. Thumbnails are hand-drawn SVGs (more reliable than rendering every block). Templates have no snapshot field, so they share one "saved" drawing. Saved templates are added by clicking; they can't be dragged, because Puck's drawer only knows component types.
+- Insert position (click or /): after the selected block in its flow or grid section. If a section, or a block in a free-layout section, is selected, the block goes in a new section right after it. With nothing selected, it goes at the end of the page.
+- Publish stages are the real ones: "Saving…" while the draft is saved and committed to GitHub, then "Rebuilding…" while the deploy Action runs (new `GET /api/editor/publish/status?sha=` reads the Actions runs for that commit), then "Live" for 3s. If GitHub reports nothing for ~25s, the editor says so and shows Live. That and the token permission are in BLOCKERS. The change count comes from a new `GET /api/editor/published` (what is live, from the draft store) compared page by page and block by block. The left island keeps a text line only for notices and for Claude's live edits.
+- Loading snapshots: `screenshot.ts` already renders a page to PNG, so after saves (in idle time, at most every 20s per page and breakpoint) it's downscaled to a 480px JPEG and kept in IndexedDB in this browser. A first snapshot is taken after a page loads without one. `?snapshot=hold` keeps the loading view up, for screenshots of it.
+- An "empty page" is one with no blocks, or only the title heading that the Blank template gives a new page. Journal entry = title (the page's name), "Date · place", an Image and body text. Gallery page = title and a short line, then a Gallery grid. "Blank" dismisses the panel for that page. Saved page templates are listed after them (the built-in Blank template isn't repeated).
+- Tests: `tests/section2-3.spec.ts` uploads a few pictures from `/art` and a one-second video made in the browser into the local (wrangler dev) media bucket. Publishing is always mocked there. The older specs now use the save dot, the scope bar, the tinted labels and the block library.
+- Gemini's quota was out (as the brief says), so all of this was written by Claude.
+
+### Summary
+Done: steps 1–10, one commit each, plus a test commit:
+- dense inspector rows;
+- drag-to-scrub numbers;
+- the full colour picker;
+- the alignment grid;
+- the per-breakpoint scope bar, tint and menu;
+- media rows and popover, adjust image on the canvas, and drop to replace;
+- the block library and / quick insert;
+- media masonry and list with usage markers;
+- the save dot and publish stages, badge and sheet;
+- loading snapshots and the empty page.
+
+Results:
+- New `tests/section2-3.spec.ts`: 9/9 pass. 13 screenshots are in `docs/screenshots/editor-section2-3/`: the 12 asked for, plus the failed-publish sheet.
+- Unit tests: 266/266 pass.
+- `npm run build` passes.
+- board, editor and section1 specs: all pass. home-editor: 2/3 pass.
+- Public output is byte-identical: `main` was built to `/tmp/aoost-dist-before-s23` with the build timestamp pinned, and `diff -rq -x admin` against this branch's pinned build shows no differences.
+
+Not done / known issues:
+1. `home-editor.spec.ts` "change a project title, swap a reel image…" still fails at the reel step. It looks for a reel item `hero.jpg`, which the 17 Nov publish removed (as on `main`). I updated the media-field part of it for the new compact row.
+2. `home.spec.ts`, `nav.spec.ts` and `sample.spec.ts` weren't touched. They fail on `main` too, for content reasons (6 projects, pages in draft).
+3. The real "Rebuilding…" → "Live" path wasn't run end to end, because tests never publish. Only the status endpoint (unit test) and the failure path (mocked) are tested. It needs a real publish to confirm, and maybe the token permission in BLOCKERS.
+4. Dragging a block card onto the canvas uses Puck's own drawer and wasn't covered by a new test (click-to-add and / are).
+5. Snapshots are per browser (IndexedDB), so a new browser shows plain frames the first time.

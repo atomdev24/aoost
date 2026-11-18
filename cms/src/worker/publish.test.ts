@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { publishToGitHub } from "./publish";
+import { buildStatus, publishToGitHub } from "./publish";
 
 type Call = { method: string; path: string; body?: Record<string, unknown> };
 
@@ -64,5 +64,19 @@ describe("publish (commit through the GitHub API)", () => {
     const moved = fakeGitHub({}, { failOn: "/git/refs/heads", status: 422 });
     const result = await publishToGitHub({ "content/a.json": "x" }, opts(moved.fetcher));
     expect(result).toMatchObject({ ok: false, status: 422, error: expect.stringContaining("Try again") });
+  });
+});
+
+describe("build status", () => {
+  const runs = (list: { status: string; conclusion: string | null }[], ok = true) =>
+    (async () => new Response(JSON.stringify({ workflow_runs: list }), { status: ok ? 200 : 403 })) as unknown as Parameters<typeof buildStatus>[1]["fetcher"];
+  it("reads the Actions runs for the commit", async () => {
+    const opts = { repo: "a/b", token: "t" };
+    expect(await buildStatus("abc1234", { ...opts, fetcher: runs([{ status: "queued", conclusion: null }]) })).toBe("queued");
+    expect(await buildStatus("abc1234", { ...opts, fetcher: runs([{ status: "in_progress", conclusion: null }]) })).toBe("running");
+    expect(await buildStatus("abc1234", { ...opts, fetcher: runs([{ status: "completed", conclusion: "success" }]) })).toBe("success");
+    expect(await buildStatus("abc1234", { ...opts, fetcher: runs([{ status: "completed", conclusion: "failure" }]) })).toBe("failure");
+    expect(await buildStatus("abc1234", { ...opts, fetcher: runs([]) })).toBe("unknown");
+    expect(await buildStatus("abc1234", { ...opts, fetcher: runs([], false) })).toBe("unknown");
   });
 });

@@ -13,8 +13,10 @@ import { pageToPuck, puckToPage, type PuckData } from "./puck/adapter";
 import { puckConfig } from "./puck/config";
 import { markFromPuck } from "./puck/PuckSync";
 import { currentPage, getState, updatePage, useEditor } from "./store";
+import { QuickInsert } from "./insert/QuickInsert";
 import { MediaPickerHost } from "./ui/MediaPicker";
 import { ActionBar } from "./workspace/ActionBar";
+import { FieldLabel } from "./workspace/FieldLabel";
 import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { TopBar } from "./workspace/TopBar";
@@ -58,7 +60,7 @@ export function Editor() {
         viewports={VIEWPORTS}
         iframe={{ enabled: true, waitForStyles: false }}
         ui={{ viewports: { current: { width: DESIGN_WIDTH[bp], height: "auto" }, controlsVisible: false, options: VIEWPORTS } }}
-        overrides={{ iframe: PuckFrame, actionBar: ActionBar }}
+        overrides={{ iframe: PuckFrame, actionBar: ActionBar, fieldLabel: FieldLabel as never }}
         onAction={(action) => {
           if (action.type === "insert") pendingLabel.current = { label: `Add ${action.componentType}` };
           else if (action.type === "remove") pendingLabel.current = { label: "Delete" };
@@ -82,6 +84,7 @@ export function Editor() {
           <LeftPanel />
           <Board />
           <Inspector />
+          <QuickInsert />
         </div>
       </Puck>
     </>

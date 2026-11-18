@@ -1,17 +1,21 @@
-import { Fragment, useId } from "react";
-import { isOverridden, resetToDesktop, resolve, setAt, setOnly } from "../../responsive/resolve";
+import { Fragment, useId, useState } from "react";
+import { anchorOf, Menu, type Anchor } from "../ui/Popover";
+import { isOverridden, resetToDesktop, resetToMobile, resolve, setAt, setOnly } from "../../responsive/resolve";
 import { Length, type Responsive, type SectionLayout, type Style } from "../../schema";
 import { useEditor } from "../store";
-import { ColorInput, NumberInput, Row, Select, TextInput, Toggle } from "../ui/kit";
+import { ColorInput, NumberInput, Select, TextInput, Toggle } from "../ui/kit";
+import { AlignControl, type AlignValue } from "./AlignControl";
+import { ScrubLength, ScrubNumber } from "./ScrubField";
+import { formatSpacing, parseSpacing } from "./spacing";
 import type { RowContext, RowDef } from "./rows";
 
 const BOX = new Set(["x", "y", "w", "h"]);
 
 /**
  * Edits a Responsive<T> at the active breakpoint. Desktop is the reference:
- * an edit on Mobile changes Mobile only (setOnly) and the value gets a blue
- * dot; the dot, or "Reset to desktop", brings back the desktop value. The
- * stored format stays mobile-base + desktop overrides (SPEC §3).
+ * an edit on Mobile changes Mobile only (setOnly), and that field turns blue.
+ * Its label opens a menu: "Reset to desktop", "Use on all sizes", and the
+ * desktop value. The stored format stays mobile-base + desktop overrides (SPEC §3).
  */
 export function ResponsiveEditor<T extends object>({
   value,
@@ -40,44 +44,64 @@ export function ResponsiveEditor<T extends object>({
   // A free-canvas layer's position and size on mobile also drive desktop's scaled layout, as dragging does.
   const drivesDesktop = (key: string) => ctx.parentKind === "canvas" && BOX.has(key);
   const set = (key: string, v: unknown) => onChange((drivesDesktop(key) ? setAt : setOnly)(safe, bp, { [key]: v } as Partial<T>));
-  const overridden = visible.filter((r) => isOverridden(safe, r.key as keyof T));
+
+  // Dense rows: rows that share a pair label sit side by side under that label.
+  const lines = (group: string) => {
+    const inGroup = visible.filter((r) => r.group === group);
+    const out: { label: string; rows: RowDef<T>[] }[] = [];
+    for (const r of inGroup) {
+      if (!r.pair) out.push({ label: r.label, rows: [r] });
+      else if (!out.some((l) => l.rows[0]!.pair === r.pair)) {
+        const pair = inGroup.filter((x) => x.pair === r.pair);
+        out.push({ label: pair.length > 1 ? r.pair : r.label, rows: pair });
+      }
+    }
+    return out;
+  };
 
   return (
     <div className="ed-responsive">
       {groups.map((group) => (
         <Fragment key={group}>
           {groups.length > 1 && !hideHeads?.includes(group) ? <h5 className="ed-subhead">{group}</h5> : null}
-          {visible
-            .filter((r) => r.group === group)
-            .map((row) => {
-              const over = isOverridden(safe, row.key as keyof T);
-              const dot =
-                bp === "mobile" && over ? (
-                  <button type="button" className="ed-dot" title="Mobile-only change. Click to reset to desktop." aria-label={`Reset ${row.label} to desktop`} onClick={() => onChange(resetToDesktop(safe, row.key as keyof T))} />
-                ) : bp === "desktop" && over ? (
-                  <span className="ed-dot ed-dot-hollow" title="Mobile has its own value for this" />
-                ) : null;
-              const id = `${uid}-${row.key}`;
-              return (
-                <Row key={row.key} label={row.label} dot={dot} htmlFor={id} stack={row.kind === "corners" || row.kind === "border" || row.kind === "filter" || row.kind === "background"}>
-                  <Control row={row} id={id} value={current[row.key]} onChange={(v) => set(row.key, v)} />
-                </Row>
-              );
-            })}
+          {lines(group).map((line) => {
+            const keys = line.rows.flatMap((r) => (r.alignKeys ? [r.alignKeys.x, r.alignKeys.y] : [r.key])) as (keyof T)[];
+            const over = bp === "mobile" && keys.some((k) => isOverridden(safe, k));
+            const tinted = (row: RowDef<T>) => bp === "mobile" && (row.alignKeys ? [row.alignKeys.x, row.alignKeys.y] : [row.key]).some((k) => isOverridden(safe, k as keyof T));
+            const id = `${uid}-${line.rows[0]!.key}`;
+            return (
+              <div key={line.label + line.rows[0]!.key} className="ed-rowset">
+                <div className={`ed-row${line.rows.length > 1 ? " ed-row-pair" : ""}`}>
+                  {over ? (
+                    <OverrideLabel
+                      label={line.label}
+                      desktop={describe(keys.map((k) => resolve(safe, "desktop")[k]))}
+                      onReset={() => onChange(keys.reduce((r, k) => resetToDesktop(r, k), safe))}
+                      onUseEverywhere={() => onChange(keys.reduce((r, k) => resetToMobile(r, k), safe))}
+                    />
+                  ) : (
+                    <label className="ed-label" htmlFor={id} title={line.rows.length > 1 ? line.rows.map((r) => r.label).join(" · ") : line.label}>
+                      <span>{line.label}</span>
+                    </label>
+                  )}
+                  {line.rows.map((row, i) => (
+                    <div key={row.key} className={`ed-cell${line.rows.length === 1 ? " ed-cell-wide" : ""}${tinted(row) ? " is-over" : ""}`}>
+                      {row.alignKeys ? (
+                        <AlignControl x={current[row.alignKeys.x] as AlignValue} y={current[row.alignKeys.y] as AlignValue} onChange={(patch) => onChange(setOnly(safe, bp, { ...(patch.x !== null ? { [row.alignKeys!.x]: patch.x } : {}), ...(patch.y !== null ? { [row.alignKeys!.y]: patch.y } : {}) } as Partial<T>))} />
+                      ) : (
+                        <Control row={row} id={i === 0 ? id : `${uid}-${row.key}`} value={current[row.key]} onChange={(v) => set(row.key, v)} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {line.rows.map((row) => (
+                  <Extra key={row.key} row={row} value={current[row.key]} onChange={(v) => set(row.key, v)} />
+                ))}
+              </div>
+            );
+          })}
         </Fragment>
       ))}
-      {bp === "mobile" && overridden.length ? (
-        <p className="ed-override-note">
-          Blue dots are mobile-only changes.{" "}
-          <button
-            type="button"
-            className="ed-link"
-            onClick={() => onChange(overridden.reduce((r, row) => resetToDesktop(r, row.key as keyof T), safe))}
-          >
-            Reset to desktop
-          </button>
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -85,28 +109,114 @@ export function ResponsiveEditor<T extends object>({
 function Control<T>({ row, value, onChange, id }: { row: RowDef<T>; value: unknown; onChange: (v: unknown) => void; id: string }) {
   switch (row.kind) {
     case "length":
-      return <TextInput id={id} value={(value as string) ?? ""} placeholder={row.placeholder} validate={(v) => Length.safeParse(v).success} onCommit={(v) => onChange(v || undefined)} />;
+      return <ScrubLength id={id} ariaLabel={row.label} glyph={row.glyph} value={value as string | undefined} placeholder={row.placeholder} validate={(v) => Length.safeParse(v).success} onChange={onChange} />;
     case "aspect":
       return <AspectControl id={id} value={value as string | undefined} onChange={onChange} />;
     case "text":
-      return <TextInput id={id} value={(value as string) ?? ""} placeholder={row.placeholder} onCommit={(v) => onChange(v || undefined)} />;
+      return <TextInput id={id} ariaLabel={row.label} value={(value as string) ?? ""} placeholder={row.placeholder} onCommit={(v) => onChange(v || undefined)} />;
     case "number":
-      return <NumberInput id={id} value={value as number | undefined} min={row.min} max={row.max} step={row.step} suffix={row.suffix} placeholder={row.placeholder} onCommit={onChange} />;
+      return <ScrubNumber id={id} ariaLabel={row.label} glyph={row.glyph} value={value as number | undefined} min={row.min} max={row.max} step={row.step} suffix={row.suffix} placeholder={row.placeholder} spacing={row.spacing} onChange={(n) => (n === undefined && row.required ? undefined : onChange(n))} />;
     case "select":
-      return <Select id={id} value={(value as string) ?? ""} options={row.options ?? []} onChange={(v) => onChange(v || undefined)} />;
+      return <Select id={id} ariaLabel={row.label} value={(value as string) ?? ""} options={row.options ?? []} onChange={(v) => onChange(v || undefined)} />;
     case "color":
       return <ColorInput label={row.label} value={value as string | undefined} onChange={onChange} />;
     case "toggle":
       return <Toggle label={row.label} checked={!!value} onChange={(v) => onChange(v || undefined)} />;
     case "corners":
-      return <Corners value={value as Style["radius"]} onChange={onChange} />;
+      return <RadiusCell id={id} glyph={row.glyph} value={value as Style["radius"]} onChange={onChange} />;
     case "border":
-      return <BorderControl value={value as Style["border"]} onChange={onChange} />;
+      return <ScrubNumber id={id} ariaLabel="Border width" glyph={row.glyph} value={(value as Style["border"])?.width} min={0} max={40} step={0.5} placeholder="0" suffix="px" onChange={(n) => onChange(borderWith(value as Style["border"], { width: n ?? 0 }))} />;
     case "filter":
       return <FilterControl value={value as Style["filter"]} onChange={onChange} />;
     case "background":
       return <BackgroundControl value={value as SectionLayout["background"]} onChange={onChange} />;
+    case "spacing":
+      return <SpacingControl id={id} label={row.label} value={value as string | undefined} required={row.required} onChange={onChange} />;
+    case "align":
+      return null;
   }
+}
+
+/** Rows that need a second line under their pair: per-corner radii when they differ, the border's style and colour. */
+function Extra<T>({ row, value, onChange }: { row: RowDef<T>; value: unknown; onChange: (v: unknown) => void }) {
+  if (row.kind === "corners") {
+    const r = value as Style["radius"];
+    // Shown once the corners are rounded, so each corner can be set on its own.
+    if (!r || r.every((n) => n === 0)) return null;
+    return (
+      <div className="ed-row">
+        <span className="ed-label" />
+        <div className="ed-cell ed-cell-wide">
+          <Corners value={r} onChange={onChange} />
+        </div>
+      </div>
+    );
+  }
+  if (row.kind === "border") {
+    const b = value as Style["border"];
+    if (!b || b.width <= 0) return null;
+    return (
+      <>
+        <div className="ed-row">
+          <span className="ed-label">Stroke</span>
+          <div className="ed-cell ed-cell-wide">
+            <ColorInput label="Border colour" value={b.color} onChange={(c) => onChange(borderWith(b, { color: c ?? "token:ink" }))} />
+          </div>
+        </div>
+        <div className="ed-row">
+          <span className="ed-label">Style</span>
+          <div className="ed-cell">
+            <Select
+              ariaLabel="Border style"
+              value={b.style}
+              options={[
+                { value: "solid", label: "Solid" },
+                { value: "dashed", label: "Dashed" },
+                { value: "dotted", label: "Dotted" },
+              ]}
+              onChange={(v) => onChange(borderWith(b, { style: (v || "solid") as "solid" }))}
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+  return null;
+}
+
+const borderWith = (value: Style["border"], patch: Partial<NonNullable<Style["border"]>>) => {
+  const next = { ...(value ?? { width: 0, style: "solid" as const, color: "token:ink" }), ...patch };
+  return next.width > 0 ? next : undefined;
+};
+
+/** One radius for all four corners. When the corners differ, the four boxes show on the line below. */
+function RadiusCell({ value, onChange, id, glyph }: { value: Style["radius"]; onChange: (v: unknown) => void; id: string; glyph?: string }) {
+  const r = value ?? [0, 0, 0, 0];
+  const same = r.every((n) => n === r[0]);
+  return (
+    <ScrubNumber
+      id={id}
+      ariaLabel="Corner radius"
+      glyph={glyph}
+      value={same ? r[0] : undefined}
+      placeholder={same ? "0" : "Mixed"}
+      min={0}
+      onChange={(n) => onChange(!n ? undefined : [n, n, n, n])}
+    />
+  );
+}
+
+/** Padding or margin as vertical and horizontal numbers; text when the value has four different sides. */
+function SpacingControl({ value, onChange, id, label, required }: { value: string | undefined; onChange: (v: unknown) => void; id: string; label: string; required?: boolean }) {
+  const vh = parseSpacing(value);
+  if (!vh) return <TextInput id={id} ariaLabel={label} value={value ?? ""} onCommit={(v) => onChange(v || (required ? "0px" : undefined))} />;
+  const write = (next: { v: number; h: number }) => onChange(!required && next.v === 0 && next.h === 0 ? undefined : formatSpacing(next));
+  return (
+    <div className="ed-pair">
+      <ScrubNumber id={id} ariaLabel={`${label} vertical`} glyph="↕" spacing value={vh.v} min={label === "Margin" ? undefined : 0} onChange={(n) => write({ ...vh, v: n ?? 0 })} />
+      <ScrubNumber ariaLabel={`${label} horizontal`} glyph="↔" spacing value={vh.h} min={label === "Margin" ? undefined : 0} onChange={(n) => write({ ...vh, h: n ?? 0 })} />
+    </div>
+  );
 }
 
 const RATIOS = ["1/1", "4/3", "3/2", "16/9", "3/4", "2/3", "9/16"];
@@ -128,7 +238,6 @@ function AspectControl({ value, onChange, id }: { value: string | undefined; onC
 const CORNERS = ["Top left", "Top right", "Bottom right", "Bottom left"];
 function Corners({ value, onChange }: { value: Style["radius"]; onChange: (v: unknown) => void }) {
   const r = value ?? [0, 0, 0, 0];
-  const same = r.every((n) => n === r[0]);
   return (
     <div className="ed-corners">
       {CORNERS.map((name, i) => (
@@ -139,37 +248,11 @@ function Corners({ value, onChange }: { value: Style["radius"]; onChange: (v: un
           min={0}
           onCommit={(n) => {
             const next = [...r] as [number, number, number, number];
-            // While all four corners match, the first box sets them together; edit another box to split them.
-            if (same && i === 0) next.fill(n ?? 0);
-            else next[i] = n ?? 0;
+            next[i] = n ?? 0;
             onChange(next.every((x) => x === 0) ? undefined : next);
           }}
         />
       ))}
-    </div>
-  );
-}
-
-function BorderControl({ value, onChange }: { value: Style["border"]; onChange: (v: unknown) => void }) {
-  const b = value ?? { width: 0, style: "solid" as const, color: "token:ink" };
-  const set = (patch: Partial<NonNullable<Style["border"]>>) => {
-    const next = { ...b, ...patch };
-    onChange(next.width > 0 ? next : undefined);
-  };
-  return (
-    <div className="ed-inline">
-      <NumberInput ariaLabel="Border width" value={value?.width} min={0} max={40} step={0.5} placeholder="0" suffix="px" onCommit={(n) => set({ width: n ?? 0 })} />
-      <Select
-        ariaLabel="Border style"
-        value={b.style}
-        options={[
-          { value: "solid", label: "Solid" },
-          { value: "dashed", label: "Dashed" },
-          { value: "dotted", label: "Dotted" },
-        ]}
-        onChange={(v) => set({ style: (v || "solid") as "solid" })}
-      />
-      <ColorInput label="Border colour" value={b.color} onChange={(c) => set({ color: c ?? "token:ink" })} />
     </div>
   );
 }
@@ -212,5 +295,47 @@ function BackgroundControl({ value, onChange }: { value: SectionLayout["backgrou
       <TextInput ariaLabel="Poster image" placeholder="Still image for phones" value={bg.poster ?? ""} onCommit={(v) => set({ poster: v })} />
       <TextInput ariaLabel="Tint over the background" placeholder="Tint, e.g. rgba(20,20,20,.4)" value={bg.overlay ?? ""} onCommit={(v) => set({ overlay: v })} />
     </div>
+  );
+}
+
+/** A value as words, for "Desktop: …" notes. */
+function describe(values: unknown[]): string {
+  const one = (v: unknown): string => {
+    if (v === undefined || v === null || v === "") return "not set";
+    if (Array.isArray(v)) return v.every((x) => x === v[0]) ? String(v[0]) : v.join(" ");
+    if (typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      if ("width" in o && "style" in o) return `${o.width}px ${o.style}`;
+      if ("kind" in o) return String(o.kind);
+      return Object.values(o).filter((x) => typeof x === "string" || typeof x === "number").join(" ") || "set";
+    }
+    if (typeof v === "string" && v.startsWith("token:")) return v.slice(6);
+    if (typeof v === "boolean") return v ? "on" : "off";
+    return String(v);
+  };
+  return values.map(one).join(" · ");
+}
+
+/** The accent label of a field that differs on this breakpoint. Clicking it offers the ways back. */
+function OverrideLabel({ label, desktop, onReset, onUseEverywhere }: { label: string; desktop: string; onReset: () => void; onUseEverywhere: () => void }) {
+  const [menu, setMenu] = useState<Anchor | null>(null);
+  return (
+    <>
+      <button type="button" className="ed-label is-over" aria-haspopup="menu" aria-expanded={!!menu} title={`Mobile has its own ${label.toLowerCase()}. Click for options.`} onClick={(e) => setMenu(menu ? null : anchorOf(e.currentTarget))}>
+        <span>{label}</span>
+      </button>
+      {menu ? (
+        <Menu
+          anchor={menu}
+          label={`${label} on this size`}
+          onClose={() => setMenu(null)}
+          items={[
+            { label: "Reset to desktop", onSelect: onReset },
+            { label: "Use on all sizes", onSelect: onUseEverywhere },
+            { label: `Desktop: ${desktop}`, note: true },
+          ]}
+        />
+      ) : null}
+    </>
   );
 }

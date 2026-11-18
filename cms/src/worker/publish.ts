@@ -71,3 +71,26 @@ export async function publishToGitHub(
     return { ok: false, status, error: (e instanceof Error ? e.message : "Publishing failed.") + hint };
   }
 }
+
+export type BuildState = "queued" | "running" | "success" | "failure" | "unknown";
+
+/**
+ * How the rebuild after a publish is going: the GitHub Actions runs for that
+ * commit. "unknown" when there is no run (yet) or the token can't read Actions.
+ */
+export async function buildStatus(sha: string, opts: { repo: string; token: string; fetcher?: Fetcher }): Promise<BuildState> {
+  const fetcher = opts.fetcher ?? ((input, init) => fetch(input, init));
+  try {
+    const res = await fetcher(`https://api.github.com/repos/${opts.repo}/actions/runs?head_sha=${sha}&per_page=10`, {
+      headers: { Authorization: `Bearer ${opts.token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "aoost-cms" },
+    });
+    if (!res.ok) return "unknown";
+    const { workflow_runs: runs = [] } = (await res.json()) as { workflow_runs?: { status: string; conclusion: string | null }[] };
+    if (!runs.length) return "unknown";
+    if (runs.some((r) => r.status === "completed" && r.conclusion && !["success", "skipped", "neutral"].includes(r.conclusion))) return "failure";
+    if (runs.every((r) => r.status === "completed")) return "success";
+    return runs.some((r) => r.status === "in_progress") ? "running" : "queued";
+  } catch {
+    return "unknown";
+  }
+}
