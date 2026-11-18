@@ -213,3 +213,9 @@ Left / known:
 - Nav: the Menu button and its sheet only render when the mobile items include a real link (page, section, external, button, a dropdown holding one, or a mega panel). Social, label, embed and search don't count. In the editor, draft pages count as live, so the Menu still shows there. Drafts were already dropped from the public menu by `resolveItem`.
 - Nav: with no page links, the desktop pill is just the logo. The empty `<nav class="pill-links">` stays so the markup is stable.
 - Browser specs in `home.spec.ts` were updated for these changes but not run, because port 8787 was in use by another build. Unit tests and `npm run build` pass.
+
+## Tests follow the current content (19 Nov 2026, TESTS-CURRENT-CONTENT.md)
+
+- Expected values now come from `content/` (`cms/tests/content.ts`): visible projects, reel, journals, playlists, nav labels and socials, and each page's status (published → 200, draft → 404). Features that are off on purpose (ticker, late mode, skills, wall) are checked as off, a draft test switches the ticker and late mode on, and the homepage nav is checked to hold only published pages (none yet, so no Menu button).
+- Only the homepage is published, so the nav, sample-page, lightbox and nav-types tests set every page live in a fresh draft and run on `/preview/`, which renders exactly like the public site. The pixel match against the original homepage uses a frozen copy of the content that matched it (`cms/tests/fixtures/home-original.json`, from e5871bb) on `/preview/`.
+- Result: 74/74 browser tests, 286/286 unit tests and `npm run build` pass. Gemini wasn't used: the edits were small and needed judgment. `cms/node_modules` was a tracked self-referencing symlink that broke `npm ci`, so it was replaced locally with a real install. That deletion is not committed.
