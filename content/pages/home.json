@@ -44,7 +44,10 @@
             "lateMode": false
           },
           "style": {
-            "base": {}
+            "base": {},
+            "desktop": {
+              "alignSelf": "center"
+            }
           },
           "effects": {
             "enter": "slide-right",
