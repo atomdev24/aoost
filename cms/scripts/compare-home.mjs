@@ -1,5 +1,6 @@
 // Side-by-side screenshots of the original homepage (repo-root index.html) and the CMS homepage.
-//   node scripts/compare-home.mjs [cmsBaseUrl]        default http://localhost:8787
+//   node scripts/compare-home.mjs [cmsBaseUrl] [cmsPath]   defaults http://localhost:8787 and /
+// A cmsPath under /preview/ captures the editor's draft; it signs in with EDITOR_PASSWORD from the environment.
 // Writes docs/screenshots/homepage-compare/{original,cms}-{390,1440}.png
 //
 // The original page talks to Alex's Supabase project. These captures must not change anything there:
@@ -13,6 +14,7 @@ import { fileURLToPath } from "node:url";
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const out = resolve(repo, "docs/screenshots/homepage-compare");
 const cms = process.argv[2] ?? "http://localhost:8787";
+const cmsPath = process.argv[3] ?? "/";
 mkdirSync(out, { recursive: true });
 
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".svg": "image/svg+xml", ".json": "application/json" };
@@ -39,10 +41,14 @@ export async function guard(context) {
 
 const browser = await chromium.launch();
 for (const [label, width, height] of [["390", 390, 844], ["1440", 1440, 900]]) {
-  for (const [name, url] of [["original", "http://localhost:8799/"], ["cms", cms + "/"]]) {
+  for (const [name, url] of [["original", "http://localhost:8799/"], ["cms", cms + cmsPath]]) {
     // Reduced motion makes both pages deterministic: no focus blur, no auto-advancing reel, no moving ticker.
     const context = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce", deviceScaleFactor: 1 });
     await guard(context);
+    if (name === "cms" && cmsPath.startsWith("/preview")) {
+      const login = await context.request.post(cms + "/api/login", { data: { password: process.env.EDITOR_PASSWORD ?? "" } });
+      if (!login.ok()) throw new Error(`could not sign in to the editor for the draft preview: ${login.status()}`);
+    }
     const page = await context.newPage();
     page.on("pageerror", (e) => console.log(`[${name} ${label}] pageerror:`, e.message.slice(0, 200)));
     try {

@@ -10,7 +10,7 @@ const content = resolve(dirname(fileURLToPath(import.meta.url)), "../../content"
 const read = (path: string) => JSON.parse(readFileSync(resolve(content, path), "utf8"));
 
 type Node = { type: string; content: Record<string, any> };
-export type ContentPage = { id: string; title: string; slug: string; parentId: string | null; status: string; showInNav: boolean; sections: { id: string; children: Node[] }[] };
+export type ContentPage = { id: string; title: string; slug: string; parentId: string | null; status: string; showInNav: boolean; sections: { id: string; layout?: { base?: { hidden?: boolean } }; children: Node[] }[] };
 
 export const site = () => read("site.json");
 export const pages = (): ContentPage[] => readdirSync(resolve(content, "pages")).filter((f) => f.endsWith(".json")).map((f) => read(`pages/${f}`));

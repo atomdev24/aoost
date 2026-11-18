@@ -1,7 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { clearArea, draftSite, editorPassword, mcpCall, onBoard, resetDraft, signIn } from "./helpers";
+import { fileName, homeBlock, visibleProjects } from "./content";
+import { bearer, clearArea, draftSite, editorPassword, mcpCall, onBoard, resetDraft, signIn } from "./helpers";
 
 const password = editorPassword();
 const shots = resolve(dirname(fileURLToPath(import.meta.url)), "../../docs/screenshots");
@@ -50,15 +51,34 @@ test.describe("homepage in the editor", () => {
   });
 
   test("change a project title, swap a reel image, add a playlist, reorder two sections, hide the skills: all of it shows in the preview", async ({ page, request }) => {
+    // What the published homepage holds now (content/pages/home.json).
+    const projects: { image: string; title?: string; hidden?: boolean }[] = homeBlock("AoostProjects").projects;
+    const firstShown = projects.findIndex((p) => !p.hidden); // the first piece on the table
+    const summary = (p: { image: string; title?: string }) => p.title || fileName(p.image);
+    const firstReel: { src: string; alt?: string } = homeBlock("AoostHero").reel[0];
+    const playlists = homeBlock("AoostPlaylistBand").playlists.length;
+
+    // The live site already hides the skills; show them in the draft so step 5 can hide them again.
+    const draftHome = (await draftSite(request, password!)).pages.find((p: { id: string }) => p.id === "home");
+    const skills = draftHome.sections.find((s: { id: string }) => s.id === "home-tools");
+    if (skills.layout.base?.hidden || skills.layout.desktop?.hidden) {
+      delete skills.layout.base.hidden;
+      if (skills.layout.desktop) delete skills.layout.desktop.hidden;
+      expect((await request.post("/api/editor/ops", { headers: bearer(password!), data: { ops: [{ op: "putPage", page: draftHome }] } })).ok()).toBe(true);
+      await page.reload();
+      await expect(canvas(page).locator('.ao-b[data-ao="tools"]')).toBeVisible();
+      await page.keyboard.press("Escape");
+    }
+
     // 1. a project's title
     await select(page, '.ao-b[data-ao="projects"] h2');
-    await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: "hero.jpg" }).click();
-    await page.locator('input[name="projects[0].title"]:visible').fill("Fire breather");
-    await expect.poll(async () => (await homeBlocks(request)).block("AoostProjects").content.projects[0].title).toBe("Fire breather");
+    await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: summary(projects[firstShown]!) }).first().click();
+    await page.locator(`input[name="projects[${firstShown}].title"]:visible`).fill("Fire breather");
+    await expect.poll(async () => (await homeBlocks(request)).block("AoostProjects").content.projects[firstShown].title).toBe("Fire breather");
 
     // 2. the first reel image
     await select(page, '.ao-b[data-ao="hero"] #reel');
-    await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: "hero.jpg" }).click();
+    await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: firstReel.alt || fileName(firstReel.src) }).first().click();
     await page.locator(".ed-mediarow-main:visible").first().click();
     const image = page.getByLabel("Image URL");
     await image.fill("/art/grillz.jpg");
@@ -67,16 +87,16 @@ test.describe("homepage in the editor", () => {
     await expect.poll(async () => (await homeBlocks(request)).block("AoostHero").content.reel[0].src).toBe("/art/grillz.jpg");
     await expect(canvas(page).locator("#reel img").first()).toHaveAttribute("src", /grillz/);
 
-    // 3. a fourth playlist
+    // 3. one more playlist
     await select(page, '.ao-b[data-ao="playlists"] #h-pl');
     await page.locator('[class*="ArrayField-addButton"]:visible').first().click();
-    const title = page.locator('input[name="playlists[3].title"]:visible');
+    const title = page.locator(`input[name="playlists[${playlists}].title"]:visible`);
     if (!(await title.count())) await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: "New playlist" }).click();
     await title.fill("Sunday");
-    await page.locator('input[name="playlists[3].spotify"]:visible').fill("https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M?si=abc");
-    await expect.poll(async () => (await homeBlocks(request)).block("AoostPlaylistBand").content.playlists.length).toBe(4);
-    await expect(canvas(page).locator("#discs .cv-frame")).toHaveCount(4);
-    await expect(canvas(page).locator("#discs .cv-fl").nth(3)).toHaveText("Disc 4 · Sunday");
+    await page.locator(`input[name="playlists[${playlists}].spotify"]:visible`).fill("https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M?si=abc");
+    await expect.poll(async () => (await homeBlocks(request)).block("AoostPlaylistBand").content.playlists.length).toBe(playlists + 1);
+    await expect(canvas(page).locator("#discs .cv-frame")).toHaveCount(playlists + 1);
+    await expect(canvas(page).locator("#discs .cv-fl").nth(playlists)).toHaveText(`Disc ${playlists + 1} · Sunday`);
 
     // 4. skills above journals, 5. then hide the skills (on desktop and on mobile)
     await page.locator(".ed-rail").getByRole("button", { name: "Layers", exact: true }).click();
@@ -90,14 +110,14 @@ test.describe("homepage in the editor", () => {
 
     // The draft, rendered like the live site
     await page.goto("/preview/");
-    await expect(page.locator("#table .piece")).toHaveCount(7);
+    await expect(page.locator("#table .piece")).toHaveCount(visibleProjects().length);
     expect(await page.locator(".ao-b").evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.ao)).then((a) => a.slice(0, 4))).toEqual(["hero", "projects", "tools", "journals"]);
     await expect(page.locator('.ao-b[data-ao="tools"]')).toBeHidden();
     await expect(page.locator('.ao-b[data-ao="journals"]')).toBeVisible();
     await expect(page.locator("#reel .hr-slide img").first()).toHaveAttribute("src", /grillz/);
     await page.locator("#discs").evaluate((e) => e.scrollIntoView({ block: "center" }));
-    await expect(page.locator("#discs .cv-frame")).toHaveCount(4);
-    await page.locator("#discs .disc").nth(3).click();
+    await expect(page.locator("#discs .cv-frame")).toHaveCount(playlists + 1);
+    await page.locator("#discs .disc").nth(playlists).click();
     await expect(page.locator("#mwOpen")).toHaveAttribute("href", "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M");
     await page.locator("#table .piece").first().evaluate((e) => e.scrollIntoView({ block: "center" }));
     await page.locator("#table .piece").first().click();
