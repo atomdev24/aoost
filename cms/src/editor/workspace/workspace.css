@@ -1633,3 +1633,104 @@ body:has(.ed-scrub.is-scrubbing) {
   justify-content: flex-end;
   font-size: 11px;
 }
+
+/* ---------------------------------------------------------------- alignment grid */
+.ed-align2-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.ed-align-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 18px);
+  grid-auto-rows: 18px;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+}
+.ed-align-grid button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+}
+.ed-align-grid button span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #6e6e73;
+}
+.ed-align-grid button:hover span {
+  background: var(--ed-text);
+}
+.ed-align-grid button.is-near span {
+  background: #409cff;
+}
+.ed-align-grid button[aria-pressed="true"] {
+  background: var(--ed-accent-soft);
+}
+.ed-align-grid button[aria-pressed="true"] span {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--ed-accent);
+}
+.ed-align-more {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ed-sub);
+  cursor: pointer;
+}
+.ed-align-more.is-on,
+.ed-align-more:hover {
+  color: var(--ed-text);
+  background: var(--ed-seg-on);
+}
+.ed-align-fine {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+.ed-align-fine-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+}
+.ed-align-fine-row .ed-seg {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.ed-align-fine-row .ed-seg button {
+  padding: 0 2px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ed-inspector .ed-row:has(.ed-align2) {
+  align-items: start;
+}
+.ed-inspector .ed-row:has(.ed-align2) > .ed-label {
+  min-height: 26px;
+}
+/* The fine controls use the whole row width, label column included. */
+.ed-inspector .ed-align-fine {
+  margin-left: -68px;
+}
+.ed-inspector .ed-align-fine-row {
+  grid-template-columns: 62px minmax(0, 1fr);
+}
+.ed-inspector .ed-align-fine-row .ed-seg button {
+  font-size: 11px;
+}

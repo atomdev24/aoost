@@ -3,6 +3,7 @@ import { isOverridden, resetToDesktop, resolve, setAt, setOnly } from "../../res
 import { Length, type Responsive, type SectionLayout, type Style } from "../../schema";
 import { useEditor } from "../store";
 import { ColorInput, NumberInput, Select, TextInput, Toggle } from "../ui/kit";
+import { AlignControl, type AlignValue } from "./AlignControl";
 import { ScrubLength, ScrubNumber } from "./ScrubField";
 import { formatSpacing, parseSpacing } from "./spacing";
 import type { RowContext, RowDef } from "./rows";
@@ -64,7 +65,7 @@ export function ResponsiveEditor<T extends object>({
         <Fragment key={group}>
           {groups.length > 1 && !hideHeads?.includes(group) ? <h5 className="ed-subhead">{group}</h5> : null}
           {lines(group).map((line) => {
-            const keys = line.rows.map((r) => r.key as keyof T);
+            const keys = line.rows.flatMap((r) => (r.alignKeys ? [r.alignKeys.x, r.alignKeys.y] : [r.key])) as (keyof T)[];
             const over = keys.some((k) => isOverridden(safe, k));
             const dot =
               bp === "mobile" && over ? (
@@ -82,7 +83,11 @@ export function ResponsiveEditor<T extends object>({
                   </label>
                   {line.rows.map((row, i) => (
                     <div key={row.key} className={`ed-cell${line.rows.length === 1 ? " ed-cell-wide" : ""}`}>
-                      <Control row={row} id={i === 0 ? id : `${uid}-${row.key}`} value={current[row.key]} onChange={(v) => set(row.key, v)} />
+                      {row.alignKeys ? (
+                        <AlignControl x={current[row.alignKeys.x] as AlignValue} y={current[row.alignKeys.y] as AlignValue} onChange={(patch) => onChange(setOnly(safe, bp, { ...(patch.x !== null ? { [row.alignKeys!.x]: patch.x } : {}), ...(patch.y !== null ? { [row.alignKeys!.y]: patch.y } : {}) } as Partial<T>))} />
+                      ) : (
+                        <Control row={row} id={i === 0 ? id : `${uid}-${row.key}`} value={current[row.key]} onChange={(v) => set(row.key, v)} />
+                      )}
                     </div>
                   ))}
                 </div>

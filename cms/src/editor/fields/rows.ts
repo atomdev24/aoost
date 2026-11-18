@@ -21,18 +21,13 @@ export type RowDef<T> = {
   spacing?: boolean;
   /** The value can't be cleared (the schema requires it). */
   required?: boolean;
+  /** An alignment grid: which keys hold the horizontal and vertical alignment. */
+  alignKeys?: { x: string; y: string };
   /** Show the row only in some contexts, e.g. inside a grid or canvas section. */
   when?: (ctx: RowContext) => boolean;
 };
 export type RowContext = { parentKind?: "flow" | "grid" | "canvas"; framed?: boolean; fit?: FrameFit["fit"] };
 
-const ALIGN = [
-  { value: "", label: "Default" },
-  { value: "start", label: "Start" },
-  { value: "center", label: "Centre" },
-  { value: "end", label: "End" },
-  { value: "stretch", label: "Stretch" },
-];
 const inCanvas = (c: RowContext) => c.parentKind === "canvas";
 const notCanvas = (c: RowContext) => c.parentKind !== "canvas";
 
@@ -50,8 +45,7 @@ export const STYLE_ROWS: RowDef<Style>[] = [
   { key: "aspectRatio", label: "Ratio", group: "Size", kind: "aspect", placeholder: "4/3", when: notCanvas },
   { key: "colSpan", label: "Column span", group: "Grid cell", kind: "number", min: 1, max: 12, when: (c) => c.parentKind === "grid", pair: "Span", glyph: "↔" },
   { key: "rowSpan", label: "Row span", group: "Grid cell", kind: "number", min: 1, max: 12, when: (c) => c.parentKind === "grid", pair: "Span", glyph: "↕" },
-  { key: "alignSelf", label: "Align", group: "Grid cell", kind: "select", options: ALIGN, when: notCanvas },
-  { key: "justifySelf", label: "Justify", group: "Grid cell", kind: "select", options: ALIGN, when: notCanvas },
+  { key: "alignSelf", label: "Align", group: "Grid cell", kind: "align", alignKeys: { x: "justifySelf", y: "alignSelf" }, when: notCanvas },
   { key: "margin", label: "Margin", group: "Spacing", kind: "spacing", when: notCanvas, spacing: true },
   { key: "padding", label: "Padding", group: "Spacing", kind: "spacing", spacing: true },
   { key: "radius", label: "Radius", group: "Frame", kind: "corners", pair: "Corners", glyph: "◜" },
@@ -123,8 +117,7 @@ export const SECTION_ROWS: RowDef<SectionLayout>[] = [
   { key: "padding", label: "Padding", group: "Layout", kind: "spacing", when: notCanvas, spacing: true, required: true },
   { key: "maxWidth", label: "Content width", group: "Layout", kind: "number", min: 200, suffix: "px", placeholder: "full", pair: "Size", glyph: "↦" },
   { key: "minHeight", label: "Min height", group: "Layout", kind: "length", placeholder: "none", pair: "Size", glyph: "↧" },
-  { key: "align", label: "Align cells", group: "Layout", kind: "select", options: ALIGN, when: notCanvas },
-  { key: "justify", label: "Justify cells", group: "Layout", kind: "select", options: ALIGN, when: notCanvas },
+  { key: "align", label: "Align", group: "Layout", kind: "align", alignKeys: { x: "justify", y: "align" }, when: notCanvas },
   { key: "background", label: "Background", group: "Background", kind: "background" },
   { key: "hidden", label: "Hide on this breakpoint", group: "Visibility", kind: "toggle" },
 ];
