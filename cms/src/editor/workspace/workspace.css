@@ -496,7 +496,9 @@
   top: 58px;
   right: 10px;
   width: 284px;
-  max-height: calc(100vh - 68px);
+  /* Ends above the zoom pill at the bottom right. */
+  max-height: calc(100vh - 124px);
+  max-height: calc(100dvh - 124px);
 }
 .ed-segctl {
   display: grid;

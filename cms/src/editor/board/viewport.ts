@@ -32,8 +32,15 @@ export function layoutFrames(heights: Partial<Record<Breakpoint, number>>): Fram
 }
 
 export function slotRect(frames: Rect[]): Rect {
-  const last = frames[frames.length - 1]!;
-  return { x: last.x + last.w + FRAME_GAP, y: 0, w: SLOT.w, h: SLOT.h };
+  if (frames.length === 0) return { x: FRAME_GAP, y: 0, w: SLOT.w, h: SLOT.h };
+  let rightmost = frames[0]!;
+  for (let i = 1; i < frames.length; i++) {
+    const f = frames[i]!;
+    if (f.x + f.w > rightmost.x + rightmost.w) {
+      rightmost = f;
+    }
+  }
+  return { x: rightmost.x + rightmost.w + FRAME_GAP, y: rightmost.y, w: SLOT.w, h: SLOT.h };
 }
 
 export const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));

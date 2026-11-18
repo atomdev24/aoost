@@ -70,8 +70,13 @@ export const frameRects = (s: BoardState = state): FrameRect[] => {
   });
 };
 
+export const visibleFrameRects = (s: BoardState = state): FrameRect[] => {
+  const visible = frameRects(s).filter((f) => !s.hidden[f.bp]);
+  return visible.length > 0 ? visible : frameRects(s);
+};
+
 const allRects = (s: BoardState = state): Rect[] => {
-  const frames = frameRects(s);
+  const frames = visibleFrameRects(s);
   return [...frames, slotRect(frames)];
 };
 

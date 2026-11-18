@@ -73,10 +73,17 @@
   opacity: 0.8;
 }
 
-/* Frame labels, in screen space above each frame. */
-.bd-label {
+/* Frame labels, in screen space above each frame. The label is the frame's drag handle. */
+.bd-label-wrap {
   position: absolute;
+  z-index: 3;
   transform: translateY(calc(-100% - 8px));
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.bd-label {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -90,7 +97,11 @@
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
+}
+.bd-label.is-dragging {
+  cursor: grabbing;
 }
 .bd-label strong {
   color: var(--ed-text);
@@ -128,20 +139,19 @@
 
 .bd-zoombar {
   position: absolute;
-  left: 50%;
+  right: 16px;
   bottom: 18px;
   z-index: 6;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 2px;
   padding: 4px;
-  border-radius: 12px;
-  background: rgba(40, 40, 44, 0.86);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--ed-line);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  border-radius: var(--ed-glass-radius);
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  box-shadow: var(--ed-glass-shadow);
   white-space: nowrap;
 }
 .bd-zb {
@@ -181,4 +191,104 @@
   height: 18px;
   margin: 0 4px;
   background: var(--ed-line);
+}
+
+.bd-zb-grid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ed-shell.is-interacting .bd-zoombar,
+.ed-shell.is-interacting .bd-hidden-chip {
+  opacity: 0.7;
+}
+
+/* The "…" frame menu beside each label. */
+.bd-frame-menu {
+  position: relative;
+  flex: none;
+}
+.bd-label-more {
+  height: 22px;
+  min-width: 22px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ed-sub);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.bd-label-more:hover,
+.bd-label-more[aria-expanded="true"] {
+  background: var(--ed-seg);
+  color: var(--ed-text);
+}
+.bd-menu,
+.bd-hidden-chip {
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  box-shadow: var(--ed-glass-shadow);
+}
+.bd-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 20;
+  min-width: 150px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border-radius: var(--ed-glass-radius);
+}
+.bd-menu button {
+  display: block;
+  width: 100%;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ed-text);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.bd-menu button:hover:not(:disabled) {
+  background: var(--ed-accent-soft);
+}
+.bd-menu button:disabled {
+  color: var(--ed-sub);
+  cursor: default;
+}
+
+/* "Mobile hidden · Show" at the bottom left. */
+.bd-hidden-chip {
+  position: absolute;
+  left: 16px;
+  bottom: 18px;
+  z-index: 6;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--ed-sub);
+  font-size: 12px;
+  transition: opacity 150ms ease;
+}
+.bd-hidden-chip button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ed-accent);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
 }
