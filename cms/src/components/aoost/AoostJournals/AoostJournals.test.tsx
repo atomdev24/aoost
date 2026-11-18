@@ -33,4 +33,11 @@ describe("AoostJournals", () => {
     expect(html).toContain('<span class="jw jw-light"></span>');
     expect(html).toContain('<span class="jstamp">hear no evil</span>');
   });
+  it("renders no line under the heading when sub is empty", () => {
+    for (const sub of ["", "  "]) {
+      const html = renderNode("AoostJournals", { ...d, sub });
+      expect(html).toContain('<h2 id="h-jr" data-underline="1">journals</h2>');
+      expect(html).not.toContain("jr-sub");
+    }
+  });
 });

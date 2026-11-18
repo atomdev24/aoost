@@ -16,6 +16,8 @@ export const AoostHeroContent = z.object({
   reel: z.array(z.object({ src: z.string(), alt: z.string().optional() })),
   /** Seconds each artwork stays before the strip moves on. */
   reelSeconds: z.number().min(1).max(60),
+  /** Show the ticker strip under the artwork. Off renders no strip at all. Older content has no value: shown. */
+  showTicker: z.boolean().optional(),
   /** Ticker lines. "day" and "late" lines show by day or after midnight; "both" always. */
   ticker: z.array(z.object({ text: z.string(), mode: z.enum(["day", "late", "both"]) })),
   /** Add the rodeo's top score to the ticker. */
@@ -44,8 +46,9 @@ const Clover = () => (
 
 /** The ticker as it stands before the script adds live lines (top score, visitor number). */
 export function tickerLines(content: AoostHeroContent): string[] {
+  if (content.showTicker === false) return [];
   const own = content.ticker.filter((t) => t.text && (t.mode === "both" || t.mode === "day")).map((t) => t.text);
-  return (own.length ? own : ["welcome", "pick a disc"]).concat(content.tickerTopScore ? ["beat the game, be the first on the board"] : []);
+  return own.concat(content.tickerTopScore ? ["beat the game, be the first on the board"] : []);
 }
 
 export const AoostHero = defineComponent<AoostHeroContent>({
@@ -61,6 +64,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
       timeZone: "Africa/Johannesburg",
       reel: [{ src: "/art/hero.jpg", alt: "" }],
       reelSeconds: 5.2,
+      showTicker: true,
       ticker: [
         { text: "welcome", mode: "day" },
         { text: "pick a playlist", mode: "both" },
@@ -75,8 +79,10 @@ export const AoostHero = defineComponent<AoostHeroContent>({
   // The ticker follows the reel directly inside this block, so it doesn't need the original's pull-up margin.
   css: css + `\n.ao .ao-b[data-ao="hero"] .ticker{margin-top:0}\n`,
   Render: ({ content }) => {
+    const showTicker = content.showTicker !== false;
     const lines = tickerLines(content);
-    const repeat = Math.max(1, Math.ceil(9 / lines.length));
+    // With no lines yet the strip stays empty; the script may still add live lines (visitor number).
+    const repeat = lines.length ? Math.ceil(9 / lines.length) : 0;
     const half = Array.from({ length: repeat }, (_, r) =>
       lines.map((text, i) => (
         <Fragment key={`${r}-${i}`}>
@@ -107,12 +113,14 @@ export const AoostHero = defineComponent<AoostHeroContent>({
             <i id="hrBar" />
           </div>
         </header>
-        <div className="ticker" id="ticker" aria-label={`${lines.join(". ")}.`}>
-          <div className="tk-track" aria-hidden="true">
-            <div className="tk-half">{half}</div>
-            <div className="tk-half">{half}</div>
+        {showTicker ? (
+          <div className="ticker" id="ticker" aria-label={lines.length ? `${lines.join(". ")}.` : undefined}>
+            <div className="tk-track" aria-hidden="true">
+              <div className="tk-half">{half}</div>
+              <div className="tk-half">{half}</div>
+            </div>
           </div>
-        </div>
+        ) : null}
       </Block>
     );
   },

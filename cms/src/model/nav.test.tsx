@@ -119,3 +119,33 @@ describe("nav rendering of all ten types", () => {
     expect(sheet).not.toContain(">Diary<");
   });
 });
+
+describe("nav with nothing published yet", () => {
+  const drafts = (s: typeof site, except: string[] = []) => ({ ...s, pages: s.pages.map((p) => (p.isHome || except.includes(p.id) ? p : { ...p, status: "draft" as const })) });
+  const withSocial = (s: typeof site) => addNavItem(s, "social").site;
+
+  it("drops items that point at draft pages", () => {
+    const html = render(drafts(site, ["diary"]));
+    expect(html).toContain(">Diary<");
+    expect(html).not.toContain(">Work<");
+    expect(html).not.toContain('href="/work"');
+  });
+  it("shows just the logo, with no Menu button or sheet, when no published page is linked", () => {
+    const html = render(withSocial(drafts(site)));
+    expect(html).toContain('class="pill-logo"');
+    expect(html).not.toContain("pill-menu");
+    expect(html).not.toContain('id="nav-sheet"');
+    expect(html).not.toContain(">Menu<");
+  });
+  it("brings the Menu back once a page is published", () => {
+    const html = render(withSocial(drafts(site, ["about"])));
+    expect(html).toContain('<button type="button" class="pill-menu" aria-expanded="false" aria-controls="nav-sheet">Menu</button>');
+    expect(html).toContain('id="nav-sheet"');
+  });
+  it("keeps the Menu in the editor, where draft pages show", () => {
+    const s = withSocial(drafts(site));
+    const Nav = navRenderer(s.nav.style).Render;
+    const html = renderToStaticMarkup(<Nav ctx={makeCtx(s, s.pages.find((p) => p.isHome)!, { editing: true })} />);
+    expect(html).toContain("pill-menu");
+  });
+});

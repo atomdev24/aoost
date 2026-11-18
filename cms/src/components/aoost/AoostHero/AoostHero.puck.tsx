@@ -23,6 +23,7 @@ export const fields: Fields<AoostHeroContent> = {
   reelSeconds: { type: "number", label: "Seconds per artwork", min: 1, max: 60 },
   clockLabel: { type: "text", label: "Clock label (before the time)" },
   timeZone: { type: "text", label: "Clock time zone (e.g. Africa/Johannesburg)" },
+  showTicker: onOff("Ticker strip"),
   ticker: {
     type: "array",
     label: "Ticker lines",

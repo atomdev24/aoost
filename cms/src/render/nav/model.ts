@@ -107,3 +107,27 @@ export function resolveItem(item: NavItem, ctx: RenderCtx, today: string): Resol
 export function resolveNav(ctx: RenderCtx, today = new Date().toISOString().slice(0, 10)): ResolvedItem[] {
   return ctx.site.nav.items.map((i) => resolveItem(i, ctx, today)).filter((i): i is ResolvedItem => !!i);
 }
+
+/**
+ * Whether these (already resolved) items give a menu anything to go to: a link to a
+ * published page, a section, an external site, or a dropdown or mega menu holding one.
+ * Social icons, labels, embeds and search alone don't count. Items for draft pages
+ * are dropped by resolveItem, so they never count either.
+ */
+export function hasMenuLinks(items: ResolvedItem[]): boolean {
+  return items.some((i) => {
+    switch (i.type) {
+      case "page":
+      case "section":
+      case "external":
+      case "button":
+        return !!i.href;
+      case "dropdown":
+        return hasMenuLinks(i.children);
+      case "mega":
+        return !!i.panel?.length;
+      default:
+        return false;
+    }
+  });
+}

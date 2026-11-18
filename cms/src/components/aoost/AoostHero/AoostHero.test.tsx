@@ -29,7 +29,27 @@ describe("AoostHero", () => {
     expect(json).not.toContain("<b>"); // can't close the script early
     expect(JSON.parse(json).ticker[0].text).toBe("howdy <b>");
   });
-  it("falls back to the original ticker when no line applies", () => {
-    expect(tickerLines({ ...d, ticker: [{ text: "night", mode: "late" }] })).toEqual(["welcome", "pick a disc", "beat the game, be the first on the board"]);
+  it("adds no fallback lines when no line applies", () => {
+    expect(tickerLines({ ...d, ticker: [{ text: "night", mode: "late" }] })).toEqual(["beat the game, be the first on the board"]);
+    expect(tickerLines({ ...d, ticker: [], tickerTopScore: false })).toEqual([]);
+  });
+  it("renders an empty strip, without crashing, when the ticker has no lines", () => {
+    const html = renderNode("AoostHero", { ...d, ticker: [], tickerTopScore: false });
+    expect(html).toContain('<div class="ticker" id="ticker"><div class="tk-track" aria-hidden="true"><div class="tk-half"></div><div class="tk-half"></div></div></div>');
+    expect(html).not.toContain("welcome");
+    expect(html).not.toContain("pick a disc");
+  });
+  it("shows the ticker by default, including for content saved before showTicker existed", () => {
+    const { showTicker: _, ...older } = d;
+    expect(AoostHero.schema.safeParse(older).success).toBe(true);
+    expect(renderNode("AoostHero", older)).toContain('id="ticker"');
+    expect(d.showTicker).toBe(true);
+  });
+  it("renders no ticker strip at all when showTicker is off", () => {
+    const html = renderNode("AoostHero", { ...d, showTicker: false });
+    expect(html).not.toContain('id="ticker"');
+    expect(html).not.toContain("tk-");
+    expect(html).toContain('id="reel"');
+    expect(tickerLines({ ...d, showTicker: false })).toEqual([]);
   });
 });

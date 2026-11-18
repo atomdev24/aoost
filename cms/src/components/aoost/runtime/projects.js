@@ -13,6 +13,7 @@ export function initProjects(){
   /* ---------- sticky notes on the page ---------- */
   document.querySelectorAll('.ao .sticky[data-note]').forEach(el=>{const i=+el.dataset.note,src=SITE_NOTES[i];
     if(src){const img=new Image();img.alt='';img.src=src;el.style.background='transparent';el.appendChild(img);return;}
+    if(el.dataset.noteStyle==='plain')return; /* plain: the neon note with nothing drawn on it */
     const cv=document.createElement('canvas');el.appendChild(cv);new ResizeObserver(()=>{const[c,w,h]=fit(cv);c.clearRect(0,0,w,h);doodle(c,w,h,i?'bolt':'eye',9+i);}).observe(cv);});
 
   /* ---------- projects table ---------- */

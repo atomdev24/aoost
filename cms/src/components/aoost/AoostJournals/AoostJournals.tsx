@@ -147,7 +147,7 @@ export const AoostJournals = defineComponent<AoostJournalsContent>({
     <Block name="journals" mat={content.mat} data={content}>
       <section className="focus-sec journals" aria-labelledby="h-jr">
         <Head id="h-jr" title={content.heading} index={1}>
-          {content.sub ? <p className="jr-sub">{content.sub}</p> : null}
+          {content.sub?.trim() ? <p className="jr-sub">{content.sub}</p> : null}
         </Head>
         <div className="jr-shelf" id="jrShelf">
           {content.journals
