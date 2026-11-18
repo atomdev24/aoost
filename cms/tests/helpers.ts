@@ -61,6 +61,22 @@ export async function fullPageShot(page: Page, path: string) {
 }
 
 /**
+ * The part of the board nothing floats over: below the top islands, above the
+ * zoom pill, and left of the inspector when one is open.
+ */
+export async function clearArea(page: Page) {
+  const board = (await page.locator(".bd").boundingBox())!;
+  const panel = page.locator(".ed-inspector");
+  const inspector = (await panel.count()) ? await panel.boundingBox() : null;
+  return {
+    top: board.y + 60,
+    bottom: board.y + board.height - 90,
+    left: board.x + 8,
+    right: (inspector ? inspector.x : board.x + board.width) - 8,
+  };
+}
+
+/**
  * The editor shows pages on a pan/zoom board, so a block can sit outside the
  * window. Pan the board (with the wheel, as a person would) until the block
  * is in view, and return its on-screen box.
@@ -70,14 +86,15 @@ export async function onBoard(page: Page, target: import("@playwright/test").Loc
   for (let i = 0; i < 30; i++) {
     const b = await target.boundingBox();
     if (!b) throw new Error("block not on the board");
+    const area = await clearArea(page);
     const h = Math.min(b.height, 160);
     const w = Math.min(b.width, 160);
-    const top = board.y + 40;
-    const bottom = board.y + board.height - 90; // above the zoom bar
-    if (b.y >= top && b.y + h <= bottom && b.x >= board.x + 8 && b.x + w <= board.x + board.width - 8) return b;
-    const dy = b.y < top || b.y + h > bottom ? b.y + h / 2 - (board.y + board.height / 2) : 0;
-    const dx = b.x < board.x + 8 || b.x + w > board.x + board.width - 8 ? b.x + w / 2 - (board.x + board.width / 2) : 0;
-    await page.mouse.move(board.x + board.width - 4, board.y + 4);
+    const midX = (area.left + area.right) / 2;
+    const midY = (area.top + area.bottom) / 2;
+    if (b.y >= area.top && b.y + h <= area.bottom && b.x >= area.left && b.x + w <= area.right) return b;
+    const dy = b.y < area.top || b.y + h > area.bottom ? b.y + h / 2 - midY : 0;
+    const dx = b.x < area.left || b.x + w > area.right ? b.x + w / 2 - midX : 0;
+    await page.mouse.move(board.x + board.width / 2, board.y + board.height / 2);
     await page.mouse.wheel(dx, dy);
     await page.waitForTimeout(60);
   }

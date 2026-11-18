@@ -1,25 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
 /* aoost editor: the dark, Photoshop-style workspace from the mockups (SPEC §9). */
 :root {
-  /* Direction B, "dark Pro" (EDITOR-REDESIGN.md §1). */
+  /* Direction B, "dark Pro" (EDITOR-REDESIGN.md §1 & EDITOR-SECTION1.md §0). */
   --ed-canvas: #161618;
   --ed-dot: #2c2c30;
-  --ed-panel: #1e1e21;
-  --ed-bar: #232326;
-  --ed-line: #3a3a3e;
-  --ed-text: #f5f5f7;
-  --ed-sub: #a1a1a6;
-  --ed-accent: #0a84ff;
-  --ed-accent-soft: rgba(10, 132, 255, 0.18);
-  --ed-seg: #2e2e32;
-  --ed-seg-on: #48484d;
-  --ed-input: #2c2c30;
+  --ed-glass-bg: rgba(36, 36, 40, 0.62);
+  --ed-glass-backdrop: blur(22px) saturate(170%);
+  --ed-glass-border: 1px solid rgba(255, 255, 255, 0.07);
+  --ed-glass-radius: 12px;
+  --ed-glass-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  --ed-panel: var(--ed-glass-bg);
+  --ed-bar: var(--ed-glass-bg);
+  --ed-line: rgba(255, 255, 255, 0.07);
+  --ed-text: #ECECEE;
+  --ed-sub: #8E8E93;
+  --ed-accent: #0A84FF;
+  --ed-accent-soft: rgba(10, 132, 255, 0.22);
+  --ed-seg: rgba(255, 255, 255, 0.06);
+  --ed-seg-on: rgba(255, 255, 255, 0.14);
+  --ed-input: rgba(0, 0, 0, 0.25);
   --ed-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif;
   /* Older names used across the panels, mapped onto the tokens above. */
   --ed-bg: var(--ed-canvas);
   --ed-raised: var(--ed-input);
-  --ed-selected: #36363b;
-  --ed-line-strong: var(--ed-seg-on);
-  --ed-text-2: #d1d1d6;
+  --ed-selected: var(--ed-seg-on);
+  --ed-line-strong: rgba(255, 255, 255, 0.14);
+  --ed-text-2: #ECECEE;
   --ed-muted: var(--ed-sub);
   --ed-ink: #141414;
   color-scheme: dark;
@@ -33,9 +41,32 @@ body,
 body {
   background: var(--ed-canvas);
   color: var(--ed-text);
-  font: 13px/1.4 var(--ed-font);
-  letter-spacing: -0.005em;
+  font: 12px/1.4 var(--ed-font);
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Frosted glass material for floating islands, flyouts, inspector, menus and popovers */
+.ed-glass {
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  border-radius: var(--ed-glass-radius);
+  box-shadow: var(--ed-glass-shadow);
+}
+
+.ed-section-label,
+.ed-caps,
+.ed-panel-head {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ed-sub);
+  letter-spacing: -0.01em;
+}
+.ed-block-name {
+  font-size: 13px;
+  color: var(--ed-text);
 }
 
 /* ---- Puck, re-themed: its neutral scale is flipped onto the dark greys, its accent is the system blue. ---- */
@@ -615,18 +646,19 @@ body {
 .ed-layer {
   display: flex;
   align-items: center;
-  gap: 4px;
-  min-height: 36px;
+  gap: 6px;
+  height: 26px;
+  min-height: 26px;
   padding-right: 4px;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: 6px;
 }
 .ed-layer:hover {
-  background: var(--ed-raised);
+  background: var(--ed-seg);
 }
 .ed-layer.is-selected {
-  background: var(--ed-selected);
-  border-color: var(--ed-line-strong);
+  background: var(--ed-accent-soft);
+  border-color: transparent;
 }
 .ed-layer.is-hidden .ed-layer-name {
   opacity: 0.5;
@@ -637,7 +669,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 34px;
+  height: 26px;
   line-height: 1;
   padding: 0;
   border: 0;

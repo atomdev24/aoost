@@ -12,7 +12,7 @@ const shots = resolve(dirname(fileURLToPath(import.meta.url)), "../../docs/scree
 const password = editorPassword();
 const editable = (page: Page) => page.frameLocator("#preview-frame");
 const live = (page: Page, bp: "desktop" | "mobile") => page.frameLocator(`.bd-live[data-bp="${bp}"]`);
-const bpSwitch = (page: Page, name: "Desktop" | "Mobile") => page.locator(".ed-bpswitch").getByRole("button", { name });
+const bpSwitch = (page: Page, name: "Desktop" | "Mobile") => page.locator(".ed-island-bps").getByRole("button", { name });
 const zoomPct = async (page: Page) => Number((await page.locator(".bd-zoom-pct").textContent())!.replace("%", ""));
 type Layout = { base: Record<string, unknown>; desktop?: Record<string, unknown> };
 const sectionLayout = async (request: Parameters<typeof draftSite>[0], id: string): Promise<Layout> =>
@@ -23,6 +23,7 @@ async function addTestGrid(page: Page, request: Parameters<typeof draftSite>[0])
   const added = await mcpCall(request, password!, "add_section", { page: "sample", kind: "grid", name: "Test grid", index: 1, layout: { columns: 3 }, nodes: [{ type: "Text", content: { text: "Cell one" } }, { type: "Text", content: { text: "Cell two" } }] });
   const id = /"sectionId":\s*"([^"]+)"/.exec(added.content[0]!.text!)![1]!;
   // Select it from the layers list; the board pans to it.
+  await page.locator(".ed-rail").getByRole("button", { name: "Layers", exact: true }).click();
   await page.locator(".ed-layer-name", { hasText: "Test grid" }).click();
   await expect(page.locator(".ed-inspector-title strong")).toHaveText("Test grid");
   return id;
@@ -40,6 +41,7 @@ test.describe("breakpoint board", () => {
     await page.reload();
     await expect(editable(page).locator(".n-sample-title")).toBeVisible();
     await expect(live(page, "mobile").locator(".n-sample-title")).toBeVisible();
+    await page.keyboard.press("Escape"); // close the default (unpinned) Layers flyout so the frames are clear
   });
   test.afterAll(async ({ request }) => {
     await resetDraft(request, password!);
@@ -100,6 +102,8 @@ test.describe("breakpoint board", () => {
   });
 
   test("zoom and Fit all work, and the view is remembered per page", async ({ page }) => {
+    // The first fit can happen before the frames have measured their pages, so fit again once they have.
+    await page.getByRole("button", { name: "Fit all" }).click();
     const fitted = await zoomPct(page);
     expect(fitted).toBeGreaterThan(10);
     expect(fitted).toBeLessThan(60);

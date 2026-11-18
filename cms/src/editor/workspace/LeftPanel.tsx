@@ -4,53 +4,31 @@ import { addSection, createSection, locate } from "../../model/page-ops";
 import type { Section } from "../../schema";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage, useEditor } from "../store";
+import { FontsPanel } from "../ui/FontsPanel";
 import { LayersPanel } from "../ui/LayersPanel";
 import { LibraryPanel } from "../ui/LibraryPanel";
 import { MediaLibrary } from "../ui/MediaLibrary";
+import { NavPanel } from "../ui/NavPanel";
 import { PagesPanel } from "../ui/PagesPanel";
 import { ThemePanel } from "../ui/ThemePanel";
+import {
+  closeFlyout,
+  togglePanel,
+  togglePinned,
+  useRail,
+  type PanelId,
+} from "./rail-store";
 
-type Tab = "pages" | "layers" | "assets";
-type AssetTab = "blocks" | "media" | "library" | "theme";
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "pages", label: "Pages" },
-  { id: "layers", label: "Layers" },
-  { id: "assets", label: "Assets" },
-];
-const ASSET_TABS: { id: AssetTab; label: string }[] = [
-  { id: "blocks", label: "Blocks" },
-  { id: "media", label: "Media" },
-  { id: "library", label: "Saved" },
-  { id: "theme", label: "Theme" },
-];
-
-const remembered = <T extends string>(key: string, fallback: T): T => {
-  try {
-    return (localStorage.getItem(key) as T | null) ?? fallback;
-  } catch {
-    return fallback;
-  }
+const PANEL_TITLES: Record<PanelId, string> = {
+  layers: "Layers",
+  pages: "Pages",
+  insert: "Insert",
+  media: "Media",
+  nav: "Navigation",
+  theme: "Theme",
+  fonts: "Fonts",
+  global: "Global",
 };
-const remember = (key: string, value: string) => {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    /* not remembered in a private window */
-  }
-};
-
-function Segmented<T extends string>({ value, options, onChange, label, small }: { value: T; options: { id: T; label: string }[]; onChange: (v: T) => void; label: string; small?: boolean }) {
-  return (
-    <div className={`ed-segctl${small ? " ed-segctl-sm" : ""}`} role="tablist" aria-label={label} style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
-      {options.map((o) => (
-        <button key={o.id} type="button" role="tab" aria-selected={value === o.id} onClick={() => onChange(o.id)}>
-          {o.label}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 const KINDS: { kind: Section["kind"]; label: string; hint: string }[] = [
   { kind: "flow", label: "Section", hint: "Blocks stacked in a column" },
@@ -59,7 +37,7 @@ const KINDS: { kind: Section["kind"]; label: string; hint: string }[] = [
 ];
 
 /** "+ Add section" at the foot of the layers list: after the selected section, or at the end. */
-function AddSection() {
+export function AddSection() {
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -98,45 +76,220 @@ function AddSection() {
   );
 }
 
-/** The 248px left panel: Pages, Layers and Assets as one segmented control. */
-export function LeftPanel() {
-  const [tab, setTabState] = useState<Tab>(() => remembered("aoost.left", "layers"));
-  const [assets, setAssetsState] = useState<AssetTab>(() => remembered("aoost.assets", "blocks"));
-  const pageId = useEditor((s) => s.pageId);
-  const setTab = (t: Tab) => {
-    setTabState(t);
-    remember("aoost.left", t);
-  };
-  const setAssets = (t: AssetTab) => {
-    setAssetsState(t);
-    remember("aoost.assets", t);
-  };
+function InsertPanel() {
+  const [tab, setTab] = useState<"blocks" | "saved">("blocks");
   return (
-    <aside className="ed-left" aria-label="Pages, layers and assets">
-      <Segmented value={tab} options={TABS} onChange={setTab} label="Left panel" />
-      <div className="ed-left-body">
-        {tab === "pages" ? <PagesPanel /> : null}
-        {tab === "layers" ? <LayersPanel key={pageId} /> : null}
-        {tab === "assets" ? (
-          <>
-            <Segmented value={assets} options={ASSET_TABS} onChange={setAssets} label="Assets" small />
-            {assets === "blocks" ? (
-              <div className="ed-panel ed-blocks">
-                <p className="ed-hint">Drag a block onto the frame you are editing.</p>
-                <Puck.Components />
-              </div>
+    <div className="ed-insert-panel">
+      <div className="ed-segctl ed-segctl-sm" role="tablist" aria-label="Insert" style={{ gridTemplateColumns: "1fr 1fr", margin: "10px 12px 6px" }}>
+        <button type="button" role="tab" aria-selected={tab === "blocks"} onClick={() => setTab("blocks")}>
+          Blocks
+        </button>
+        <button type="button" role="tab" aria-selected={tab === "saved"} onClick={() => setTab("saved")}>
+          Saved
+        </button>
+      </div>
+      {tab === "blocks" ? (
+        <div className="ed-panel ed-blocks">
+          <p className="ed-hint">Drag a block onto the frame you are editing.</p>
+          <Puck.Components />
+        </div>
+      ) : (
+        <LibraryPanel mode="templates" />
+      )}
+    </div>
+  );
+}
+
+const RailIcon = ({ id }: { id: PanelId }) => {
+  switch (id) {
+    case "layers":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M2 4.5L8 1.5l6 3-6 3-6-3zM2 8.5l6 3 6-3M2 12.5l6 3 6-3" />
+        </svg>
+      );
+    case "pages":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M4 2h5.5L13 5.5V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" />
+          <path d="M9 2v4h4" />
+        </svg>
+      );
+    case "insert":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M8 2.5v11M2.5 8h11" />
+        </svg>
+      );
+    case "media":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
+          <circle cx="5.5" cy="6" r="1.2" fill="currentColor" />
+          <path d="M2 11.5l3.5-3.5 3 3 2.5-2.5 3 3" />
+        </svg>
+      );
+    case "nav":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" aria-hidden="true">
+          <path d="M3 4.5h10M3 8h10M3 11.5h10" />
+        </svg>
+      );
+    case "theme":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+          <circle cx="8" cy="8" r="6" />
+          <circle cx="5.5" cy="6.5" r="1" fill="currentColor" />
+          <circle cx="10.5" cy="6.5" r="1" fill="currentColor" />
+          <circle cx="8" cy="11" r="1" fill="currentColor" />
+        </svg>
+      );
+    case "fonts":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" aria-hidden="true">
+          <path d="M3 4h10M8 4v9M5.5 13h5" />
+        </svg>
+      );
+    case "global":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+          <circle cx="8" cy="8" r="6" />
+          <ellipse cx="8" cy="8" rx="2.5" ry="6" strokeWidth="1.1" />
+          <path d="M2 8h12" strokeWidth="1.1" />
+        </svg>
+      );
+  }
+};
+
+const PinIcon = ({ pinned }: { pinned: boolean }) => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 16 16"
+    fill={pinned ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="1.4"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    style={{ transform: pinned ? "rotate(0deg)" : "rotate(35deg)", transition: "transform 140ms ease" }}
+  >
+    <path d="M9.5 2.5l4 4M8 4L3.5 8.5 7.5 12.5 12 8 8 4zM3.5 8.5L1.5 14.5l6-2" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+    <path d="M4 4l8 8M12 4l-8 8" />
+  </svg>
+);
+
+const TOP_PANELS: PanelId[] = ["layers", "pages", "insert", "media"];
+const BOTTOM_PANELS: PanelId[] = ["nav", "theme", "fonts", "global"];
+
+/**
+ * Direction B left panel: a slim 36px frosted rail and floating flyouts beside it.
+ */
+export function LeftPanel() {
+  const active = useRail((s) => s.active);
+  const pinned = useRail((s) => s.pinned);
+  const pageId = useEditor((s) => s.pageId);
+
+  const renderPanelButton = (id: PanelId) => {
+    const isSelected = active === id;
+    const title = PANEL_TITLES[id];
+    return (
+      <button
+        key={id}
+        type="button"
+        className={`ed-rail-btn${isSelected ? " is-active" : ""}`}
+        aria-label={title}
+        aria-pressed={isSelected}
+        title={title}
+        onClick={() => togglePanel(id)}
+      >
+        <RailIcon id={id} />
+      </button>
+    );
+  };
+
+  return (
+    <>
+      <nav className="ed-rail" aria-label="Editor panels">
+        <div className="ed-rail-group">
+          {TOP_PANELS.map(renderPanelButton)}
+        </div>
+        <span className="ed-rail-divider" aria-hidden="true" />
+        <div className="ed-rail-group">
+          {BOTTOM_PANELS.map(renderPanelButton)}
+        </div>
+      </nav>
+
+      {active ? (
+        <aside
+          className={`ed-flyout${pinned ? " is-pinned" : ""}`}
+          aria-label={PANEL_TITLES[active]}
+          data-panel={active}
+        >
+          <header className="ed-flyout-head">
+            <strong className="ed-flyout-title">{PANEL_TITLES[active]}</strong>
+            <div className="ed-flyout-actions">
+              <button
+                type="button"
+                className={`ed-mini ed-pin-btn${pinned ? " is-pinned" : ""}`}
+                aria-label={pinned ? "Unpin flyout" : "Pin flyout"}
+                aria-pressed={pinned}
+                title={pinned ? "Unpin flyout (auto-close on canvas click)" : "Pin flyout (keep open)"}
+                onClick={togglePinned}
+              >
+                <PinIcon pinned={pinned} />
+              </button>
+              <button
+                type="button"
+                className="ed-mini"
+                aria-label="Close flyout"
+                title="Close (Esc)"
+                onClick={closeFlyout}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+          </header>
+          <div className="ed-flyout-body">
+            {active === "layers" ? (
+              <>
+                <LayersPanel key={pageId} />
+                <AddSection />
+              </>
             ) : null}
-            {assets === "media" ? (
+            {active === "pages" ? <PagesPanel /> : null}
+            {active === "insert" ? <InsertPanel /> : null}
+            {active === "media" ? (
               <div className="ed-panel ed-theme">
                 <MediaLibrary compact />
               </div>
             ) : null}
-            {assets === "library" ? <LibraryPanel /> : null}
-            {assets === "theme" ? <ThemePanel /> : null}
-          </>
-        ) : null}
-      </div>
-      {tab === "layers" ? <AddSection /> : null}
-    </aside>
+            {active === "nav" ? (
+              <div className="ed-panel ed-theme">
+                <NavPanel />
+              </div>
+            ) : null}
+            {active === "theme" ? (
+              <div className="ed-panel ed-theme">
+                <ThemePanel />
+              </div>
+            ) : null}
+            {active === "fonts" ? (
+              <div className="ed-panel ed-theme">
+                <FontsPanel />
+              </div>
+            ) : null}
+            {active === "global" ? (
+              <LibraryPanel mode="globals" />
+            ) : null}
+          </div>
+        </aside>
+      ) : null}
+    </>
   );
 }

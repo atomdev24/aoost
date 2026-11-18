@@ -2,6 +2,7 @@ import { useState } from "react";
 import { setShowInNav } from "../../model/pages";
 import { setPage, update, useEditor } from "../store";
 import { NewPageModal } from "./NewPageModal";
+import { PageSettings } from "./PageSettings";
 
 const HomeIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
@@ -14,11 +15,29 @@ const PageIcon = () => (
   </svg>
 );
 
-/** The pages list from the Editor artboard: home, nested sub-pages, and a nav toggle per page. */
+const GearIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+    <circle cx="8" cy="8" r="2.2" />
+    <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4" />
+  </svg>
+);
+
+/**
+ * The pages list: home, nested sub-pages, a nav toggle per page, and a
+ * "Page settings" action per page that opens that page's settings in place.
+ */
 export function PagesPanel() {
   const pages = useEditor((s) => s.site.pages);
   const pageId = useEditor((s) => s.pageId);
   const [creating, setCreating] = useState(false);
+  const [settingsFor, setSettingsFor] = useState<string | null>(null);
+  if (settingsFor && pages.some((p) => p.id === settingsFor)) {
+    return (
+      <div className="ed-panel ed-page-settings">
+        <PageSettings targetPageId={settingsFor} onBack={() => setSettingsFor(null)} />
+      </div>
+    );
+  }
   const ordered = pages.filter((p) => !p.parentId).flatMap((p) => [p, ...pages.filter((c) => c.parentId === p.id)]);
 
   return (
@@ -44,6 +63,15 @@ export function PagesPanel() {
                 </span>
                 <span className="ed-page-slug">{p.slug}</span>
               </span>
+            </button>
+            <button
+              type="button"
+              className="ed-mini ed-page-settings-btn"
+              aria-label={`Page settings for ${p.title}`}
+              title="Page settings"
+              onClick={() => setSettingsFor(p.id)}
+            >
+              <GearIcon />
             </button>
             {p.isHome ? (
               <span className="ed-page-note">Logo link</span>

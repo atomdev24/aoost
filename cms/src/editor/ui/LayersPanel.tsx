@@ -6,6 +6,7 @@ import { revealBlock } from "../board/bridge";
 import { usePuck } from "../puck/usePuck";
 import { currentPage, getState, setOverlay, updatePage, useEditor } from "../store";
 import { Select } from "./kit";
+import { LayerIcon } from "./LayerIcon";
 
 const KIND_LABEL: Record<Section["kind"], string> = { flow: "Flow", grid: "Grid", canvas: "Canvas" };
 
@@ -55,10 +56,11 @@ export function LayersPanel() {
     setOverlay(id);
   };
 
-  const row = (item: Section | Node, opts: { id: string; label: string; meta: string; depth: number; selected: boolean; onSelect: () => void }) => {
+  const row = (item: Section | Node, opts: { id: string; label: string; meta: string; typeOrKind: string; depth: number; selected: boolean; onSelect: () => void }) => {
     const hidden = isHidden(item, bp);
     return (
-      <li key={opts.id} className={`ed-layer${opts.selected ? " is-selected" : ""}${hidden ? " is-hidden" : ""}`} style={{ paddingLeft: 8 + opts.depth * 18 }}>
+      <li key={opts.id} className={`ed-layer${opts.selected ? " is-selected" : ""}${hidden ? " is-hidden" : ""}`} style={{ paddingLeft: 8 + opts.depth * 14 }}>
+        <LayerIcon type={opts.typeOrKind} className="ed-layer-icon" />
         {renaming === opts.id ? (
           <input
             className="ed-input"
@@ -116,10 +118,10 @@ export function LayersPanel() {
       </div>
       <ul className="ed-layers">
         {page.sections.flatMap((s, i) => [
-          row(s, { id: s.id, label: s.name ?? `Section ${i + 1}`, meta: KIND_LABEL[s.kind], depth: 0, selected: selection.includes(s.id), onSelect: () => select(s.id) }),
+          row(s, { id: s.id, label: s.name ?? `Section ${i + 1}`, meta: KIND_LABEL[s.kind], typeOrKind: s.kind, depth: 0, selected: selection.includes(s.id), onSelect: () => select(s.id) }),
           // One-block sections (the homepage) show just the section until it is selected; bigger ones always list their blocks.
           ...(s.children.length > 1 || selection.some((id) => id === s.id || s.children.some((n) => n.id === id)) ? s.children : []).map((n) =>
-            row(n, { id: n.id, label: n.name ?? getComponent(n.type)?.label ?? n.type, meta: n.type === "Text" ? String(n.content.text ?? "").slice(0, 24) : "", depth: 1, selected: selection.includes(n.id), onSelect: () => select(n.id) }),
+            row(n, { id: n.id, label: n.name ?? getComponent(n.type)?.label ?? n.type, meta: n.type === "Text" ? String(n.content.text ?? "").slice(0, 24) : "", typeOrKind: n.type, depth: 1, selected: selection.includes(n.id), onSelect: () => select(n.id) }),
           ),
         ])}
       </ul>
@@ -133,6 +135,7 @@ export function LayersPanel() {
             id: o.id,
             label: o.node.name ?? getComponent(o.node.type)?.label ?? o.node.type,
             meta: o.anchor === "viewport" ? "On screen" : `On ${page.sections.find((s) => o.anchor !== "viewport" && s.id === o.anchor.sectionId)?.name ?? "section"}`,
+            typeOrKind: o.node.type,
             depth: 0,
             selected: overlayId === o.id,
             onSelect: () => selectOverlay(o.id),

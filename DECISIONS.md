@@ -98,3 +98,37 @@ One line each: the decision, and why. Newest at the bottom.
 - The layers list shows a one-block section (the homepage) as a single row and lists its block once the section is selected. Why: the mockup lists sections; each homepage section holds one block.
 - Performance check (homepage open, typing 31 characters into a field with both frames live): no long tasks (over 50 ms) on this Mac. Off-screen frames don't render, and the passive frame re-renders at most every 150 ms while typing.
 - Public output: every page of the site rendered with `main` and with this branch is byte-identical (all 10 pages, drafts included), and the built `dist/` matches apart from the time-based `?v=` cache-busting suffix.
+
+## Editor Section 1 (workspace frame), branch `editor-section1`, 18 Nov 2026
+
+- Steps 0–2 (tokens, islands, rail and flyouts) were committed by another agent. I reviewed them against the brief and kept them as they were.
+- The inspector unmounts when nothing (no block, overlay or global) is selected, and plays a 150ms fade-and-slide on the way in only. Why: if it faded out too, the panel would be empty while it faded. Its height stops above the zoom pill, and it scrolls inside.
+- Page settings: each row in the Pages flyout has a gear ("Page settings for …") that opens that page's settings inside the flyout, with a back arrow. They work on that page even when it isn't the one open on the board.
+- Frames: dragging a label moves the frame. A press without movement still makes that frame active. The slot and "Fit" use only visible frames. If the active frame is hidden, Puck's frame stays mounted with `display:none` (unmounting the iframe would reload it). "Fit" now leaves 92px at the top so labels clear the islands.
+- Zoom pill: − % + · Fit · Linked · dot grid. "Linked selection" is kept as an existing feature, shortened to "Linked" with its full name as the accessible label.
+- Name tag: Puck's action bar override shows the pill. Its quick actions (move up/down, duplicate, hide at the current breakpoint, delete) are new helpers in `canvas/actions.ts` that call `updatePage`, so each one is a single undo step. Puck's own duplicate/delete buttons are replaced. "Select parent" is kept. When a block starts at the top of its frame, the tag sits just inside the top edge so the iframe doesn't clip it.
+- Corner handles: four 6px squares are drawn on Puck's selection overlay (visual only). Free-layout layers keep their live resize handles: corners show as the same 6px squares, and the edge handles still work as invisible grab areas, so no resize feature was lost.
+- Lines and handles inside frames are multiplied by `--ed-px` (1/zoom), so they look the same on screen at any zoom. Other frames show the selection as a 1px dashed accent outline.
+- A press inside any frame now counts as a canvas click, so it closes unpinned flyouts.
+- Tests: the remembered Layers flyout opens by default and covers part of the Desktop frame, so the older specs press Esc after loading. `onBoard` keeps targets clear of the islands and the inspector. The board "Fit all" test re-fits before measuring, because the first fit can run before the frames have measured their pages.
+- Gemini (`ask-gemini`) was out of quota (resets in about 7 days), so all of this was written by Claude.
+
+### Summary
+Done: steps 3–5 on top of the reviewed steps 0–2, each step in its own commit:
+- inspector only while something is selected, and page settings in the Pages flyout;
+- draggable frames with a `…` menu (Hide frame / Reset positions), a hidden-frame chip, and a zoom pill at the bottom right with a dot-grid toggle (`'` key). Positions, hidden frames and the view are remembered per page; the dot grid is remembered too;
+- hover and selection outlines, corner handles, a name tag that expands into undoable quick actions, and a dashed outline in the other frame.
+
+New `tests/section1.spec.ts` (9 tests) and 6 screenshots in `docs/screenshots/editor-section1/`. Results:
+- unit tests: 248/248 pass;
+- `npm run build` passes;
+- board, editor and section 1 specs: all pass;
+- home-editor: 2/3 pass.
+
+Public pages are byte-identical: with the build timestamp pinned to the "before" build, `diff -rq -x admin /tmp/aoost-dist-before cms/dist` shows no differences. In a normal build only the time-based `?v=` suffix changes.
+
+Not done / known failures, none caused by this branch:
+1. `home-editor.spec.ts` "change a project title, swap a reel image…" still fails. It looks for a reel item `hero.jpg`, but the 17 Nov publish replaced the hero reel with one halftone banner.
+2. `home.spec.ts`, `nav.spec.ts` and `sample.spec.ts` (26 tests) fail on the public site for content reasons. Examples: the home page has 6 projects because one is hidden (the test expects 7), and the other pages are drafts. These tests only read the public build, which is byte-identical to before.
+3. Those tests need updating to the current published content, or the content needs changing; that's Alex's call.
+4. Not checked: how the glass reads over very bright page content when zoomed in. It's legible in the screenshots, but low contrast over white pages.

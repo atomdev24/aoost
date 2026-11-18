@@ -10,6 +10,8 @@ import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT } from "./frame-css";
 import { attachKeys } from "./keys";
 import { frameOrigin, getBoard, setHeight, useBoard } from "./store";
 import { onBoardWheel } from "./wheel";
+import { ZoomVar } from "./PuckFrame";
+import { closeUnpinnedFlyout } from "../workspace/rail-store";
 
 /** Editor-only rules for a passive frame: still motion, no live media, nav drawn in place. */
 const passiveCss = `
@@ -115,6 +117,8 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     };
     doc.addEventListener("wheel", wheel, { passive: false });
     doc.addEventListener("click", click, true);
+    // A press inside a frame is a canvas click: unpinned flyouts close.
+    doc.addEventListener("pointerdown", closeUnpinnedFlyout, true);
     const RO = doc.defaultView!.ResizeObserver;
     const ro = new RO(() => shown.current && doc.body.childElementCount > 0 && setHeight(bp, doc.documentElement.scrollHeight));
     ro.observe(doc.body);
@@ -122,6 +126,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
       detach();
       doc.removeEventListener("wheel", wheel);
       doc.removeEventListener("click", click, true);
+      doc.removeEventListener("pointerdown", closeUnpinnedFlyout, true);
       ro.disconnect();
     };
   }, [doc, bp]);
@@ -133,7 +138,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     const ids = linked ? selection : [];
     const sel = ids.flatMap((id) => [`.n-${CSS.escape(id)}`, `.s#${CSS.escape(id)}`]).join(",");
     const flash = highlight.flatMap((id) => [`.n-${CSS.escape(id)}`, `.s#${CSS.escape(id)}`]).join(",");
-    return [sel && `${sel}{outline:2px solid #0A84FF!important;outline-offset:-2px}`, flash && `${flash}{animation:ed-flash 2s ease-out}@keyframes ed-flash{0%,60%{outline:3px solid #0A84FF;outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}`].filter(Boolean).join("");
+    return [sel && `${sel}{outline:calc(1px * var(--ed-px,1)) dashed #0A84FF!important;outline-offset:calc(-1px * var(--ed-px,1))}`, flash && `${flash}{animation:ed-flash 2s ease-out}@keyframes ed-flash{0%,60%{outline:3px solid #0A84FF;outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}`].filter(Boolean).join("");
   }, [selection, highlight, linked]);
 
   return (
@@ -145,6 +150,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
               <style>{css}</style>
               <style>{frameBaseCss + passiveCss}</style>
               <style>{selectionCss}</style>
+              <ZoomVar doc={doc} />
               <PageBody site={model.site} page={model.page} editing />
             </>,
             doc.body,

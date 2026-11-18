@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, ApiError } from "../api";
+import { activateBreakpoint } from "../board/bridge";
+import { setFrameHidden, toggleFrameHidden, useBoard } from "../board/store";
 import { PuckSync } from "../puck/PuckSync";
 import { currentPage, flush, megaItemId, redo, setPage, setUnpublished, undo, useEditor } from "../store";
 import { ClaudePill } from "./ClaudePill";
@@ -30,7 +32,7 @@ const Icon = ({ d }: { d: string }) => (
   </svg>
 );
 
-/** The 52px top bar: site mark, page switcher and save state · tools · Claude, Preview, Publish. */
+/** Three floating islands over the canvas: left (mark, page, save), centre (tools, breakpoints), right (Claude, preview, publish). */
 export function TopBar() {
   const save = useEditor((s) => s.save);
   const saveError = useEditor((s) => s.saveError);
@@ -40,6 +42,8 @@ export function TopBar() {
   const canRedo = useEditor((s) => s.future.length > 0);
   const lastLabel = useEditor((s) => s.lastLabel);
   const live = useEditor((s) => s.live);
+  const bp = useEditor((s) => s.bp);
+  const hidden = useBoard((s) => s.hidden);
   const page = useEditor(currentPage);
   const returnPageId = useEditor((s) => s.returnPageId);
   const editingMenu = !!megaItemId(page.id);
@@ -92,9 +96,10 @@ export function TopBar() {
   };
 
   return (
-    <header className="ed-top">
+    <header className="ed-islands ed-top">
       <PuckSync />
-      <div className="ed-top-left">
+      {/* Left island: site mark, page switcher, save state */}
+      <div className="ed-island ed-island-left" role="region" aria-label="Page and save status">
         <span className="ed-mark" aria-label="aoost editor" role="img">
           a
         </span>
@@ -117,18 +122,57 @@ export function TopBar() {
           </button>
         </span>
       </div>
-      <ToolGroup />
-      <div className="ed-top-actions">
+
+      {/* Centre island: segmented tool group, hairline divider, breakpoint buttons */}
+      <div className="ed-island ed-island-center" role="toolbar" aria-label="Tools and breakpoints">
+        <ToolGroup />
+        <span className="ed-island-divider" aria-hidden="true" />
+        <div className="ed-island-bps" role="group" aria-label="Breakpoints">
+          <button
+            type="button"
+            className={`ed-tool-bp${bp === "desktop" ? " is-active" : ""}${hidden.desktop ? " is-hidden" : ""}`}
+            aria-pressed={bp === "desktop"}
+            title="Desktop (1440px). Shift-click to hide/show."
+            onClick={(e) => {
+              if (e.shiftKey) toggleFrameHidden("desktop");
+              else {
+                setFrameHidden("desktop", false);
+                activateBreakpoint("desktop");
+              }
+            }}
+          >
+            Desktop
+          </button>
+          <button
+            type="button"
+            className={`ed-tool-bp${bp === "mobile" ? " is-active" : ""}${hidden.mobile ? " is-hidden" : ""}`}
+            aria-pressed={bp === "mobile"}
+            title="Mobile (390px). Shift-click to hide/show."
+            onClick={(e) => {
+              if (e.shiftKey) toggleFrameHidden("mobile");
+              else {
+                setFrameHidden("mobile", false);
+                activateBreakpoint("mobile");
+              }
+            }}
+          >
+            Mobile
+          </button>
+        </div>
+      </div>
+
+      {/* Right island: Claude status pill, Preview, Discard draft, Publish */}
+      <div className="ed-island ed-island-right" role="toolbar" aria-label="Publishing and preview">
         <ClaudePill />
         {unpublished ? (
-          <button type="button" className="ed-btn" onClick={discard} title="Throw away unpublished changes and reload what is live">
+          <button type="button" className="ed-btn ed-btn-discard" onClick={discard} title="Throw away unpublished changes and reload what is live">
             Discard draft
           </button>
         ) : null}
         <button type="button" className="ed-btn" onClick={preview}>
           Preview
         </button>
-        <button type="button" className="ed-btn ed-btn-accent" onClick={publish} disabled={publishing || (!unpublished && save !== "error")}>
+        <button type="button" className="ed-btn ed-btn-accent ed-pill" onClick={publish} disabled={publishing || (!unpublished && save !== "error")}>
           {publishing ? "Publishing…" : "Publish"}
         </button>
       </div>

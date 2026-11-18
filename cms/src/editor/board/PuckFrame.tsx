@@ -2,8 +2,9 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import { components } from "../../components/registry";
 import { getState, useEditor } from "../store";
 import { attachKeys } from "./keys";
-import { frameOrigin, getBoard, setHeight } from "./store";
+import { frameOrigin, getBoard, setHeight, useBoard } from "./store";
 import { onBoardWheel } from "./wheel";
+import { closeUnpinnedFlyout } from "../workspace/rail-store";
 
 /**
  * Runs inside Puck's editable frame (Puck's `iframe` override): loads the
@@ -34,6 +35,8 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       onBoardWheel(e, { x: (o.x + e.clientX) * view.zoom + view.x, y: (o.y + e.clientY) * view.zoom + view.y });
     };
     doc.addEventListener("wheel", wheel, { passive: false });
+    // A press inside the frame is a canvas click: unpinned flyouts close (the selection is Puck's business).
+    doc.addEventListener("pointerdown", closeUnpinnedFlyout, true);
     const RO = doc.defaultView!.ResizeObserver;
     const measure = () => {
       const main = doc.getElementById("main");
@@ -46,10 +49,25 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     return () => {
       detach();
       doc.removeEventListener("wheel", wheel);
+      doc.removeEventListener("pointerdown", closeUnpinnedFlyout, true);
       ro.disconnect();
       mo.disconnect();
     };
   }, [doc]);
 
-  return <>{children}</>;
+  return (
+    <>
+      <ZoomVar doc={doc} />
+      {children}
+    </>
+  );
+}
+
+/** Sets --ed-px (1 / zoom) on a frame's root so selection lines and handles keep their on-screen size. */
+export function ZoomVar({ doc }: { doc?: Document | null }) {
+  const zoom = useBoard((s) => s.view.zoom);
+  useEffect(() => {
+    doc?.documentElement.style.setProperty("--ed-px", String(1 / zoom));
+  }, [doc, zoom]);
+  return null;
 }
