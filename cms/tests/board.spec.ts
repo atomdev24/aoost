@@ -135,10 +135,13 @@ test.describe("breakpoint board", () => {
     await expect.poll(() => zoomPct(page)).toBe(fitted);
   });
 
-  test("the add-a-breakpoint slot is there but not yet available", async ({ page }) => {
+  test("the add-a-breakpoint slot shows the hidden Tablet and Widescreen frames", async ({ page }) => {
     const slot = page.locator(".bd-slot");
-    await expect(slot).toHaveAttribute("aria-disabled", "true");
-    await expect(slot).toHaveAttribute("title", "Coming soon: tablet and custom widths");
+    await expect(page.locator('.bd-frame[data-bp="tablet"]')).toHaveCount(0);
+    await expect(slot.getByRole("button")).toHaveText(["Tablet 834", "Widescreen 1920"]);
+    await slot.getByRole("button", { name: /Tablet/ }).click();
+    await expect(page.locator('.bd-frame[data-bp="tablet"]')).toBeVisible();
+    await expect(slot.getByRole("button")).toHaveText(["Widescreen 1920"]);
   });
 });
 

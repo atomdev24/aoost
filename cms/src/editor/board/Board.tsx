@@ -74,7 +74,8 @@ export function Board() {
   const frames = useMemo(() => visibleFrameRects({ ...getBoard(), heights, positions, hidden }), [heights, positions, hidden]);
   const slot = slotRect(frames);
   const active = allFrames.find((f) => f.bp === bp)!;
-  const hiddenBps = (Object.keys(hidden) as Breakpoint[]).filter((b) => hidden[b]);
+  // Tablet and Widescreen come back through the "Add a breakpoint" slot, so the chip lists only Desktop and Mobile.
+  const hiddenBps = (Object.keys(hidden) as Breakpoint[]).filter((b) => hidden[b] && !EXTRA_FRAMES.includes(b));
   const overrides = useMemo(() => ({ mobile: countOverrides(page, "mobile"), tablet: countOverrides(page, "tablet"), widescreen: countOverrides(page, "widescreen"), desktop: 0 }) as Record<Breakpoint, number>, [page]);
   const addable = EXTRA_FRAMES.filter((b) => hidden[b]);
   const ready = useBoard((s) => s.ready);
