@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { diffSite } from "../model/ops";
 import { tools, toolByName, runTool, type ToolContext } from "../mcp/tools";
-import { validateSite } from "../schema";
+import { DESIGN_WIDTH, validateSite, type Breakpoint } from "../schema";
 import { draftStub, readDraft, type Env } from "./env";
 import { extOf, MAX_UPLOAD, MEDIA_TYPES, storeMedia } from "./media";
 import { publishToGitHub } from "./publish";
@@ -67,13 +67,13 @@ async function callTool(name: string, args: Record<string, unknown>, env: Env, o
   }
 
   if (name === "get_preview_screenshot") {
-    const a = parsed.data as { page?: string; breakpoint: "mobile" | "desktop" };
+    const a = parsed.data as { page?: string; breakpoint: Breakpoint };
     const { site } = await readDraft(env);
     const state = await draft.state();
     const page = site.pages.find((p) => p.id === a.page || p.slug === a.page) ?? site.pages.find((p) => p.id === state.context?.pageId) ?? site.pages.find((p) => p.isHome)!;
     const shot = await screenshot(env, page, a.breakpoint);
     if (!shot.ok) return text(shot.error, true);
-    return { content: [{ type: "image", data: shot.png, mimeType: "image/png" }, { type: "text", text: `Draft of ${page.title} (${page.slug}) at ${a.breakpoint === "mobile" ? "390" : "1440"}px, captured by ${shot.via}.` }] };
+    return { content: [{ type: "image", data: shot.png, mimeType: "image/png" }, { type: "text", text: `Draft of ${page.title} (${page.slug}) at ${DESIGN_WIDTH[a.breakpoint]}px, captured by ${shot.via}.` }] };
   }
 
   if (name === "publish") {

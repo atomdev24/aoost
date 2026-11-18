@@ -25,6 +25,8 @@ import "./workspace/workspace.css";
 const VIEWPORTS = [
   { width: DESIGN_WIDTH.desktop, height: "auto" as const, label: "Desktop", icon: "Monitor" as const },
   { width: DESIGN_WIDTH.mobile, height: "auto" as const, label: "Mobile", icon: "Smartphone" as const },
+  { width: DESIGN_WIDTH.tablet, height: "auto" as const, label: "Tablet", icon: "Tablet" as const },
+  { width: DESIGN_WIDTH.widescreen, height: "auto" as const, label: "Widescreen", icon: "Monitor" as const },
 ];
 
 /** Lets code outside Puck's tree (frames, tools, shortcuts) reach Puck. */

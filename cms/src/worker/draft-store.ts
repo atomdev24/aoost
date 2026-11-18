@@ -2,7 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import "../components/registry";
 import { applyOps, type Op } from "../model/ops";
 import type { ClientMessage, EditorContext, ServerMessage } from "../model/protocol";
-import { filesToSite, siteToFiles, validateSite, type ContentFiles, type Issue, type Site } from "../schema";
+import { filesToSite, siteToFiles, validateSite, type Breakpoint, type ContentFiles, type Issue, type Site } from "../schema";
 import type { Env } from "./env";
 
 const same = (a: ContentFiles, b: ContentFiles) => {
@@ -162,7 +162,7 @@ export class DraftStore extends DurableObject<Env> {
   }
 
   /** Ask an open editor to capture its preview (fallback for get_preview_screenshot). */
-  async requestScreenshot(pageId: string, breakpoint: "mobile" | "desktop", timeoutMs = 15000): Promise<string | null> {
+  async requestScreenshot(pageId: string, breakpoint: Breakpoint, timeoutMs = 15000): Promise<string | null> {
     if (!this.ctx.getWebSockets().length) return null;
     const requestId = crypto.randomUUID();
     this.broadcast({ type: "screenshot-request", requestId, pageId, breakpoint });

@@ -4,7 +4,7 @@
  * editor, viewport units are pinned to a typical screen for the breakpoint.
  * Only the editor's copy of the CSS is rewritten; the site is untouched.
  */
-export const SCREEN_HEIGHT = { desktop: 900, mobile: 844 } as const;
+export const SCREEN_HEIGHT = { desktop: 900, mobile: 844, tablet: 1194, widescreen: 1080 } as const;
 
 const UNIT = /(-?\d*\.?\d+)(s|l|d)?vh\b/g;
 

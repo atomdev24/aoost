@@ -3,6 +3,7 @@ import { api, ApiError } from "../api";
 import { activateBreakpoint } from "../board/bridge";
 import { setFrameHidden, toggleFrameHidden, useBoard } from "../board/store";
 import { PuckSync } from "../puck/PuckSync";
+import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
 import { currentPage, flush, megaItemId, redo, setPage, undo, useEditor } from "../store";
 import { ClaudePill } from "./ClaudePill";
 import { loadPublished, openSheet, publish, usePublish } from "./publish";
@@ -33,6 +34,9 @@ const Icon = ({ d }: { d: string }) => (
     <path d={d} />
   </svg>
 );
+
+/** Widest first, as the frames sit on the board. */
+const ISLAND_ORDER: Breakpoint[] = ["widescreen", "desktop", "tablet", "mobile"];
 
 /** Three floating islands over the canvas: left (mark, page, save), centre (tools, breakpoints), right (Claude, preview, publish). */
 export function TopBar() {
@@ -116,36 +120,24 @@ export function TopBar() {
         <ToolGroup />
         <span className="ed-island-divider" aria-hidden="true" />
         <div className="ed-island-bps" role="group" aria-label="Breakpoints">
-          <button
-            type="button"
-            className={`ed-tool-bp${bp === "desktop" ? " is-active" : ""}${hidden.desktop ? " is-hidden" : ""}`}
-            aria-pressed={bp === "desktop"}
-            title="Desktop (1440px). Shift-click to hide/show."
-            onClick={(e) => {
-              if (e.shiftKey) toggleFrameHidden("desktop");
-              else {
-                setFrameHidden("desktop", false);
-                activateBreakpoint("desktop");
-              }
-            }}
-          >
-            Desktop
-          </button>
-          <button
-            type="button"
-            className={`ed-tool-bp${bp === "mobile" ? " is-active" : ""}${hidden.mobile ? " is-hidden" : ""}`}
-            aria-pressed={bp === "mobile"}
-            title="Mobile (390px). Shift-click to hide/show."
-            onClick={(e) => {
-              if (e.shiftKey) toggleFrameHidden("mobile");
-              else {
-                setFrameHidden("mobile", false);
-                activateBreakpoint("mobile");
-              }
-            }}
-          >
-            Mobile
-          </button>
+          {ISLAND_ORDER.map((b) => (
+            <button
+              key={b}
+              type="button"
+              className={`ed-tool-bp${bp === b ? " is-active" : ""}${hidden[b] ? " is-hidden" : ""}`}
+              aria-pressed={bp === b}
+              title={`${BREAKPOINT_LABEL[b]} (${DESIGN_WIDTH[b]}px). ${hidden[b] ? "Click to show and edit." : "Shift-click to hide."}`}
+              onClick={(e) => {
+                if (e.shiftKey) toggleFrameHidden(b);
+                else {
+                  setFrameHidden(b, false);
+                  activateBreakpoint(b);
+                }
+              }}
+            >
+              {BREAKPOINT_LABEL[b]}
+            </button>
+          ))}
         </div>
       </div>
 

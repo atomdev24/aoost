@@ -1,6 +1,6 @@
 import { frameDecls, type Decls, type Sheet } from "../../responsive/css";
 import { resolve } from "../../responsive/resolve";
-import { DEFAULT_FRAME_FIT, type FrameFit, type Responsive } from "../../schema";
+import { DEFAULT_FRAME_FIT, type Breakpoint, type FrameFit, type Responsive } from "../../schema";
 import type { FrameSlot } from "../types";
 
 /**
@@ -63,14 +63,16 @@ export function slotBgDecls(f: FrameFit): Decls {
 }
 
 /** The frame in effect at a breakpoint, complete. */
-export const frameAt = (r: Responsive<FrameFit> | undefined, bp: "mobile" | "desktop"): FrameFit => ({ ...DEFAULT_FRAME_FIT, ...(r ? resolve(r, bp) : {}) });
+export const frameAt = (r: Responsive<FrameFit> | undefined, bp: Breakpoint): FrameFit => ({ ...DEFAULT_FRAME_FIT, ...(r ? resolve(r, bp) : {}) });
 
-/** One rule per framed picture: the mobile value, and desktop's in the desktop media query. */
+/** One rule per framed picture: the mobile value, and each other size's in its media query (tablet and widescreen only when set). */
 export function addSlotCss(sheet: Sheet, nodeId: string, slots: FrameSlot[]) {
   for (const s of slots) {
     if (!s.frame) continue;
     const decls = s.kind === "bg" ? slotBgDecls : slotImgDecls;
-    sheet.add(`.n-${nodeId} ${s.selector}`, decls(frameAt(s.frame, "mobile")), decls(frameAt(s.frame, "desktop")));
+    const f = s.frame;
+    const extra = { tablet: f.tablet ? decls(frameAt(f, "tablet")) : undefined, widescreen: f.widescreen ? decls(frameAt(f, "widescreen")) : undefined };
+    sheet.add(`.n-${nodeId} ${s.selector}`, decls(frameAt(f, "mobile")), decls(frameAt(f, "desktop")), extra);
   }
 }
 

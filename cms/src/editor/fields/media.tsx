@@ -1,7 +1,7 @@
 import type { CustomField } from "@puckeditor/core";
 import { useState } from "react";
 import { updateNode } from "../../model/page-ops";
-import { overriddenKeys, resetToDesktop, resetToMobile, resolve, setOnly } from "../../responsive/resolve";
+import { overridesAt, REFERENCE, resetAt, resolve, setOnly } from "../../responsive/resolve";
 import { itemAt } from "../../components/aoost/frames";
 import type { FrameSlot } from "../../components/types";
 import { DEFAULT_FRAME_FIT, type FrameFit, type Node, type Responsive } from "../../schema";
@@ -90,7 +90,7 @@ export function MediaInput({ value, onChange, kind, label, owner = false, slot =
   const bp = useEditor((s) => s.bp);
   const frame = slot ? (slot.slot.frame ?? { base: DEFAULT_FRAME_FIT }) : node?.frame;
   const fit = frame ? { ...DEFAULT_FRAME_FIT, ...resolve(frame, bp) } : null;
-  const over = bp === "mobile" && !!slot?.slot.frame && overriddenKeys(slot.slot.frame).length > 0;
+  const over = !!slot?.slot.frame && overridesAt(slot.slot.frame, bp).length > 0;
   const isImage = !!value && (kind === "image" || IMAGE.test(value));
   return (
     <div
@@ -211,23 +211,25 @@ export const mediaField = (label: string, kind: MediaKind, opts: { owner?: boole
 
 /**
  * The picture of a content item that can be framed per screen size (an aoost block's artwork or
- * cover). On Mobile, a framing that differs from desktop tints the row, and the label offers
- * "Reset to desktop" and "Use on all sizes", like every other per-size value.
+ * cover). On any size but Desktop, a framing that differs from the size it inherits tints the
+ * row, and the label offers "Reset to <that size>" and "Use on all sizes", like every other per-size value.
  */
 function FramedMediaField({ name, value, onChange, kind, label, altKey }: { name: string; value: string | undefined; onChange: (v: string) => void; kind: MediaKind; label: string; altKey?: string }) {
   const slot = useSlot(name);
   const bp = useEditor((s) => s.bp);
   const frame = slot?.slot.frame;
-  const over = bp === "mobile" && !!frame && overriddenKeys(frame).length > 0;
-  const desktop = frame ? resolve(frame, "desktop") : null;
+  const over = !!frame && overridesAt(frame, bp).length > 0;
+  const from = REFERENCE[bp] ?? "desktop";
+  const ref = frame ? resolve(frame, from) : null;
   return (
     <div className={`ed-field${label.length > 16 ? " is-long" : ""}`}>
       {over && slot ? (
         <OverrideLabel
           label={label}
-          desktop={desktop ? `${FIT_NAME[desktop.fit ?? "fill"]} at ${desktop.focalX ?? 50}% ${desktop.focalY ?? 50}%` : "not set"}
-          onReset={() => editSlotFrame(slot, (r) => resetToDesktop(r), "Reset to desktop")}
-          onUseEverywhere={() => editSlotFrame(slot, (r) => resetToMobile(r), "Use on all sizes")}
+          bp={bp}
+          reference={ref ? `${FIT_NAME[ref.fit ?? "fill"]} at ${ref.focalX ?? 50}% ${ref.focalY ?? 50}%` : "not set"}
+          onReset={() => editSlotFrame(slot, (r) => resetAt(r, bp), `Reset to ${from}`)}
+          onUseEverywhere={() => editSlotFrame(slot, (r) => ({ base: { ...resolve(r, bp) } }), "Use on all sizes")}
         />
       ) : (
         <span className="ed-field-label" title={label}>

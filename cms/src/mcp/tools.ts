@@ -4,8 +4,8 @@ import { addNavItem, findNavItem, moveNavItem, NAV_TYPE_LABELS, removeNavItem, s
 import { addNode, addSection, createNode, createSection, locate, moveNode, moveSection, remove, updateNode, updateSection } from "../model/page-ops";
 import { createPage, renamePage, setParent, setSeo, setShowInNav, setSlug, setStatus } from "../model/pages";
 import type { EditorContext } from "../model/protocol";
-import { resetToMobile, setAt } from "../responsive/resolve";
-import { FrameFit, LinkTarget, NAV_ITEM_TYPES, SectionLayout, Style, type Node, type Page, type Section, type Site } from "../schema";
+import { setAt } from "../responsive/resolve";
+import { FrameFit, LinkTarget, NAV_ITEM_TYPES, SectionLayout, Style, type Node, type Page, type Responsive, type Section, type Site } from "../schema";
 
 /**
  * The Claude connector's tools (SPEC §8). Everything here is a pure function
@@ -46,7 +46,7 @@ const pageSummary = (p: Page) => ({ id: p.id, title: p.title, url: p.slug, statu
 // ------------------------------------------------------------ schemas
 
 const PartialStyle = Style.partial().describe(
-  'Layout and look. Lengths are CSS strings ("100%", "320px"). Colours are CSS colours or theme tokens like "token:rust". radius is [topLeft, topRight, bottomRight, bottomLeft] in px. In a canvas section use x, y, w, h (design px: 390 wide on mobile, 1440 on desktop).',
+  'Layout and look. Lengths are CSS strings ("100%", "320px"). Colours are CSS colours or theme tokens like "token:rust". radius is [topLeft, topRight, bottomRight, bottomLeft] in px. In a canvas section use x, y, w, h (design px: 390 wide on mobile, 834 on tablet, 1440 on desktop, 1920 on widescreen).',
 );
 const PartialLayout = SectionLayout.partial().describe('Section layout: columns, gap (px), padding (CSS shorthand like "56px 20px"), maxWidth (px), minHeight, height (canvas artboard height in px), background { color, image, video, poster, overlay }.');
 const NodeInput = z.object({
@@ -85,7 +85,7 @@ export const tools: Tool[] = [
     z.object({}),
     (_a, ctx) => {
       const { pages, templates, ...rest } = ctx.site;
-      return { text: json({ ...rest, templates: templates.map((t) => ({ id: t.id, name: t.name, kind: t.kind })), pages: pages.map(pageSummary), components: componentCatalogue(), breakpoints: { mobile: "base, 390px design width", desktop: "overrides from 900px, 1440px design width" } }) };
+      return { text: json({ ...rest, templates: templates.map((t) => ({ id: t.id, name: t.name, kind: t.kind })), pages: pages.map(pageSummary), components: componentCatalogue(), breakpoints: { mobile: "base, 390px design width", tablet: "overrides on mobile for 600–899px screens, 834px design width (optional)", desktop: "overrides on mobile from 900px, 1440px design width", widescreen: "overrides on desktop from 1600px, 1920px design width (optional)" } }) };
     },
   ),
 
@@ -195,11 +195,11 @@ export const tools: Tool[] = [
 
   tool(
     "set_responsive_override",
-    'Set or reset per-breakpoint values. The base is mobile; desktop stores only what differs. breakpoint "desktop" writes overrides, "mobile" writes the base. Pass null for a key to reset it (on desktop: back to the mobile value).',
+    'Set or reset per-breakpoint values. The base is mobile (390px); tablet (834px, 600–899px screens) and desktop (1440px, 900px and up) store only what differs from mobile; widescreen (1920px, 1600px and up) stores only what differs from desktop. breakpoint "mobile" writes the base, any other writes that size\'s overrides. Pass null for a key to reset it (on tablet and desktop: back to the mobile value; on widescreen: back to the desktop value). Free-layout boxes (x, y, w, h) and section height are in that size\'s own design pixels.',
     z.object({
       page: PageRef,
       node_id: z.string(),
-      breakpoint: z.enum(["mobile", "desktop"]),
+      breakpoint: z.enum(["mobile", "tablet", "desktop", "widescreen"]),
       style: z.record(z.string(), z.unknown()).optional().describe("Style keys → value, or null to reset. Same keys as update_node.style."),
       layout: z.record(z.string(), z.unknown()).optional().describe("Sections only: layout keys → value, or null to reset."),
       frame: z.record(z.string(), z.unknown()).optional().describe("Media nodes: frame-fit keys → value, or null to reset."),
@@ -207,11 +207,11 @@ export const tools: Tool[] = [
     (a, ctx) => {
       const page = findOwner(ctx, a.node_id, a.page);
       const at = locate(page, a.node_id)!;
-      const patch = <T extends object>(r: { base: T; desktop?: Partial<T> }, values: Record<string, unknown> | undefined, schema: z.ZodType) => {
+      const patch = <T extends object>(r: Responsive<T>, values: Record<string, unknown> | undefined, schema: z.ZodType) => {
         if (!values) return r;
         let next = r;
         for (const [key, value] of Object.entries(values)) {
-          if (value === null) next = a.breakpoint === "desktop" ? resetToMobile(next, key as keyof T) : setAt(next, "mobile", { [key]: undefined } as Partial<T>);
+          if (value === null) next = setAt(next, a.breakpoint, { [key]: undefined } as Partial<T>);
           else {
             const ok = schema.safeParse({ [key]: value });
             if (!ok.success) fail(`Invalid ${key}: ${ok.error.issues[0]!.message}`);
@@ -342,8 +342,8 @@ export const tools: Tool[] = [
   ),
   tool(
     "get_preview_screenshot",
-    "Get a PNG screenshot of a draft page as it renders at a breakpoint (mobile 390px or desktop 1440px wide). Use it to check your changes.",
-    z.object({ page: PageRef, breakpoint: z.enum(["mobile", "desktop"]).default("mobile") }),
+    "Get a PNG screenshot of a draft page as it renders at a breakpoint (mobile 390px, tablet 834px, desktop 1440px or widescreen 1920px wide). Use it to check your changes.",
+    z.object({ page: PageRef, breakpoint: z.enum(["mobile", "tablet", "desktop", "widescreen"]).default("mobile") }),
   ),
   tool(
     "publish",

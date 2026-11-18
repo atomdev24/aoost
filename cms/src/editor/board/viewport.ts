@@ -19,16 +19,23 @@ const FIT_PAD = { x: 48, top: 92, bottom: 88 };
 /** Zoom steps for ⌘+ / ⌘− and the zoom bar. */
 const STEPS = [0.05, 0.1, 0.15, 0.2, 0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4];
 
-/** Desktop first, then mobile, left to right, tops aligned. */
-export const FRAME_ORDER: Breakpoint[] = ["desktop", "mobile"];
+/** Widest first, left to right, tops aligned: widescreen, desktop, tablet, mobile. */
+export const FRAME_ORDER: Breakpoint[] = ["widescreen", "desktop", "tablet", "mobile"];
 
-export function layoutFrames(heights: Partial<Record<Breakpoint, number>>): FrameRect[] {
+/**
+ * Default frame places. Shown frames are packed left to right, so hidden ones
+ * leave no gap (with tablet and widescreen hidden, desktop and mobile sit where
+ * they always did). Hidden frames go after the shown ones.
+ */
+export function layoutFrames(heights: Partial<Record<Breakpoint, number>>, hidden: Partial<Record<Breakpoint, boolean>> = {}): FrameRect[] {
   let x = 0;
-  return FRAME_ORDER.map((bp) => {
+  const order = [...FRAME_ORDER.filter((bp) => !hidden[bp]), ...FRAME_ORDER.filter((bp) => hidden[bp])];
+  const rects = order.map((bp) => {
     const rect = { bp, x, y: 0, w: DESIGN_WIDTH[bp], h: Math.max(200, Math.round(heights[bp] ?? 900)) };
     x += rect.w + FRAME_GAP;
     return rect;
   });
+  return FRAME_ORDER.map((bp) => rects.find((r) => r.bp === bp)!);
 }
 
 export function slotRect(frames: Rect[]): Rect {

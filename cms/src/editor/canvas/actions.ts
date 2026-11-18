@@ -13,9 +13,9 @@ export function findCanvas(page: Page, nodeId: string): Section | undefined {
 /** Write a layer's box at a breakpoint (SPEC §3: x, y, w, h, rotation, z per breakpoint). */
 export function withBox(section: Section, node: Node, bp: Breakpoint, patch: Partial<Box>): Node {
   if (bp === "mobile") return { ...node, style: setAt(node.style, "mobile", patch as Partial<Style>) };
-  // The first desktop move turns a box derived from mobile into a stored one.
-  const { x, y, w, h } = layerBox(section, node, "desktop");
-  return { ...node, style: setAt(node.style, "desktop", { x, y, w, h, ...patch } as Partial<Style>) };
+  // The first move on another size turns a box derived from mobile (or desktop) into a stored one.
+  const { x, y, w, h } = layerBox(section, node, bp);
+  return { ...node, style: setAt(node.style, bp, { x, y, w, h, ...patch } as Partial<Style>) };
 }
 
 /** Apply new boxes to layers of one canvas section as a single undo step. */

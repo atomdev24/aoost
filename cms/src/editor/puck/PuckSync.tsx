@@ -1,7 +1,7 @@
 import { useGetPuck } from "@puckeditor/core";
 import { useEffect } from "react";
 import { deepEqual } from "../../responsive/resolve";
-import { DESIGN_WIDTH } from "../../schema";
+import { BREAKPOINTS, DESIGN_WIDTH } from "../../schema";
 import { currentPage, getState, setBreakpoint, setGlobalEdit, setOverlay, setSelection, subscribe } from "../store";
 import { pageToPuck, puckToPage, type PuckData } from "./adapter";
 import { usePuck } from "./usePuck";
@@ -23,7 +23,7 @@ export function PuckSync() {
   const width = usePuck((s) => s.appState.ui.viewports.current.width);
 
   useEffect(() => {
-    setBreakpoint(width === DESIGN_WIDTH.mobile ? "mobile" : "desktop");
+    setBreakpoint(BREAKPOINTS.find((b) => DESIGN_WIDTH[b] === width) ?? "desktop");
   }, [width]);
 
   // Puck's single selection seeds ours (Shift-click on a canvas can then add to it).

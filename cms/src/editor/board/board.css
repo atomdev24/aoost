@@ -62,7 +62,6 @@
   color: var(--ed-sub);
   font-size: 30px;
   text-align: center;
-  cursor: not-allowed;
 }
 .bd-slot-plus {
   font-size: 56px;
@@ -71,6 +70,21 @@
 .bd-slot small {
   font-size: 24px;
   opacity: 0.8;
+}
+.bd-slot-add {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid var(--ed-line);
+  border-radius: 16px;
+  background: transparent;
+  color: var(--ed-text);
+  font: 500 28px var(--ed-font);
+  cursor: pointer;
+}
+.bd-slot-add:hover,
+.bd-slot-add:focus-visible {
+  border-color: var(--ed-sub);
+  background: var(--ed-seg);
 }
 
 /* Frame labels, in screen space above each frame. The label is the frame's drag handle. */

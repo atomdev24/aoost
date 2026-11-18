@@ -1,5 +1,5 @@
 import { getComponent } from "../components/registry";
-import { setAt } from "../responsive/resolve";
+import { resolve, setAt } from "../responsive/resolve";
 import { DEFAULT_FRAME_FIT, newId, type Breakpoint, type Node, type Overlay, type Page, type Responsive, type Section, type SectionLayout, type Style } from "../schema";
 
 /**
@@ -128,9 +128,10 @@ export function setHidden(page: Page, id: string, bp: Breakpoint, hidden: boolea
   const baseHidden = !!r.base.hidden;
   const desktopHidden = r.desktop?.hidden ?? baseHidden;
   let next: Responsive<{ hidden?: boolean }>;
-  if (bp === "desktop") {
-    // On desktop "shown" must be stored explicitly when mobile hides it.
-    next = setAt(r, "desktop", { hidden: hidden ? true : baseHidden ? false : undefined });
+  if (bp !== "mobile") {
+    // Off mobile, "shown" must be stored explicitly when the size it inherits from hides it.
+    const inherited = bp === "widescreen" ? !!resolve(r, "desktop").hidden : baseHidden;
+    next = setAt(r, bp, { hidden: hidden ? true : inherited ? false : undefined });
   } else {
     // A change on mobile leaves desktop as it was.
     next = setAt(r, "mobile", { hidden: hidden || undefined });
@@ -141,9 +142,8 @@ export function setHidden(page: Page, id: string, bp: Breakpoint, hidden: boolea
 }
 
 export function isHidden(item: Section | Node, bp: Breakpoint): boolean {
-  const r = "kind" in item ? item.layout : item.style;
-  const base = !!r.base.hidden;
-  return bp === "mobile" ? base : (r.desktop?.hidden ?? base);
+  const r = ("kind" in item ? item.layout : item.style) as Responsive<{ hidden?: boolean }>;
+  return !!resolve(r, bp).hidden;
 }
 
 /** A new node of a registered component type, with that component's defaults. */

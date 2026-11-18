@@ -1,7 +1,7 @@
 import type { CustomField } from "@puckeditor/core";
 import { resolve, setOnly } from "../../responsive/resolve";
 import type { FrameFit, Node, Responsive, Section, SectionLayout, Style } from "../../schema";
-import { DEFAULT_FRAME_FIT } from "../../schema";
+import { BREAKPOINT_LABEL, DEFAULT_FRAME_FIT } from "../../schema";
 import { FocalPicker } from "../fields/FocalPicker";
 import { ResponsiveEditor } from "../fields/ResponsiveEditor";
 import { FRAME_ROWS, SECTION_ROWS, STYLE_ROWS } from "../fields/rows";
@@ -113,9 +113,9 @@ function VisibleOn() {
   return (
     <InspectorGroup title="Visible on">
       <div className="ed-visible" role="group" aria-label="Visible on">
-        {(["desktop", "mobile"] as const).map((bp) => {
+        {(["desktop", "mobile", "tablet", "widescreen"] as const).map((bp) => {
           const shown = !isHidden(item, bp);
-          const name = bp === "desktop" ? "Desktop" : "Mobile";
+          const name = BREAKPOINT_LABEL[bp];
           return (
             <button
               key={bp}

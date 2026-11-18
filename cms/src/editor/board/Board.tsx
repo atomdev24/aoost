@@ -1,6 +1,6 @@
 import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { Breakpoint } from "../../schema";
+import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
 import { AdjustImage } from "../canvas/AdjustImage";
 import { EmptyPage } from "../insert/EmptyPage";
 import { takeSnapshots, useSnapshot, watchSnapshots } from "./snapshots";
@@ -8,14 +8,17 @@ import { currentPage, useEditor } from "../store";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { activateBreakpoint } from "./bridge";
 import { LiveFrame } from "./LiveFrame";
-import { countMobileOverrides } from "./overrides";
+import { countOverrides } from "./overrides";
 import { frameRects, getBoard, openPage, panBy, resetFramePositions, setFrameHidden, setFramePosition, setHeight, setInteracting, setSize, toggleFrameHidden, useBoard, visibleFrameRects } from "./store";
 import { FRAME_GAP, isVisible, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
 import { ZoomBar } from "./ZoomBar";
 import "./board.css";
 
-const NAME: Record<Breakpoint, string> = { desktop: "Desktop", mobile: "Mobile" };
+const NAME = BREAKPOINT_LABEL;
+const EXTRA_FRAMES: Breakpoint[] = ["tablet", "widescreen"];
+/** What each frame inherits from, under its label. */
+const NOTE: Partial<Record<Breakpoint, string>> = { desktop: " · base for wide screens", tablet: " · from mobile", widescreen: " · from desktop" };
 /** ?snapshot=hold keeps the loading view up (for screenshots of it). */
 const hold = new URLSearchParams(location.search).get("snapshot") === "hold";
 
@@ -67,12 +70,13 @@ export function Board() {
   const positions = useBoard((s) => s.positions);
   const hidden = useBoard((s) => s.hidden);
   const dotGrid = useBoard((s) => s.dotGrid);
-  const allFrames = useMemo(() => frameRects({ ...getBoard(), heights, positions }), [heights, positions]);
+  const allFrames = useMemo(() => frameRects({ ...getBoard(), heights, positions, hidden }), [heights, positions, hidden]);
   const frames = useMemo(() => visibleFrameRects({ ...getBoard(), heights, positions, hidden }), [heights, positions, hidden]);
   const slot = slotRect(frames);
   const active = allFrames.find((f) => f.bp === bp)!;
   const hiddenBps = (Object.keys(hidden) as Breakpoint[]).filter((b) => hidden[b]);
-  const overrides = useMemo(() => countMobileOverrides(page), [page]);
+  const overrides = useMemo(() => ({ mobile: countOverrides(page, "mobile"), tablet: countOverrides(page, "tablet"), widescreen: countOverrides(page, "widescreen"), desktop: 0 }) as Record<Breakpoint, number>, [page]);
+  const addable = EXTRA_FRAMES.filter((b) => hidden[b]);
   const ready = useBoard((s) => s.ready);
   const loading = hold || frames.some((f) => !ready[f.bp] && (f.bp === bp || !size.w || isVisible(view, f, size.w, size.h)));
   useEffect(() => watchSnapshots(), []);
@@ -182,11 +186,26 @@ export function Board() {
               <LoadingCover bp={f.bp} pageId={pageId} slug={page.slug} ready={ready[f.bp] && !hold} />
             </div>
           ))}
-        <div className="bd-slot" style={{ left: slot.x, top: slot.y, width: slot.w, height: slot.h }} title="Coming soon: tablet and custom widths" aria-disabled="true" role="button" tabIndex={-1}>
-          <span className="bd-slot-plus">+</span>
-          <span>Add a breakpoint</span>
-          <small>Coming soon: tablet and custom widths</small>
-        </div>
+        {addable.length ? (
+          <div className="bd-slot" style={{ left: slot.x, top: slot.y, width: slot.w, height: slot.h }} role="group" aria-label="Add a breakpoint">
+            <span className="bd-slot-plus">+</span>
+            <span>Add a breakpoint</span>
+            {addable.map((b) => (
+              <button
+                key={b}
+                type="button"
+                className="bd-slot-add"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
+                  setFrameHidden(b, false);
+                  activateBreakpoint(b);
+                }}
+              >
+                {NAME[b]} <small>{DESIGN_WIDTH[b]}</small>
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {/* Labels stay readable at any zoom, so they live in screen space. */}
@@ -209,8 +228,8 @@ export function Board() {
             title="Click to edit, drag to move"
           >
             <strong>{NAME[f.bp]}</strong> {f.w}
-            {f.bp === "desktop" ? " · base for wide screens" : null}
-            {f.bp === "mobile" && overrides ? <span className="bd-badge">{overrides === 1 ? "1 override" : `${overrides} overrides`}</span> : null}
+            {NOTE[f.bp] ?? null}
+            {overrides[f.bp] ? <span className="bd-badge">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span> : null}
           </button>
           <FrameMenu bp={f.bp} canHide={frames.length > 1} />
         </div>

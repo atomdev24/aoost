@@ -1,4 +1,4 @@
-import { DESKTOP_MIN, type Breakpoint, type FrameFit, type Node, type Section, type SectionLayout, type Style, type Theme } from "../schema";
+import { DESKTOP_MIN, TABLET_MIN, WIDESCREEN_MIN, type Breakpoint, type FrameFit, type Node, type Section, type SectionLayout, type Style, type Theme } from "../schema";
 import { canvasSize, layerBox, type Box } from "./canvas";
 import { resolve } from "./resolve";
 
@@ -135,15 +135,32 @@ export function diff(base: Decls, desktop: Decls): Decls {
 }
 const RESET: Decls = { display: "block", transform: "none", position: "static", "z-index": "auto", margin: "0", padding: "0" };
 
+/** Full declarations for the sizes that have their own values; a missing size emits nothing. */
+export type ExtraDecls = { tablet?: Decls; widescreen?: Decls };
+
 export class Sheet {
   private base: string[] = [];
+  private tablet: string[] = [];
   private desktop: string[] = [];
+  private widescreen: string[] = [];
 
-  /** Add a rule from mobile declarations and the full desktop declarations. */
-  add(selector: string, mobile: Decls, desktop: Decls = mobile) {
+  /**
+   * Add a rule from mobile declarations and the full desktop declarations.
+   * Tablet (its own range below desktop) is written as the difference from
+   * mobile; widescreen (on top of desktop) as the difference from desktop.
+   */
+  add(selector: string, mobile: Decls, desktop: Decls = mobile, extra: ExtraDecls = {}) {
     if (Object.keys(mobile).length) this.base.push(`${selector}{${body(mobile)}}`);
     const d = diff(mobile, desktop);
     if (Object.keys(d).length) this.desktop.push(`${selector}{${body(d)}}`);
+    if (extra.tablet) {
+      const t = diff(mobile, extra.tablet);
+      if (Object.keys(t).length) this.tablet.push(`${selector}{${body(t)}}`);
+    }
+    if (extra.widescreen) {
+      const w = diff(desktop, extra.widescreen);
+      if (Object.keys(w).length) this.widescreen.push(`${selector}{${body(w)}}`);
+    }
   }
 
   raw(css: string) {
@@ -151,49 +168,72 @@ export class Sheet {
   }
 
   toString(): string {
-    const out = this.base.join("\n");
-    return this.desktop.length ? `${out}\n@media (min-width:${DESKTOP_MIN}px){\n${this.desktop.join("\n")}\n}` : out;
+    let out = this.base.join("\n");
+    const block = (query: string, rules: string[]) => (rules.length ? `\n@media ${query}{\n${rules.join("\n")}\n}` : "");
+    out += block(`(min-width:${TABLET_MIN}px) and (max-width:${DESKTOP_MIN - 0.02}px)`, this.tablet);
+    out += block(`(min-width:${DESKTOP_MIN}px)`, this.desktop);
+    out += block(`(min-width:${WIDESCREEN_MIN}px)`, this.widescreen);
+    return out;
   }
 }
 
 // --------------------------------------------------------- content → CSS
 
 const BPS: Breakpoint[] = ["mobile", "desktop"];
+const EXTRA = ["tablet", "widescreen"] as const;
+
+/** Declarations for the extra sizes that `has` says carry values; the others are left out. */
+function extraDecls(has: (bp: (typeof EXTRA)[number]) => boolean, decls: (bp: Breakpoint) => Decls): ExtraDecls {
+  const out: ExtraDecls = {};
+  for (const bp of EXTRA) if (has(bp)) out[bp] = decls(bp);
+  return out;
+}
 
 export function addNodeCss(sheet: Sheet, node: Node, section?: Section) {
   const sel = `.n-${node.id}`;
-  const [m, d] = BPS.map((bp) => {
+  const canvas = section?.kind === "canvas" ? section : undefined;
+  const at = (bp: Breakpoint) => {
     const style = resolve(node.style, bp);
     const decls = styleDecls(style);
-    if (section?.kind === "canvas") Object.assign(decls, boxDecls(layerBox(section, node, bp), canvasSize(section, bp)));
+    if (canvas) Object.assign(decls, boxDecls(layerBox(canvas, node, bp), canvasSize(canvas, bp)));
     return { style, decls };
-  }) as [{ style: Style; decls: Decls }, { style: Style; decls: Decls }];
-  sheet.add(sel, m.decls, d.decls);
-
+  };
+  // A layer's box also moves when its canvas section has its own size there.
+  const styleSet = (bp: (typeof EXTRA)[number]) => !!node.style[bp] || !!canvas?.layout[bp];
+  const [m, d] = BPS.map(at) as [{ style: Style; decls: Decls }, { style: Style; decls: Decls }];
+  const extra = { tablet: styleSet("tablet") ? at("tablet") : undefined, widescreen: styleSet("widescreen") ? at("widescreen") : undefined };
+  sheet.add(sel, m.decls, d.decls, extraDecls((bp) => !!extra[bp], (bp) => extra[bp as keyof typeof extra]!.decls));
   if (node.frame) {
-    sheet.add(`${sel} .media`, frameDecls(resolve(node.frame, "mobile")), frameDecls(resolve(node.frame, "desktop")));
+    const frame = node.frame;
+    sheet.add(`${sel} .media`, frameDecls(resolve(frame, "mobile")), frameDecls(resolve(frame, "desktop")), extraDecls((bp) => !!frame[bp], (bp) => frameDecls(resolve(frame, bp))));
   }
   const fm = filterDecls(m.style);
   const fd = filterDecls(d.style);
-  if (fm || fd) {
+  const ft = extra.tablet ? filterDecls(extra.tablet.style) : null;
+  const fw = extra.widescreen ? filterDecls(extra.widescreen.style) : null;
+  if (fm || fd || ft || fw) {
     const none = { media: {}, frame: {}, after: {} };
-    sheet.add(`${sel} .media`, (fm ?? none).media, (fd ?? fm ?? none).media);
-    sheet.add(`${sel} .frame`, (fm ?? none).frame, (fd ?? fm ?? none).frame);
-    sheet.add(`${sel} .frame::after`, (fm ?? none).after, (fd ?? fm ?? none).after);
+    const fx = { tablet: ft ?? fm ?? none, widescreen: fw ?? fd ?? fm ?? none };
+    for (const part of ["media", "frame", "after"] as const) {
+      const sub = part === "media" ? ".media" : part === "frame" ? ".frame" : ".frame::after";
+      sheet.add(`${sel} ${sub}`, (fm ?? none)[part], (fd ?? fm ?? none)[part], extraDecls((bp) => !!extra[bp], (bp) => fx[bp as keyof typeof fx][part]));
+    }
   }
 }
 
 export function addSectionCss(sheet: Sheet, section: Section) {
-  const [m, d] = BPS.map((bp) =>
-    sectionDecls(section.kind, resolve(section.layout, bp), section.kind === "canvas" ? canvasSize(section, bp) : undefined),
-  ) as [ReturnType<typeof sectionDecls>, ReturnType<typeof sectionDecls>];
-  sheet.add(`.s-${section.id}`, m.outer, d.outer);
-  sheet.add(`.s-${section.id}>.si`, m.inner, d.inner);
+  const at = (bp: Breakpoint) => sectionDecls(section.kind, resolve(section.layout, bp), section.kind === "canvas" ? canvasSize(section, bp) : undefined);
+  const [m, d] = BPS.map(at) as [ReturnType<typeof sectionDecls>, ReturnType<typeof sectionDecls>];
+  const has = (bp: (typeof EXTRA)[number]) => !!section.layout[bp];
+  const x = { tablet: has("tablet") ? at("tablet") : undefined, widescreen: has("widescreen") ? at("widescreen") : undefined };
+  const pick = (part: "outer" | "inner") => extraDecls(has, (bp) => x[bp as keyof typeof x]![part]);
+  sheet.add(`.s-${section.id}`, m.outer, d.outer, pick("outer"));
+  sheet.add(`.s-${section.id}>.si`, m.inner, d.inner, pick("inner"));
   const tint = (bp: Breakpoint): Decls => {
     const c = resolve(section.layout, bp).background?.overlay;
     return c ? { background: colorValue(c) } : {};
   };
-  sheet.add(`.s-${section.id}>.s-bg>.s-bg-tint`, tint("mobile"), tint("desktop"));
+  sheet.add(`.s-${section.id}>.s-bg>.s-bg-tint`, tint("mobile"), tint("desktop"), extraDecls(has, tint));
   for (const node of section.children) addNodeCss(sheet, node, section);
 }
 
