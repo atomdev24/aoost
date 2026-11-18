@@ -1,7 +1,9 @@
 import type { CSSProperties } from "react";
 import { z } from "zod";
+import { ResponsiveFrameFit } from "../../../schema";
 import { defineComponent } from "../../types";
 import { Block, Head } from "../Block";
+import { shownSlots } from "../frames";
 import { aoostKit, matBand } from "../kit";
 import { css } from "./AoostJournals.styles";
 
@@ -27,6 +29,8 @@ export const AoostJournal = z.object({
   year: z.string().optional(),
   /** Cover image. Without one the cover is the plain cover colour. */
   cover: z.string().optional(),
+  /** Framing of the cover image, per screen size. */
+  frame: ResponsiveFrameFit.optional(),
   coverColor: z.string().optional(),
   /** A sticker centred on the cover. */
   sticker: z.string().optional(),
@@ -101,6 +105,8 @@ export const AoostJournals = defineComponent<AoostJournalsContent>({
   kit: aoostKit,
   band: matBand,
   schema: AoostJournalsContent,
+  frames: (content) =>
+    shownSlots(content.journals, (j) => !j.hidden, (j, i, k) => (j.cover ? { path: ["journals", i], label: `${j.title || `Journal ${k}`} cover`, kind: "bg", selector: `.jr-shelf>.jr:nth-child(${k})>.jr-cv`, src: j.cover } : null)),
   defaults: {
     content: {
       mat: "light",

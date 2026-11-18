@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { getComponent } from "../components/registry";
 import type { ComponentKit } from "../components/types";
 import type { NavItem, Node, Page, Section, Site } from "../schema";
+import { addSlotCss } from "../components/aoost/frames";
 import { addNodeCss, addSectionCss, Sheet, themeCss } from "../responsive/css";
 import { baseCss } from "./base.styles";
 import { makeCtx } from "./context";
@@ -71,6 +72,11 @@ export function pageCss(site: Site, page: Page): string {
     addNodeCss(sheet, o.node);
   }
   for (const g of site.globals) addNodeCss(sheet, g.node);
+  // Pictures framed inside a block's content (the aoost blocks); only items with a frame add rules.
+  for (const n of nodesOf(site, page)) {
+    const def = getComponent(n.type);
+    if (def?.frames) addSlotCss(sheet, n.id, def.frames({ ...(def.defaults.content as object), ...n.content }));
+  }
 
   const used = new Set(nodesOf(site, page).map((n) => n.type));
   used.add("Image"); // .frame is shared by every media component

@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import type { z } from "zod";
-import type { Breakpoint, LinkTarget, Node, Page, Site, Style } from "../schema";
+import type { Breakpoint, FrameFit, LinkTarget, Node, Page, Responsive, Site, Style } from "../schema";
 
 /** What a component can ask of its surroundings, on the public site and in the editor. */
 export type RenderCtx = {
@@ -36,6 +36,23 @@ export type ComponentKit = {
   mainClass?: string;
 };
 
+/** A picture inside a block's content that can be framed (moved and scaled inside its box) per screen size. */
+export type FrameSlot = {
+  /** Path to the content item that holds `frame`, e.g. ["reel", 0] or ["note"]. */
+  path: (string | number)[];
+  /** Plain name for the editor, e.g. "Artwork 1". */
+  label: string;
+  /**
+   * The element the picture is drawn in, relative to the node wrapper (.n-<id>). It matches both the
+   * server markup and the markup the block's script builds, so it works before and after the script runs.
+   */
+  selector: string;
+  /** "img": an <img> fitted with object-fit. "bg": a CSS background picture (it can move, not scale). */
+  kind: "img" | "bg";
+  src: string;
+  frame?: Responsive<FrameFit>;
+};
+
 export type ComponentDef<C = Record<string, unknown>> = {
   type: string;
   label: string;
@@ -46,6 +63,8 @@ export type ComponentDef<C = Record<string, unknown>> = {
   /** Media components sit in a frame and get fit / focal point / zoom / pan. */
   framed?: boolean;
   Render: (props: { node: Node; content: C; ctx: RenderCtx }) => ReactElement | null;
+  /** Pictures inside the content that can be framed per screen size (the aoost blocks). */
+  frames?: (content: C) => FrameSlot[];
   /** Component CSS, inlined once per page that uses it. */
   css: string;
   /** The kit this component belongs to, if any. */
