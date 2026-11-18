@@ -37,18 +37,22 @@ export type BoardState = {
   ready: Record<Breakpoint, boolean>;
 };
 
+/** Tablet and widescreen start hidden; Alex shows them when a page needs them. */
+export const DEFAULT_HIDDEN: Record<Breakpoint, boolean> = { mobile: false, tablet: true, desktop: false, widescreen: true };
+const NOT_READY: Record<Breakpoint, boolean> = { mobile: false, tablet: false, desktop: false, widescreen: false };
+
 let state: BoardState = {
   view: { x: 0, y: 0, zoom: 0.35 },
-  heights: { desktop: 900, mobile: 1600 },
+  heights: { desktop: 900, mobile: 1600, tablet: 1200, widescreen: 900 },
   size: { w: 0, h: 0 },
   linked: true,
   spaceDown: false,
   pageId: null,
   interacting: false,
-  hidden: { desktop: false, mobile: false },
+  hidden: DEFAULT_HIDDEN,
   positions: {},
   dotGrid: loadDotGridPref(),
-  ready: { desktop: false, mobile: false },
+  ready: NOT_READY,
 };
 const listeners = new Set<() => void>();
 const set = (patch: Partial<BoardState>) => {
@@ -65,7 +69,7 @@ export function useBoard<T>(selector: (s: BoardState) => T): T {
 }
 
 export const frameRects = (s: BoardState = state): FrameRect[] => {
-  const defaults = layoutFrames(s.heights);
+  const defaults = layoutFrames(s.heights, s.hidden);
   return defaults.map((f) => {
     const custom = s.positions[f.bp];
     if (custom) return { ...f, x: custom.x, y: custom.y };
@@ -115,15 +119,16 @@ export function openPage(pageId: string) {
   const saved = loadPageBoard(pageId);
   set({
     pageId,
-    ready: { desktop: false, mobile: false },
+    ready: NOT_READY,
     ...(saved
       ? {
           view: saved.view,
-          hidden: saved.hidden ?? { desktop: false, mobile: false },
+          // Boards saved before tablet and widescreen existed keep them hidden.
+          hidden: { ...DEFAULT_HIDDEN, ...(saved.hidden ?? {}) },
           positions: saved.positions ?? {},
         }
       : {
-          hidden: { desktop: false, mobile: false },
+          hidden: DEFAULT_HIDDEN,
           positions: {},
         }),
   });
@@ -164,7 +169,7 @@ export const resetFramePositions = () => {
 
 export const setFrameHidden = (bp: Breakpoint, hide: boolean) => {
   const nextHidden = { ...state.hidden, [bp]: hide };
-  if (nextHidden.desktop && nextHidden.mobile) return; // At least one must stay visible
+  if (Object.values(nextHidden).every(Boolean)) return; // At least one must stay visible
   set({ hidden: nextHidden });
   scheduleSave();
 };
@@ -172,8 +177,9 @@ export const setFrameHidden = (bp: Breakpoint, hide: boolean) => {
 export const toggleFrameHidden = (bp: Breakpoint) => {
   const willHide = !state.hidden[bp];
   if (willHide) {
-    const other: Breakpoint = bp === "desktop" ? "mobile" : "desktop";
-    if (state.hidden[other]) return; // At least one frame must always stay visible
+    // The nearest shown frame takes over; at least one frame must always stay visible.
+    const other = (["desktop", "mobile", "tablet", "widescreen"] as Breakpoint[]).find((b) => b !== bp && !state.hidden[b]);
+    if (!other) return;
     setFrameHidden(bp, true);
     activateBreakpoint(other);
   } else {

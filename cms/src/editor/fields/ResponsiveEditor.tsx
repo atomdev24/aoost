@@ -1,7 +1,7 @@
 import { Fragment, useId, useState } from "react";
 import { anchorOf, Menu, type Anchor } from "../ui/Popover";
-import { isOverridden, resetToDesktop, resetToMobile, resolve, setAt, setOnly } from "../../responsive/resolve";
-import { Length, type Responsive, type SectionLayout, type Style } from "../../schema";
+import { isOverriddenAt, REFERENCE, resetAt, resolve, setAt, setOnly, useEverywhere } from "../../responsive/resolve";
+import { BREAKPOINT_LABEL, Length, type Breakpoint, type Responsive, type SectionLayout, type Style } from "../../schema";
 import { useEditor } from "../store";
 import { ColorInput, NumberInput, Select, TextInput, Toggle } from "../ui/kit";
 import { AlignControl, type AlignValue } from "./AlignControl";
@@ -13,9 +13,10 @@ const BOX = new Set(["x", "y", "w", "h"]);
 
 /**
  * Edits a Responsive<T> at the active breakpoint. Desktop is the reference:
- * an edit on Mobile changes Mobile only (setOnly), and that field turns blue.
- * Its label opens a menu: "Reset to desktop", "Use on all sizes", and the
- * desktop value. The stored format stays mobile-base + desktop overrides (SPEC §3).
+ * an edit on another size changes that size only (setOnly), and that field
+ * turns blue. Its label opens a menu: "Reset to <the size it inherits from>",
+ * "Use on all sizes", and that size's value. The stored format stays
+ * mobile-base + per-size overrides (SPEC §3).
  */
 export function ResponsiveEditor<T extends object>({
   value,
@@ -41,8 +42,8 @@ export function ResponsiveEditor<T extends object>({
   // Visibility has its own "Visible on" switches.
   const visible = rows.filter((r) => r.key !== "hidden" && (!r.when || r.when(ctx)) && (!onlyGroups || onlyGroups.includes(r.group)));
   const groups = onlyGroups ? onlyGroups.filter((g) => visible.some((r) => r.group === g)) : [...new Set(visible.map((r) => r.group))];
-  // A free-canvas layer's position and size on mobile also drive desktop's scaled layout, as dragging does.
-  const drivesDesktop = (key: string) => ctx.parentKind === "canvas" && BOX.has(key);
+  // A free-canvas layer's position and size on mobile (or desktop) also drive the scaled layouts derived from it, as dragging does.
+  const drivesDesktop = (key: string) => ctx.parentKind === "canvas" && BOX.has(key) && (bp === "mobile" || bp === "desktop");
   const set = (key: string, v: unknown) => onChange((drivesDesktop(key) ? setAt : setOnly)(safe, bp, { [key]: v } as Partial<T>));
 
   // Dense rows: rows that share a pair label sit side by side under that label.
@@ -66,8 +67,9 @@ export function ResponsiveEditor<T extends object>({
           {groups.length > 1 && !hideHeads?.includes(group) ? <h5 className="ed-subhead">{group}</h5> : null}
           {lines(group).map((line) => {
             const keys = line.rows.flatMap((r) => (r.alignKeys ? [r.alignKeys.x, r.alignKeys.y] : [r.key])) as (keyof T)[];
-            const over = bp === "mobile" && keys.some((k) => isOverridden(safe, k));
-            const tinted = (row: RowDef<T>) => bp === "mobile" && (row.alignKeys ? [row.alignKeys.x, row.alignKeys.y] : [row.key]).some((k) => isOverridden(safe, k as keyof T));
+            const over = keys.some((k) => isOverriddenAt(safe, bp, k));
+            const tinted = (row: RowDef<T>) => (row.alignKeys ? [row.alignKeys.x, row.alignKeys.y] : [row.key]).some((k) => isOverriddenAt(safe, bp, k as keyof T));
+            const from = REFERENCE[bp] ?? "desktop";
             const id = `${uid}-${line.rows[0]!.key}`;
             return (
               <div key={line.label + line.rows[0]!.key} className="ed-rowset">
@@ -75,9 +77,10 @@ export function ResponsiveEditor<T extends object>({
                   {over ? (
                     <OverrideLabel
                       label={line.label}
-                      desktop={describe(keys.map((k) => resolve(safe, "desktop")[k]))}
-                      onReset={() => onChange(keys.reduce((r, k) => resetToDesktop(r, k), safe))}
-                      onUseEverywhere={() => onChange(keys.reduce((r, k) => resetToMobile(r, k), safe))}
+                      bp={bp}
+                      reference={describe(keys.map((k) => resolve(safe, from)[k]))}
+                      onReset={() => onChange(keys.reduce((r, k) => resetAt(r, bp, k), safe))}
+                      onUseEverywhere={() => onChange(keys.reduce((r, k) => useEverywhere(r, bp, k), safe))}
                     />
                   ) : (
                     <label className="ed-label" htmlFor={id} title={line.rows.length > 1 ? line.rows.map((r) => r.label).join(" · ") : line.label}>
@@ -317,11 +320,12 @@ function describe(values: unknown[]): string {
 }
 
 /** The accent label of a field that differs on this breakpoint. Clicking it offers the ways back. */
-export function OverrideLabel({ label, desktop, onReset, onUseEverywhere }: { label: string; desktop: string; onReset: () => void; onUseEverywhere: () => void }) {
+export function OverrideLabel({ label, bp, reference, onReset, onUseEverywhere }: { label: string; bp: Breakpoint; reference: string; onReset: () => void; onUseEverywhere: () => void }) {
   const [menu, setMenu] = useState<Anchor | null>(null);
+  const from = REFERENCE[bp] ?? "desktop";
   return (
     <>
-      <button type="button" className="ed-label is-over" aria-haspopup="menu" aria-expanded={!!menu} title={`Mobile has its own ${label.toLowerCase()}. Click for options.`} onClick={(e) => setMenu(menu ? null : anchorOf(e.currentTarget))}>
+      <button type="button" className="ed-label is-over" aria-haspopup="menu" aria-expanded={!!menu} title={`${BREAKPOINT_LABEL[bp]} has its own ${label.toLowerCase()}. Click for options.`} onClick={(e) => setMenu(menu ? null : anchorOf(e.currentTarget))}>
         <span>{label}</span>
       </button>
       {menu ? (
@@ -330,9 +334,9 @@ export function OverrideLabel({ label, desktop, onReset, onUseEverywhere }: { la
           label={`${label} on this size`}
           onClose={() => setMenu(null)}
           items={[
-            { label: "Reset to desktop", onSelect: onReset },
+            { label: `Reset to ${BREAKPOINT_LABEL[from].toLowerCase()}`, onSelect: onReset },
             { label: "Use on all sizes", onSelect: onUseEverywhere },
-            { label: `Desktop: ${desktop}`, note: true },
+            { label: `${BREAKPOINT_LABEL[from]}: ${reference}`, note: true },
           ]}
         />
       ) : null}

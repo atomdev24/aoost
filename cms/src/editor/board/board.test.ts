@@ -3,13 +3,28 @@ import { pinViewportUnits } from "./frame-css";
 import { clampZoom, fitAll, isVisible, layoutFrames, reveal, slotRect, stepZoom, zoomAt } from "./viewport";
 
 describe("board layout", () => {
+  const EXTRA_HIDDEN = { tablet: true, widescreen: true };
   it("puts desktop then mobile side by side, tops aligned, with the add slot after", () => {
-    const frames = layoutFrames({ desktop: 3000, mobile: 5000 });
+    const frames = layoutFrames({ desktop: 3000, mobile: 5000 }, EXTRA_HIDDEN).filter((f) => f.bp === "desktop" || f.bp === "mobile");
     expect(frames.map((f) => [f.bp, f.x, f.y, f.w, f.h])).toEqual([
       ["desktop", 0, 0, 1440, 3000],
       ["mobile", 1560, 0, 390, 5000],
     ]);
     expect(slotRect(frames).x).toBe(1560 + 390 + 120);
+  });
+  it("lays all four sizes out widest first when tablet and widescreen are shown", () => {
+    const frames = layoutFrames({ widescreen: 1000, desktop: 3000, tablet: 4000, mobile: 5000 });
+    expect(frames.map((f) => [f.bp, f.x, f.w])).toEqual([
+      ["widescreen", 0, 1920],
+      ["desktop", 2040, 1440],
+      ["tablet", 3600, 834],
+      ["mobile", 4554, 390],
+    ]);
+  });
+  it("packs shown frames so a hidden one leaves no gap", () => {
+    const frames = layoutFrames({}, { widescreen: true });
+    expect(frames.find((f) => f.bp === "desktop")!.x).toBe(0);
+    expect(frames.find((f) => f.bp === "tablet")!.x).toBe(1560);
   });
 });
 
@@ -30,7 +45,7 @@ describe("zoom", () => {
 
 describe("fit all", () => {
   it("fits every frame across the view", () => {
-    const frames = layoutFrames({ desktop: 4000, mobile: 7000 });
+    const frames = layoutFrames({ desktop: 4000, mobile: 7000 }, { tablet: true, widescreen: true }).filter((f) => f.bp === "desktop" || f.bp === "mobile");
     const rects = [...frames, slotRect(frames)];
     const v = fitAll(rects, 908, 848);
     const right = rects[2]!.x + rects[2]!.w;

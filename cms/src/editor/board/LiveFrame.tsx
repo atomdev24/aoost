@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { components } from "../../components/registry";
 import { pageCss, PageBody } from "../../render/document";
 import { updateNavItem } from "../../model/nav";
-import type { Breakpoint, Page, Site } from "../../schema";
+import { BREAKPOINT_LABEL, type Breakpoint, type Page, type Site } from "../../schema";
 import { currentPage, megaItemId, useEditor } from "../store";
 import { activateBreakpoint } from "./bridge";
 import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT } from "./frame-css";
@@ -154,7 +154,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
 
   return (
     <>
-      <iframe ref={ref} className="bd-live" title={`${bp === "desktop" ? "Desktop" : "Mobile"} frame`} tabIndex={-1} data-bp={bp} />
+      <iframe ref={ref} className="bd-live" title={`${BREAKPOINT_LABEL[bp]} frame`} tabIndex={-1} data-bp={bp} />
       {doc && visible
         ? createPortal(
             <>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Breakpoint } from "../../schema";
 import { DESIGN_WIDTH } from "../../schema";
+import { getBoard } from "./store";
 import { capturePreview } from "../screenshot";
 import { currentPage, getState, megaItemId, subscribe } from "../store";
 
@@ -74,7 +75,8 @@ export async function takeSnapshots(pageId: string, slug: string) {
   if (busy || megaItemId(pageId)) return;
   busy = true;
   try {
-    for (const bp of Object.keys(DESIGN_WIDTH) as Breakpoint[]) {
+    // Hidden frames (tablet and widescreen by default) need no snapshot.
+    for (const bp of (Object.keys(DESIGN_WIDTH) as Breakpoint[]).filter((b) => !getBoard().hidden[b])) {
       const k = key(pageId, bp);
       if (Date.now() - (last.get(k) ?? 0) < MIN_GAP_MS) continue;
       last.set(k, Date.now());
