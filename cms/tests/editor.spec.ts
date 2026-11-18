@@ -44,24 +44,26 @@ test.describe("editor", () => {
     await page.locator("textarea:visible").first().fill("Edited in the test.");
     await expect(canvas(page).locator(".n-sample-title")).toHaveText("Edited in the test.");
     await expect.poll(async () => (await headline(request)).content.text).toBe("Edited in the test.");
-    await expect(page.locator(".ed-status")).toHaveText("Draft · saved just now");
+    await expect(page.locator(".ed-savedot")).toHaveAttribute("data-state", "saved");
+    await expect(page.locator(".ed-savedot")).toHaveAttribute("title", /Last saved just now/);
     await page.screenshot({ path: `${shots}/editor-1440.png` });
     await page.getByRole("button", { name: "Undo" }).click();
     await expect(canvas(page).locator(".n-sample-title")).toHaveText("Dust and neon.");
     await expect.poll(async () => (await headline(request)).content.text).toBe("Dust and neon.");
   });
 
-  test("desktop edits are overrides; on Mobile the blue dot resets to desktop", async ({ page, request }) => {
+  test("desktop edits are overrides; on Mobile the tinted label resets to desktop", async ({ page, request }) => {
     const box = await onBoard(page, canvas(page).locator(".n-sample-title"));
     await page.mouse.click(box.x + 20, box.y + 20);
     await expect(bpSwitch(page, "Desktop")).toHaveAttribute("aria-pressed", "true");
-    const width = page.locator(".ed-row", { hasText: /^Width/ }).locator("input:visible").first();
+    const width = page.locator(".ed-inspector").getByLabel("Width", { exact: true });
     await width.fill("50%");
     await width.press("Enter");
     await expect.poll(async () => (await headline(request)).style).toEqual({ base: {}, desktop: { width: "50%" } });
     await bpSwitch(page, "Mobile").click();
-    await expect(page.locator(".ed-inspector-note")).toContainText("Mobile only");
-    await page.getByRole("button", { name: "Reset Width to desktop" }).click();
+    await expect(page.locator(".ed-scope")).toContainText("Editing Mobile · 1 change");
+    await page.locator(".ed-label.is-over", { hasText: "Size" }).click();
+    await page.getByRole("menuitem", { name: "Reset to desktop" }).click();
     await expect.poll(async () => (await headline(request)).style).toEqual({ base: { width: "50%" } });
   });
 
@@ -70,7 +72,7 @@ test.describe("editor", () => {
     await expect.poll(() => canvas(page).locator("html").evaluate((el) => el.ownerDocument.defaultView!.innerWidth)).toBe(390);
     const box = await onBoard(page, canvas(page).locator(".n-sample-title"));
     await page.mouse.click(box.x + 20, box.y + 20);
-    await expect(page.locator(".ed-inspector-note")).toContainText("Mobile only");
+    await expect(page.locator(".ed-scope")).toContainText("Editing Mobile");
   });
 
   test("drags a canvas layer with snapping; the move is stored per breakpoint", async ({ page, request }) => {
