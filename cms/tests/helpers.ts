@@ -25,6 +25,19 @@ export async function draftSite(request: APIRequestContext, password: string) {
   return (await (await request.get("/api/editor/site", { headers: bearer(password) })).json()).site;
 }
 
+/**
+ * Start from a fresh draft with every page set live, so /preview/ shows the pages and the nav
+ * as they will look once Alex publishes them. Only the homepage is published for now, and the
+ * public site (and its nav) leaves draft pages out.
+ */
+export async function draftWithAllPagesLive(request: APIRequestContext, password: string) {
+  await resetDraft(request, password);
+  const site = await draftSite(request, password);
+  const ops = site.pages.filter((p: { status: string }) => p.status !== "published").map((p: object) => ({ op: "putPage", page: { ...p, status: "published" } }));
+  const res = await request.post("/api/editor/ops", { headers: bearer(password), data: { ops } });
+  if (!res.ok()) throw new Error(`could not set the draft pages live: ${res.status()}`);
+}
+
 /** Call one MCP tool over streamable HTTP and return its result. */
 export async function mcpCall(request: APIRequestContext, password: string, name: string, args: Record<string, unknown> = {}) {
   const res = await request.post("/mcp", { headers: { ...bearer(password), Accept: "application/json, text/event-stream" }, data: { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: args } } });
