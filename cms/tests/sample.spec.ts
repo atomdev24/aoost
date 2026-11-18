@@ -1,11 +1,29 @@
 import { expect, test } from "@playwright/test";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { bearer, draftSite, editorPassword, fullPageShot, resetDraft, signIn } from "./helpers";
+import { pages } from "./content";
+import { bearer, draftSite, draftWithAllPagesLive, editorPassword, fullPageShot, resetDraft, signIn } from "./helpers";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const shots = resolve(__dirname, "../../docs/screenshots");
+const password = editorPassword();
+
+/*
+ * Only the homepage is published. The sample page and the other pages are drafts, so the tests that
+ * need them set every page live in a fresh draft and look at /preview/, which renders the draft
+ * exactly like the public site.
+ */
+const allPagesLive = () => {
+  test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
+  test.beforeEach(async ({ page, request }) => {
+    await draftWithAllPagesLive(request, password!);
+    await signIn(page, password!);
+  });
+  test.afterAll(async ({ request }) => {
+    if (password) await resetDraft(request, password);
+  });
+};
 const widths = [
   { name: "390", viewport: { width: 390, height: 844 } },
   { name: "1440", viewport: { width: 1440, height: 900 } },
@@ -16,10 +34,13 @@ for (const { name, viewport } of widths) {
     test.use({ viewport });
     test.setTimeout(90_000); // full-height captures with live embeds are slow
 
-    test("renders every section kind and media type, and is captured for the docs", async ({ page }) => {
+    test("renders every section kind and media type, and is captured for the docs", async ({ page, request }) => {
+      test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
+      await draftWithAllPagesLive(request, password!);
+      await signIn(page, password!);
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
-      await page.goto("/sample");
+      await page.goto("/preview/sample");
 
       // the three section kinds
       for (const kind of ["flow", "grid", "canvas"]) await expect(page.locator(`section[data-kind="${kind}"]`).first()).toBeAttached();
@@ -58,10 +79,12 @@ for (const { name, viewport } of widths) {
 
       // layout basics
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
-      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex"); // unlisted
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
+      await expect(page.locator('.nav a[href$="/sample"]')).toHaveCount(0); // unlisted: not in the nav
       expect(errors).toEqual([]);
 
       await fullPageShot(page, `${shots}/sample-${name}.png`);
+      await resetDraft(request, password!);
     });
 
     test("captures the home page for the docs", async ({ page }) => {
@@ -71,31 +94,39 @@ for (const { name, viewport } of widths) {
   });
 }
 
-test.describe("lightbox and clean URLs", () => {
+test.describe("lightbox", () => {
   test.use({ viewport: { width: 390, height: 844 } });
+  allPagesLive();
 
   test("an image opens full screen and closes with Escape", async ({ page }) => {
-    await page.goto("/work");
+    await page.goto("/preview/work");
     await page.locator(".gal .frame").first().click();
     await expect(page.locator("dialog.lbx")).toBeVisible();
     await expect(page.locator("dialog.lbx img")).toHaveAttribute("alt", "Studio piece");
     await page.keyboard.press("Escape");
     await expect(page.locator("dialog.lbx")).toBeHidden();
   });
+});
 
-  test("pages are served at clean URLs, with a real 404", async ({ request }) => {
-    expect((await request.get("/work/digital")).status()).toBe(200);
+test.describe("clean URLs", () => {
+  test("published pages are served at clean URLs; drafts and unknown URLs get a real 404", async ({ request }) => {
+    const all = pages();
+    expect(all.some((p) => p.status === "published")).toBe(true);
+    for (const p of all) {
+      const res = await request.get(p.slug, { headers: { Accept: "text/html" } });
+      expect(res.status(), `${p.slug} (${p.status})`).toBe(p.status === "published" ? 200 : 404);
+      if (p.status === "published") expect(res.url(), "no redirect to a .html URL").toMatch(new RegExp(`${p.slug.replace(/\//g, "\\/")}$`));
+    }
     expect((await request.get("/nope", { headers: { Accept: "text/html" } })).status()).toBe(404);
     expect((await request.get("/_published.json")).status()).toBe(404);
   });
 });
 
 test.describe("navigation with all ten item types (draft preview)", () => {
-  const password = editorPassword();
   test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
 
   test("mega menu, search, badge, button, embed on desktop; accordions on mobile", async ({ page, request }) => {
-    await resetDraft(request, password!);
+    await draftWithAllPagesLive(request, password!);
     const site = await draftSite(request, password!);
     const item = (id: string, type: string, extra: object = {}) => ({ id, type, showOn: "both", hover: "tint", ...extra });
     const nav = {
