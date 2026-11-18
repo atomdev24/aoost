@@ -10,7 +10,7 @@ export const fields: Fields<AoostProjectsContent> = {
     type: "array",
     label: "Projects",
     arrayFields: {
-      image: mediaField("Artwork", "image"),
+      image: mediaField("Artwork", "image", { framed: true }),
       title: { type: "text", label: "Title" },
       year: { type: "text", label: "Year" },
       medium: { type: "text", label: "Medium" },
@@ -35,7 +35,7 @@ export const fields: Fields<AoostProjectsContent> = {
           { label: "Plain", value: "plain" },
         ],
       },
-      image: mediaField("Your own note design (600 × 600); replaces the drawing", "image"),
+      image: mediaField("Your own note design (600 × 600); replaces the drawing", "image", { framed: true }),
     },
   },
   keychain: {

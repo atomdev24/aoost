@@ -1,7 +1,9 @@
 import { Fragment } from "react";
 import { z } from "zod";
+import { ResponsiveFrameFit } from "../../../schema";
 import { defineComponent } from "../../types";
 import { Block } from "../Block";
+import { shownSlots } from "../frames";
 import { aoostKit } from "../kit";
 import { css } from "./AoostHero.styles";
 
@@ -13,7 +15,7 @@ export const AoostHeroContent = z.object({
   /** IANA time zone for the clock, and for late mode. */
   timeZone: z.string(),
   /** The artwork strip. Left empty, it reuses the projects' images (as the original does). */
-  reel: z.array(z.object({ src: z.string(), alt: z.string().optional() })),
+  reel: z.array(z.object({ src: z.string(), alt: z.string().optional(), /** Framing of the artwork, per screen size. */ frame: ResponsiveFrameFit.optional() })),
   /** Seconds each artwork stays before the strip moves on. */
   reelSeconds: z.number().min(1).max(60),
   /** Show the ticker strip under the artwork. Off renders no strip at all. Older content has no value: shown. */
@@ -57,6 +59,8 @@ export const AoostHero = defineComponent<AoostHeroContent>({
   category: "aoost",
   kit: aoostKit,
   schema: AoostHeroContent,
+  frames: (content) =>
+    shownSlots(content.reel, (r) => !!r.src, (r, i, k) => ({ path: ["reel", i], label: `Artwork ${k}`, kind: "img", selector: `.hr-track>.hr-slide:nth-child(${k})>img`, src: r.src })),
   defaults: {
     content: {
       label: "aoost / portfolio",

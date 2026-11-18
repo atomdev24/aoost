@@ -1,12 +1,27 @@
 import { overriddenKeys, resetToDesktop } from "../../responsive/resolve";
-import type { Page } from "../../schema";
+import type { Node, Page } from "../../schema";
+import { nodeSlots, withSlotFrame } from "../canvas/slots";
+
+/** A block's own values that differ on mobile: layout and look, its frame, and the frames of pictures inside it. */
+function nodeOverrides(node: Node): number {
+  let n = overriddenKeys(node.style).length + (node.frame ? overriddenKeys(node.frame).length : 0);
+  for (const s of nodeSlots(node)) if (s.frame) n += overriddenKeys(s.frame).length;
+  return n;
+}
+
+/** The block with every mobile difference reset to desktop's value. */
+function resetNode(node: Node): Node {
+  let next: Node = { ...node, style: resetToDesktop(node.style), ...(node.frame ? { frame: resetToDesktop(node.frame) } : {}) };
+  for (const s of nodeSlots(node)) if (s.frame && overriddenKeys(s.frame).length) next = withSlotFrame(next, s.path, resetToDesktop(s.frame));
+  return next;
+}
 
 /** How many values on the page differ on mobile from desktop (the "N overrides" on the Mobile frame). */
 export function countMobileOverrides(page: Page): number {
   let n = 0;
   for (const s of page.sections) {
     n += overriddenKeys(s.layout).length;
-    for (const node of s.children) n += overriddenKeys(node.style).length + (node.frame ? overriddenKeys(node.frame).length : 0);
+    for (const node of s.children) n += nodeOverrides(node);
   }
   for (const o of page.overlays) n += overriddenKeys(o.node.style).length + overriddenKeys(o.place).length;
   return n;
@@ -20,7 +35,7 @@ export function blockOverrides(page: Page, id: string): number {
   if (o) return overriddenKeys(o.node.style).length + overriddenKeys(o.place).length;
   for (const sec of page.sections) {
     const n = sec.children.find((x) => x.id === id);
-    if (n) return overriddenKeys(n.style).length + (n.frame ? overriddenKeys(n.frame).length : 0);
+    if (n) return nodeOverrides(n);
   }
   return 0;
 }
@@ -32,6 +47,6 @@ export function resetBlockOverrides(page: Page, id: string): Page {
     return { ...page, overlays: page.overlays.map((o) => (o.id === id ? { ...o, place: resetToDesktop(o.place), node: { ...o.node, style: resetToDesktop(o.node.style) } } : o)) };
   return {
     ...page,
-    sections: page.sections.map((s) => (!s.children.some((n) => n.id === id) ? s : { ...s, children: s.children.map((n) => (n.id !== id ? n : { ...n, style: resetToDesktop(n.style), ...(n.frame ? { frame: resetToDesktop(n.frame) } : {}) })) })),
+    sections: page.sections.map((s) => (!s.children.some((n) => n.id === id) ? s : { ...s, children: s.children.map((n) => (n.id !== id ? n : resetNode(n))) })),
   };
 }

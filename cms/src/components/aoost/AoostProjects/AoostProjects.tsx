@@ -1,6 +1,8 @@
 import { z } from "zod";
+import { ResponsiveFrameFit } from "../../../schema";
 import { defineComponent } from "../../types";
 import { Block, Head, LineArt } from "../Block";
+import { shownSlots } from "../frames";
 import { aoostKit, matBand } from "../kit";
 import { css } from "./AoostProjects.styles";
 
@@ -16,6 +18,8 @@ export const AoostProject = z.object({
   /** A cut-out sticker: no white card or tape, just its own shape and shadow. */
   sticker: z.boolean().optional(),
   hidden: z.boolean().optional(),
+  /** Framing of the image, per screen size. */
+  frame: ResponsiveFrameFit.optional(),
 });
 
 export const AoostProjectsContent = z.object({
@@ -28,7 +32,7 @@ export const AoostProjectsContent = z.object({
    * The neon sticky note pinned to the table's corner. Without an image it shows the drawn eye,
    * or nothing on it when style is "plain". Older content has no style: "eye".
    */
-  note: z.object({ show: z.boolean(), style: z.enum(["eye", "plain"]).optional(), image: z.string().optional() }),
+  note: z.object({ show: z.boolean(), style: z.enum(["eye", "plain"]).optional(), image: z.string().optional(), frame: ResponsiveFrameFit.optional() }),
   keychain: z.object({ show: z.boolean(), image: z.string(), label: z.string() }),
   /** Western line art: a cactus beside the intro line, a longhorn skull beside the heading. */
   showCactus: z.boolean(),
@@ -53,6 +57,10 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
   kit: aoostKit,
   band: matBand,
   schema: AoostProjectsContent,
+  frames: (content) => [
+    ...shownSlots(content.projects, (p) => !!p.image && !p.hidden, (p, i, k) => ({ path: ["projects", i], label: p.title || `Piece ${k}`, kind: "img", selector: `.table>.piece:nth-child(${k})>img`, src: p.image })),
+    ...(content.note.show && content.note.image ? [{ path: ["note"], label: "Sticky note", kind: "img" as const, selector: '.sticky[data-note="0"]>img', src: content.note.image, frame: content.note.frame }] : []),
+  ],
   defaults: {
     content: {
       mat: "light",

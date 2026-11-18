@@ -16,7 +16,7 @@ export const fields: Fields<AoostHeroContent> = {
   reel: {
     type: "array",
     label: "Artwork reel (empty = the projects' images)",
-    arrayFields: { src: mediaField("Image", "image"), alt: { type: "text", label: "Description (shown full screen, for screen readers)" } },
+    arrayFields: { src: mediaField("Image", "image", { framed: true, altKey: "alt" }), alt: { type: "text", label: "Description (shown full screen, for screen readers)" } },
     defaultItemProps: { src: "", alt: "" },
     getItemSummary: (item, i) => item.alt || item.src?.split("/").pop() || `Artwork ${(i ?? 0) + 1}`,
   },

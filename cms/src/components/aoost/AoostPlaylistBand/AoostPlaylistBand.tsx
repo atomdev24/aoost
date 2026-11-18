@@ -1,6 +1,8 @@
 import { z } from "zod";
+import { ResponsiveFrameFit } from "../../../schema";
 import { defineComponent } from "../../types";
 import { Block, Head } from "../Block";
+import { shownSlots } from "../frames";
 import { aoostKit, matBand } from "../kit";
 import { css } from "./AoostPlaylistBand.styles";
 
@@ -11,6 +13,8 @@ export const AoostPlaylist = z.object({
   spotify: z.string(),
   /** Your own cover (square, 1080 × 1080). Without one the Spotify cover is used. */
   cover: z.string().optional(),
+  /** Framing of the cover, per screen size. */
+  frame: ResponsiveFrameFit.optional(),
   /** The frame's colour behind the cover while it loads. */
   color: z.string().optional(),
   hidden: z.boolean().optional(),
@@ -41,6 +45,8 @@ export const AoostPlaylistBand = defineComponent<AoostPlaylistBandContent>({
   kit: aoostKit,
   band: matBand,
   schema: AoostPlaylistBandContent,
+  frames: (content) =>
+    shownSlots(content.playlists, (p) => !!p.spotify && !p.hidden, (p, i, k) => (p.cover ? { path: ["playlists", i], label: `${p.title} cover`, kind: "img", selector: `.cv-frames>.cv-frame:nth-child(${k})>.disc>img`, src: p.cover } : null)),
   defaults: {
     content: {
       mat: "dark",

@@ -317,7 +317,7 @@ function describe(values: unknown[]): string {
 }
 
 /** The accent label of a field that differs on this breakpoint. Clicking it offers the ways back. */
-function OverrideLabel({ label, desktop, onReset, onUseEverywhere }: { label: string; desktop: string; onReset: () => void; onUseEverywhere: () => void }) {
+export function OverrideLabel({ label, desktop, onReset, onUseEverywhere }: { label: string; desktop: string; onReset: () => void; onUseEverywhere: () => void }) {
   const [menu, setMenu] = useState<Anchor | null>(null);
   return (
     <>
