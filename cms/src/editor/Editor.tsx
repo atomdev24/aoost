@@ -13,6 +13,7 @@ import { pageToPuck, puckToPage, type PuckData } from "./puck/adapter";
 import { puckConfig } from "./puck/config";
 import { markFromPuck } from "./puck/PuckSync";
 import { currentPage, getState, updatePage, useEditor } from "./store";
+import { QuickInsert } from "./insert/QuickInsert";
 import { MediaPickerHost } from "./ui/MediaPicker";
 import { ActionBar } from "./workspace/ActionBar";
 import { FieldLabel } from "./workspace/FieldLabel";
@@ -83,6 +84,7 @@ export function Editor() {
           <LeftPanel />
           <Board />
           <Inspector />
+          <QuickInsert />
         </div>
       </Puck>
     </>

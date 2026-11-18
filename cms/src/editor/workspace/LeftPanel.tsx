@@ -4,9 +4,10 @@ import { addSection, createSection, locate } from "../../model/page-ops";
 import type { Section } from "../../schema";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage, useEditor } from "../store";
+import { InsertPanel } from "../insert/InsertPanel";
+import { LibraryPanel } from "../ui/LibraryPanel";
 import { FontsPanel } from "../ui/FontsPanel";
 import { LayersPanel } from "../ui/LayersPanel";
-import { LibraryPanel } from "../ui/LibraryPanel";
 import { MediaLibrary } from "../ui/MediaLibrary";
 import { NavPanel } from "../ui/NavPanel";
 import { PagesPanel } from "../ui/PagesPanel";
@@ -72,30 +73,6 @@ export function AddSection() {
       <button type="button" className="ed-dashed" aria-expanded={open} onClick={() => setOpen(!open)}>
         + Add section
       </button>
-    </div>
-  );
-}
-
-function InsertPanel() {
-  const [tab, setTab] = useState<"blocks" | "saved">("blocks");
-  return (
-    <div className="ed-insert-panel">
-      <div className="ed-segctl ed-segctl-sm" role="tablist" aria-label="Insert" style={{ gridTemplateColumns: "1fr 1fr", margin: "10px 12px 6px" }}>
-        <button type="button" role="tab" aria-selected={tab === "blocks"} onClick={() => setTab("blocks")}>
-          Blocks
-        </button>
-        <button type="button" role="tab" aria-selected={tab === "saved"} onClick={() => setTab("saved")}>
-          Saved
-        </button>
-      </div>
-      {tab === "blocks" ? (
-        <div className="ed-panel ed-blocks">
-          <p className="ed-hint">Drag a block onto the frame you are editing.</p>
-          <Puck.Components />
-        </div>
-      ) : (
-        <LibraryPanel mode="templates" />
-      )}
     </div>
   );
 }
