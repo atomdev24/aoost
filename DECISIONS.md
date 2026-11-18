@@ -180,3 +180,25 @@ Not done / known issues:
 3. The real "Rebuilding…" → "Live" path wasn't run end to end, because tests never publish. Only the status endpoint (unit test) and the failure path (mocked) are tested. It needs a real publish to confirm, and maybe the token permission in BLOCKERS.
 4. Dragging a block card onto the canvas uses Puck's own drawer and wasn't covered by a new test (click-to-add and / are).
 5. Snapshots are per browser (IndexedDB), so a new browser shows plain frames the first time.
+
+## Per-screen-size image framing in the aoost blocks (EDITOR-AOOST-FRAMING.md, 19 Nov 2026)
+
+Decisions:
+- Hero reel items, project pieces, the sticky note image, journal covers and playlist covers each get an optional `frame` (the existing `ResponsiveFrameFit`). Other aoost images aren't cropped (keychain, journal page scans and the viewer show the whole picture) or exist only in the script's widgets (the mini player art), so they have no frame.
+- Blocks list their pictures as "frame slots" (`frames(content)` on the component: item path, label, CSS selector). `pageCss` writes one `Sheet` rule per framed picture, the same mobile-base and desktop-media-query mechanism `Image` uses. Selectors use `nth-child` among the shown items, so they match both the server markup and the markup the runtime scripts rebuild. The runtime scripts and `/assets/aoost.js` are unchanged.
+- Free mode (zoom and pan) uses the same transform as the media blocks. The aoost images have no `.frame` wrapper, so the picture clips itself with `clip-path: inset(…)`, the inverse of the transform. That way it never spills into the next hero slide.
+- Journal covers are CSS backgrounds, so they can move (focal point, Cover or Fit) but not scale. Adjust mode shows no scale handles for them, and the popover offers Cover and Fit only.
+- Project pieces show the whole artwork (height auto), so moving the focal point has no visible effect there. Scaling in Free mode does.
+- Double-click hit-tests the picture's box (Puck's layers can sit over the block), selects the block, and adjusts that one item. Esc is caught on the canvas frame's window, so leaving adjust mode keeps the selection.
+- One adjust session (any number of drags, scrolls and handle drags) is one undo step. This also applies to the standard Image adjust.
+
+Summary:
+- Changed: `cms/src/components/aoost/frames.ts` (slots, CSS, item helpers), the four block schemas and Puck fields, `render/document.tsx`, `editor/canvas/{AdjustImage,drops,slots}.ts(x)`, `editor/board/overrides.ts` (the scope bar counts item frames, and Reset all resets them), and `editor/fields/media.tsx` (framed media rows: popover with focal point, fit, Replace and alt; mobile tint; label menu with "Reset to desktop" and "Use on all sizes").
+- Tests: unit tests 277/277 (new `frames.test.ts`, `slots.test.ts`). New `tests/aoost-framing.spec.ts` passes 2/2. Editor specs (board, editor, section1, section2-3, framing) all pass. Screenshot: `docs/screenshots/aoost-framing/hero-mobile-adjust.png`.
+- `npm run build` passes. Public output is byte-identical: `main` built to `/tmp/aoost-dist-before-framing` with the build timestamp pinned, and `diff -rq -x admin` against this branch shows no differences.
+
+Left / known:
+1. `home-editor.spec.ts` still fails at its reel step (it looks for `hero.jpg`, removed by the 17 Nov publish), and `home`, `nav` and `sample` specs still fail for content reasons. These are unchanged from before.
+2. Not covered by browser tests: adjusting project pieces, playlist covers and journal covers on the canvas (unit-tested only). The sticky note image is drawn by the script, so in the editor it can be framed from the inspector only.
+3. Tablet and widescreen will need the breakpoint list to grow. Item frames use the same `Responsive` helpers, so they follow automatically.
+4. Gemini (`ask-gemini`) was out of quota (resets in about 7 days), so Claude wrote all the code.
