@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "../api";
 import { activateBreakpoint } from "../board/bridge";
 import { setFrameHidden, toggleFrameHidden, useBoard } from "../board/store";
 import { PuckSync } from "../puck/PuckSync";
-import { currentPage, flush, megaItemId, redo, setPage, setUnpublished, undo, useEditor } from "../store";
+import { currentPage, flush, megaItemId, redo, setPage, undo, useEditor } from "../store";
 import { ClaudePill } from "./ClaudePill";
+import { loadPublished, openSheet, publish, usePublish } from "./publish";
+import { PublishSheet, useChanges } from "./PublishSheet";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
 
@@ -47,41 +49,24 @@ export function TopBar() {
   const page = useEditor(currentPage);
   const returnPageId = useEditor((s) => s.returnPageId);
   const editingMenu = !!megaItemId(page.id);
-  const [publishing, setPublishing] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const now = useNow(20_000);
   const remote = lastLabel && /^(Claude|Another window): /.test(lastLabel) ? lastLabel : null;
+  const phase = usePublish((p) => p.phase);
+  const changes = useChanges();
+  useEffect(() => void loadPublished(), []);
+  // Once a publish lands (here, or in another window), what is live changes.
+  useEffect(() => {
+    if (!unpublished) void loadPublished();
+  }, [unpublished]);
+  const count = unpublished ? (changes?.count ?? null) : 0;
 
-  const status =
-    save === "error"
-      ? `Not saved: ${saveError}`
-      : save === "saving"
-        ? "Draft · saving…"
-        : !unpublished
-          ? "Published · no changes"
-          : savedAt
-            ? `Draft · saved ${ago(savedAt, now)}`
-            : "Draft · unpublished changes";
+  const lastSaved = savedAt ? `Last saved ${ago(savedAt, now)}` : "No changes saved in this session yet";
+  const saveTitle = save === "error" ? `Not saved: ${saveError}. ${lastSaved}.` : save === "saving" ? `Saving… ${lastSaved}.` : `Saved. ${lastSaved}.`;
 
   const preview = async () => {
     await flush();
     window.open(`/preview${editingMenu || page.slug === "/" ? "/" : page.slug}`, "aoost-preview");
-  };
-
-  const publish = async () => {
-    setPublishing(true);
-    setNotice(null);
-    try {
-      if (!(await flush())) throw new Error("Fix the save error first.");
-      const result = await api.publish();
-      setUnpublished(false);
-      setNotice(result.commit ? "Published. The site rebuilds in about a minute." : "Nothing new to publish.");
-      setTimeout(() => setNotice(null), 6000);
-    } catch (e) {
-      setNotice(e instanceof ApiError || e instanceof Error ? e.message : "Publishing failed.");
-    } finally {
-      setPublishing(false);
-    }
   };
 
   const discard = async () => {
@@ -109,9 +94,12 @@ export function TopBar() {
             Done editing menu panel
           </button>
         ) : null}
-        <span className={`ed-status${save === "error" ? " ed-status-error" : ""}`} role="status" title={lastLabel ?? undefined}>
-          {notice ?? remote ?? status}
-        </span>
+        <span className="ed-savedot" data-state={save === "error" ? "error" : save === "saving" ? "saving" : "saved"} role="img" aria-label={saveTitle} title={saveTitle} />
+        {notice || remote ? (
+          <span className="ed-status" role="status" title={lastLabel ?? undefined}>
+            {notice ?? remote}
+          </span>
+        ) : null}
         <span className={`ed-live${live ? " is-on" : ""}`} title={live ? "Live: changes from Claude appear here as they happen" : "Reconnecting to live sync…"} aria-label={live ? "Live sync connected" : "Live sync reconnecting"} role="img" />
         <span className="ed-history">
           <button type="button" className="ed-icon" onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (⌘Z)">
@@ -164,18 +152,77 @@ export function TopBar() {
       {/* Right island: Claude status pill, Preview, Discard draft, Publish */}
       <div className="ed-island ed-island-right" role="toolbar" aria-label="Publishing and preview">
         <ClaudePill />
-        {unpublished ? (
-          <button type="button" className="ed-btn ed-btn-discard" onClick={discard} title="Throw away unpublished changes and reload what is live">
-            Discard draft
-          </button>
-        ) : null}
         <button type="button" className="ed-btn" onClick={preview}>
           Preview
         </button>
-        <button type="button" className="ed-btn ed-btn-accent ed-pill" onClick={publish} disabled={publishing || (!unpublished && save !== "error")}>
-          {publishing ? "Publishing…" : "Publish"}
-        </button>
+        <PublishButton phase={phase} count={count} disabled={!unpublished && save !== "error" && phase === "idle"} />
+        <MoreMenu canDiscard={unpublished} onDiscard={discard} />
+        <PublishSheet />
       </div>
     </header>
+  );
+}
+
+/**
+ * Publish, with its real stages: a spinner and "Saving…", then "Rebuilding…",
+ * then a green "Live" for a few seconds. The badge counts unpublished changes;
+ * clicking it opens the details sheet.
+ */
+function PublishButton({ phase, count, disabled }: { phase: string; count: number | null; disabled: boolean }) {
+  const busy = phase === "github" || phase === "rebuilding";
+  const label = phase === "github" ? "Saving…" : phase === "rebuilding" ? "Rebuilding…" : phase === "live" ? "Live" : "Publish";
+  return (
+    <span className={`ed-publish is-${phase}`}>
+      <button type="button" className="ed-btn ed-btn-accent ed-pill ed-publish-btn" onClick={() => void publish()} disabled={busy || (disabled && phase !== "error")} aria-live="polite">
+        {busy ? <span className="ed-spinner" aria-hidden="true" /> : phase === "live" ? <span aria-hidden="true">✓</span> : null}
+        {label}
+      </button>
+      {count && phase === "idle" ? (
+        <button type="button" className="ed-publish-badge" aria-label={`${count} unpublished ${count === 1 ? "change" : "changes"}: show details`} title="What will be published" onClick={openSheet}>
+          {count}
+        </button>
+      ) : phase === "error" ? (
+        <button type="button" className="ed-publish-badge is-error" aria-label="Publishing failed: show details" onClick={openSheet}>
+          !
+        </button>
+      ) : null}
+    </span>
+  );
+}
+
+/** The right island's "…" menu: Discard draft lives here. */
+function MoreMenu({ canDiscard, onDiscard }: { canDiscard: boolean; onDiscard: () => void }) {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+  return (
+    <div className="ed-more" ref={box}>
+      <button type="button" className="ed-icon ed-more-btn" aria-label="More" aria-haspopup="menu" aria-expanded={open} title="More" onClick={() => setOpen(!open)}>
+        …
+      </button>
+      {open ? (
+        <ul className="ed-menu ed-more-menu" role="menu" aria-label="More">
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              disabled={!canDiscard}
+              title={canDiscard ? "Throw away unpublished changes and reload what is live" : "Nothing to discard"}
+              onClick={() => {
+                setOpen(false);
+                onDiscard();
+              }}
+            >
+              Discard draft
+            </button>
+          </li>
+        </ul>
+      ) : null}
+    </div>
   );
 }

@@ -145,6 +145,11 @@ export class DraftStore extends DurableObject<Env> {
     return (await this.ctx.storage.get<number>("connectorSeenAt")) ?? null;
   }
 
+  /** What is live (as site JSON), so the editor can say which pages and blocks a publish would change. */
+  async getPublishedJson(): Promise<string> {
+    return JSON.stringify(filesToSite(await this.published()));
+  }
+
   /** Record that the current draft is now what is published. */
   async markPublished() {
     const files = siteToFiles(await this.load());
