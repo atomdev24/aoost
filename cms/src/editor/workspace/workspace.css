@@ -1799,6 +1799,14 @@ body:has(.ed-scrub.is-scrubbing) {
 .ed-inspector .ed-cell.is-over .ed-pair .ed-scrub {
   background: rgba(10, 132, 255, 0.16);
 }
+/* A picture inside a block whose framing differs on this size. */
+.ed-inspector .ed-mediarow.is-over .ed-mediarow-main {
+  background: rgba(10, 132, 255, 0.16);
+}
+.ed-inspector .ed-field > .ed-label.is-over {
+  padding: 0;
+  font-size: inherit;
+}
 
 /* ---------------------------------------------------------------- adjust image (on the canvas) */
 .ed-adjust {

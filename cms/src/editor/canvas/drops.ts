@@ -3,6 +3,7 @@ import { uploadFile } from "../media";
 import { currentPage, getState, updatePage } from "../store";
 import { selectBlock } from "../board/bridge";
 import { adjustable, startAdjust } from "./AdjustImage";
+import { slotAtPoint } from "./slots";
 
 /** What a media library item carries when it is dragged (see MediaLibrary). */
 export const MEDIA_MIME = "application/x-aoost-media";
@@ -57,14 +58,27 @@ export function placeMedia(target: EventTarget | null, media: { url: string; kin
 
 /**
  * Canvas behaviour wired into Puck's editable frame:
- *   double-click a picture → adjust it in its frame;
+ *   double-click a picture (or a picture inside an aoost block) → adjust it in its frame;
  *   drop an image file (or a media library item) on an Image block → replace it;
  *   drop one anywhere else → place it as a new block there.
  */
 export function attachCanvasDrops(doc: Document) {
   const dbl = (e: MouseEvent) => {
     const el = (e.target as Element | null)?.closest?.("[data-node-id]");
-    if (!el || !adjustable(el)) return;
+    if (!el) return;
+    // A picture inside a block's content (an aoost block's artwork or cover): adjust that one picture.
+    const at = locate(currentPage(getState()), el.getAttribute("data-node-id") ?? "");
+    const owner = at?.kind === "node" ? at.node : at?.kind === "overlay" ? at.overlay.node : null;
+    const hit = owner ? slotAtPoint(owner, el, e.clientX, e.clientY) : null;
+    if (owner && hit && (hit.slot.kind === "bg" || (hit.el as HTMLImageElement).naturalWidth)) {
+      e.preventDefault();
+      e.stopPropagation();
+      // The block is selected too, so the inspector shows the picture being adjusted.
+      if (!getState().selection.includes(owner.id)) selectBlock(owner.id);
+      startAdjust(owner.id, hit.slot.path);
+      return;
+    }
+    if (!adjustable(el)) return;
     const id = imageBlockAt(e.target) ?? el.getAttribute("data-node-id");
     if (!id) return;
     e.preventDefault();
