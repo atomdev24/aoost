@@ -2246,3 +2246,221 @@ button.ed-card {
 .ed-library-panel .ed-chip-sm {
   padding: 0 8px;
 }
+
+/* ---------------------------------------------------------------- media library: masonry and list */
+.ed-medialib {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ed-medialib .ed-hint,
+.ed-medialib .ed-note {
+  margin: 0;
+}
+.ed-medialib-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ed-medialib-head .ed-search {
+  flex: 1;
+  min-width: 0;
+}
+.ed-medialib-head .ed-btn {
+  flex: none;
+  height: 28px;
+}
+.ed-viewtoggle {
+  flex: none;
+  display: flex;
+  padding: 2px;
+}
+.ed-viewtoggle button {
+  width: 26px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.ed-medialib.is-over {
+  outline: 2px dashed var(--ed-accent);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+.ed-masonry {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  columns: 2;
+  column-gap: 8px;
+}
+.ed-modal .ed-masonry {
+  columns: 4;
+}
+.ed-masonry-item {
+  position: relative;
+  break-inside: avoid;
+  margin-bottom: 8px;
+}
+.ed-masonry-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: grab;
+}
+.ed-masonry-tile:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 2px;
+}
+.ed-masonry-media {
+  position: relative;
+  display: block;
+  min-height: 40px;
+}
+.ed-masonry-media img,
+.ed-masonry-media video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ed-masonry-media .ed-asset-glyph {
+  display: grid;
+  place-items: center;
+  height: 64px;
+  color: var(--ed-sub);
+}
+.ed-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 10px;
+  pointer-events: none;
+}
+.ed-used-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ed-accent);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45);
+}
+.ed-masonry-item .ed-asset-tools,
+.ed-medialist li .ed-asset-tools {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.ed-masonry-item:hover .ed-asset-tools,
+.ed-masonry-item:focus-within .ed-asset-tools,
+.ed-medialist li:hover .ed-asset-tools,
+.ed-medialist li:focus-within .ed-asset-tools {
+  opacity: 1;
+}
+.ed-masonry-item .ed-mini,
+.ed-medialist .ed-mini {
+  background: rgba(0, 0, 0, 0.6);
+}
+.ed-medialist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ed-medialist li {
+  position: relative;
+}
+.ed-medialist-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 5px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ed-text);
+  text-align: left;
+  font: 12px var(--ed-font);
+  cursor: grab;
+}
+.ed-medialist-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.ed-medialist-thumb {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  display: grid;
+  place-items: center;
+  color: var(--ed-sub);
+}
+.ed-medialist-thumb img,
+.ed-medialist-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ed-medialist-thumb .ed-play {
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  font-size: 8px;
+}
+.ed-medialist-thumb .ed-used-dot {
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+}
+.ed-medialist-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.ed-medialist-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ed-medialist-meta,
+.ed-medialist-used {
+  color: var(--ed-sub);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ed-medialist-used.is-used {
+  color: #8cc4ff;
+}

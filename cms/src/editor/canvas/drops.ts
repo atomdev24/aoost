@@ -1,6 +1,7 @@
 import { addNode, addSection, createNode, createSection, locate, updateNode } from "../../model/page-ops";
 import { uploadFile } from "../media";
 import { currentPage, getState, updatePage } from "../store";
+import { selectBlock } from "../board/bridge";
 import { adjustable, startAdjust } from "./AdjustImage";
 
 /** What a media library item carries when it is dragged (see MediaLibrary). */
@@ -25,19 +26,40 @@ export function replaceImage(id: string, media: { url: string; width?: number; h
   updatePage(pageId, (p) => updateNode(p, id, (n) => ({ ...n, content: { ...n.content, src: media.url, width: media.width, height: media.height } })), label);
 }
 
-/** Add an Image block at the end of the page, in a new section when the page has none (the empty-page drop). */
-export function addImageBlock(media: { url: string; width?: number; height?: number }) {
+/**
+ * Place a picture (or video) on the page as a new block: after the block it
+ * was dropped on (flow and grid sections), at the end of the section it was
+ * dropped in, or at the end of the page (a new section when there is none).
+ * One undo step; the new block is selected.
+ */
+export function placeMedia(target: EventTarget | null, media: { url: string; kind?: string; width?: number; height?: number }) {
   const page = currentPage(getState());
-  const node = createNode("Image", { content: { src: media.url, width: media.width, height: media.height, alt: "" } });
-  const last = page.sections[page.sections.length - 1];
-  updatePage(page.id, (p) => (last && last.kind !== "canvas" ? addNode(p, last.id, node) : addSection(p, createSection("flow", { children: [node] }))), "Add image");
+  const node =
+    media.kind === "video"
+      ? createNode("Video", { content: { src: media.url } })
+      : createNode("Image", { content: { src: media.url, width: media.width, height: media.height, alt: "" } });
+  const el = (target as Element | null)?.closest?.("[data-node-id], [data-section-id]") ?? null;
+  const id = el?.getAttribute("data-node-id") ?? el?.getAttribute("data-section-id") ?? null;
+  const at = id ? locate(page, id) : null;
+  updatePage(
+    page.id,
+    (p) => {
+      if (at?.kind === "node" && at.section.kind !== "canvas") return addNode(p, at.section.id, node, at.section.children.indexOf(at.node) + 1);
+      if (at?.kind === "section" && at.section.kind !== "canvas") return addNode(p, at.section.id, node);
+      const index = at && at.kind !== "overlay" ? p.sections.findIndex((s) => s.id === at.section.id) + 1 : p.sections.length;
+      return addSection(p, createSection("flow", { children: [node] }), index);
+    },
+    media.kind === "video" ? "Add video" : "Add image",
+  );
+  selectBlock(node.id);
   return node.id;
 }
 
 /**
  * Canvas behaviour wired into Puck's editable frame:
  *   double-click a picture → adjust it in its frame;
- *   drop an image file (or a media library item) on an Image block → replace it.
+ *   drop an image file (or a media library item) on an Image block → replace it;
+ *   drop one anywhere else → place it as a new block there.
  */
 export function attachCanvasDrops(doc: Document) {
   const dbl = (e: MouseEvent) => {
@@ -59,31 +81,32 @@ export function attachCanvasDrops(doc: Document) {
   };
   const over = (e: DragEvent) => {
     if (!wanted(e)) return;
-    const id = imageBlockAt(e.target);
-    if (!id) return mark(null);
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer!.dropEffect = "copy";
-    mark((e.target as Element).closest("[data-node-id]"));
+    const id = imageBlockAt(e.target);
+    mark(id ? (e.target as Element).closest("[data-node-id]") : null);
   };
   const drop = async (e: DragEvent) => {
     mark(null);
     if (!wanted(e)) return;
-    const id = imageBlockAt(e.target);
-    if (!id) return;
     e.preventDefault();
     e.stopPropagation();
+    const id = imageBlockAt(e.target);
+    const target = e.target;
     const media = e.dataTransfer!.getData(MEDIA_MIME);
     if (media) {
       const m = JSON.parse(media) as DraggedMedia;
-      if (m.kind === "image") replaceImage(id, m);
+      if (id && m.kind === "image") replaceImage(id, m);
+      else if (m.kind === "image" || m.kind === "video") placeMedia(target, m);
       return;
     }
-    const file = [...e.dataTransfer!.files].find((f) => IMAGE_FILE.test(f.type));
+    const file = [...e.dataTransfer!.files].find((f) => IMAGE_FILE.test(f.type) || /^video\//.test(f.type));
     if (!file) return;
     try {
       const item = await uploadFile(file);
-      replaceImage(id, item);
+      if (id && item.kind === "image") replaceImage(id, item);
+      else placeMedia(target, item);
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Upload failed.");
     }
