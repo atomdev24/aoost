@@ -8,7 +8,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const password = editorPassword();
 const shots = resolve(__dirname, "../../docs/screenshots");
 const canvas = (page: Page) => page.frameLocator("#preview-frame");
-const bpSwitch = (page: Page, name: "Desktop" | "Mobile") => page.locator(".ed-bpswitch").getByRole("button", { name });
+// The breakpoint buttons in the centre island (the inspector's switch only shows while something is selected).
+const bpSwitch = (page: Page, name: "Desktop" | "Mobile") => page.locator(".ed-island-bps").getByRole("button", { name });
 // The editor tests work on the sample page: it has plain text and a free canvas. (The home page is made of the aoost blocks; see home-editor.spec.ts.)
 const samplePage = async (request: Parameters<typeof draftSite>[0]) => (await draftSite(request, password!)).pages.find((p: { id: string }) => p.id === "sample");
 const headline = async (request: Parameters<typeof draftSite>[0]) => (await samplePage(request)).sections[0].children[1];
@@ -22,6 +23,7 @@ test.describe("editor", () => {
     await signIn(page, password!);
     await page.goto("/admin/?page=sample");
     await expect(canvas(page).locator(".n-sample-title")).toBeVisible();
+    await page.keyboard.press("Escape"); // close the remembered (unpinned) flyout so the frame is clear
   });
   test.afterAll(async ({ request }) => {
     await resetDraft(request, password!);
@@ -117,12 +119,13 @@ test.describe("editor", () => {
   });
 
   test("creates a page and re-URLs it with a redirect", async ({ page, request }) => {
-    await page.getByRole("tab", { name: "Pages" }).click();
+    await page.locator(".ed-rail").getByRole("button", { name: "Pages", exact: true }).click();
     await page.getByRole("button", { name: "New page" }).click();
     await page.locator(".ed-modal input").first().fill("Sketchbook");
     await page.locator(".ed-templates button", { hasText: "Gallery" }).click();
     await page.getByRole("button", { name: "Create page" }).click();
     await expect(page.locator(".ed-page-row.is-selected")).toContainText("Sketchbook");
+    await page.getByRole("button", { name: "Page settings for Sketchbook" }).click();
     const slug = page.locator("#ps-slug:visible");
     await slug.fill("sketches");
     await slug.press("Enter");

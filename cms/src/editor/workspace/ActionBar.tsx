@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { isHidden, locate } from "../../model/page-ops";
 import { useBoard } from "../board/store";
 import { deleteBlock, duplicateBlock, moveBlock, toggleBlockHidden } from "../canvas/actions";
@@ -32,12 +32,26 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
   const item = at?.kind === "section" ? at.section : at?.kind === "node" ? at.node : null;
   const hidden = item ? isHidden(item, bp) : false;
   const name = item?.name ?? label;
+  // A block at the very top of its frame has no room above it, so the tag tucks inside its top edge instead.
+  const ref = useRef<HTMLDivElement>(null);
+  const [inside, setInside] = useState(false);
+  useLayoutEffect(() => {
+    const anchor = ref.current?.parentElement;
+    if (!anchor) return;
+    const room = anchor.getBoundingClientRect().top + (anchor.ownerDocument.defaultView?.scrollY ?? 0);
+    const next = room < 24 / zoom;
+    if (next !== inside) setInside(next);
+  });
   const act = (fn: (id: string) => void) => (e: React.MouseEvent) => {
     e.stopPropagation();
     if (id) fn(id);
   };
   return (
-    <div className="ed-tag" style={{ transform: `scale(${1 / zoom}) translateY(calc(-100% - 4px))` }} onPointerDown={(e) => e.stopPropagation()}>
+    <div
+      ref={ref}
+      className={`ed-tag${inside ? " is-inside" : ""}`}
+      style={{ transform: `scale(${1 / zoom}) translateY(${inside ? "4px" : "calc(-100% - 4px)"})` }}
+      onPointerDown={(e) => e.stopPropagation()}>
       <span className="ed-tag-name">{name}</span>
       {item ? (
         <span className="ed-tag-actions" role="toolbar" aria-label="Block actions">

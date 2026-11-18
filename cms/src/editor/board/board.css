@@ -279,7 +279,7 @@
   height: 32px;
   padding: 0 12px;
   border-radius: 999px;
-  color: var(--ed-sub);
+  color: var(--ed-text);
   font-size: 12px;
   transition: opacity 150ms ease;
 }
@@ -287,8 +287,8 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--ed-accent);
+  color: #409cff;
   font: inherit;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
 }
