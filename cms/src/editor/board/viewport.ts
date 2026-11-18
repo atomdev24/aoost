@@ -14,8 +14,8 @@ export const MAX_ZOOM = 4;
 /** Space between frames, and the size of the "Add a breakpoint" slot (world px). */
 export const FRAME_GAP = 120;
 export const SLOT = { w: 260, h: 320 };
-/** Room around everything for "Fit all" (screen px); the top leaves space for the labels. */
-const FIT_PAD = { x: 48, top: 56, bottom: 88 };
+/** Room around everything for "Fit all" (screen px); the top leaves space for the floating islands and the labels. */
+const FIT_PAD = { x: 48, top: 92, bottom: 88 };
 /** Zoom steps for ⌘+ / ⌘− and the zoom bar. */
 const STEPS = [0.05, 0.1, 0.15, 0.2, 0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4];
 

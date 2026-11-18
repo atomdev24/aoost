@@ -971,68 +971,118 @@
   gap: 4px;
 }
 
-/* Selection on the editable frame (inside the iframe; Puck copies these styles in). */
+/* Selection on the editable frame (inside the iframe; Puck copies these styles in).
+   --ed-px is 1/zoom, set on the frame's root, so lines stay the same width on screen. */
 [class*="DraggableComponent-overlay_"] {
-  outline-color: #0a84ff !important;
+  outline: calc(1.5px * var(--ed-px, 1)) solid #0a84ff !important;
+  outline-offset: calc(-1.5px * var(--ed-px, 1)) !important;
 }
 [class*="DraggableComponent--hover"] > [class*="DraggableComponent-overlayWrapper"] > [class*="DraggableComponent-overlay_"] {
-  background: rgba(10, 132, 255, 0.06) !important;
+  background: transparent !important;
+  outline: calc(1px * var(--ed-px, 1)) solid rgba(10, 132, 255, 0.55) !important;
+  outline-offset: calc(-1px * var(--ed-px, 1)) !important;
+}
+[class*="DraggableComponent--isSelected"] > [class*="DraggableComponent-overlayWrapper"] > [class*="DraggableComponent-overlay_"] {
+  position: relative;
+  background: transparent !important;
+  outline: calc(1.5px * var(--ed-px, 1)) solid #0a84ff !important;
+  outline-offset: calc(-1.5px * var(--ed-px, 1)) !important;
+}
+/* Four corner handles: 6px white squares with an accent border (visual; free-layout layers draw their own live handles). */
+[class*="DraggableComponent--isSelected"] > [class*="DraggableComponent-overlayWrapper"] > [class*="DraggableComponent-overlay_"]::before {
+  --h: calc(6px * var(--ed-px, 1));
+  --i: calc(4px * var(--ed-px, 1));
+  --o: calc(1px * var(--ed-px, 1));
+  content: "";
+  position: absolute;
+  inset: calc(-3px * var(--ed-px, 1));
+  pointer-events: none;
+  background:
+    linear-gradient(#fff, #fff) left var(--o) top var(--o) / var(--i) var(--i) no-repeat,
+    linear-gradient(#fff, #fff) right var(--o) top var(--o) / var(--i) var(--i) no-repeat,
+    linear-gradient(#fff, #fff) left var(--o) bottom var(--o) / var(--i) var(--i) no-repeat,
+    linear-gradient(#fff, #fff) right var(--o) bottom var(--o) / var(--i) var(--i) no-repeat,
+    linear-gradient(#0a84ff, #0a84ff) left top / var(--h) var(--h) no-repeat,
+    linear-gradient(#0a84ff, #0a84ff) right top / var(--h) var(--h) no-repeat,
+    linear-gradient(#0a84ff, #0a84ff) left bottom / var(--h) var(--h) no-repeat,
+    linear-gradient(#0a84ff, #0a84ff) right bottom / var(--h) var(--h) no-repeat;
 }
 [class*="DraggableComponent-actions_"] {
   right: auto !important;
   left: 0 !important;
   min-height: 0 !important;
   padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
   cursor: default;
 }
+
+/* The name tag: an accent pill above the top-left corner. Hover expands it into quick actions. */
 .ed-tag {
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 22px;
+  height: 18px;
+  padding: 0 1px 0 0;
+  border-radius: 4px 4px 4px 0;
+  background: #0a84ff;
+  color: #fff;
   transform-origin: left top;
   white-space: nowrap;
-  font: 600 11px var(--ed-font);
+  font: 500 10px/1 var(--ed-font, -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 .ed-tag-name {
   display: flex;
   align-items: center;
-  height: 20px;
-  padding: 0 8px;
-  border-radius: 6px;
-  background: #0a84ff;
-  color: #fff;
-  cursor: grab;
+  height: 18px;
+  padding: 0 6px;
+  cursor: default;
 }
 .ed-tag-actions {
   display: flex;
   align-items: center;
-  height: 22px;
-  padding: 0 2px;
-  border-radius: 6px;
-  background: #2a2a2d;
-  color: #f5f5f7;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-width 150ms ease, opacity 120ms ease;
 }
-.ed-tag-actions:empty {
-  display: none;
+.ed-tag:hover .ed-tag-actions,
+.ed-tag:focus-within .ed-tag-actions {
+  max-width: 160px;
+  opacity: 1;
+}
+.ed-tag-actions::before {
+  content: "";
+  flex: none;
+  width: 1px;
+  height: 10px;
+  margin: 0 2px 0 0;
+  background: rgba(255, 255, 255, 0.35);
 }
 .ed-tag-actions button {
-  width: 22px;
-  height: 22px;
-  padding: 3px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 16px;
+  padding: 0;
   border: 0;
-  border-radius: 5px;
+  border-radius: 3px;
   background: transparent;
   color: inherit;
   cursor: pointer;
 }
-.ed-tag-actions button:hover {
-  background: rgba(255, 255, 255, 0.12);
+.ed-tag-actions button:hover,
+.ed-tag-actions button[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.2);
 }
 .ed-tag-actions svg {
-  width: 14px;
-  height: 14px;
+  width: 11px;
+  height: 11px;
 }
 
 /* modals */

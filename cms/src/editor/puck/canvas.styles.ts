@@ -10,8 +10,11 @@ html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!imp
 [data-puck-dropzone]:empty{min-height:120px;border:1.5px dashed #8E8E93;border-radius:4px}
 .s[data-kind="canvas"]>.si>.n{cursor:move;touch-action:none;user-select:none}
 .s[data-kind="canvas"]>.si>.n.ed-locked{cursor:not-allowed}
-.s[data-kind="canvas"]>.si>.n.ed-selected{outline:1.5px solid #0A84FF;outline-offset:0}
-.s[data-kind="canvas"]>.si>.n>.ed-h{position:absolute;width:10px!important;height:10px!important;margin:-5px;background:#fff;border:1.5px solid #0A84FF;border-radius:2px;z-index:10;pointer-events:auto!important}
+.s[data-kind="canvas"]>.si>.n.ed-selected{outline:calc(1.5px * var(--ed-px,1)) solid #0A84FF;outline-offset:0}
+.s[data-kind="canvas"]>.si>.n>.ed-h{position:absolute;box-sizing:border-box;width:calc(10px * var(--ed-px,1))!important;height:calc(10px * var(--ed-px,1))!important;margin:calc(-5px * var(--ed-px,1));background:transparent;border:0;border-radius:0;z-index:10;pointer-events:auto!important}
+/* Corners show as 6px squares; the edge handles stay as invisible grab areas. */
+.ed-h[data-ed-handle$="w"]::after,.ed-h[data-ed-handle$="e"]::after{content:"";position:absolute;inset:calc(2px * var(--ed-px,1));background:#fff;border:calc(1px * var(--ed-px,1)) solid #0A84FF}
+.ed-h[data-ed-handle="e"]::after,.ed-h[data-ed-handle="w"]::after{display:none}
 .ed-h[data-ed-handle="nw"]{left:0;top:0;cursor:nwse-resize}.ed-h[data-ed-handle="n"]{left:50%;top:0;cursor:ns-resize}
 .ed-h[data-ed-handle="ne"]{left:100%;top:0;cursor:nesw-resize}.ed-h[data-ed-handle="e"]{left:100%;top:50%;cursor:ew-resize}
 .ed-h[data-ed-handle="se"]{left:100%;top:100%;cursor:nwse-resize}.ed-h[data-ed-handle="s"]{left:50%;top:100%;cursor:ns-resize}

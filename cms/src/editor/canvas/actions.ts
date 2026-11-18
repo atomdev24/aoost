@@ -1,6 +1,8 @@
 import { canvasSize, layerBox, type Box } from "../../responsive/canvas";
 import { setAt } from "../../responsive/resolve";
 import type { Breakpoint, Node, Page, Section, Style } from "../../schema";
+import { duplicate, isHidden, locate, nudgeOrder, remove, setHidden } from "../../model/page-ops";
+import { activateBreakpoint, selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage } from "../store";
 import { align, distribute, type AlignMode, type Rect } from "./geometry";
 
@@ -64,4 +66,44 @@ export function nudgeSelection(dx: number, dy: number) {
     "Nudge",
   );
   return true;
+}
+
+// ------------------------------------------- quick actions for one block (the name tag)
+
+/** Move a block or section one place up (-1) or down (1). One undo step. */
+export function moveBlock(id: string, delta: -1 | 1) {
+  const page = currentPage(getState());
+  const next = nudgeOrder(page, id, delta);
+  if (next !== page) updatePage(page.id, () => next, delta < 0 ? "Move up" : "Move down");
+}
+
+/** Duplicate a block or section right after itself and select the copy. One undo step. */
+export function duplicateBlock(id: string) {
+  const page = currentPage(getState());
+  const at = locate(page, id);
+  if (!at || at.kind === "overlay") return;
+  const next = duplicate(page, id);
+  if (next === page) return;
+  const copy = at.kind === "section" ? next.sections[at.index + 1]?.id : next.sections.find((s) => s.id === at.section.id)?.children[at.index + 1]?.id;
+  updatePage(page.id, () => next, "Duplicate");
+  if (copy) selectBlock(copy);
+}
+
+/** Hide or show a block at the breakpoint being edited ("Visible on"). One undo step. */
+export function toggleBlockHidden(id: string) {
+  const { bp } = getState();
+  const page = currentPage(getState());
+  const at = locate(page, id);
+  if (!at || at.kind === "overlay") return;
+  const hidden = isHidden(at.kind === "section" ? at.section : at.node, bp);
+  updatePage(page.id, (p) => setHidden(p, id, bp, !hidden), hidden ? "Show layer" : "Hide layer");
+}
+
+/** Delete a block or section and clear the selection. One undo step. */
+export function deleteBlock(id: string) {
+  const page = currentPage(getState());
+  const next = remove(page, id);
+  if (next === page) return;
+  activateBreakpoint(getState().bp, null);
+  updatePage(page.id, () => next, "Delete");
 }
