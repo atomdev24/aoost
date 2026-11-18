@@ -37,11 +37,16 @@ export function itemPathOfField(name: string | undefined): SlotPath | null {
   return parts.slice(0, -1).map((p) => (/^\d+$/.test(p) ? Number(p) : p));
 }
 
-/** The picture slot whose element is (or holds) a clicked element, inside a block's element on the canvas. */
-export function slotAtTarget(node: Node, blockEl: Element, target: Element): { slot: FrameSlot; el: HTMLElement } | null {
+/**
+ * The picture under a point (in the canvas frame's pixels) inside a block's element on the canvas.
+ * Hit-tested by box rather than by event target: Puck's own layers can sit over the block. A picture's
+ * box is its frame: an <img>'s parent (it may be scaled past it), a background's own element.
+ */
+export function slotAtPoint(node: Node, blockEl: Element, x: number, y: number): { slot: FrameSlot; el: HTMLElement } | null {
   for (const slot of nodeSlots(node)) {
     const el = blockEl.querySelector<HTMLElement>(slot.selector);
-    if (el && (el.contains(target) || el.parentElement === target)) return { slot, el };
+    const box = (slot.kind === "img" ? el?.parentElement : el)?.getBoundingClientRect();
+    if (el && box && box.width && x >= box.left && x <= box.right && y >= box.top && y <= box.bottom) return { slot, el };
   }
   return null;
 }

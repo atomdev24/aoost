@@ -3,7 +3,7 @@ import { uploadFile } from "../media";
 import { currentPage, getState, updatePage } from "../store";
 import { selectBlock } from "../board/bridge";
 import { adjustable, startAdjust } from "./AdjustImage";
-import { slotAtTarget } from "./slots";
+import { slotAtPoint } from "./slots";
 
 /** What a media library item carries when it is dragged (see MediaLibrary). */
 export const MEDIA_MIME = "application/x-aoost-media";
@@ -69,10 +69,12 @@ export function attachCanvasDrops(doc: Document) {
     // A picture inside a block's content (an aoost block's artwork or cover): adjust that one picture.
     const at = locate(currentPage(getState()), el.getAttribute("data-node-id") ?? "");
     const owner = at?.kind === "node" ? at.node : at?.kind === "overlay" ? at.overlay.node : null;
-    const hit = owner ? slotAtTarget(owner, el, e.target as Element) : null;
+    const hit = owner ? slotAtPoint(owner, el, e.clientX, e.clientY) : null;
     if (owner && hit && (hit.slot.kind === "bg" || (hit.el as HTMLImageElement).naturalWidth)) {
       e.preventDefault();
       e.stopPropagation();
+      // The block is selected too, so the inspector shows the picture being adjusted.
+      if (!getState().selection.includes(owner.id)) selectBlock(owner.id);
       startAdjust(owner.id, hit.slot.path);
       return;
     }

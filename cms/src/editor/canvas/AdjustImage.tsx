@@ -165,12 +165,13 @@ export function AdjustImage() {
       e.preventDefault();
       stopAdjust();
     };
-    const doc = document.querySelector<HTMLIFrameElement>("#preview-frame")?.contentDocument;
+    // On the canvas frame's window, so it runs before Puck's own Escape (which would drop the selection).
+    const win = document.querySelector<HTMLIFrameElement>("#preview-frame")?.contentWindow;
     window.addEventListener("keydown", key, true);
-    doc?.addEventListener("keydown", key, true);
+    win?.addEventListener("keydown", key, true);
     return () => {
       window.removeEventListener("keydown", key, true);
-      doc?.removeEventListener("keydown", key, true);
+      win?.removeEventListener("keydown", key, true);
     };
   }, [id]);
 
