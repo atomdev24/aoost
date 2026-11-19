@@ -14,6 +14,15 @@ export const fields: Fields<AoostJournalsContent> = {
       year: { type: "text", label: "Year" },
       cover: mediaField("Cover image (empty = plain colour)", "image", { framed: true }),
       coverColor: hexField("Cover colour"),
+      material: {
+        type: "select",
+        label: "Material",
+        options: [
+          { label: "None", value: "none" },
+          { label: "Kraft board", value: "kraft" },
+          { label: "Worn leather", value: "leather" },
+        ],
+      },
       sticker: mediaField("Sticker on the cover", "image"),
       band: hexField("Elastic band colour"),
       tilt: { type: "number", label: "Tilt on the shelf (degrees)", min: -20, max: 20 },

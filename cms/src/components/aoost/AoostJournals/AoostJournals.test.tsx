@@ -41,3 +41,40 @@ describe("AoostJournals", () => {
     }
   });
 });
+
+describe("AoostJournals cover materials", () => {
+  const book = (j: Partial<AoostJournalsContent["journals"][number]>) => renderNode("AoostJournals", { ...d, journals: [{ title: "b", pages: [], coverColor: "#B48A5C", sticker: "/art/s.png", band: "#7A1A1A", ...j }] });
+  const coverOf = (html: string) => /<span class="jr-cv[^"]*"[^>]*>.*?<span class="jr-lbl">/.exec(html)![0];
+
+  it("none (or nothing) is today's plain cover, unchanged", () => {
+    const plain = book({});
+    const markup = (html: string) => html.replace(/<script[^]*<\/script>/, "");
+    expect(markup(book({ material: "none" }))).toBe(markup(plain));
+    expect(coverOf(plain)).toMatch(/^<span class="jr-cv cvx" style="--cbg:#B48A5C;--tone:#333;--band:#7A1A1A"><img class="st" src="\/art\/s.png" alt=""\/><span class="jr-band"><\/span>/);
+    expect(plain).not.toContain("jmat");
+  });
+
+  it("kraft board: a texture layer over the cover colour, under the sticker and band", () => {
+    const cv = coverOf(book({ material: "kraft" }));
+    expect(cv).toMatch(/^<span class="jr-cv cvx cv-kraft" style="--cbg:#B48A5C;[^"]*"><span class="jmat"><\/span><img class="st" src="\/art\/s.png" alt=""\/><span class="jr-band"><\/span>/);
+    // No colour of its own: a warm kraft brown.
+    expect(coverOf(book({ material: "kraft", coverColor: undefined }))).toContain("--cbg:#A47A4E");
+    expect(AoostJournals.css).toMatch(/\.cv-kraft \.jmat\{background:url\("data:image\/svg\+xml,[^"]*feTurbulence/);
+  });
+
+  it("worn leather: grain, scuffs and the sheen; the sticker and a cover image sit on it", () => {
+    const cv = coverOf(book({ material: "leather", coverColor: "#141516" }));
+    expect(cv).toMatch(/^<span class="jr-cv cvx cv-leather" style="--cbg:#141516;[^"]*"><span class="jmat"><\/span><img class="st"/);
+    expect(cv).toContain('<span class="jr-band"></span>');
+    expect(coverOf(book({ material: "leather", cover: "/art/c.jpg" }))).toContain('class="jr-cv cvx cv-leather cv-img"');
+    expect(AoostJournals.css).toMatch(/\.cv-leather \.jmat::before\{[^}]*feTurbulence%20type='turbulence'|\.cv-leather \.jmat::before\{[^}]*feTurbulence type='turbulence'/);
+    expect(AoostJournals.css).toContain(".ao .jr:hover .cv-leather .jmat::after");
+    expect(AoostJournals.css).toContain("@media (prefers-reduced-motion:reduce){.ao .cv-leather .jmat::after{transition:none}}");
+  });
+
+  it("only takes the three materials", () => {
+    const ok = (material: string) => AoostJournalsContent.safeParse({ ...d, journals: [{ title: "x", pages: [], material }] }).success;
+    expect(["none", "kraft", "leather"].map(ok)).toEqual([true, true, true]);
+    expect(ok("paper")).toBe(false);
+  });
+});

@@ -36,7 +36,8 @@ function fromFields(j,n){
   const o=isObj(j.options)?j.options:{},props={};
   if(o.ribbon)props.ribbon=o.ribbon;if(o.wear&&o.wear!=='none')props.wear=o.wear;if(o.titleStamp)props.title_stamp=true;if(o.coverText==='light')props.cover_text='light';if(o.sound)props.sound=true;if(o.backCover)props.back_cover_url=o.backCover;
   const cov=Array.isArray(j.coverItems)?j.coverItems:[],side=back=>cov.filter(i=>((isObj(i.props)?i.props:{}).side==='back')===back);
-  return {id:j.id||('j'+n),title:j.title||'',year:j.year||'',cover:j.cover||null,cbg:j.coverColor||'#222',sticker:j.sticker||null,band:j.band||'#141516',dark:!!j.dark,r:+j.tilt||0,link:j.link||'',
+  const mat=j.material==='kraft'||j.material==='leather'?j.material:'';
+  return {id:j.id||('j'+n),title:j.title||'',year:j.year||'',cover:j.cover||null,cbg:j.coverColor||(mat==='kraft'?'#A47A4E':'#222'),mat,sticker:j.sticker||null,band:j.band||'#141516',dark:!!j.dark,r:+j.tilt||0,link:j.link||'',
     props,citems:side(false),bitems:side(true),pages:all};}
 
 export function initJournals(){
@@ -107,12 +108,15 @@ function coverExtras(j,shelfCover){const p=j.props||{};let h='';
   if(p.title_stamp)h+=`<span class="jstamp${p.cover_text==='light'?' lt':''}">${esc(j.title)}</span>`;
   if((j.citems||[]).length)h+=layerHTML(0);
   return h;}
-const coverInner=j=>`${j.sticker?`<img class="st" src="${esc(j.sticker)}" alt="">`:''}<span class="jr-coil"></span><span class="jr-tip"><img src="${esc(j.cover||j.sticker||'')}" alt=""></span><span class="jr-deb">${esc(j.title)}</span><span class="jr-stk">${(j.stk||[]).map((u,k)=>`<img src="${u}" alt="" style="--k:${k}">`).join('')}</span><span class="jr-band"></span>${coverExtras(j)}<span class="jr-lbl">${esc(j.title)}</span>`;
+/* cover material (kraft board, worn leather): a class on the cover and a texture layer under the sticker */
+const matCls=j=>j.mat?` cv-${j.mat}${j.cover?' cv-img':''}`:'';
+const matLayer=j=>j.mat?'<span class="jmat"></span>':'';
+const coverInner=j=>`${matLayer(j)}${j.sticker?`<img class="st" src="${esc(j.sticker)}" alt="">`:''}<span class="jr-coil"></span><span class="jr-tip"><img src="${esc(j.cover||j.sticker||'')}" alt=""></span><span class="jr-deb">${esc(j.title)}</span><span class="jr-stk">${(j.stk||[]).map((u,k)=>`<img src="${u}" alt="" style="--k:${k}">`).join('')}</span><span class="jr-band"></span>${coverExtras(j)}<span class="jr-lbl">${esc(j.title)}</span>`;
 const ribbon=j=>{const r=(j.props||{}).ribbon;return r&&r!=='none'?`<span class="jrib" style="--rib:${col(r,'#C8161F')}"></span>`:'';};
 
 function shelfButton(j,i){const b=document.createElement('button');b.type='button';b.className='jr';b.style.setProperty('--r',(j.r||0)+'deg');
   b.setAttribute('aria-label',`Open journal: ${j.title}`);
-  b.style.setProperty('--i',i);b.innerHTML=`${ribbon(j)}<span class="jr-cv cvx" style="${coverStyle(j)}">${coverInner(j)}</span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;
+  b.style.setProperty('--i',i);b.innerHTML=`${ribbon(j)}<span class="jr-cv cvx${matCls(j)}" style="${coverStyle(j)}">${coverInner(j)}</span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;
   const l=b.querySelector('.it-l');if(l){fillLayer(l,j.citems);l.querySelectorAll('[data-src]').forEach(m=>{m.src=m.dataset.src;if(m.tagName==='VIDEO'){m.autoplay=true;m.play&&m.play().catch(()=>{});}});}
   b.addEventListener('click',()=>openJ(j,b));return b;}
 JOURNALS.forEach((j,i)=>shelf.appendChild(shelfButton(j,i)));
@@ -143,7 +147,7 @@ function spreadOf(P,i){const p=P[i];if(!isObj(p)||!(p.props||{}).spread)return n
 function build(j){
   const leaves=[];const P=j.pages,pr=j.props||{};
   const back=pr.back_cover_url?`--cbg:url('${url(pr.back_cover_url)}') center/cover no-repeat,${j.cbg||'#222'};--band:${j.band||'#141516'}`:coverStyle(j);
-  leaves.push({f:{cls:'cover cvx',style:coverStyle(j),html:coverInner(j),citems:j.citems},b:{cls:'end',style:`--end:${j.band||'#141516'}`,html:`<span class="endtxt" style="color:#ffffffaa">if found, return to<br>aoost — cape town</span>`}});
+  leaves.push({f:{cls:'cover cvx'+matCls(j),style:coverStyle(j),html:coverInner(j),citems:j.citems},b:{cls:'end',style:`--end:${j.band||'#141516'}`,html:`<span class="endtxt" style="color:#ffffffaa">if found, return to<br>aoost — cape town</span>`}});
   const faces=[];
   for(let k=0;k<P.length;k+=2){const a=page(P[k],k+1,j.dark),c=page(P[k+1]||{blank:true},k+2,j.dark);faces[k]=a;faces[k+1]=c;leaves.push({f:a,b:c});}
   // own items go in each page's layer; spreads add a second, two-page-wide layer to both pages of the spread
@@ -154,7 +158,7 @@ function build(j){
     if(faces[i]){faces[i].layers=faces[i].layers.filter(l=>l.sp);if(p.scan)faces[i].html=faces[i].html.replace(/<img class="full"[^>]*>/,'');}
     // one sheet across the fold: the facing page takes the spread's paper
     const other=i===s.L?s.R:s.L;if(faces[other]&&faces[i]){faces[other].cls=faces[i].cls;faces[other].html=faces[other].html.replace(/<span class="wip">[^<]*<\/span>/,'');}});
-  leaves.push({f:{cls:'end',style:`--end:${j.band||'#141516'}`,html:''},b:{cls:'backcover cvx',style:back,html:(pr.wear&&pr.wear!=='none'?`<span class="jw jw-${pr.wear}"></span>`:'')+((j.bitems||[]).length?layerHTML(0):''),citems:j.bitems}});
+  leaves.push({f:{cls:'end',style:`--end:${j.band||'#141516'}`,html:''},b:{cls:'backcover cvx'+matCls(j),style:back,html:matLayer(j)+(pr.wear&&pr.wear!=='none'?`<span class="jw jw-${pr.wear}"></span>`:'')+((j.bitems||[]).length?layerHTML(0):''),citems:j.bitems}});
   return leaves;}
 function faceHTML(f,bk){
   const layers=(f.layers||[]).map(l=>l.sp?`<div class="it-l sp" style="--off:${l.off}">${l.scan?`<img class="full sp-scan" src="${esc(l.scan)}" alt="">`:''}</div>`:layerHTML(0)).join('');
