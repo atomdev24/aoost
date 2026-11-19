@@ -17,7 +17,7 @@
   .ed-mark,
   .ed-tool[data-tool="section"],
   .ed-tool[data-tool="claude"],
-  .ed-pill-text,
+  .ed-island-right > .ed-pill,
   .ed-status {
     display: none !important;
   }
@@ -76,8 +76,13 @@
   }
   .ed-top .ed-icon,
   .ed-icon {
+    flex: none;
     width: 40px;
     height: 40px;
+  }
+  .ed-island-left .ed-switcher {
+    min-width: 0;
+    flex: 0 1 auto;
   }
   .ed-tool {
     width: 40px;
@@ -111,12 +116,6 @@
   }
   .ed-publish-btn {
     padding: 0 12px;
-  }
-  .ed-pill {
-    height: 40px;
-    width: 40px;
-    padding: 0;
-    justify-content: center;
   }
   .ed-more-menu button,
   .ed-menu button {

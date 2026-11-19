@@ -10,6 +10,7 @@ import { loadPublished, openSheet, publish, usePublish } from "./publish";
 import { PublishSheet, useChanges } from "./PublishSheet";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
+import { openPalette } from "../commands/palette-store";
 
 /** "just now", "2 min ago", "at 14:05". */
 function ago(at: number, now: number): string {
@@ -94,6 +95,10 @@ export function TopBar() {
         <span className="ed-mark" aria-label="aoost editor" role="img">
           a
         </span>
+        {/* Phones open the palette from here (⌘K on a keyboard). */}
+        <button type="button" className="ed-icon ed-phone-only ed-search-btn" aria-label="Search and commands" title="Search and commands (⌘K)" onClick={openPalette}>
+          <Icon d="M7 2.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zM10.5 10.5L14 14" />
+        </button>
         <PageSwitcher />
         {editingMenu ? (
           <button type="button" className="ed-btn ed-btn-accent ed-btn-sm" onClick={() => returnPageId && setPage(returnPageId)}>
@@ -128,6 +133,7 @@ export function TopBar() {
               type="button"
               className={`ed-tool-bp${bp === b ? " is-active" : ""}${hidden[b] ? " is-hidden" : ""}`}
               data-short={SHORT[b]}
+              aria-label={BREAKPOINT_LABEL[b]}
               aria-pressed={bp === b}
               title={`${BREAKPOINT_LABEL[b]} (${DESIGN_WIDTH[b]}px). ${hidden[b] ? "Click to show and edit." : "Shift-click to hide."}`}
               onClick={(e) => {
