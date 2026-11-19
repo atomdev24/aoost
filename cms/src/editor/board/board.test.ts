@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { pinViewportUnits } from "./frame-css";
-import { clampZoom, fitAll, isVisible, layoutFrames, reveal, slotRect, stepZoom, zoomAt } from "./viewport";
+import { clampZoom, fitAll, isVisible, layoutFrames, panelRoom, PANEL_ROOM, reveal, slotRect, stepZoom, zoomAt } from "./viewport";
 
 describe("board layout", () => {
   const EXTRA_HIDDEN = { tablet: true, widescreen: true };
@@ -111,5 +111,19 @@ describe("fitWidth (the phone's default view)", () => {
     expect(v.zoom).toBeCloseTo(318 / 390);
     expect(2000 * v.zoom + v.x).toBeCloseTo(64);
     expect(v.y).toBe(152);
+  });
+});
+
+describe("room for panels", () => {
+  it("keeps the inspector's room on a desktop, and the left panel's when it is open", () => {
+    expect(panelRoom(1440, false)).toEqual({ left: 0, right: PANEL_ROOM.inspector });
+    expect(panelRoom(1440, true)).toEqual({ left: PANEL_ROOM.flyout, right: PANEL_ROOM.inspector });
+  });
+  it("gives phones no side room", () => {
+    expect(panelRoom(390, true)).toEqual({ left: 0, right: 0 });
+  });
+  it("never squeezes the visible part below half the board", () => {
+    const r = panelRoom(1000, true);
+    expect(r.left + r.right).toBeLessThanOrEqual(500);
   });
 });

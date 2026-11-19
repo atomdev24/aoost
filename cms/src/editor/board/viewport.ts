@@ -169,3 +169,21 @@ export function saveView(pageId: string, view: View) {
   const existing = loadPageBoard(pageId);
   savePageBoard(pageId, { ...existing, view });
 }
+
+/**
+ * Screen px the floating panels cover at each side of the board on a desktop: the left panel
+ * (rail at 52px plus the 260px flyout) and the 284px inspector 10px from the right. The
+ * inspector's room is kept even with nothing selected, so selecting a block doesn't cover the
+ * frame. Narrow boards (phones) get none: their panels are sheets. Never squeeze the visible part
+ * below half the board.
+ */
+export const PANEL_ROOM = { flyout: 312 + 12, inspector: 284 + 10 + 12 };
+export function panelRoom(boardWidth: number, flyoutOpen: boolean): { left: number; right: number } {
+  if (boardWidth < 700) return { left: 0, right: 0 };
+  const left = flyoutOpen ? PANEL_ROOM.flyout : 0;
+  const right = PANEL_ROOM.inspector;
+  if (left + right <= boardWidth / 2) return { left, right };
+  // Not enough room for both: keep the left panel's room if it fits, else neither.
+  return left > 0 && left <= boardWidth / 2 ? { left, right: 0 } : { left: 0, right: 0 };
+}
+
