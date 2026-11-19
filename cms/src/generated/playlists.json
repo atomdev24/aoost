@@ -1,0 +1,1285 @@
+{
+  "playlists": {
+    "2FeVxQ6ZPLOAuoejGJj9Fb": {
+      "name": "Disc - 1 - Rock",
+      "tracks": [
+        {
+          "title": "Tonight (demo)",
+          "artist": "Amira Elfeky",
+          "durationMs": 194666,
+          "uri": "spotify:track:6p5duPGjAdVYLq2kOGXYUD"
+        },
+        {
+          "title": "Aerials",
+          "artist": "System Of A Down",
+          "durationMs": 235053,
+          "uri": "spotify:track:4e9eGQYsOiBcftrWXwsVco"
+        },
+        {
+          "title": "A Dozen Roses",
+          "artist": "Amira Elfeky",
+          "durationMs": 156194,
+          "uri": "spotify:track:5zfSxKmqBSKTaZjVkvPkmA"
+        },
+        {
+          "title": "fade",
+          "artist": "Holywatr",
+          "durationMs": 276090,
+          "uri": "spotify:track:6BZAuqR6nUQ9QbutwGJMXz"
+        },
+        {
+          "title": "Vivien",
+          "artist": "✝✝✝ (Crosses)",
+          "durationMs": 233350,
+          "uri": "spotify:track:4dqWxfF0VaoAXPgyQv2EmF"
+        },
+        {
+          "title": "You Know You're Right",
+          "artist": "Nirvana",
+          "durationMs": 217000,
+          "uri": "spotify:track:5O8L4I2S4izFGDjvP7xAKv"
+        },
+        {
+          "title": "Hypnotize",
+          "artist": "System Of A Down",
+          "durationMs": 189440,
+          "uri": "spotify:track:6oO7WMjD6kEvCITLbVj0mu"
+        },
+        {
+          "title": "Heart-Shaped Box",
+          "artist": "Nirvana",
+          "durationMs": 281160,
+          "uri": "spotify:track:11LmqTE2naFULdEP94AUBa"
+        },
+        {
+          "title": "Alone",
+          "artist": "Scarlet House",
+          "durationMs": 136000,
+          "uri": "spotify:track:6TEn3Vedivw7mEcmSkfdLa"
+        },
+        {
+          "title": "Phantom Bride",
+          "artist": "Deftones",
+          "durationMs": 293053,
+          "uri": "spotify:track:33qrQEXQJg4uk6k8fZgoOa"
+        },
+        {
+          "title": "Darkness",
+          "artist": "SWEET SPINE",
+          "durationMs": 228923,
+          "uri": "spotify:track:07WWAnpW4RVPY4D2lmlClG"
+        },
+        {
+          "title": "Oztroja",
+          "artist": "Zeruel",
+          "durationMs": 105341,
+          "uri": "spotify:track:2vBMF1PWJC1CFRJx3prcIC"
+        },
+        {
+          "title": "Blood on the Sheets",
+          "artist": "VIOLENT VIRA",
+          "durationMs": 229500,
+          "uri": "spotify:track:7pCoALlwKHdGFfnkpgH0A1"
+        },
+        {
+          "title": "Stars Above",
+          "artist": "sweet93",
+          "durationMs": 236000,
+          "uri": "spotify:track:4coOLKzvTTj7zQ9mzP3gxp"
+        },
+        {
+          "title": "Too High",
+          "artist": "Scarlet House",
+          "durationMs": 172687,
+          "uri": "spotify:track:46e7nyAltcyRiBinWIdFzK"
+        },
+        {
+          "title": "Collar of Truth",
+          "artist": "VIOLENT VIRA",
+          "durationMs": 187411,
+          "uri": "spotify:track:3VglBB0nx48IcOr68SkjbZ"
+        },
+        {
+          "title": "Blvd. Nights",
+          "artist": "Team Sleep",
+          "durationMs": 188133,
+          "uri": "spotify:track:7xDAU9IAMyWjl7ia3hRxs7"
+        },
+        {
+          "title": "About A Girl",
+          "artist": "Nirvana",
+          "durationMs": 168428,
+          "uri": "spotify:track:2SHTKB8YYlawTGIuJ2b2ok"
+        },
+        {
+          "title": "girl alone",
+          "artist": "MOGY",
+          "durationMs": 143661,
+          "uri": "spotify:track:6X5FCj894AIT0HRpoku3oy"
+        },
+        {
+          "title": "Californication",
+          "artist": "Red Hot Chili Peppers",
+          "durationMs": 329733,
+          "uri": "spotify:track:48UPSzbZjgc449aqz8bxox"
+        },
+        {
+          "title": "All I Need",
+          "artist": "Radiohead",
+          "durationMs": 228746,
+          "uri": "spotify:track:5Qv2Nby1xTr9pQyjkrc94J"
+        },
+        {
+          "title": "Saccharine",
+          "artist": "VIOLENT VIRA",
+          "durationMs": 192347,
+          "uri": "spotify:track:1NiPI7ATyw4ZwI2b858XrT"
+        },
+        {
+          "title": "Tarantula Girl",
+          "artist": "VIOLENT VIRA",
+          "durationMs": 192000,
+          "uri": "spotify:track:3Q1LPocIJMcmHNGXwSU0S0"
+        },
+        {
+          "title": "Nervous Habits",
+          "artist": "Narrow Head",
+          "durationMs": 231424,
+          "uri": "spotify:track:3iIOUEPbQDG2XQNeckP62n"
+        },
+        {
+          "title": "Rosemary",
+          "artist": "Deftones",
+          "durationMs": 413346,
+          "uri": "spotify:track:4FEr6dIdH6EqLKR0jB560J"
+        },
+        {
+          "title": "Cherry Waves",
+          "artist": "Deftones",
+          "durationMs": 317706,
+          "uri": "spotify:track:70L6nHORQsblY813yNqUR3"
+        },
+        {
+          "title": "Hole in the Earth",
+          "artist": "Deftones",
+          "durationMs": 249320,
+          "uri": "spotify:track:5Bpc360LNUScK53FrM8nvB"
+        },
+        {
+          "title": "Beware",
+          "artist": "Deftones",
+          "durationMs": 360666,
+          "uri": "spotify:track:2ASygm7048ssav4ekbehPS"
+        },
+        {
+          "title": "Beauty School",
+          "artist": "Deftones",
+          "durationMs": 287840,
+          "uri": "spotify:track:5sUCU4eiyf0pplIJ7OGEoc"
+        },
+        {
+          "title": "Diamond Eyes",
+          "artist": "Deftones",
+          "durationMs": 188266,
+          "uri": "spotify:track:1FdU4oF88UOJwA9GYgognx"
+        },
+        {
+          "title": "Be Quiet and Drive (Far Away)",
+          "artist": "Deftones",
+          "durationMs": 299866,
+          "uri": "spotify:track:4Uiw0Sl9yskBaC6P4DcdVD"
+        },
+        {
+          "title": "Digital Bath",
+          "artist": "Deftones",
+          "durationMs": 255373,
+          "uri": "spotify:track:2jSJm3Gv6GLxduWLenmjKS"
+        },
+        {
+          "title": "Entombed",
+          "artist": "Deftones",
+          "durationMs": 299240,
+          "uri": "spotify:track:4bLCPfBLKlqiONo6TALTh5"
+        },
+        {
+          "title": "Youngest Daughter",
+          "artist": "Superheaven",
+          "durationMs": 249514,
+          "uri": "spotify:track:3tYxhPqkioZEV5el3DJxLQ"
+        },
+        {
+          "title": "Is It Really You?",
+          "artist": "Loathe",
+          "durationMs": 287627,
+          "uri": "spotify:track:4OmlsAT8r4q9vPFBvfYgyZ"
+        },
+        {
+          "title": "Covet",
+          "artist": "Basement",
+          "durationMs": 227340,
+          "uri": "spotify:track:1AMADyXgIWayh5vXLZo2qF"
+        },
+        {
+          "title": "Screaming",
+          "artist": "Loathe",
+          "durationMs": 354640,
+          "uri": "spotify:track:611WshW3yQKLCQ2pTCOii4"
+        },
+        {
+          "title": "You're Not Gone, You're Just Dead!",
+          "artist": "VIOLENT VIRA",
+          "durationMs": 175229,
+          "uri": "spotify:track:3IT2AP0SuXSBliYDiwCrK1"
+        },
+        {
+          "title": "crawl",
+          "artist": "cloudyfield",
+          "durationMs": 200526,
+          "uri": "spotify:track:0cac9xzrRVzBj7wuLfwE9G"
+        },
+        {
+          "title": "Don't Cry Over Spilt Milk",
+          "artist": "Select All",
+          "durationMs": 225714,
+          "uri": "spotify:track:0mURUw0hQjNOUztnmwzAXK"
+        },
+        {
+          "title": "Your Way",
+          "artist": "Downward",
+          "durationMs": 200912,
+          "uri": "spotify:track:2jkdDcSHUvWo3ToRLw9WWz"
+        },
+        {
+          "title": "Are You The One",
+          "artist": "Basement",
+          "durationMs": 180906,
+          "uri": "spotify:track:6wxW10ewY9UlXw7IFsD6eu"
+        },
+        {
+          "title": "Twin Flames",
+          "artist": "Midrift",
+          "durationMs": 104071,
+          "uri": "spotify:track:2xnIV4DQp2D0qVHCQYRIn9"
+        },
+        {
+          "title": "Blank",
+          "artist": "Glare",
+          "durationMs": 216089,
+          "uri": "spotify:track:2gpkmR9oX3Jk6rDI6KUwHj"
+        },
+        {
+          "title": "touch",
+          "artist": "pinkwoodz",
+          "durationMs": 171931,
+          "uri": "spotify:track:5YmiwRzAh2LYefQ4tGBAiO"
+        },
+        {
+          "title": "Do Me a Favour",
+          "artist": "Arctic Monkeys",
+          "durationMs": 209253,
+          "uri": "spotify:track:2BqfIlpahcebJPeu1IUTEo"
+        },
+        {
+          "title": "Murder Your Memory",
+          "artist": "Title Fight",
+          "durationMs": 156720,
+          "uri": "spotify:track:1SRKTHfXZFp1ybmbWpIfEZ"
+        },
+        {
+          "title": "in your head",
+          "artist": "cloudyfield",
+          "durationMs": 170000,
+          "uri": "spotify:track:0GrAc2fGqrvY7xMsAPdTKC"
+        },
+        {
+          "title": "Downswing",
+          "artist": "Superheaven",
+          "durationMs": 220557,
+          "uri": "spotify:track:1V7XV0nFnqmCCWXgFjXTvi"
+        },
+        {
+          "title": "next to nothing",
+          "artist": "cloudyfield",
+          "durationMs": 162666,
+          "uri": "spotify:track:0bz5FtzvklYN7YcZ4NurA6"
+        },
+        {
+          "title": "Will You Love Me When I’m Dead",
+          "artist": "Amira Elfeky",
+          "durationMs": 193798,
+          "uri": "spotify:track:4z4JQxp5ddY3Z8ETnaPPAK"
+        },
+        {
+          "title": "mandy",
+          "artist": "she's green",
+          "durationMs": 226437,
+          "uri": "spotify:track:48WjoS8xixdToSxYDujDmb"
+        },
+        {
+          "title": "Safe In Your Skin",
+          "artist": "Title Fight",
+          "durationMs": 154800,
+          "uri": "spotify:track:1FpSnm4bMaZD0KFH3f4Fso"
+        },
+        {
+          "title": "the precipice",
+          "artist": "Jessie Mazin",
+          "durationMs": 232758,
+          "uri": "spotify:track:78StcaU2P13SpqXdhaJRtk"
+        }
+      ]
+    },
+    "3PbXJWUZ4RooUU0aSSdDi0": {
+      "name": "Disc - 2 - Alt",
+      "tracks": [
+        {
+          "title": "Pretender",
+          "artist": "Bennett Coast",
+          "durationMs": 177104,
+          "uri": "spotify:track:2qIc2lDtHJte4EpEx7nKXn"
+        },
+        {
+          "title": "Disguise",
+          "artist": "Bennett Coast",
+          "durationMs": 248436,
+          "uri": "spotify:track:30Y0XSAI8sI8RdMp2s3R2N"
+        },
+        {
+          "title": "Fleet Week",
+          "artist": "Bennett Coast",
+          "durationMs": 229597,
+          "uri": "spotify:track:5ylmBa4MNb3BBoOOckRIVf"
+        },
+        {
+          "title": "Seeds",
+          "artist": "Bennett Coast",
+          "durationMs": 219286,
+          "uri": "spotify:track:4BwGU8l91SQWeVqnWqWClh"
+        },
+        {
+          "title": "Driver",
+          "artist": "Bennett Coast",
+          "durationMs": 165989,
+          "uri": "spotify:track:1D0JQnRvAP5vsEg3eKNTPy"
+        },
+        {
+          "title": "Medium demons",
+          "artist": "Christopher Emond, Bennett Coast",
+          "durationMs": 240758,
+          "uri": "spotify:track:6K3CMOKlGxGfF5Z65aD7Ks"
+        },
+        {
+          "title": "She Knows How To Say My Name",
+          "artist": "Marlon Funaki",
+          "durationMs": 281142,
+          "uri": "spotify:track:4tAbdhAtgakhJyALYCWVvC"
+        },
+        {
+          "title": "when sunday comes around",
+          "artist": "Marlon Funaki",
+          "durationMs": 319333,
+          "uri": "spotify:track:1qTLYAQcXTs1JGbt8DfedM"
+        },
+        {
+          "title": "Murphy's Law",
+          "artist": "Marlon Funaki",
+          "durationMs": 192811,
+          "uri": "spotify:track:1nPercWuuhmchDfb4fsoFK"
+        },
+        {
+          "title": "Red Hearts",
+          "artist": "Marlon Funaki",
+          "durationMs": 197111,
+          "uri": "spotify:track:7aU8ycwySg1LQAuCKgr3z9"
+        },
+        {
+          "title": "Under Fire",
+          "artist": "Marlon Funaki",
+          "durationMs": 230136,
+          "uri": "spotify:track:1cGPRJjVxwXEPsBCQIo9rO"
+        },
+        {
+          "title": "don't do it!",
+          "artist": "DellaXOZ",
+          "durationMs": 155920,
+          "uri": "spotify:track:2pRFXQi8khBsS3r8yBhzGT"
+        },
+        {
+          "title": "UnHinged",
+          "artist": "DellaXOZ",
+          "durationMs": 168573,
+          "uri": "spotify:track:0tnqSQzffOCR3J0bnBUtJa"
+        },
+        {
+          "title": "Leave",
+          "artist": "Whirr",
+          "durationMs": 253561,
+          "uri": "spotify:track:6lRJqlbbsSAyoN67hVsF8A"
+        },
+        {
+          "title": "Machina",
+          "artist": "Midrift",
+          "durationMs": 134489,
+          "uri": "spotify:track:0QU2XdrfeeihtV28iAhGaK"
+        },
+        {
+          "title": "desire machine",
+          "artist": "spirit blue",
+          "durationMs": 230462,
+          "uri": "spotify:track:0ggTHtuRYmdQxTEs8T32ny"
+        },
+        {
+          "title": "Boy",
+          "artist": "Passion Mango",
+          "durationMs": 163745,
+          "uri": "spotify:track:2e8ZZpcW0vVCXVL0wvhmAT"
+        },
+        {
+          "title": "Metaphor",
+          "artist": "Marlon Funaki",
+          "durationMs": 237794,
+          "uri": "spotify:track:05cKqQBORyoTMzZwo7DIJZ"
+        },
+        {
+          "title": "Another Stone",
+          "artist": "Men I Trust",
+          "durationMs": 190280,
+          "uri": "spotify:track:5RHhmGMV3FKxRa63AIfIgZ"
+        },
+        {
+          "title": "Stars Above",
+          "artist": "sweet93",
+          "durationMs": 236000,
+          "uri": "spotify:track:4coOLKzvTTj7zQ9mzP3gxp"
+        },
+        {
+          "title": "Back To Strangers",
+          "artist": "Rehash",
+          "durationMs": 270335,
+          "uri": "spotify:track:2GpNjyQO67Ss38PmPaL6uA"
+        },
+        {
+          "title": "Pressure",
+          "artist": "Bennett Coast",
+          "durationMs": 245320,
+          "uri": "spotify:track:12VwD5bxEkcfCnFg3dZFqr"
+        },
+        {
+          "title": "Satellite",
+          "artist": "Hayes Bradley, Bennett Coast",
+          "durationMs": 264475,
+          "uri": "spotify:track:4i6Ul6n1UCRJVztcObU0ts"
+        },
+        {
+          "title": "Ante Meridiem",
+          "artist": "Men I Trust",
+          "durationMs": 146086,
+          "uri": "spotify:track:2oNPsTQ3y61xs6hQy2j6fI"
+        },
+        {
+          "title": "Ghosts",
+          "artist": "Bakar",
+          "durationMs": 161360,
+          "uri": "spotify:track:2NPB9lL0iUc34d7UZcFzHf"
+        },
+        {
+          "title": "Cashmere Tears",
+          "artist": "Bakar",
+          "durationMs": 180546,
+          "uri": "spotify:track:22NwAaLUl2GURRdmsowkXm"
+        },
+        {
+          "title": "Yllw",
+          "artist": "Bakar",
+          "durationMs": 64346,
+          "uri": "spotify:track:6X0netKUtOWZjhQYk0kZTA"
+        },
+        {
+          "title": "Piha Lounging",
+          "artist": "Day We Ran",
+          "durationMs": 230351,
+          "uri": "spotify:track:0PYC777EjWywXUnojj0SEB"
+        },
+        {
+          "title": "Snake With a Bone",
+          "artist": "Day We Ran",
+          "durationMs": 227219,
+          "uri": "spotify:track:7yw87RtyWyIGfr1f2Pdoht"
+        },
+        {
+          "title": "Moonboy",
+          "artist": "Bennett Coast",
+          "durationMs": 132230,
+          "uri": "spotify:track:3j4P8ytkoDpBFePPrXHEbe"
+        },
+        {
+          "title": "Joint",
+          "artist": "Passion Mango",
+          "durationMs": 148737,
+          "uri": "spotify:track:3Z95ltAgLF75Hni0sYCXjl"
+        },
+        {
+          "title": "Surf scum",
+          "artist": "Passion Mango",
+          "durationMs": 163722,
+          "uri": "spotify:track:3yWBkfzyDVX2dmHWhFUOEn"
+        },
+        {
+          "title": "You Deserve This",
+          "artist": "Men I Trust",
+          "durationMs": 184920,
+          "uri": "spotify:track:294NusLyTV6cRxJVjCqxML"
+        },
+        {
+          "title": "Foaming",
+          "artist": "Day We Ran",
+          "durationMs": 193906,
+          "uri": "spotify:track:0HeEz3p1yVoAIOjAULJzrD"
+        },
+        {
+          "title": "Forever",
+          "artist": "Night Tapes",
+          "durationMs": 249968,
+          "uri": "spotify:track:0uwbhRjoItKPn4YLp0n4vd"
+        },
+        {
+          "title": "Head in the Ceiling Fan",
+          "artist": "Title Fight",
+          "durationMs": 239546,
+          "uri": "spotify:track:449LuMpoIOhxnW2B246Aau"
+        },
+        {
+          "title": "Required",
+          "artist": "HEAVY CHEST",
+          "durationMs": 167206,
+          "uri": "spotify:track:10UNa6qLnyJqCidBklPGm0"
+        },
+        {
+          "title": "Every Wave To Ever Rise (feat. Elizabeth Powell)",
+          "artist": "American Football, Elizabeth Powell",
+          "durationMs": 354157,
+          "uri": "spotify:track:3XaVXSIvpEbbSaICMPlgZ9"
+        },
+        {
+          "title": "11/11",
+          "artist": "Team Sleep",
+          "durationMs": 198200,
+          "uri": "spotify:track:3SyzUB8LeQxplnbWTVYTVj"
+        },
+        {
+          "title": "Flash",
+          "artist": "Cigarettes After Sex",
+          "durationMs": 274106,
+          "uri": "spotify:track:6eknHC7HjAKchl23x2A7dW"
+        },
+        {
+          "title": "where we ended",
+          "artist": "rutherford",
+          "durationMs": 145028,
+          "uri": "spotify:track:0B1mFZRbhCrKiHJEJse429"
+        },
+        {
+          "title": "dismal",
+          "artist": "Midrift",
+          "durationMs": 123924,
+          "uri": "spotify:track:0BpVAwVSq0De3DtroDmmKh"
+        },
+        {
+          "title": "Cosmic Departure - Audiotree Live Version",
+          "artist": "Marlon Funaki, Audiotree",
+          "durationMs": 256794,
+          "uri": "spotify:track:0ZNYj6N3NGCRIaAgzHXOBO"
+        },
+        {
+          "title": "Carolina",
+          "artist": "Day We Ran",
+          "durationMs": 235285,
+          "uri": "spotify:track:2zhv3ZZjjWJjCyys8THvJt"
+        },
+        {
+          "title": "Naked At Your Door",
+          "artist": "Day We Ran",
+          "durationMs": 267058,
+          "uri": "spotify:track:55ifabMUNYzw5gypCHdkR0"
+        },
+        {
+          "title": "Glistening",
+          "artist": "flipturn",
+          "durationMs": 247559,
+          "uri": "spotify:track:3FRJFImdfX5NSY3QH3jI4u"
+        },
+        {
+          "title": "Sun's Luv",
+          "artist": "HEAVY CHEST",
+          "durationMs": 204000,
+          "uri": "spotify:track:6kMfkFr9HOWujA3vUGnrnv"
+        },
+        {
+          "title": "Home",
+          "artist": "Marlon Funaki",
+          "durationMs": 260000,
+          "uri": "spotify:track:3Tz88BlUDked4Us9EsaOp4"
+        },
+        {
+          "title": "Cut from a ceiling fan",
+          "artist": "Passion Mango",
+          "durationMs": 209452,
+          "uri": "spotify:track:2lmf7WqDNWYepMzD2OBpNy"
+        },
+        {
+          "title": "Space Cowboy",
+          "artist": "flipturn",
+          "durationMs": 246773,
+          "uri": "spotify:track:5IJbX95pat8W6I7JfVRTLN"
+        },
+        {
+          "title": "Say Can You Hear (Album V)",
+          "artist": "Men I Trust",
+          "durationMs": 189246,
+          "uri": "spotify:track:7j59MN6vDM9lrvQ0iGhqaa"
+        },
+        {
+          "title": "Sooner",
+          "artist": "Blue Imagined",
+          "durationMs": 226714,
+          "uri": "spotify:track:3wriybCruVeUiLOGuGXDbi"
+        },
+        {
+          "title": "Gotta Kno",
+          "artist": "Highway",
+          "durationMs": 257786,
+          "uri": "spotify:track:2y7oxJmlYknZSDRqgg7aUv"
+        },
+        {
+          "title": "I Found Love",
+          "artist": "Blue Imagined",
+          "durationMs": 158941,
+          "uri": "spotify:track:2BHrthgYRSGWenDA8DPi7a"
+        },
+        {
+          "title": "Why Can't You Be Mine",
+          "artist": "Marlon Funaki",
+          "durationMs": 305777,
+          "uri": "spotify:track:2ecSxF0e8aciG4kUJVfFEG"
+        },
+        {
+          "title": "I Just Want You",
+          "artist": "The Helltones",
+          "durationMs": 234266,
+          "uri": "spotify:track:2PtcTdhjcEqi1hTVtvPHTH"
+        },
+        {
+          "title": "In-Between",
+          "artist": "Title Fight",
+          "durationMs": 173613,
+          "uri": "spotify:track:1FmF8pmIiLEGNNWFdlkhW3"
+        }
+      ]
+    },
+    "6KYCNr0X6Zt189pYxHMx1j": {
+      "name": "Disc - 3 - H | T | R",
+      "tracks": [
+        {
+          "title": "Patience",
+          "artist": "Greglane",
+          "durationMs": 125004,
+          "uri": "spotify:track:0PidXLX94757ihAsblFa1U"
+        },
+        {
+          "title": "Livefastdieslay ##4Kaine",
+          "artist": "Kankan",
+          "durationMs": 164091,
+          "uri": "spotify:track:24veccqgRDZcBbl59EylZr"
+        },
+        {
+          "title": "Laylow",
+          "artist": "GoVanni",
+          "durationMs": 164953,
+          "uri": "spotify:track:12DYYBuq5IphSL7T4HUZ06"
+        },
+        {
+          "title": "Mocktails and Weed",
+          "artist": "Harvey Whyte",
+          "durationMs": 199606,
+          "uri": "spotify:track:398dkH5y8JWFil1pJu9lAO"
+        },
+        {
+          "title": "Portabella",
+          "artist": "Young Nudy",
+          "durationMs": 216146,
+          "uri": "spotify:track:6Bwh3yd8BzeJOzqaOH3XnV"
+        },
+        {
+          "title": "Fool outta him",
+          "artist": "Fourfive",
+          "durationMs": 108169,
+          "uri": "spotify:track:6ibJLJQT06SeeoKWBtWvdN"
+        },
+        {
+          "title": "SZA",
+          "artist": "Fourfive",
+          "durationMs": 116066,
+          "uri": "spotify:track:21ksvc3pwFWwkv6FgZqdFv"
+        },
+        {
+          "title": "switch",
+          "artist": "Fourfive",
+          "durationMs": 112941,
+          "uri": "spotify:track:5XiZd4hMNjWRuI1sGPweOU"
+        },
+        {
+          "title": "see u",
+          "artist": "Kankan",
+          "durationMs": 101613,
+          "uri": "spotify:track:3iGlCJ8ZvSTwRjyHemIx6P"
+        },
+        {
+          "title": "Safe Route",
+          "artist": "Loe Shimmy",
+          "durationMs": 145694,
+          "uri": "spotify:track:5XRnD9x81B7NpTpWuyrLDm"
+        },
+        {
+          "title": "Limbless",
+          "artist": "Lelo",
+          "durationMs": 157310,
+          "uri": "spotify:track:3mrRsFCXnKL5tKzoSUy1Mj"
+        },
+        {
+          "title": "Keep On Trying",
+          "artist": "D. Savage",
+          "durationMs": 177230,
+          "uri": "spotify:track:1Au3rgYWhuH7rWQGWGM2RV"
+        },
+        {
+          "title": "God's Child!",
+          "artist": "Autumn!",
+          "durationMs": 153333,
+          "uri": "spotify:track:4ctJYLCZayN8ENoCFA21pM"
+        },
+        {
+          "title": "Ain’t Enough",
+          "artist": "Loe Shimmy",
+          "durationMs": 128046,
+          "uri": "spotify:track:1kybuwUL8ghpvlmsOOXwRL"
+        },
+        {
+          "title": "My Very Best (feat. Tony Shhnow)",
+          "artist": "D. Savage, Tony Shhnow",
+          "durationMs": 188734,
+          "uri": "spotify:track:2kiQV8jlNY5h4Fb6n5Qzra"
+        },
+        {
+          "title": "Dirty Soda Junkie (feat. Veeze)",
+          "artist": "Loe Shimmy, Veeze",
+          "durationMs": 112298,
+          "uri": "spotify:track:25AxrAUfIpyfvXzOfsQHS4"
+        },
+        {
+          "title": "Get Lucki",
+          "artist": "Veeze",
+          "durationMs": 179612,
+          "uri": "spotify:track:2Lesv91L9paVZjIPpu0jx6"
+        },
+        {
+          "title": "Unreleased leak",
+          "artist": "Veeze",
+          "durationMs": 213484,
+          "uri": "spotify:track:5II9VQpQ8MGDWwBZfVyxTN"
+        },
+        {
+          "title": "High As I Can",
+          "artist": "Lil Candy Paint",
+          "durationMs": 164592,
+          "uri": "spotify:track:5I1ZwphR4XCsv8ucL4RdXu"
+        },
+        {
+          "title": "JACKPOT",
+          "artist": "Cochise",
+          "durationMs": 140526,
+          "uri": "spotify:track:7MURXO8ygXnNxg1PMMlX3o"
+        },
+        {
+          "title": "Drought (16yrold & KILLY)",
+          "artist": "16yrold, KILLY",
+          "durationMs": 169005,
+          "uri": "spotify:track:2O7q2dHz651x6XbDsLrAdm"
+        },
+        {
+          "title": "Lightspeed",
+          "artist": "cirvekii, dyingoutlay",
+          "durationMs": 138804,
+          "uri": "spotify:track:5U15YUaViHCRQbjKBgSS9i"
+        },
+        {
+          "title": "SYRUP SIPPIN",
+          "artist": "Destroy Lonely",
+          "durationMs": 190551,
+          "uri": "spotify:track:7kE2DB11mej6C1HUdeVYir"
+        },
+        {
+          "title": "CADILLAC",
+          "artist": "Destroy Lonely",
+          "durationMs": 145439,
+          "uri": "spotify:track:5y0DiWFGPejEmSYXIGOtgl"
+        },
+        {
+          "title": "U Feel Me",
+          "artist": "Dom Corleo",
+          "durationMs": 236382,
+          "uri": "spotify:track:62ZHxwrDzbjJm45ZeLLrWO"
+        },
+        {
+          "title": "HXG Bizness",
+          "artist": "HXG",
+          "durationMs": 122208,
+          "uri": "spotify:track:4vx664UYFeIQ1RFPrAjtBx"
+        },
+        {
+          "title": "Lif3",
+          "artist": "Homixide Gang",
+          "durationMs": 157777,
+          "uri": "spotify:track:5CYq30RE6u1z0MXPUGD5tn"
+        },
+        {
+          "title": "Stunt",
+          "artist": "Homixide Gang, Ken Carson",
+          "durationMs": 178285,
+          "uri": "spotify:track:5hzkAD8nloXDHk62KsVtyG"
+        },
+        {
+          "title": "Yale",
+          "artist": "Ken Carson",
+          "durationMs": 106536,
+          "uri": "spotify:track:0HTIrbUwwFn984RzVZm5Fk"
+        },
+        {
+          "title": "Fashion Habits",
+          "artist": "Ken Carson",
+          "durationMs": 201681,
+          "uri": "spotify:track:2ivRKtdr0RD9nLjeXgRBPV"
+        },
+        {
+          "title": "bleh",
+          "artist": "Hardrock",
+          "durationMs": 146750,
+          "uri": "spotify:track:5jhI9kdseTMJQYvjIm5MVU"
+        },
+        {
+          "title": "1of1",
+          "artist": "Hardrock",
+          "durationMs": 124000,
+          "uri": "spotify:track:6fODBIJuXEZxrZkcX4BpOJ"
+        },
+        {
+          "title": "BITE THRU IT",
+          "artist": "untiljapan",
+          "durationMs": 190575,
+          "uri": "spotify:track:6tgj1ElIwVkPkwjOFJ0SdP"
+        },
+        {
+          "title": "In The Air",
+          "artist": "Destroy Lonely",
+          "durationMs": 206878,
+          "uri": "spotify:track:2eJBpNlTTPatjec4SDQvuo"
+        },
+        {
+          "title": "your eyes",
+          "artist": "Destroy Lonely",
+          "durationMs": 182554,
+          "uri": "spotify:track:5pqdoxTWmBvyz1jmHQCy4m"
+        },
+        {
+          "title": "Angels",
+          "artist": "GoVanni",
+          "durationMs": 191075,
+          "uri": "spotify:track:24nUMNaojZsWyUBMtA1lPc"
+        },
+        {
+          "title": "BLITZ",
+          "artist": "GoVanni",
+          "durationMs": 158497,
+          "uri": "spotify:track:3XPosMAHN59lPuBxy7pkSR"
+        },
+        {
+          "title": "BLACK TRUCK GREETERS!",
+          "artist": "Autumn!",
+          "durationMs": 179562,
+          "uri": "spotify:track:2rHtkpixEhm0GpCk9sLoIw"
+        },
+        {
+          "title": "TWO CHROME NECKLACES!",
+          "artist": "Autumn!",
+          "durationMs": 181743,
+          "uri": "spotify:track:0JuPu6lUE5MkoaKtth8ajC"
+        },
+        {
+          "title": "Born With It",
+          "artist": "Jay Critch, Harry Fraud",
+          "durationMs": 112866,
+          "uri": "spotify:track:04EiG9ApCYXm38cwb7oq6t"
+        },
+        {
+          "title": "GET IN",
+          "artist": "Thouxanbanfauni, Maxx Kenif",
+          "durationMs": 137247,
+          "uri": "spotify:track:2dR3ydAu2XGjM8KhFuZiWd"
+        },
+        {
+          "title": "Call of Duty",
+          "artist": "Izaya Tiji",
+          "durationMs": 213552,
+          "uri": "spotify:track:4RYiyvnYAqXEOXDMoDzjQk"
+        },
+        {
+          "title": "Mac & Cheese",
+          "artist": "Izaya Tiji",
+          "durationMs": 195004,
+          "uri": "spotify:track:3T7p1njEMkL2zwFcjNp2Cs"
+        },
+        {
+          "title": "Umbrella",
+          "artist": "Nick Andree, Dom Corleo",
+          "durationMs": 179200,
+          "uri": "spotify:track:0Jh9BSvLTwNa9uTahEYNtP"
+        },
+        {
+          "title": "Sayless",
+          "artist": "Izaya Tiji, Lil Yen, Yhapojj",
+          "durationMs": 199224,
+          "uri": "spotify:track:1EOSeIR6rYBl7RaSlUXt6z"
+        },
+        {
+          "title": "Can't Stop 3 (RIP TAKEOFF)",
+          "artist": "Izaya Tiji",
+          "durationMs": 233273,
+          "uri": "spotify:track:3isyse4MnwGMBICvKlSsKY"
+        },
+        {
+          "title": "12 Stout Street",
+          "artist": "Rx Papi, Gud",
+          "durationMs": 118750,
+          "uri": "spotify:track:7x8O57b6oXzmbwANbSy2wq"
+        },
+        {
+          "title": "Out of Bounds",
+          "artist": "Benji Blue Bills",
+          "durationMs": 139871,
+          "uri": "spotify:track:01DwiJZPBJrW21ge8ElLMM"
+        },
+        {
+          "title": "16*29",
+          "artist": "RA Beats",
+          "durationMs": 138507,
+          "uri": "spotify:track:4Wb5fX3HmreGR9mB95Xuhl"
+        },
+        {
+          "title": "Bracket",
+          "artist": "Barretta",
+          "durationMs": 96109,
+          "uri": "spotify:track:0a6j47Vk0Q0cNAumjvLDG2"
+        },
+        {
+          "title": "easy",
+          "artist": "dexelz",
+          "durationMs": 116121,
+          "uri": "spotify:track:5S2RrmtEqywVatLeTS1hPO"
+        },
+        {
+          "title": "away",
+          "artist": "dexelz",
+          "durationMs": 119187,
+          "uri": "spotify:track:1QlLqpFMj7XQhy1viRixk5"
+        },
+        {
+          "title": "bands",
+          "artist": "dexelz",
+          "durationMs": 117093,
+          "uri": "spotify:track:5WzwZomHDvYPcgMqWCzDiA"
+        },
+        {
+          "title": "higher den u",
+          "artist": "dexelz",
+          "durationMs": 117000,
+          "uri": "spotify:track:7JgFusfKydn1nNv3I1epTb"
+        },
+        {
+          "title": "Kudos",
+          "artist": "Lelo",
+          "durationMs": 78857,
+          "uri": "spotify:track:56DzzcpAKVhikRHueLGjwC"
+        },
+        {
+          "title": "Chasing",
+          "artist": "Lelo",
+          "durationMs": 169016,
+          "uri": "spotify:track:6R1lKtITVkOQkqo9pANPkL"
+        },
+        {
+          "title": "Yoppenheimer",
+          "artist": "Lelo",
+          "durationMs": 135500,
+          "uri": "spotify:track:59xdYjVILhhafdiPHBpRda"
+        },
+        {
+          "title": "Playas Circle",
+          "artist": "BashfortheWorld, Mathaius Young",
+          "durationMs": 133834,
+          "uri": "spotify:track:2jAJYaqIkjuWljyqwH3NuF"
+        },
+        {
+          "title": "Kick Em Out",
+          "artist": "D. Savage",
+          "durationMs": 167720,
+          "uri": "spotify:track:5DrU8wmyLPmrjRHmSnQ40p"
+        },
+        {
+          "title": "How Does It Feel",
+          "artist": "D. Savage",
+          "durationMs": 150000,
+          "uri": "spotify:track:13E2LxjLkusP9TqbSTGTIz"
+        },
+        {
+          "title": "Stay Alert",
+          "artist": "D. Savage",
+          "durationMs": 181426,
+          "uri": "spotify:track:6FRDrbCQJExsFGeYdTmSPW"
+        },
+        {
+          "title": "Party Girlz",
+          "artist": "Dom Corleo",
+          "durationMs": 133002,
+          "uri": "spotify:track:4dbthnQWUKNzEMDZ9Kc3jR"
+        },
+        {
+          "title": "Sky Harbor",
+          "artist": "Dom Corleo",
+          "durationMs": 94646,
+          "uri": "spotify:track:1d9fqSgPef0v4m8JwlteR8"
+        },
+        {
+          "title": "Penthouse Shordy",
+          "artist": "Dom Corleo",
+          "durationMs": 126615,
+          "uri": "spotify:track:6vOedMRRZuckfMknIswvLv"
+        },
+        {
+          "title": "Bloody Runtz",
+          "artist": "Dom Corleo",
+          "durationMs": 162306,
+          "uri": "spotify:track:2PcuF9PUKm1N1gmLxQeyDG"
+        },
+        {
+          "title": "OMO",
+          "artist": "Dom Corleo",
+          "durationMs": 122367,
+          "uri": "spotify:track:5FBsSCiA2LpGx8dcpHf37m"
+        },
+        {
+          "title": "Ginseng",
+          "artist": "Dom Corleo",
+          "durationMs": 164858,
+          "uri": "spotify:track:0SIBZ4mKy6LTeyKEwsedN1"
+        },
+        {
+          "title": "Energy",
+          "artist": "Yung Bans",
+          "durationMs": 158000,
+          "uri": "spotify:track:5H12chEM6bgr2q8mxxkZVW"
+        },
+        {
+          "title": "KAPITOL DENIM",
+          "artist": "LUCKI, Future",
+          "durationMs": 117000,
+          "uri": "spotify:track:2P1oNlBGmFudn3ZyUrj7hJ"
+        },
+        {
+          "title": "Fallin",
+          "artist": "Loe Shimmy",
+          "durationMs": 141886,
+          "uri": "spotify:track:3kRZgKLvX0ETRsQONyEjWm"
+        },
+        {
+          "title": "GRWN AS HELL",
+          "artist": "GoVanni",
+          "durationMs": 126322,
+          "uri": "spotify:track:31rKUyqlMOvbz3WCkyMO9c"
+        },
+        {
+          "title": "Laylow",
+          "artist": "Jace!",
+          "durationMs": 96043,
+          "uri": "spotify:track:36lPLD87IC7LyLlSPwfsy6"
+        },
+        {
+          "title": "25WAGG3DOU2",
+          "artist": "Lancey Foux",
+          "durationMs": 143413,
+          "uri": "spotify:track:4FbEljjTdoUcnY2aYsxDDh"
+        },
+        {
+          "title": "Slave",
+          "artist": "UnoTheActivist",
+          "durationMs": 151578,
+          "uri": "spotify:track:6gzEKpPDrMetHz0EVeo37I"
+        },
+        {
+          "title": "AINT NOTHING",
+          "artist": "Rich Amiri",
+          "durationMs": 154879,
+          "uri": "spotify:track:5754hZ1mD8MUxppIBI1Lze"
+        },
+        {
+          "title": "GOMD",
+          "artist": "Veeze",
+          "durationMs": 171864,
+          "uri": "spotify:track:1wabjSijwiHbAKhCiDlLEu"
+        },
+        {
+          "title": "eighteen",
+          "artist": "Dom Corleo",
+          "durationMs": 135000,
+          "uri": "spotify:track:50GKkxM5mOxktRIFmmSDKj"
+        },
+        {
+          "title": "overseas",
+          "artist": "Ken Carson",
+          "durationMs": 141031,
+          "uri": "spotify:track:722NAIXkI6WRNvu9O7JkdH"
+        },
+        {
+          "title": "too damn rich",
+          "artist": "Destroy Lonely",
+          "durationMs": 195030,
+          "uri": "spotify:track:6roXHIr2kJS4YLdATOxKdc"
+        },
+        {
+          "title": "Bye Bye",
+          "artist": "Izaya Tiji",
+          "durationMs": 198400,
+          "uri": "spotify:track:2i3ZGeVIp5k41xdJ4qHDrL"
+        },
+        {
+          "title": "superstar",
+          "artist": "Destroy Lonely",
+          "durationMs": 191392,
+          "uri": "spotify:track:5BsdVsuzFtyD44mEZOE5SA"
+        },
+        {
+          "title": "Coming Home",
+          "artist": "Benji Blue Bills, LUCKI",
+          "durationMs": 182248,
+          "uri": "spotify:track:0Ag2XKLbOkIlFXm1WSqNSp"
+        },
+        {
+          "title": "Jack Sparrow",
+          "artist": "The Act",
+          "durationMs": 103443,
+          "uri": "spotify:track:3FqMUvBQbOEJ9BU7y3sVLj"
+        },
+        {
+          "title": "back sippin",
+          "artist": "Destroy Lonely",
+          "durationMs": 148249,
+          "uri": "spotify:track:3e4YpD6kn1jro7ee3oVwlZ"
+        },
+        {
+          "title": "Ounce",
+          "artist": "untiljapan",
+          "durationMs": 155587,
+          "uri": "spotify:track:16epK4QAFFuVazNrhchbsE"
+        },
+        {
+          "title": "50-0",
+          "artist": "BashfortheWorld",
+          "durationMs": 224365,
+          "uri": "spotify:track:1Smhzk6DHo8aR11SkZAtEY"
+        },
+        {
+          "title": "Titanic",
+          "artist": "Dom Corleo",
+          "durationMs": 128951,
+          "uri": "spotify:track:2le9mdH7fVUDQFSO2cLlYh"
+        },
+        {
+          "title": "fear no man",
+          "artist": "tana",
+          "durationMs": 116248,
+          "uri": "spotify:track:3rQFAulh8ywHTvPRMRxVZ8"
+        },
+        {
+          "title": "Kids",
+          "artist": "Dom Corleo",
+          "durationMs": 146468,
+          "uri": "spotify:track:4DTl5B6zVxUxqHeuAlwtPL"
+        },
+        {
+          "title": "Murder She Wrote ...",
+          "artist": "Slimesito",
+          "durationMs": 119067,
+          "uri": "spotify:track:3xL4STpmyDo7PSbsM9SvwA"
+        },
+        {
+          "title": "Grand Slam",
+          "artist": "ian",
+          "durationMs": 119999,
+          "uri": "spotify:track:0knH8qVHfaJMr8WB3L1GpS"
+        },
+        {
+          "title": "inthej",
+          "artist": "D. Savage, PlaqueBoyMax",
+          "durationMs": 109727,
+          "uri": "spotify:track:0AJTkZVEpSVmn6Yf5rsx8l"
+        },
+        {
+          "title": "Living Lavish",
+          "artist": "tana",
+          "durationMs": 144039,
+          "uri": "spotify:track:07jRDsccmmp4BuX3eCjqye"
+        },
+        {
+          "title": "hills @ night",
+          "artist": "tana",
+          "durationMs": 158050,
+          "uri": "spotify:track:6SmgEASoJScyDPj3s1zfRh"
+        },
+        {
+          "title": "IN THE SPUR",
+          "artist": "untiljapan",
+          "durationMs": 103839,
+          "uri": "spotify:track:10DHkFGbe3G9Mdq6SWwY0h"
+        },
+        {
+          "title": "4KEEPS",
+          "artist": "untiljapan",
+          "durationMs": 188553,
+          "uri": "spotify:track:1BdkblCEplUiQ70bD4QQMJ"
+        },
+        {
+          "title": "WAKE UP / I'M ALIVE",
+          "artist": "Lancey Foux",
+          "durationMs": 313098,
+          "uri": "spotify:track:3sznhfRa7fYrIBcyR337cs"
+        },
+        {
+          "title": "NOW > THEN",
+          "artist": "Lancey Foux, 070 Shake",
+          "durationMs": 94519,
+          "uri": "spotify:track:351h4cacX88t9xzpMD4WIF"
+        },
+        {
+          "title": "SPIRIT OF X2C",
+          "artist": "Lancey Foux",
+          "durationMs": 218786,
+          "uri": "spotify:track:39SMhVOsxqmhPo7tpZZlLY"
+        },
+        {
+          "title": "LIES WILL SET YOU FREE",
+          "artist": "Lancey Foux, KAYTRANADA",
+          "durationMs": 284152,
+          "uri": "spotify:track:1ntp9QhwKYmikKLiOKrARR"
+        }
+      ]
+    }
+  }
+}

@@ -68,7 +68,7 @@ describe("aoost image framing", () => {
 
   it("covers playlists, project pieces and the sticky note", () => {
     const pl = getComponent("AoostPlaylistBand")!.frames!({ ...(getComponent("AoostPlaylistBand")!.defaults.content as object), playlists: [{ title: "A", spotify: "x", hidden: true, cover: "a.jpg" }, { title: "B", spotify: "y", cover: "b.jpg" }] } as never);
-    expect(pl.map((s) => s.selector)).toEqual([".cv-frames>.cv-frame:nth-child(1)>.disc>img"]);
+    expect(pl.map((s) => s.selector)).toEqual([".pl-sleeves>.pl-rec:nth-child(1)>.pl-sleeve>img"]);
     const pj = getComponent("AoostProjects")!.frames!({ ...(getComponent("AoostProjects")!.defaults.content as object), projects: [{ image: "a.jpg" }, { image: "b.jpg", hidden: true }, { image: "c.jpg" }], note: { show: true, image: "n.jpg" } } as never);
     expect(pj.map((s) => s.selector)).toEqual([".table>.piece:nth-child(1)>img", ".table>.piece:nth-child(2)>img", '.sticky[data-note="0"]>img']);
     expect(pj[1]!.path).toEqual(["projects", 2]);

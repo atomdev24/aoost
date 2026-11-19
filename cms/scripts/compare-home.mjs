@@ -2,6 +2,7 @@
 //   node scripts/compare-home.mjs [cmsBaseUrl] [cmsPath]   defaults http://localhost:8787 and /
 // A cmsPath under /preview/ captures the editor's draft; it signs in with EDITOR_PASSWORD from the environment.
 // Writes docs/screenshots/homepage-compare/{original,cms}-{390,1440}.png
+// The playlists band is left out of both: it no longer follows the original (see PLAYLISTS-SLEEVE.md).
 //
 // The original page talks to Alex's Supabase project. These captures must not change anything there:
 // reads (content, leaderboard) are allowed; writes (visit counter, scores) and live presence are blocked.
@@ -67,6 +68,12 @@ for (const [label, width, height] of [["390", 390, 844], ["1440", 1440, 900]]) {
       window.scrollTo(0, 0);
     });
     await page.waitForTimeout(1200);
+    // The playlists band was redesigned on purpose (sleeve and tracklist, Nov 2026), so both captures leave it out.
+    await page.evaluate(() => {
+      document.querySelector('.ao-b[data-ao="playlists"]')?.closest("section[data-kind]")?.remove();
+      document.querySelector("section#band")?.remove();
+    });
+    await page.waitForTimeout(300);
     const full = await page.evaluate(() => document.documentElement.scrollHeight);
     await page.screenshot({ path: `${out}/${name}-${label}.png`, fullPage: true });
     console.log(`${name}-${label}.png  ${width}×${full}`);
