@@ -274,7 +274,9 @@ export function Board() {
             {short ? null : (NOTE[f.bp] ?? null)}
             {overrides[f.bp] ? (
               short ? (
-                <span className="bd-badge is-dot" title={overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`} aria-label={overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`} />
+                <span className="bd-badge is-dot" title={overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}>
+                  <span className="ed-visually-hidden">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span>
+                </span>
               ) : (
                 <span className="bd-badge">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span>
               )

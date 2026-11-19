@@ -200,7 +200,7 @@ function PaletteRow({ row, i, active, heading, onHover, onChoose }: { row: Row; 
           <span className="ed-pal-title">{row.title}</span>
           {row.sub ? <span className="ed-pal-sub">{row.sub}</span> : null}
         </span>
-        {row.keys ? (
+        {row.keys && !isTouchOnly() ? (
           <span className="ed-pal-keys" aria-label={`Shortcut ${row.keys.join(" ")}`}>
             {row.keys.map((k) => (
               <kbd key={k}>{k}</kbd>
