@@ -5,7 +5,7 @@ import { AdjustImage } from "../canvas/AdjustImage";
 import { ResizePiece } from "../canvas/ResizePiece";
 import { EmptyPage } from "../insert/EmptyPage";
 import { takeSnapshots, useSnapshot, watchSnapshots } from "./snapshots";
-import { currentPage, useEditor } from "../store";
+import { currentPage, getState, useEditor } from "../store";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { activateBreakpoint } from "./bridge";
 import { LiveFrame } from "./LiveFrame";
@@ -14,6 +14,8 @@ import { frameRects, getBoard, openPage, panBy, resetFramePositions, setFrameHid
 import { FRAME_GAP, isVisible, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
 import { ZoomBar } from "./ZoomBar";
+import { attachGestures } from "../touch/gestures";
+import { LONG_PRESS_MS } from "../touch/longpress";
 import "./board.css";
 
 const NAME = BREAKPOINT_LABEL;
@@ -94,9 +96,21 @@ export function Board() {
       onBoardWheel(e, { x: e.clientX - r.left, y: e.clientY - r.top });
     };
     el.addEventListener("wheel", wheel, { passive: false });
+    // Touch: one finger on empty board pans, two fingers pinch and pan. A tap on empty board clears the selection.
+    const empty = (t: EventTarget | null) => t === el || (t as Element | null)?.classList?.contains("bd-world") === true;
+    const detachTouch = attachGestures(el, {
+      toBoard: (e) => {
+        const r = el.getBoundingClientRect();
+        return { x: e.clientX - r.left, y: e.clientY - r.top };
+      },
+      canPanOne: (e) => empty(e.target) || !!(e.target as Element).closest?.(".bd-slot") && !(e.target as Element).closest("button"),
+      ignore: (e) => !!(e.target as Element).closest?.(".ed-adjust, .ed-piece, .bd-zoombar, .bd-label-wrap, .bd-hidden-chip"),
+      onTap: (e) => empty(e.target) && activateBreakpoint(getState().bp, null),
+    });
     return () => {
       ro.disconnect();
       el.removeEventListener("wheel", wheel);
+      detachTouch();
     };
   }, []);
 
@@ -127,6 +141,7 @@ export function Board() {
 
   // A frame's label is its drag handle; a press without movement is a click.
   const dragged = useRef(false);
+  const [menuFor, setMenuFor] = useState<Breakpoint | null>(null);
   const startFrameDrag = (e: React.PointerEvent<HTMLElement>, f: { bp: Breakpoint; x: number; y: number }) => {
     if (e.button !== 0 || spaceDown) return;
     e.stopPropagation();
@@ -135,10 +150,19 @@ export function Board() {
     const start = { x: e.clientX, y: e.clientY };
     const zoom = getBoard().view.zoom;
     dragged.current = false;
+    // On touch, a long-press on the label opens the frame menu (there is no right-click).
+    const long =
+      e.pointerType === "mouse"
+        ? undefined
+        : setTimeout(() => {
+            dragged.current = true;
+            setMenuFor(f.bp);
+          }, LONG_PRESS_MS);
     const move = (m: PointerEvent) => {
       const dx = m.clientX - start.x;
       const dy = m.clientY - start.y;
-      if (!dragged.current && Math.hypot(dx, dy) < 3) return;
+      if (!dragged.current && Math.hypot(dx, dy) < (e.pointerType === "mouse" ? 3 : 8)) return;
+      clearTimeout(long);
       if (!dragged.current) {
         dragged.current = true;
         setInteracting(true);
@@ -147,6 +171,7 @@ export function Board() {
       setFramePosition(f.bp, { x: Math.round(f.x + dx / zoom), y: Math.round(f.y + dy / zoom) });
     };
     const up = () => {
+      clearTimeout(long);
       if (dragged.current) setInteracting(false);
       target.classList.remove("is-dragging");
       target.removeEventListener("pointermove", move);
@@ -170,7 +195,8 @@ export function Board() {
       onPointerDownCapture={(e) => {
         closeUnpinnedFlyout();
         // A click on empty board clears the selection, as in any canvas app.
-        if (e.target === host.current && !spaceDown && e.button === 0) activateBreakpoint(bp, null);
+        // (On touch that waits for the tap, so a pan keeps the selection.)
+        if (e.target === host.current && !spaceDown && e.button === 0 && e.pointerType !== "touch") activateBreakpoint(bp, null);
       }}
       data-zoom={view.zoom.toFixed(3)}
     >
@@ -233,7 +259,7 @@ export function Board() {
             {NOTE[f.bp] ?? null}
             {overrides[f.bp] ? <span className="bd-badge">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span> : null}
           </button>
-          <FrameMenu bp={f.bp} canHide={frames.length > 1} />
+          <FrameMenu bp={f.bp} canHide={frames.length > 1} open={menuFor === f.bp} setOpen={(open) => setMenuFor(open ? f.bp : null)} />
         </div>
       ))}
 
@@ -265,8 +291,7 @@ export function Board() {
 }
 
 /** The small "…" menu beside a frame label: hide this frame, or put every frame back. */
-function FrameMenu({ bp, canHide }: { bp: Breakpoint; canHide: boolean }) {
-  const [open, setOpen] = useState(false);
+function FrameMenu({ bp, canHide, open, setOpen }: { bp: Breakpoint; canHide: boolean; open: boolean; setOpen: (open: boolean) => void }) {
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -276,10 +301,10 @@ function FrameMenu({ bp, canHide }: { bp: Breakpoint; canHide: boolean }) {
       e.stopPropagation();
       setOpen(false);
     };
-    document.addEventListener("mousedown", close);
+    document.addEventListener("pointerdown", close);
     document.addEventListener("keydown", esc, true);
     return () => {
-      document.removeEventListener("mousedown", close);
+      document.removeEventListener("pointerdown", close);
       document.removeEventListener("keydown", esc, true);
     };
   }, [open]);

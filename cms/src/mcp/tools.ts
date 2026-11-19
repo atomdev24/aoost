@@ -91,7 +91,7 @@ export const tools: Tool[] = [
 
   tool(
     "get_editor_context",
-    'What Alex is looking at in the editor right now: the open page, the selected node ids (with their type and content) and the active breakpoint. Use this to resolve "this", "that image", "make it rounder".',
+    'What Alex is looking at in the editor right now: the open page, the selected node ids (with their type and content) and the active breakpoint. Use this to resolve "this", "that image", "make it rounder". If Alex typed a request into the editor ("Ask Claude to do this"), it is under `request`: when he says "do what I asked in the editor", do that.',
     z.object({}),
     (_a, ctx) => {
       if (!ctx.editor) return { text: "The editor is not open, so there is no selection. Ask Alex which page or element he means, or use list_pages / get_page." };
@@ -101,7 +101,9 @@ export const tools: Tool[] = [
         if (!at) return { id, note: "not found on the open page" };
         return at.kind === "section" ? { id, kind: "section", sectionKind: at.section.kind, name: at.section.name, layout: at.section.layout } : { id, kind: at.kind, type: at.node.type, name: at.node.name, content: at.node.content, style: at.node.style, frame: at.node.frame, inSection: at.kind === "node" ? at.section.id : undefined };
       });
-      return { text: json({ page: page ? pageSummary(page) : ctx.editor.pageId, breakpoint: ctx.editor.breakpoint, selected, secondsSinceUpdate: Math.round((Date.now() - ctx.editor.updatedAt) / 1000) }) };
+      // A request typed in the editor's palette ("Ask Claude to do this") in the last half hour.
+      const req = ctx.editor.request && Date.now() - ctx.editor.request.at < 30 * 60_000 ? { text: ctx.editor.request.text, secondsAgo: Math.round((Date.now() - ctx.editor.request.at) / 1000) } : undefined;
+      return { text: json({ page: page ? pageSummary(page) : ctx.editor.pageId, breakpoint: ctx.editor.breakpoint, selected, ...(req ? { request: req } : {}), secondsSinceUpdate: Math.round((Date.now() - ctx.editor.updatedAt) / 1000) }) };
     },
   ),
 

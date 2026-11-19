@@ -1,0 +1,93 @@
+{
+  "id": "test-page",
+  "title": "Test page",
+  "slug": "/test-page",
+  "parentId": null,
+  "status": "draft",
+  "template": "blank",
+  "seo": {},
+  "isHome": false,
+  "showInNav": false,
+  "sections": [
+    {
+      "id": "s_ci0urm79",
+      "kind": "flow",
+      "name": "Entry",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "56px 20px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "96px 56px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_7d6kpyeh",
+          "type": "Text",
+          "content": {
+            "text": "Test page",
+            "styleId": "h1",
+            "tag": "h1"
+          },
+          "style": {
+            "base": {}
+          },
+          "effects": {
+            "parallax": 0.25
+          }
+        },
+        {
+          "id": "n_xykny8a5",
+          "type": "Text",
+          "content": {
+            "text": "Date · place",
+            "styleId": "label",
+            "tag": "p"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "n_eq45kswo",
+          "type": "Image",
+          "content": {
+            "src": "",
+            "alt": "",
+            "lightbox": true
+          },
+          "style": {
+            "base": {}
+          },
+          "frame": {
+            "base": {
+              "fit": "fill",
+              "focalX": 50,
+              "focalY": 50,
+              "zoom": 1,
+              "panX": 0,
+              "panY": 0
+            }
+          }
+        },
+        {
+          "id": "n_vtal2vqx",
+          "type": "Text",
+          "content": {
+            "text": "Write the entry here.",
+            "styleId": "body",
+            "tag": "p"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": []
+}

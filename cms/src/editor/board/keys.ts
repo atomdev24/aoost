@@ -1,16 +1,16 @@
-import { isAdjusting } from "../canvas/AdjustImage";
-import { openQuickInsert } from "../insert/QuickInsert";
-import { flush, getState, redo, undo } from "../store";
+import { getPalette } from "../commands/palette-store";
+import { runAction } from "../commands/run";
+import { matchShortcut } from "../commands/shortcuts";
 import { closeUnpinnedFlyout, getRailState } from "../workspace/rail-store";
-import { activateBreakpoint, selectBlock } from "./bridge";
-import { fit, getBoard, setSpaceDown, toggleDotGrid, zoomStep, zoomTo } from "./store";
+import { selectBlock } from "./bridge";
+import { getBoard, setSpaceDown } from "./store";
 import { runTool, type Tool } from "./tools";
 
 /**
  * Keyboard for the whole workspace, attached to the editor's document and to
- * every frame's document (keys pressed while a frame has focus land there):
- *   V select · F frame · T text · Space-drag pan · ⌘+ ⌘− ⌘0 zoom · ⇧1 fit all
- *   ⌘Z / ⇧⌘Z undo / redo · ⌘S save the draft now
+ * every frame's document (keys pressed while a frame has focus land there).
+ * The keys are in commands/shortcuts.ts and what they run in commands/run.ts;
+ * the cheat sheet (?) lists them all.
  */
 let onTool: ((tool: Tool) => void) | null = null;
 export const setToolListener = (fn: ((tool: Tool) => void) | null) => {
@@ -31,15 +31,18 @@ export function applyTool(tool: Tool) {
 
 export function attachKeys(doc: Document): () => void {
   const down = (e: KeyboardEvent) => {
-    const mod = e.metaKey || e.ctrlKey;
-    const key = e.key.toLowerCase();
-    if (mod && key === "s") {
+    const sc = matchShortcut(e);
+    if (!sc) return;
+    if (typing(doc) && !sc.whileTyping) return;
+    // The cheat sheet is up: only ? (and its own Esc) reach the editor.
+    if (getPalette().cheat && sc.id !== "help.shortcuts" && sc.id !== "palette.open") return;
+    if (sc.id === "canvas.pan") {
       e.preventDefault();
-      void flush();
+      if (!e.repeat) setSpaceDown(true);
       return;
     }
-    if (typing(doc)) return;
-    if (key === "escape") {
+    // Esc first closes an unpinned flyout, then steps out of the selection.
+    if (sc.id === "block.stepOut") {
       const rail = getRailState();
       if (!rail.pinned && rail.active) {
         e.preventDefault();
@@ -47,59 +50,11 @@ export function attachKeys(doc: Document): () => void {
         closeUnpinnedFlyout();
         return;
       }
-      if (getState().selection.length > 0 || getState().overlayId || getState().globalId) {
-        e.preventDefault();
-        activateBreakpoint(getState().bp, null);
-        return;
-      }
     }
-    if (mod && key === "z") {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      if (e.shiftKey) redo();
-      else undo();
-      return;
-    }
-    if (mod && (key === "=" || key === "+")) {
-      e.preventDefault();
-      zoomStep(1);
-      return;
-    }
-    if (mod && (key === "-" || key === "_")) {
-      e.preventDefault();
-      zoomStep(-1);
-      return;
-    }
-    if (mod && key === "0") {
-      e.preventDefault();
-      zoomTo(1);
-      return;
-    }
-    if (mod || e.altKey) return;
-    if (e.code === "Space") {
-      e.preventDefault();
-      if (!e.repeat) setSpaceDown(true);
-      return;
-    }
-    if (e.shiftKey && e.code === "Digit1") {
-      e.preventDefault();
-      fit();
-      return;
-    }
-    if (key === "'" || e.code === "Quote") {
-      e.preventDefault();
-      toggleDotGrid();
-      return;
-    }
-    if (e.key === "/" && !isAdjusting()) {
-      e.preventDefault();
-      openQuickInsert();
-      return;
-    }
-    if (e.shiftKey) return;
-    if (key === "v") applyTool("select");
-    else if (key === "f") applyTool("frame");
-    else if (key === "t") applyTool("text");
+    if (!sc.action || !runAction(sc.action)) return;
+    // Ours, not the browser's (⌘1–4, ⌘+/−, ⌘D, ⌘K…) and not Puck's (⌘Z, Delete).
+    e.preventDefault();
+    e.stopImmediatePropagation();
   };
   const up = (e: KeyboardEvent) => {
     if (e.code === "Space" && getBoard().spaceDown) setSpaceDown(false);

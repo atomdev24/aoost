@@ -103,3 +103,13 @@ describe("block overrides", () => {
     expect(reset.sections[0]!.children[0]!.style).toEqual({ base: { padding: "20px", opacity: 1 } });
   });
 });
+
+describe("fitWidth (the phone's default view)", () => {
+  it("fits the frame between the rail and the right edge, under the islands", async () => {
+    const { fitWidth } = await import("./viewport");
+    const v = fitWidth({ x: 2000, y: 0, w: 390, h: 1600 }, 390);
+    expect(v.zoom).toBeCloseTo(318 / 390);
+    expect(2000 * v.zoom + v.x).toBeCloseTo(64);
+    expect(v.y).toBe(152);
+  });
+});

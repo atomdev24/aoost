@@ -141,14 +141,15 @@ test.describe("editor", () => {
   });
 });
 
-test.describe("quick edit on a phone", () => {
+test.describe("quick edit on a phone (?quick)", () => {
   test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("edits text and adds a diary entry", async ({ page, request }) => {
     await resetDraft(request, password!);
     await signIn(page, password!);
-    await page.goto("/admin/?page=work");
+    // Phones now get the full editor; the quick-edit form stays at ?quick.
+    await page.goto("/admin/?page=work&quick");
     await expect(page.locator(".qe-brand span")).toHaveText("Quick edit");
     await page.locator(".qe-card textarea").nth(1).fill("Edited on a phone.");
     await page.getByRole("tab", { name: "Diary" }).click();

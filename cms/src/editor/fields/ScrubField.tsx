@@ -3,6 +3,7 @@ import { beginGesture, endGesture, useEditor } from "../store";
 import { Menu, type Anchor } from "../ui/Popover";
 import { PX_PER_STEP, scrubUnit } from "./scrub";
 import { parseLength } from "./spacing";
+import { useLongPress } from "../touch/longpress";
 
 type Common = {
   glyph?: string;
@@ -121,9 +122,12 @@ export function ScrubNumber({ value, onChange, glyph, suffix, placeholder, id, a
     setDraft(show(clamp(decimals ? tidy(n) : Math.round(n), min, max)));
   };
   const scrub = useScrub(() => live.current ?? 0, put, step, decimals);
+  // Touch: a long-press opens the spacing steps (right-click on a mouse).
+  const press = useLongPress(setMenu, !!spacing);
   return (
     <span
       className={`ed-scrub${scrub.active ? " is-scrubbing" : ""}`}
+      {...press}
       onContextMenu={
         spacing
           ? (e) => {
@@ -189,9 +193,11 @@ export function ScrubLength({ value, onChange, validate, glyph, placeholder, id,
   };
   const scrub = useScrub(() => parseLength(live.current)?.n ?? 0, put, 1, true);
   const nudge = (d: number) => put((parseLength(live.current)?.n ?? 0) + d);
+  const press = useLongPress(setMenu, !!spacing);
   return (
     <span
       className={`ed-scrub${scrub.active ? " is-scrubbing" : ""}`}
+      {...press}
       onContextMenu={
         spacing
           ? (e) => {

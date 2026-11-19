@@ -6,6 +6,7 @@ import { attachPieceSelect } from "../canvas/ResizePiece";
 import { attachKeys } from "./keys";
 import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
 import { onBoardWheel } from "./wheel";
+import { attachFrameGestures } from "../touch/gestures";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 
 /**
@@ -39,6 +40,15 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       onBoardWheel(e, { x: (o.x + e.clientX) * view.zoom + view.x, y: (o.y + e.clientY) * view.zoom + view.y });
     };
     doc.addEventListener("wheel", wheel, { passive: false });
+    const detachTouch = attachFrameGestures(
+      doc,
+      (e) => {
+        const { view } = getBoard();
+        const o = frameOrigin(getState().bp);
+        return { x: (o.x + e.clientX) * view.zoom + view.x, y: (o.y + e.clientY) * view.zoom + view.y };
+      },
+      () => getState().selection,
+    );
     // A press inside the frame is a canvas click: unpinned flyouts close (the selection is Puck's business).
     doc.addEventListener("pointerdown", closeUnpinnedFlyout, true);
     const RO = doc.defaultView!.ResizeObserver;
@@ -58,6 +68,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       detach();
       detachDrops();
       detachPieces();
+      detachTouch();
       doc.removeEventListener("wheel", wheel);
       doc.removeEventListener("pointerdown", closeUnpinnedFlyout, true);
       ro.disconnect();

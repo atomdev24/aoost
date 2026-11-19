@@ -7,6 +7,8 @@ export type EditorContext = {
   selectedNodeIds: string[];
   breakpoint: Breakpoint;
   updatedAt: number;
+  /** Something Alex asked Claude to do, typed in the editor's palette ("Ask Claude to do this"). */
+  request?: { text: string; at: number } | null;
 };
 
 /** Draft store → editor. */

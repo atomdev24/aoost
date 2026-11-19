@@ -58,7 +58,7 @@
             "tickerTopScore": true,
             "tickerVisitors": true,
             "lateMode": false,
-            "showTicker": false
+            "showTicker": true
           },
           "style": {
             "base": {},

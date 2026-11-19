@@ -35,6 +35,8 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
   // A block at the very top of its frame has no room above it, so the tag tucks inside its top edge instead.
   const ref = useRef<HTMLDivElement>(null);
   const [inside, setInside] = useState(false);
+  const [open, setOpen] = useState(false);
+  useLayoutEffect(() => setOpen(false), [id]);
   useLayoutEffect(() => {
     const anchor = ref.current?.parentElement;
     if (!anchor) return;
@@ -49,10 +51,13 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
   return (
     <div
       ref={ref}
-      className={`ed-tag${inside ? " is-inside" : ""}`}
+      className={`ed-tag${inside ? " is-inside" : ""}${open ? " is-open" : ""}`}
       style={{ transform: `scale(${1 / zoom}) translateY(${inside ? "4px" : "calc(-100% - 4px)"})` }}
       onPointerDown={(e) => e.stopPropagation()}>
-      <span className="ed-tag-name">{name}</span>
+      {/* On touch there is no hover: a tap on the name opens the quick actions. */}
+      <span className="ed-tag-name" onClick={() => setOpen((o) => !o)}>
+        {name}
+      </span>
       {item ? (
         <span className="ed-tag-actions" role="toolbar" aria-label="Block actions">
           {parentAction}
