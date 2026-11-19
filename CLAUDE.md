@@ -1,27 +1,39 @@
-# Rules for this repo (unattended build run)
+# Rules for this repo
 
-You're building the aoost CMS and visual editor. `SPEC.md` is the source of truth and `PLAN.md` is the checklist. Alex is not watching, so keep moving.
+You're working on the aoost CMS and visual editor, which is also becoming the editor for the
+Aerobotics website. Start with `HANDBOOK.md` (how it's built and run), then `ROADMAP.md` (agreed
+decisions and the order of work). `SPEC.md` is the original spec; `DECISIONS.md` logs choices.
 
 ## Working style
 
-- Work through `PLAN.md` in order. Tick each item and **commit after each one** with a clear message.
-- **Don't stop to ask questions.** When something is ambiguous, pick the option most consistent with `SPEC.md` and the mockup canvas, record it in `DECISIONS.md` (one line: decision and why), and carry on.
-- When a step needs Alex (a missing secret, a dashboard click, a missing file), write it in `BLOCKERS.md` with exact instructions. Stub or mock the dependency and continue with everything else.
-- Test as you go. An item is done only when its tests pass and `npm run build` succeeds.
-- Prefer small, readable modules. Each editor component lives in its own folder: component, Puck config, styles and test.
+- One branch per change (a worktree under `/tmp` is easiest), tests and `npm run build` passing,
+  then a PR. Pushing to `main` deploys, so merge only when Alex has asked for it or has approved
+  that kind of change.
+- Bigger pieces start with a short brief at the repo root (`EDITOR-*.md` style): goal, choices,
+  checks. Record new decisions in `DECISIONS.md` (one line: decision and why) and update
+  `ROADMAP.md` when something is done or a decision changes.
+- When a step needs Alex (a secret, a dashboard click, an approval), write it in `BLOCKERS.md` with
+  exact instructions and carry on with the rest.
+- Test as you go: unit tests next to the code, browser tests in `cms/tests/`. Check the editor and
+  the public site at 390px as well as desktop.
+- Prefer small, readable modules. Each block lives in its own folder: component, fields, styles, test.
 
 ## Hard limits
 
-- Work only on the branch `cms-v1`. Never push to, force-push or merge into `main`. Finish with a PR for Alex to review.
-- Don't change or remove the existing GitHub Pages site files or settings, the rodeo game, or the Supabase project and keys.
-- Don't touch DNS or domain settings, and don't deploy to the production domain. Deploy only to a `*.workers.dev` preview.
-- No paid services, plans or add-ons, and no new accounts.
+- Don't touch DNS or domain settings. Don't change the Supabase project or keys (rodeo leaderboard).
+- No paid services, plans or add-ons, and no new accounts without Alex.
 - Secrets only in `.dev.vars` (gitignored) and Worker or GitHub secrets. Never commit or print them.
-- Don't delete files outside `cms/`, `content/`, `docs/` and the files you created yourself.
+- Never commit `cms/node_modules`. Restore `docs/screenshots` after browser tests unless the change
+  is about them.
+- Anything outside a page frame (board references, notes) must never reach published content.
 
 ## Taste
 
-- The site is a visual diary for people in the know: edgy-artistic but clean, clean type, clean motion. Avoid generic template looks.
-- **Not cowboy-themed.** The Western line art belongs only to the original homepage and the rodeo mini game. Everything else (new pages, templates, system pages like 404, sign-in, empty states, default labels) stays clean and neutral, with plain wording and no Western references.
-- The editor UI is the dark Photoshop-style workspace from the mockups. Keep it calm and clear.
-- Mobile first, always. Check every public component at 390px.
+- aoost is a visual diary for people in the know: edgy-artistic but clean, clean type, clean
+  motion, "barely there" copy. Avoid generic template looks.
+- **Not cowboy-themed.** Western line art belongs only to the original homepage and the rodeo
+  game. Everything else stays clean and neutral with plain wording.
+- The editor UI is the dark, Apple "Pro apps" style workspace with frosted glass panels. Keep it
+  calm and clear. It must also work for non-designers (teammates at Aerobotics): plain words,
+  content before layout controls.
+- Mobile first, always.
