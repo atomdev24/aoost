@@ -1955,6 +1955,9 @@ body:has(.ed-scrub.is-scrubbing) {
 .ed-mediapop-actions .ed-btn {
   flex: 1;
 }
+.ed-mediapop-fill {
+  width: 100%;
+}
 .ed-mediapop-field {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
