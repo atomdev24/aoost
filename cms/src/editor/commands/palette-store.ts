@@ -1,3 +1,4 @@
+import { isTouchOnly } from "../touch/device";
 import { useSyncExternalStore } from "react";
 
 /**
@@ -39,7 +40,10 @@ export function usePalette<T>(sel: (s: State) => T): T {
 export const openPalette = () => set({ palette: true, cheat: false });
 export const closePalette = () => state.palette && set({ palette: false });
 export const togglePalette = () => (state.palette ? closePalette() : openPalette());
-export const openCheatSheet = () => set({ cheat: true, palette: false });
+// On a touch-only device there is no keyboard to learn, so the cheat sheet never opens.
+export const openCheatSheet = () => {
+  if (!isTouchOnly()) set({ cheat: true, palette: false });
+};
 export const closeCheatSheet = () => state.cheat && set({ cheat: false });
 export const toggleCheatSheet = () => (state.cheat ? closeCheatSheet() : openCheatSheet());
 

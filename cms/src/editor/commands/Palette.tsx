@@ -11,6 +11,7 @@ import { pageBlocks } from "./items";
 import { closePalette, noteAsked, usePalette } from "./palette-store";
 import { canRun, runAction } from "./run";
 import { ACTIONS, type ActionId } from "./registry";
+import { isTouchOnly } from "../touch/device";
 import { keyLabels, shortcutFor } from "./shortcuts";
 import "./palette.css";
 
@@ -20,6 +21,7 @@ type Row = { key: string; kind: Kind; title: string; sub?: string; keys?: string
 const CHIP: Record<Kind, string> = { claude: "Claude", connect: "Claude", page: "Page", block: "Block", insert: "Add", media: "Media", action: "Action" };
 
 const keysOf = (id: ActionId) => {
+  if (isTouchOnly()) return undefined; // no key hints without a keyboard
   const s = shortcutFor(id);
   return s ? keyLabels(s) : undefined;
 };
@@ -173,7 +175,7 @@ function PaletteDialog() {
         <footer className="ed-pal-foot">
           {note ? (
             <span role="status">{note}</span>
-          ) : (
+          ) : isTouchOnly() ? null : (
             <span className="ed-pal-hint">
               ↑↓ choose · ↵ open · <kbd>{keyLabels(shortcutFor("palette.open")!)[0]}</kbd>↵ ask Claude · Esc close
             </span>
