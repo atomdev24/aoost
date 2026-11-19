@@ -26,3 +26,8 @@ Each entry: what is needed, exact steps, and what is stubbed meanwhile.
 - Since Editor Sections 2 and 3 the Publish button shows "Rebuilding…" until the deploy Action for that commit finishes, then "Live". It reads the run's status through `GET /api/editor/publish/status`, using the same `GITHUB_TOKEN` the editor publishes with.
 - If the token can't read Actions, the editor waits about 25 seconds, then shows "Live" with the note "GitHub didn't report the rebuild. It usually takes about a minute." Nothing breaks.
 - To get the real status: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → the editor's token → Repository permissions → **Actions: Read-only** → Save. (A classic token with the `repo` scope can already read it.) No new secret is needed.
+
+## Make the editor sign-in last longer
+- The editor now installs as a home-screen app (Share → Add to Home Screen on the iPhone). With the default Access session it keeps asking for the email code.
+- Cloudflare dashboard → Zero Trust → Access → Applications → the editor app → Edit → Session Duration → **1 month** → Save.
+- Only you can do this (it's your Cloudflare account). Nothing is stubbed: until then the app works, it just asks for the code more often.
