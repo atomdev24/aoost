@@ -6,6 +6,7 @@ import { updateNavItem } from "../../model/nav";
 import { BREAKPOINT_LABEL, type Breakpoint, type Page, type Site } from "../../schema";
 import { currentPage, megaItemId, useEditor } from "../store";
 import { activateBreakpoint } from "./bridge";
+import { pieceFromClick, selectPiece } from "../canvas/ResizePiece";
 import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT } from "./frame-css";
 import { attachKeys } from "./keys";
 import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
@@ -113,7 +114,10 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     };
     const click = (e: MouseEvent) => {
       e.preventDefault();
+      // A click on a project piece also picks it, so its handles show once this frame is active.
+      const piece = pieceFromClick(doc, e, bp);
       activateBreakpoint(bp, blockIdAt(e.target));
+      selectPiece(piece);
     };
     doc.addEventListener("wheel", wheel, { passive: false });
     doc.addEventListener("click", click, true);

@@ -1803,12 +1803,54 @@ body:has(.ed-scrub.is-scrubbing) {
 .ed-inspector .ed-mediarow.is-over .ed-mediarow-main {
   background: rgba(10, 132, 255, 0.16);
 }
+/* A piece whose size differs on this size. */
+.ed-inspector .ed-sizefield.is-over .ed-scrub {
+  background: rgba(10, 132, 255, 0.16);
+}
 .ed-inspector .ed-field > .ed-label.is-over {
   padding: 0;
   font-size: inherit;
 }
 
 /* ---------------------------------------------------------------- adjust image (on the canvas) */
+/* A project piece picked on the canvas: its box and corner handles (resize keeps its shape). */
+.ed-piece {
+  position: absolute;
+  inset: 0;
+  z-index: 55;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ed-piece-box {
+  position: absolute;
+  box-shadow: 0 0 0 1.5px var(--ed-accent);
+}
+.ed-piece-handle {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px;
+  background: #fff;
+  border: 1.5px solid var(--ed-accent);
+  border-radius: 2px;
+  box-sizing: border-box;
+  pointer-events: auto;
+  touch-action: none;
+}
+.ed-piece-handle.is-nw { left: 0; top: 0; cursor: nwse-resize; }
+.ed-piece-handle.is-ne { right: 0; top: 0; margin-right: -4.5px; cursor: nesw-resize; }
+.ed-piece-handle.is-se { right: 0; bottom: 0; margin-right: -4.5px; margin-bottom: -4.5px; cursor: nwse-resize; }
+.ed-piece-handle.is-sw { left: 0; bottom: 0; margin-bottom: -4.5px; cursor: nesw-resize; }
+.ed-piece-tag {
+  position: absolute;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--ed-accent);
+  color: #fff;
+  font: 600 11px var(--ed-font);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .ed-adjust {
   position: absolute;
   inset: 0;

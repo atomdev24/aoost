@@ -1,5 +1,6 @@
 import type { Fields } from "@puckeditor/core";
 import { mediaField } from "../../../editor/fields/media";
+import { sizeField } from "../../../editor/fields/size";
 import { listField, matField, onOff } from "../fields";
 import type { AoostProjectsContent } from "./AoostProjects";
 
@@ -11,6 +12,7 @@ export const fields: Fields<AoostProjectsContent> = {
     label: "Projects",
     arrayFields: {
       image: mediaField("Artwork", "image", { framed: true }),
+      size: sizeField("Size"),
       title: { type: "text", label: "Title" },
       year: { type: "text", label: "Year" },
       medium: { type: "text", label: "Medium" },

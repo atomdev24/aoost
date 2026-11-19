@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import type { z } from "zod";
-import type { Breakpoint, FrameFit, LinkTarget, Node, Page, Responsive, Site, Style } from "../schema";
+import type { Breakpoint, FrameFit, ItemSize, LinkTarget, Node, Page, Responsive, Site, Style } from "../schema";
 
 /** What a component can ask of its surroundings, on the public site and in the editor. */
 export type RenderCtx = {
@@ -51,6 +51,12 @@ export type FrameSlot = {
   kind: "img" | "bg";
   src: string;
   frame?: Responsive<FrameFit>;
+  /**
+   * Items that can be resized on the canvas (project pieces): the element that scales, relative to
+   * the node wrapper like `selector`, and the item's stored size per screen size.
+   */
+  box?: string;
+  size?: Responsive<ItemSize>;
 };
 
 export type ComponentDef<C = Record<string, unknown>> = {
