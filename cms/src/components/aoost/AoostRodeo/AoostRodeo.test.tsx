@@ -25,6 +25,15 @@ describe("AoostRodeo", () => {
     expect(html).toContain('<p class="rodeo-copy">Tap to jump.</p>');
     expect(html).toContain('{"showLeaderboard":false}');
   });
+  it("renders no heading element when the heading is empty", () => {
+    for (const heading of ["", undefined]) {
+      const html = renderNode("AoostRodeo", { ...d, heading });
+      expect(html).not.toContain("<h2");
+      expect(html).not.toContain("aria-labelledby");
+      expect(html).toContain('<section class="focus-sec" aria-label="Rodeo">');
+      expect(html).toContain('<canvas id="rodeo"');
+    }
+  });
   it("uses the same Supabase project and key as the original page", () => {
     const original = readFileSync(resolve(__dirname, "../../../../../index.html"), "utf8");
     const runtime = readFileSync(resolve(__dirname, "../runtime/shared.js"), "utf8");
