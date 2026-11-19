@@ -16,6 +16,7 @@ export function resolveLayerIconType(typeOrKind: string): LayerIconType {
     case "Spacer":
     case "AoostJournals":
     case "AoostTools":
+    case "AoostAbout":
       return "text";
     case "Image":
     case "Video":

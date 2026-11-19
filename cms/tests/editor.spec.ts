@@ -148,7 +148,7 @@ test.describe("quick edit on a phone", () => {
   test("edits text and adds a diary entry", async ({ page, request }) => {
     await resetDraft(request, password!);
     await signIn(page, password!);
-    await page.goto("/admin/?page=about");
+    await page.goto("/admin/?page=work");
     await expect(page.locator(".qe-brand span")).toHaveText("Quick edit");
     await page.locator(".qe-card textarea").nth(1).fill("Edited on a phone.");
     await page.getByRole("tab", { name: "Diary" }).click();
@@ -158,7 +158,7 @@ test.describe("quick edit on a phone", () => {
     await expect
       .poll(async () => {
         const site = await draftSite(request, password!);
-        return [site.pages.find((p: { id: string }) => p.id === "about").sections[0].children[1].content.text, site.collections.diary[0].title];
+        return [site.pages.find((p: { id: string }) => p.id === "work").sections[0].children[1].content.text, site.collections.diary[0].title];
       })
       .toEqual(["Edited on a phone.", "Phone entry"]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
