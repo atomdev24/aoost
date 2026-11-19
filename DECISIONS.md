@@ -312,3 +312,12 @@ Summary:
 - Gemini (`ask-gemini`) was out of quota (resets in about 6 days), so Claude wrote all the code.
 - I couldn't open the design canvas from this session, so the layout follows the brief's wording.
 - Nothing for BLOCKERS.md.
+
+## Share preview, dark-room viewer, sketchbook spread, About and 404 (SHARE-VIEWER.md, 19 Nov 2026)
+
+- Share image and favicons are made once by `cms/scripts/make-icons.ts` from `art/app-icon-1024.png` and committed in `cms/static/` (`og.png`, `favicon.ico`, `favicon-16/32.png`, `apple-touch-icon.png`), so they are served from the site root. `editor-phone-palette` wasn't merged yet, so this branch takes only its `art/app-icon-*.png` source files (byte-identical, so the merge won't conflict). The editor's own PWA icons stay in that branch.
+- `og:url` and `og:image` need absolute URLs, and the build had no `SITE_URL`. The build now reads the domain from the repo's `CNAME` (`shareOrigin`). Canonical links and the sitemap still follow `SITE_URL` only, so they don't change.
+- No description text: the renderer no longer writes `description` or `og:description`, and the descriptions were removed from `content/site.json` and the home page. Page settings can still hold one, but it isn't output.
+- The "Share image" setting is the existing `settings.defaultSeo.image`, edited from a new "Site" group at the bottom of the Theme panel. Empty means the clover (`/og.png`). A page's own share image still wins. `og:image:width/height` are always 1200 × 630, and the setting's label asks for that size.
+- Viewer plaque fields reuse the pieces' existing `title`, `medium` and `year` and add `note`. An existing `link` also counts as plaque content and shows as "open ↗" on the card, so it stays reachable. Tags are no longer shown in the viewer (the old caption strip is gone).
+- The viewer is one sequence per opener: the projects table steps through its pieces, and the reel steps through the reel. Arrows wrap at the ends and are hidden for a single piece. Swipe works on touch and pen only, so a mouse drag doesn't turn.

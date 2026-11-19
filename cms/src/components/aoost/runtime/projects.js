@@ -40,10 +40,12 @@ export function initProjects(){
   function bindDrag(st){const el=st.el;let sx,sy,ox,oy,moved=false,id=null;
     el.addEventListener('pointerdown',e=>{id=e.pointerId;el.setPointerCapture(id);sx=e.clientX;sy=e.clientY;ox=st.x;oy=st.y;moved=false;el.style.zIndex=++z+10;el.style.transition='box-shadow .2s';el.classList.add('lifted');st.rot*=.4;place(st);});
     el.addEventListener('pointermove',e=>{if(e.pointerId!==id)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.hypot(dx,dy)>6)moved=true;const W=table.clientWidth,H=table.clientHeight;st.x=Math.max(-el.offsetWidth*.3,Math.min(W-el.offsetWidth*.7,ox+dx));st.y=Math.max(-20,Math.min(H-el.offsetHeight*.6,oy+dy));st.rot=Math.max(-10,Math.min(10,dx*.04));place(st);});
-    const up=e=>{if(e.pointerId!==id)return;id=null;el.classList.remove('lifted');st.rot=(Math.random()-.5)*8;el.style.transition=reduce?'none':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);if(!moved)openViewer(st);};
-    el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{moved=true;up(e);});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openViewer(st);}});}
-  /* a piece carries its project's details, so the viewer can caption it */
-  const itemOf=src=>{const p=META.get(src)||{};return {src,alt:p.title||'',caption:p};};
+    const up=e=>{if(e.pointerId!==id)return;id=null;el.classList.remove('lifted');st.rot=(Math.random()-.5)*8;el.style.transition=reduce?'none':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);if(!moved)open(st);};
+    el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{moved=true;up(e);});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open(st);}});}
+  /* the whole table is the room's sequence, starting from the piece tapped */
+  function open(st){openViewer(els.map(s=>s.item),els.indexOf(st),st.el);}
+  /* a piece carries its project's plaque (title, medium, year, note, link); the viewer shows it only if there's text */
+  const itemOf=src=>{const p=META.get(src)||{};return {src,alt:p.title||'',plaque:{title:p.title,medium:p.medium,year:p.year,note:p.note,link:p.link}};};
   (ARTWORK.length?ARTWORK.map(itemOf):PH.map(ph=>({ph}))).forEach(addPiece);
   requestAnimationFrame(()=>layout(false));
   let lastTW=table.clientWidth;new ResizeObserver(()=>{if(Math.abs(table.clientWidth-lastTW)>40){lastTW=table.clientWidth;layout(false);}}).observe(table);
