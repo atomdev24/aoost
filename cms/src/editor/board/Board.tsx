@@ -210,7 +210,8 @@ export function Board() {
           .filter((f) => f.bp !== bp)
           .map((f) => (
             <div key={f.bp} className="bd-frame" data-bp={f.bp} style={{ left: f.x, top: f.y, width: f.w, height: f.h }}>
-              <LiveFrame bp={f.bp} visible={!size.w || isVisible(view, f, size.w, size.h)} />
+              {/* A screen of margin, so a frame panned back into view is already drawn (it used to blank, then pop in). */}
+              <LiveFrame bp={f.bp} visible={!size.w || isVisible(view, f, size.w, size.h, Math.max(size.w, size.h))} />
               <LoadingCover bp={f.bp} pageId={pageId} slug={page.slug} ready={ready[f.bp] && !hold} />
             </div>
           ))}

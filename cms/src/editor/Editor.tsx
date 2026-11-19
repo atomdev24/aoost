@@ -57,6 +57,7 @@ export function Editor() {
   const pageId = useEditor((s) => s.pageId);
   const bp = useEditor((s) => s.bp);
   const interacting = useBoard((s) => s.interacting);
+  const moving = useBoard((s) => s.moving);
   useEffect(() => attachKeys(document), []);
 
   // Initial data per page; later store changes reach Puck through <PuckSync>.
@@ -92,7 +93,7 @@ export function Editor() {
         }}
       >
         <PuckBridge />
-        <div className={`ed-shell${interacting ? " is-interacting" : ""}`}>
+        <div className={`ed-shell${interacting ? " is-interacting" : ""}${moving ? " is-moving" : ""}`}>
           <TopBar />
           <SyncNotice />
           <LeftPanel />

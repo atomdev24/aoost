@@ -1,4 +1,4 @@
-import { getBoard, panBy, zoomTo } from "./store";
+import { getBoard, markMoving, panBy, zoomTo } from "./store";
 
 /**
  * Trackpad and mouse wheel on the board: scroll pans, pinch (or ⌘/Ctrl +
@@ -7,6 +7,7 @@ import { getBoard, panBy, zoomTo } from "./store";
  */
 export function onBoardWheel(e: WheelEvent, at: { x: number; y: number }) {
   e.preventDefault();
+  markMoving();
   const scale = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
   if (e.ctrlKey || e.metaKey) {
     const dy = Math.max(-50, Math.min(50, e.deltaY * scale));
