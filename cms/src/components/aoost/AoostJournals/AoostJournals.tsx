@@ -7,6 +7,7 @@ import { shownSlots } from "../frames";
 import { aoostKit, matBand } from "../kit";
 import { css } from "./AoostJournals.styles";
 import { KRAFT_BROWN, materialCss } from "./materials.styles";
+import { roomCss } from "./room.styles";
 
 /** A page inside a journal. Empty pages show as "work in progress". */
 export const AoostJournalPage = z.object({
@@ -157,7 +158,7 @@ export const AoostJournals = defineComponent<AoostJournalsContent>({
       ],
     },
   },
-  css: css + materialCss,
+  css: css + materialCss + roomCss,
   Render: ({ content }) => (
     <Block name="journals" mat={content.mat} data={content}>
       <section className="focus-sec journals" aria-labelledby="h-jr">

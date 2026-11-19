@@ -118,7 +118,7 @@ function shelfButton(j,i){const b=document.createElement('button');b.type='butto
   b.setAttribute('aria-label',`Open journal: ${j.title}`);
   b.style.setProperty('--i',i);b.innerHTML=`${ribbon(j)}<span class="jr-cv cvx${matCls(j)}" style="${coverStyle(j)}">${coverInner(j)}</span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;
   const l=b.querySelector('.it-l');if(l){fillLayer(l,j.citems);l.querySelectorAll('[data-src]').forEach(m=>{m.src=m.dataset.src;if(m.tagName==='VIDEO'){m.autoplay=true;m.play&&m.play().catch(()=>{});}});}
-  b.addEventListener('click',()=>openJ(j,b));return b;}
+  b.addEventListener('click',()=>PREVIEW?openJ(j,b):openRoom(j,b));return b;}
 JOURNALS.forEach((j,i)=>shelf.appendChild(shelfButton(j,i)));
 
 /* ---------- pages ---------- */
@@ -144,12 +144,9 @@ const curFor=i=>Math.floor(i/2)+1+(i%2);
 /* a spread page's items (and scan) run across both pages of its spread; coordinates are from the spread's left page */
 function spreadOf(P,i){const p=P[i];if(!isObj(p)||!(p.props||{}).spread)return null;const L=i%2?i:i-1;if(L<1)return null;return {L,R:L+1,owner:i};}
 
-function build(j){
-  const leaves=[];const P=j.pages,pr=j.props||{};
-  const back=pr.back_cover_url?`--cbg:url('${url(pr.back_cover_url)}') center/cover no-repeat,${j.cbg||'#222'};--band:${j.band||'#141516'}`:coverStyle(j);
-  leaves.push({f:{cls:'cover cvx'+matCls(j),style:coverStyle(j),html:coverInner(j),citems:j.citems},b:{cls:'end',style:`--end:${j.band||'#141516'}`,html:`<span class="endtxt" style="color:#ffffffaa">if found, return to<br>aoost — cape town</span>`}});
-  const faces=[];
-  for(let k=0;k<P.length;k+=2){const a=page(P[k],k+1,j.dark),c=page(P[k+1]||{blank:true},k+2,j.dark);faces[k]=a;faces[k+1]=c;leaves.push({f:a,b:c});}
+/* every page's face (paper, scan, items), with spread pages' two-page layers on both of their pages */
+function facesOf(j){const P=j.pages;const faces=[];
+  for(let k=0;k<P.length;k+=2){faces[k]=page(P[k],k+1,j.dark);faces[k+1]=page(P[k+1]||{blank:true},k+2,j.dark);}
   // own items go in each page's layer; spreads add a second, two-page-wide layer to both pages of the spread
   P.forEach((p,i)=>{const f=faces[i];if(!f)return;f.layers=[];if(f.ed)f.layers.push({items:f.items,off:0});});
   P.forEach((p,i)=>{const s=spreadOf(P,i);if(!s)return;const items=p.items||[];
@@ -158,7 +155,17 @@ function build(j){
     if(faces[i]){faces[i].layers=faces[i].layers.filter(l=>l.sp);if(p.scan)faces[i].html=faces[i].html.replace(/<img class="full"[^>]*>/,'');}
     // one sheet across the fold: the facing page takes the spread's paper
     const other=i===s.L?s.R:s.L;if(faces[other]&&faces[i]){faces[other].cls=faces[i].cls;faces[other].html=faces[other].html.replace(/<span class="wip">[^<]*<\/span>/,'');}});
-  leaves.push({f:{cls:'end',style:`--end:${j.band||'#141516'}`,html:''},b:{cls:'backcover cvx'+matCls(j),style:back,html:matLayer(j)+(pr.wear&&pr.wear!=='none'?`<span class="jw jw-${pr.wear}"></span>`:'')+((j.bitems||[]).length?layerHTML(0):''),citems:j.bitems}});
+  return faces;}
+const insideFront=j=>({cls:'end',style:`--end:${j.band||'#141516'}`,html:`<span class="endtxt" style="color:#ffffffaa">if found, return to<br>aoost — cape town</span>`});
+const insideBack=j=>({cls:'end',style:`--end:${j.band||'#141516'}`,html:''});
+
+function build(j){
+  const leaves=[];const P=j.pages,pr=j.props||{};
+  const back=pr.back_cover_url?`--cbg:url('${url(pr.back_cover_url)}') center/cover no-repeat,${j.cbg||'#222'};--band:${j.band||'#141516'}`:coverStyle(j);
+  leaves.push({f:{cls:'cover cvx'+matCls(j),style:coverStyle(j),html:coverInner(j),citems:j.citems},b:insideFront(j)});
+  const faces=facesOf(j);
+  for(let k=0;k<P.length;k+=2)leaves.push({f:faces[k],b:faces[k+1]});
+  leaves.push({f:insideBack(j),b:{cls:'backcover cvx'+matCls(j),style:back,html:matLayer(j)+(pr.wear&&pr.wear!=='none'?`<span class="jw jw-${pr.wear}"></span>`:'')+((j.bitems||[]).length?layerHTML(0):''),citems:j.bitems}});
   return leaves;}
 function faceHTML(f,bk){
   const layers=(f.layers||[]).map(l=>l.sp?`<div class="it-l sp" style="--off:${l.off}">${l.scan?`<img class="full sp-scan" src="${esc(l.scan)}" alt="">`:''}</div>`:layerHTML(0)).join('');
@@ -173,6 +180,88 @@ function turnSound(){if(!touched)return;try{actx=actx||new (window.AudioContext|
   const src=actx.createBufferSource();src.buffer=buf;const f=actx.createBiquadFilter();f.type='bandpass';f.Q.value=.8;f.frequency.setValueAtTime(3200,t);f.frequency.exponentialRampToValueAtTime(700,t+len);
   const g=actx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.22,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+len);
   src.connect(f).connect(g).connect(actx.destination);src.start(t);src.stop(t+len);}catch(e){}}
+
+/* ---------- the dark room: a two-page spread on the book's own cover (one page on phones) ----------
+   Arrows, ← → keys and swipe turn a whole spread with a quick page flip (a crossfade under reduced motion).
+   The Atom app's preview keeps the 3D book below (openJ), so placing items on pages works as before. */
+const ROOM_ICON=d=>`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+const narrow=()=>innerWidth<768;
+function openRoom(j,trigger){
+  const P=j.pages,N=P.length,faces=facesOf(j),inF=insideFront(j),inB=insideBack(j);
+  /* spreads: [inside cover | 1], [2 | 3], … , [N | inside back]; on phones, pages 1…N */
+  const spreads=[];for(let L=-1;L<N;L+=2)spreads.push([L,L+1]);
+  const faceAt=i=>i<0?inF:i>=N?inB:faces[i];
+  const el=document.createElement('div');el.className='jv jvr';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',`Sketchbook: ${j.title}`);
+  const safeLink=j.link&&/^(https?:\/\/|\/)/.test(j.link);
+  el.innerHTML=`<div class="jvr-top"><span class="jvr-sw cvx${matCls(j)}" style="${coverStyle(j)}" aria-hidden="true">${matLayer(j)}</span>${safeLink?`<a class="jvr-t" href="${esc(j.link)}"${/^https?:/.test(j.link)?' target="_blank" rel="noopener"':''}>${esc(j.title)} ↗</a>`:`<span class="jvr-t">${esc(j.title)}</span>`}
+    <span class="jvr-ct" aria-live="polite"></span><button class="jvr-b jvr-x" type="button" aria-label="Close sketchbook">${ROOM_ICON('M6 6l12 12M18 6L6 18')}</button></div>
+    <div class="jvr-stage"><button class="jvr-b jvr-nav jvr-pv" type="button" aria-label="Previous pages">${ROOM_ICON('M15 5l-7 7 7 7')}</button>
+      <div class="jvr-book cvx${matCls(j)}" style="${coverStyle(j)}">${matLayer(j)}<div class="jvr-pages"></div></div>
+      <button class="jvr-b jvr-nav jvr-nx" type="button" aria-label="Next pages">${ROOM_ICON('M9 5l7 7-7 7')}</button></div>
+    <div class="jvr-dots" role="group" aria-label="Pages"></div>`;
+  overlays().appendChild(el);
+  const $=c=>el.querySelector(c),book=$('.jvr-book'),pages=$('.jvr-pages'),ct=$('.jvr-ct'),pv=$('.jvr-pv'),nx=$('.jvr-nx'),dots=$('.jvr-dots'),stage=$('.jvr-stage');
+  let one=narrow(),cur=0,W=0,H=0,busy=false,anims=[];
+  /* a turn asked for mid-flip finishes the running one at once */
+  function settle(){anims.forEach(a=>{a.onfinish=null;a.cancel();});anims=[];pages.replaceChildren(sheet(cur));busy=false;}
+  /* mobile: page index (0…N-1); desktop: spread index. Opening goes to where the other mode was. */
+  const count=()=>one?N:spreads.length;
+  function faceEl(i,bk){const t=document.createElement('div');t.innerHTML=faceHTML(faceAt(i),bk);const f=t.firstElementChild;fillFace(f,faceAt(i));
+    f.querySelectorAll('video[data-src],img[data-src]').forEach(m=>{m.src=m.dataset.src;if(m.tagName==='VIDEO'){m.autoplay=true;const pr=m.play&&m.play();pr&&pr.catch(()=>{});}});
+    requestAnimationFrame(()=>f.querySelectorAll('.jd-draw:not(.drawn)').forEach(d=>d.classList.add('drawn')));
+    const box=document.createElement('div');box.className='jvr-p '+(bk?'L':'R');box.appendChild(f);return box;}
+  /* the pages shown at position c: two pages (left is a back face) or one */
+  function sheet(c){const s=document.createElement('div');s.className='jvr-sheet';
+    if(one){const i=c;s.appendChild(faceEl(i,i%2===1));}else{const [L,R]=spreads[c];s.appendChild(faceEl(L,true));s.appendChild(faceEl(R,false));s.insertAdjacentHTML('beforeend','<i class="jvr-gutter" aria-hidden="true"></i>');}
+    return s;}
+  function label(c){if(one)return `${c+1} / ${N}`;const [L,R]=spreads[c],a=Math.max(0,L)+1,b=Math.min(N-1,R)+1;
+    return (L<0?`${b}`:R>=N?`${a}`:`${a}–${b}`)+` / ${N}`;}
+  function chrome(){ct.textContent=label(cur);pv.disabled=cur===0;nx.disabled=cur===count()-1;
+    if(dots.children.length!==count()){dots.innerHTML='';for(let k=0;k<count();k++){const d=document.createElement('button');d.type='button';d.className='jvr-dot';d.setAttribute('aria-label',`Go to ${one?'page':'pages'} ${label(k).split(' /')[0]}`);d.onclick=()=>go(k-cur);dots.appendChild(d);}}
+    [...dots.children].forEach((d,k)=>{d.classList.toggle('on',k===cur);d.setAttribute('aria-current',k===cur?'true':'false');});}
+  function size(){if(busy){anims.forEach(a=>{a.onfinish=null;a.cancel();});anims=[];busy=false;}const was=one;one=narrow();
+    if(was!==one){cur=one?Math.max(0,spreads[cur][0]+(spreads[cur][0]<0?1:0)):Math.floor((cur+1)/2);dots.innerHTML='';}
+    const aw=innerWidth-(one?2*52:2*112),ah=innerHeight-(one?168:184),across=one?1:2;
+    H=Math.max(120,Math.min(ah,(aw/across)*148/105));W=H*105/148;
+    el.style.setProperty('--pw',W+'px');el.style.setProperty('--ph',H+'px');el.classList.toggle('one',one);
+    pages.replaceChildren(sheet(cur));chrome();}
+  function go(d){if(busy)settle();const n=Math.max(0,Math.min(count()-1,cur+d));if(n===cur)return;
+    const fwd=n>cur,old=pages.firstElementChild,next=sheet(n);cur=n;chrome();if((j.props||{}).sound)turnSound();
+    if(RM){next.style.position='absolute';next.style.inset='0';pages.appendChild(next);busy=true;
+      const a=next.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});anims=[a];a.onfinish=()=>{anims=[];old.remove();next.style.position=next.style.inset='';busy=false;};return;}
+    flip(old,next,fwd);}
+  /* the page flip: the turning leaf carries the old page on its front and the new one on its back */
+  function flip(old,next,fwd){busy=true;
+    const oldP=[...old.querySelectorAll(':scope>.jvr-p')],newP=[...next.querySelectorAll(':scope>.jvr-p')];
+    const leaf=document.createElement('div');leaf.className='jvr-leaf '+(one?'one ':'')+(fwd?'fwd':'back');
+    let front,back,under;
+    if(one){front=oldP[0];back=null;under=next;}
+    else if(fwd){front=oldP[1];back=newP[0];under=document.createElement('div');under.className='jvr-sheet';under.append(oldP[0],newP[1]);under.insertAdjacentHTML('beforeend','<i class="jvr-gutter"></i>');}
+    else{front=oldP[0];back=newP[1];under=document.createElement('div');under.className='jvr-sheet';under.append(newP[0],oldP[1]);under.insertAdjacentHTML('beforeend','<i class="jvr-gutter"></i>');}
+    front.classList.add('lf-f');leaf.appendChild(front);if(back){back.classList.add('lf-b');leaf.appendChild(back);}
+    pages.replaceChildren(under,leaf);
+    const deg=one?(fwd?-100:100):(fwd?-180:180);
+    const a=leaf.animate([{transform:'rotateY(0deg)'},{transform:`rotateY(${deg}deg)`}],{duration:450,easing:'cubic-bezier(.45,.05,.3,1)'});
+    anims=[a];if(one)anims.push(leaf.animate([{opacity:1},{opacity:1,offset:.6},{opacity:0}],{duration:450}));
+    a.onfinish=()=>{anims=[];pages.replaceChildren(sheet(cur));busy=false;};}
+  size();addEventListener('resize',size);
+  requestAnimationFrame(()=>el.classList.add('on'));
+  pv.onclick=()=>go(-1);nx.onclick=()=>go(1);
+  /* swipe turns (there is no dragging a page) */
+  let sx=null,sy=0;stage.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;sx=e.clientX;sy=e.clientY;});
+  stage.addEventListener('pointerup',e=>{if(sx===null)return;const dx=e.clientX-sx,dy=e.clientY-sy;sx=null;if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.2)go(dx<0?1:-1);});
+  stage.addEventListener('pointercancel',()=>{sx=null;});
+  el.addEventListener('click',e=>{const f=e.target.closest('.ji-flap');if(f){e.stopPropagation();f.classList.toggle('open');return;}if(e.target===el||e.target===stage)close();});
+  const key=e=>{if(e.key==='ArrowRight'){e.preventDefault();go(1);}else if(e.key==='ArrowLeft'){e.preventDefault();go(-1);}else if(e.key==='Escape'){e.preventDefault();close();}
+    else if(e.key==='Tab'){const f=[...el.querySelectorAll('button:not(:disabled),a[href]')].filter(b=>b.offsetParent!==null);if(!f.length)return;const a=document.activeElement,first=f[0],last=f[f.length-1];
+      if(!el.contains(a)){e.preventDefault();first.focus();}else if(e.shiftKey&&a===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&a===last){e.preventDefault();first.focus();}}};
+  addEventListener('keydown',key);
+  const x=$('.jvr-x');x.onclick=close;x.focus({preventScroll:true});
+  const prevOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow='hidden';
+  function close(){el.classList.remove('on');removeEventListener('keydown',key);removeEventListener('resize',size);
+    el.querySelectorAll('video').forEach(v=>{v.pause();v.removeAttribute('src');});
+    setTimeout(()=>{el.remove();document.documentElement.style.overflow=prevOverflow;trigger&&trigger.focus({preventScroll:true});},RM?0:280);}
+}
 
 /* ---------- viewer ---------- */
 let V=null;
