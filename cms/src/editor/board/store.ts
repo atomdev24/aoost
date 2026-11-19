@@ -35,6 +35,8 @@ export type BoardState = {
   dotGrid: boolean;
   /** Each frame has drawn the page that is open (until then its last snapshot shows). */
   ready: Record<Breakpoint, boolean>;
+  /** True while the wheel or trackpad is panning or zooming (and briefly after): the glass drops its blur. */
+  moving: boolean;
 };
 
 /** Tablet and widescreen start hidden; Alex shows them when a page needs them. */
@@ -53,6 +55,7 @@ let state: BoardState = {
   positions: {},
   dotGrid: loadDotGridPref(),
   ready: NOT_READY,
+  moving: false,
 };
 const listeners = new Set<() => void>();
 const set = (patch: Partial<BoardState>) => {
@@ -169,6 +172,13 @@ export const zoomStep = (dir: 1 | -1) => zoomTo(stepZoom(state.view.zoom, dir));
 export const panBy = (dx: number, dy: number) => setView({ ...state.view, x: state.view.x + dx, y: state.view.y + dy });
 export const setLinked = (linked: boolean) => set({ linked });
 export const setSpaceDown = (spaceDown: boolean) => spaceDown !== state.spaceDown && set({ spaceDown });
+let movingTimer: ReturnType<typeof setTimeout> | undefined;
+/** The board is moving under the pointer (wheel, trackpad): mark it until it has been still for a moment. */
+export const markMoving = () => {
+  if (!state.moving) set({ moving: true });
+  clearTimeout(movingTimer);
+  movingTimer = setTimeout(() => set({ moving: false }), 220);
+};
 export const setInteracting = (interacting: boolean) => {
   if (state.interacting === interacting) return;
   set({ interacting });

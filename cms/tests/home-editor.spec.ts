@@ -120,7 +120,9 @@ test.describe("homepage in the editor", () => {
     await page.locator(".pl-chip").nth(playlists).click();
     await expect(page.locator(`.pl-list[data-i="${playlists}"] .pl-more`)).toHaveAttribute("href", "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M");
     await page.locator("#table .piece").first().evaluate((e) => e.scrollIntoView({ block: "center" }));
-    await page.locator("#table .piece").first().click();
+    // The metal clover sits on top of the first piece, so open it from the keyboard.
+    await page.locator("#table .piece").first().focus();
+    await page.keyboard.press("Enter");
     await expect(page.locator("#viewer")).toContainText("Fire breather");
     await page.keyboard.press("Escape");
     await page.setViewportSize({ width: 390, height: 844 });
