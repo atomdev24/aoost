@@ -117,7 +117,7 @@ test.describe("homepage: the original page, from aoost blocks", () => {
     await expect(page.locator(".skills")).toBeVisible({ visible: !skillsHidden }); // hidden on the live site, kept for an About page later
   });
 
-  test("a journal opens in the 3D viewer, turns pages and closes", async ({ page }) => {
+  test("a journal opens in the dark room, turns spreads and closes", async ({ page }) => {
     const { journals, sub } = homeBlock("AoostJournals");
     const first = journals[0];
     await home(page);
@@ -126,17 +126,16 @@ test.describe("homepage: the original page, from aoost blocks", () => {
     await expect(page.locator(".jr-sub")).toHaveCount(sub?.trim() ? 1 : 0);
     await page.locator("#jrShelf .jr").first().scrollIntoViewIfNeeded();
     await page.locator("#jrShelf .jr").first().click();
-    const viewer = page.locator(".jv");
+    const viewer = page.locator(".jv.jvr");
     await expect(viewer).toHaveClass(/on/);
-    await expect(viewer.locator(".jv-t")).toHaveText(first.title);
-    await expect(viewer.locator(".jv-lf.fl")).toHaveCount(1, { timeout: 4000 }); // the cover opens by itself
-    await expect(viewer.locator(".ct")).toContainText("inside cover");
-    // the stickers placed in Atom on the first spread
+    await expect(viewer.locator(".jvr-t")).toHaveText(first.title);
+    // the stickers placed in Atom on the first page
     await expect(viewer.locator(".ji-sticker img")).toHaveCount(first.pages[0].items.filter((i: { kind: string }) => i.kind === "sticker").length);
-    await viewer.locator(".nx").click();
-    await expect(viewer.locator(".jv-lf.fl")).toHaveCount(2);
+    const before = await viewer.locator(".jvr-ct").textContent();
+    await viewer.locator(".jvr-nx").click();
+    await expect(viewer.locator(".jvr-ct")).not.toHaveText(before!);
     await page.keyboard.press("ArrowLeft");
-    await expect(viewer.locator(".jv-lf.fl")).toHaveCount(1);
+    await expect(viewer.locator(".jvr-ct")).toHaveText(before!);
     await page.keyboard.press("Escape");
     await expect(page.locator(".jv")).toHaveCount(0, { timeout: 4000 });
   });

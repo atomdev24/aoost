@@ -1,5 +1,6 @@
 import type { Page, Site } from "../schema";
 import { renderPage, type RenderOptions } from "./document";
+import { renderNotFound } from "./not-found";
 import { redirectsFile } from "./redirects";
 
 export type SearchEntry = { title: string; url: string; kind: string; text: string };
@@ -38,37 +39,11 @@ export function searchIndex(site: Site): SearchEntry[] {
   return out;
 }
 
-const notFound = (site: Site): Page => ({
-  id: "not-found",
-  title: "Page not found",
-  slug: "/",
-  parentId: null,
-  status: "unlisted",
-  template: "blank",
-  seo: { title: `Not found · ${site.settings.title}` },
-  isHome: false,
-  showInNav: false,
-  overlays: [],
-  sections: [
-    {
-      id: "nf",
-      kind: "flow",
-      layout: { base: { columns: 1, gap: 18, padding: "140px 20px 96px", maxWidth: 1160 }, desktop: { padding: "200px 56px 140px" } },
-      children: [
-        { id: "nf-k", type: "Text", content: { text: "404", styleId: "label", tag: "p" }, style: { base: { color: "token:muted" } } },
-        { id: "nf-t", type: "Text", content: { text: "Page not found", styleId: "h1", tag: "h1" }, style: { base: {} } },
-        { id: "nf-d", type: "Text", content: { text: "This page doesn't exist or isn't available yet.", styleId: "body", tag: "p" }, style: { base: { color: "token:text" } } },
-        { id: "nf-b", type: "Button", content: { label: "Back to home", target: { kind: "url", url: "/" }, variant: "filled" }, style: { base: { margin: "12px 0 0" } } },
-      ],
-    },
-  ],
-});
-
 /** Render the whole site to a map of output path → file contents. Pure: no fs, no network. */
 export function buildSite(site: Site, opts: RenderOptions = {}): Record<string, string> {
   const files: Record<string, string> = {};
   for (const page of builtPages(site)) files[outputPath(page.slug)] = renderPage(site, page, opts);
-  files["404.html"] = renderPage(site, notFound(site), opts);
+  files["404.html"] = renderNotFound(site, opts);
   files["_redirects"] = redirectsFile(site);
   files["search.json"] = JSON.stringify(searchIndex(site));
   files["robots.txt"] = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\nDisallow: /preview\n${opts.siteUrl ? `Sitemap: ${opts.siteUrl.replace(/\/$/, "")}/sitemap.xml\n` : ""}`;

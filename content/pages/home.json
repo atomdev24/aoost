@@ -6,8 +6,7 @@
   "status": "published",
   "template": "blank",
   "seo": {
-    "title": "aoost",
-    "description": "Alex, Cape Town. Projects, playlists and a wall to draw on."
+    "title": "aoost"
   },
   "isHome": true,
   "showInNav": false,

@@ -4,7 +4,7 @@
 //   static/, ../art, ../assets/fonts are copied as they are. dist/admin is left alone.
 import { build } from "esbuild";
 import sharp from "sharp";
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildSite } from "../src/render/build";
@@ -20,7 +20,9 @@ mkdirSync(dist, { recursive: true });
 for (const entry of readdirSync(dist)) if (entry !== "admin") rmSync(resolve(dist, entry), { recursive: true, force: true });
 
 const site = loadSite(repo);
-const files = buildSite(site, { siteUrl: process.env.SITE_URL || undefined, assetVersion: Date.now().toString(36) });
+// Share tags need absolute URLs; the site's own domain comes from the repo's CNAME file.
+const cname = existsSync(resolve(repo, "CNAME")) ? readFileSync(resolve(repo, "CNAME"), "utf8").trim() : "";
+const files = buildSite(site, { siteUrl: process.env.SITE_URL || undefined, shareOrigin: cname ? `https://${cname}` : undefined, assetVersion: Date.now().toString(36) });
 for (const [path, body] of Object.entries(files)) {
   const file = resolve(dist, path);
   mkdirSync(dirname(file), { recursive: true });

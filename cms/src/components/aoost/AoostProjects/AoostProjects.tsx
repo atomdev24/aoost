@@ -12,7 +12,9 @@ export const AoostProject = z.object({
   title: z.string().optional(),
   year: z.string().optional(),
   medium: z.string().optional(),
-  /** Where the piece leads (shown as "open" in the viewer). */
+  /** Plaque note: shown under the title on the piece's plaque in the viewer (title, medium, year and note are all optional). */
+  note: z.string().optional(),
+  /** Where the piece leads (shown as "open" on the plaque). */
   link: z.string().optional(),
   tags: z.array(z.string()).optional(),
   /** A cut-out sticker: no white card or tape, just its own shape and shadow. */
@@ -44,8 +46,6 @@ export type AoostProjectsContent = z.infer<typeof AoostProjectsContent>;
 
 const extraCss = `
 .ao .ao-b[data-ao="projects"] .who-row{margin-bottom:var(--s9)}
-.ao .viewer .stage{position:relative}
-.ao .viewer .vcap{position:absolute;left:0;right:0;bottom:0;margin:0;padding:10px 12px;text-align:center;font:400 var(--t-xs)/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:linear-gradient(rgba(20,21,22,0),rgba(20,21,22,.7))}
 .ao .table.ao-static{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:28px 22px;align-items:center;padding:28px 22px;min-height:0}
 .ao .table.ao-static .piece{position:relative}
 .ao .table.ao-static .piece:nth-child(odd){transform:rotate(-3deg)}

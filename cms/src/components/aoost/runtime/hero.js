@@ -15,14 +15,14 @@ export function initHero(){
   if(reel&&hrBar){
     /* the strip's own images; left empty it reuses the projects' artwork, like the original */
     const projects=(blockData('projects')||{}).projects||[];
-    const CAROUSEL=(D.reel||[]).filter(r=>r&&r.src),ARTWORK=projects.filter(p=>p&&p.image&&!p.hidden).map(p=>({src:p.image,alt:p.title}));
-    const REEL=(CAROUSEL.length?CAROUSEL:ARTWORK).map(r=>({src:r.src,alt:r.alt}));
+    const CAROUSEL=(D.reel||[]).filter(r=>r&&r.src),ARTWORK=projects.filter(p=>p&&p.image&&!p.hidden).map(p=>({src:p.image,alt:p.title,plaque:{title:p.title,medium:p.medium,year:p.year,note:p.note,link:p.link}}));
+    const REEL=(CAROUSEL.length?CAROUSEL:ARTWORK).map(r=>({src:r.src,alt:r.alt,plaque:r.plaque}));
     const reelItems=REEL.length?REEL:[{fnArt:monkey},{ph:PH[0]},{fnArt:pinkField},{ph:PH[1]},{fnArt:skyField},{ph:PH[2]},{fnArt:orangeField},{ph:PH[4]}];
     reel.innerHTML='';
     reelItems.forEach((it,i)=>{const b=document.createElement('button');b.className='hr-slide';b.setAttribute('aria-label','Open artwork '+(i+1)+' of '+reelItems.length);
       if(it.src){const img=new Image();img.alt='';img.src=it.src;img.decoding='async';img.loading=i?'lazy':'eager';b.appendChild(img);}
       else{const cv=document.createElement('canvas');b.appendChild(cv);new ResizeObserver(()=>{const[c,w,h]=fit(cv);if(it.fnArt){it.fnArt(c,w,h);}else{c.fillStyle=C.paper;c.fillRect(0,0,w,h);const pc=placeholderCanvas(it.ph,400),s=Math.min(w/pc.width,h/pc.height)*.8;c.drawImage(pc,(w-pc.width*s)/2,(h-pc.height*s)/2,pc.width*s,pc.height*s);}}).observe(cv);}
-      b.addEventListener('click',()=>openViewer({item:it}));reel.appendChild(b);});
+      b.addEventListener('click',()=>openViewer(reelItems,i,b));reel.appendChild(b);});
     let hrIdx=0,hrT0=performance.now(),hrHold=0,hrOn=true;const HR_DUR=Math.max(1000,(+D.reelSeconds||5.2)*1000);
     ['pointerdown','touchstart','wheel','focusin'].forEach(ev=>reel.addEventListener(ev,()=>{hrHold=performance.now()+4000;},{passive:true}));
     let hrScrollT;reel.addEventListener('scroll',()=>{clearTimeout(hrScrollT);hrScrollT=setTimeout(()=>{hrIdx=Math.round(reel.scrollLeft/Math.max(1,reel.clientWidth));hrT0=performance.now();},120);},{passive:true});

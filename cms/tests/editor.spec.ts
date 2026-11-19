@@ -149,7 +149,7 @@ test.describe("quick edit on a phone (?quick)", () => {
     await resetDraft(request, password!);
     await signIn(page, password!);
     // Phones now get the full editor; the quick-edit form stays at ?quick.
-    await page.goto("/admin/?page=about&quick");
+    await page.goto("/admin/?page=work&quick");
     await expect(page.locator(".qe-brand span")).toHaveText("Quick edit");
     await page.locator(".qe-card textarea").nth(1).fill("Edited on a phone.");
     await page.getByRole("tab", { name: "Diary" }).click();
@@ -159,7 +159,7 @@ test.describe("quick edit on a phone (?quick)", () => {
     await expect
       .poll(async () => {
         const site = await draftSite(request, password!);
-        return [site.pages.find((p: { id: string }) => p.id === "about").sections[0].children[1].content.text, site.collections.diary[0].title];
+        return [site.pages.find((p: { id: string }) => p.id === "work").sections[0].children[1].content.text, site.collections.diary[0].title];
       })
       .toEqual(["Edited on a phone.", "Phone entry"]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);

@@ -313,6 +313,21 @@ Summary:
 - I couldn't open the design canvas from this session, so the layout follows the brief's wording.
 - Nothing for BLOCKERS.md.
 
+## Share preview, dark-room viewer, sketchbook spread, About and 404 (SHARE-VIEWER.md, 19 Nov 2026)
+
+- Share image and favicons are made once by `cms/scripts/make-icons.ts` from `art/app-icon-1024.png` and committed in `cms/static/` (`og.png`, `favicon.ico`, `favicon-16/32.png`, `apple-touch-icon.png`), so they are served from the site root. `editor-phone-palette` wasn't merged yet, so this branch takes only its `art/app-icon-*.png` source files (byte-identical, so the merge won't conflict). The editor's own PWA icons stay in that branch.
+- `og:url` and `og:image` need absolute URLs, and the build had no `SITE_URL`. The build now reads the domain from the repo's `CNAME` (`shareOrigin`). Canonical links and the sitemap still follow `SITE_URL` only, so they don't change.
+- No description text: the renderer no longer writes `description` or `og:description`, and the descriptions were removed from `content/site.json` and the home page. Page settings can still hold one, but it isn't output.
+- The "Share image" setting is the existing `settings.defaultSeo.image`, edited from a new "Site" group at the bottom of the Theme panel. Empty means the clover (`/og.png`). A page's own share image still wins. `og:image:width/height` are always 1200 × 630, and the setting's label asks for that size.
+- Viewer plaque fields reuse the pieces' existing `title`, `medium` and `year` and add `note`. An existing `link` also counts as plaque content and shows as "open ↗" on the card, so it stays reachable. Tags are no longer shown in the viewer (the old caption strip is gone).
+- The viewer is one sequence per opener: the projects table steps through its pieces, and the reel steps through the reel. Arrows wrap at the ends and are hidden for a single piece. Swipe works on touch and pen only, so a mouse drag doesn't turn.
+- Sketchbooks open into a new dark room (`openRoom` in `runtime/journals.js`, styles in `AoostJournals/room.styles.ts`). The Atom app's preview (`?atom-preview=1`), where items are placed on pages, still uses the 3D book (`openJ`), so that editor works as before. Pages are built by the same `facesOf`/`faceHTML` code, so paper, scans, items and two-page spreads look the same.
+- Spreads are [inside cover | 1], [2 | 3] … [last | inside back], matching where pages sat in the 3D book. The counter reads "2–3 / 12", or one number on the first and last spread. Dots are one per spread (one per page on phones) and are clickable.
+- The old tap-to-zoom, wheel-to-turn, pointer tilt and the "tap the edge" hint are gone from the public viewer (the brief asks for arrows, keys and swipe, with no drag). The turn sound still plays for books that have it switched on.
+- A turn asked for during a flip (a quick double ←) finishes the running flip at once instead of being dropped.
+- About is built from aoost blocks so it sits on the cutting mat: a new small `AoostAbout` block (label, the line, byline, hairline, and/or the socials as links) is placed before and after a copy of the homepage's `AoostTools` content (heading "Skills", same tools, bars and grow-in animation). The homepage's hidden skills section is unchanged. The page stays a draft, and its old placeholder text, sun drawing and footer global were removed ("no other text"). The quick-edit phone test now edits the Work page, since About has no plain text nodes left.
+- The 404 is its own small document (`render/not-found.ts`): pure black, the clover (`/art/app-icon-512.png`, sharp at 200px on retina) turning once every 40s (still under reduced motion), and `404 · back`. It has the same share and favicon tags as other pages, but no nav, site script or fonts. It is still `dist/404.html`, which wrangler serves for unknown paths.
+
 ## Phone editing, the command palette and shortcuts (19 Nov 2026, EDITOR-PHONE-PALETTE.md)
 
 - Phones get the full editor. The quick-edit form is no longer the phone default; it stays at `/admin/?quick` (its browser test now opens it there). Why: Alex chose "same as desktop".
