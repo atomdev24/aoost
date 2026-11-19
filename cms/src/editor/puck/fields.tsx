@@ -98,7 +98,7 @@ export const contentHeading: CustomField<undefined> = {
   label: "Content",
   render: () => (
     <h4 className="ed-igroup-title ed-igroup-solo">
-      Content <span>same on every breakpoint</span>
+      Content <span>same on every screen size</span>
     </h4>
   ),
 };
@@ -253,12 +253,13 @@ export const layoutField = (kind: Section["kind"]): CustomField<Responsive<Secti
   label: "Section layout",
   render: ({ value, onChange }) => (
     <>
+      {/* Background first: its picture or video is the section's content. */}
+      <InspectorGroup title="Background">
+        <ResponsiveEditor value={value} onChange={onChange} rows={SECTION_ROWS} ctx={{ parentKind: kind }} groups={["Background"]} />
+      </InspectorGroup>
       <InspectorGroup title="Layout">
         {kind === "grid" ? <SplitBar value={value} onChange={onChange} /> : null}
         <ResponsiveEditor value={value} onChange={onChange} rows={SECTION_ROWS} ctx={{ parentKind: kind }} groups={["Layout"]} />
-      </InspectorGroup>
-      <InspectorGroup title="Frame">
-        <ResponsiveEditor value={value} onChange={onChange} rows={SECTION_ROWS} ctx={{ parentKind: kind }} groups={["Background"]} />
       </InspectorGroup>
     </>
   ),

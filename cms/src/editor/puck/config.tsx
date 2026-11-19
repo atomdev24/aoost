@@ -12,12 +12,13 @@ function nodeConfig(def: ComponentDef): ComponentConfig {
   return {
     label: def.label,
     inline: true,
-    // Inspector order: Layout and Frame (per breakpoint), then Content (shared), Motion, Visible on.
+    // Inspector order: Content first (shared, what most people came to change), then Layout and
+    // Frame (per screen size), Motion, Visible on.
     fields: {
-      style: styleField(!!def.framed),
-      ...(def.framed ? { frame: frameField } : {}),
       ...(Object.keys(contentFields[def.type] ?? {}).length ? { __content: contentHeading } : {}),
       ...contentFields[def.type],
+      style: styleField(!!def.framed),
+      ...(def.framed ? { frame: frameField } : {}),
       effects: effectsField,
       __visible: visibleOnField,
       name: { type: "text", label: "Layer name" },
