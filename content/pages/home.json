@@ -306,9 +306,6 @@
           "content": {
             "mat": "dark",
             "heading": "Playlists",
-            "crumbBold": "aoost",
-            "crumb": " / Page 1 / playlist",
-            "hint": "Tap play on the player below. Tap a disc to switch playlists.",
             "playlists": [
               {
                 "title": "Rock",

@@ -21,7 +21,7 @@ REGIONS = {
     "AoostViewer": [(77, 83)],
     "AoostJournals": [(229, 386)],
     "AoostTools": [(405, 415)],
-    "AoostPlaylistBand": [(87, 142), (149, 180), (418, 427)],
+    # AoostPlaylistBand: written by hand since the sleeve-and-tracklist redesign (Nov 2026); not ported any more.
     "AoostDrawingWall": [(430, 524)],
     "AoostRodeo": [(547, 550), (559, 574)],
     "AoostFooter": [(526, 526), (552, 555)],

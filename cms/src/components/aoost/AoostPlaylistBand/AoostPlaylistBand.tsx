@@ -1,59 +1,106 @@
 import { z } from "zod";
+import generated from "../../../generated/playlists.json";
 import { ResponsiveFrameFit } from "../../../schema";
 import { defineComponent } from "../../types";
 import { Block, Head } from "../Block";
 import { shownSlots } from "../frames";
 import { aoostKit, matBand } from "../kit";
+import { fmtDuration, spotifyId, type GeneratedPlaylists, type Track } from "./spotify";
 import { css } from "./AoostPlaylistBand.styles";
 
 export const AoostPlaylist = z.object({
-  /** Shown until Spotify answers with the playlist's real name (on the site Spotify's name wins). */
+  /** The name on the chip. */
   title: z.string(),
   /** A Spotify playlist link, or just its id. */
   spotify: z.string(),
-  /** Your own cover (square, 1080 × 1080). Without one the Spotify cover is used. */
+  /** Your own cover (square, 1080 × 1080), on the sleeve and the disc's label. */
   cover: z.string().optional(),
   /** Framing of the cover, per screen size. */
   frame: ResponsiveFrameFit.optional(),
-  /** The frame's colour behind the cover while it loads. */
+  /** The sleeve's colour behind the cover while it loads. */
   color: z.string().optional(),
   hidden: z.boolean().optional(),
+  /** Typed-in tracks, used instead of the list fetched from Spotify (for when the fetch fails). */
+  tracks: z.array(z.object({ title: z.string(), artist: z.string().optional() })).optional(),
 });
+export type AoostPlaylist = z.infer<typeof AoostPlaylist>;
 
 export const AoostPlaylistBandContent = z.object({
   mat: z.enum(["none", "light", "dark"]),
   heading: z.string(),
-  /** The breadcrumb over the frames: the bold part, then the rest. */
-  crumbBold: z.string(),
-  crumb: z.string(),
-  /** The line shown on phones, where the Spotify player itself has to be tapped. */
-  hint: z.string(),
   playlists: z.array(AoostPlaylist),
 });
 export type AoostPlaylistBandContent = z.infer<typeof AoostPlaylistBandContent>;
 
-/** Spotify calls them "Disc - 1 - Rock"; on the canvas that reads "Disc 1 · Rock" (same rule as the script). */
-export function frameName(title: string, i: number): string {
-  const m = /disc\s*-?\s*(\d+)\s*-\s*(.+)/i.exec(title);
-  return m ? `Disc ${m[1]} · ${m[2]}` : title.includes(" - ") ? title.split(/\s+-\s+/).join(" · ") : `Disc ${i + 1} · ${title}`;
+/** How many tracks show before "+ N more". */
+export const SHOWN_TRACKS = 8;
+
+const FETCHED = (generated as GeneratedPlaylists).playlists;
+
+/** The tracks to list: the manual override when it has rows, else the copy fetched from Spotify at build time. */
+export function tracksFor(p: AoostPlaylist, fetched: GeneratedPlaylists["playlists"] = FETCHED): Track[] {
+  const manual = (p.tracks ?? []).filter((t) => t.title?.trim());
+  if (manual.length) return manual.map((t) => ({ title: t.title.trim(), artist: t.artist?.trim() ?? "", durationMs: 0, uri: "" }));
+  return fetched[spotifyId(p.spotify)]?.tracks ?? [];
+}
+
+const pad = (n: number) => String(n).padStart(2, "0");
+
+export function Tracklist({ playlist, tracks, index, shown }: { playlist: AoostPlaylist; tracks: Track[]; index: number; shown: boolean }) {
+  const first = tracks.slice(0, SHOWN_TRACKS);
+  const more = tracks.length - first.length;
+  const open = `https://open.spotify.com/playlist/${spotifyId(playlist.spotify)}`;
+  return (
+    <div className="pl-list" data-i={index} hidden={!shown}>
+      {first.length ? (
+        <ol className="pl-tracks" aria-label={`${playlist.title} tracks`}>
+          {first.map((t, k) => {
+            const inner = (
+              <>
+                <span className="pl-n">{pad(k + 1)}</span>
+                <span className="pl-tt">
+                  <span className="pl-ti">{t.title}</span>
+                  {t.artist ? <span className="pl-ar"> · {t.artist}</span> : null}
+                </span>
+                <span className="pl-du">{fmtDuration(t.durationMs)}</span>
+              </>
+            );
+            return (
+              <li key={k}>
+                {t.uri ? (
+                  <button className="pl-track" type="button" data-uri={t.uri} aria-current={k === 0 ? "true" : undefined}>
+                    {inner}
+                  </button>
+                ) : (
+                  <span className="pl-track" aria-current={k === 0 ? "true" : undefined}>
+                    {inner}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      ) : null}
+      <a className="pl-more" href={open} target="_blank" rel="noopener">
+        {more > 0 ? `+ ${more} more · open in Spotify ↗` : "open in Spotify ↗"}
+      </a>
+    </div>
+  );
 }
 
 export const AoostPlaylistBand = defineComponent<AoostPlaylistBandContent>({
   type: "AoostPlaylistBand",
-  label: "Playlists: discs and the mini player",
+  label: "Playlists: sleeve and tracklist",
   category: "aoost",
   kit: aoostKit,
   band: matBand,
   schema: AoostPlaylistBandContent,
   frames: (content) =>
-    shownSlots(content.playlists, (p) => !!p.spotify && !p.hidden, (p, i, k) => (p.cover ? { path: ["playlists", i], label: `${p.title} cover`, kind: "img", selector: `.cv-frames>.cv-frame:nth-child(${k})>.disc>img`, src: p.cover } : null)),
+    shownSlots(content.playlists, (p) => !!p.spotify && !p.hidden, (p, i, k) => (p.cover ? { path: ["playlists", i], label: `${p.title} cover`, kind: "img", selector: `.pl-sleeves>.pl-rec:nth-child(${k})>.pl-sleeve>img`, src: p.cover } : null)),
   defaults: {
     content: {
       mat: "dark",
-      heading: "playlists",
-      crumbBold: "aoost",
-      crumb: " / Page 1 / playlist",
-      hint: "Tap play on the player below. Tap a disc to switch playlists.",
+      heading: "Playlists",
       // Today's live playlists.
       playlists: [
         { title: "Rock", spotify: "2FeVxQ6ZPLOAuoejGJj9Fb", cover: "/art/cover-disc1.jpg" },
@@ -65,82 +112,42 @@ export const AoostPlaylistBand = defineComponent<AoostPlaylistBandContent>({
   css,
   Render: ({ content }) => {
     const list = content.playlists.filter((p) => p.spotify && !p.hidden);
+    // The script only needs each playlist's id, in chip order.
+    const data = { playlists: list.map((p) => ({ id: spotifyId(p.spotify) })) };
     return (
-      <Block name="playlists" mat={content.mat} data={content}>
-        <section className="cv focus-sec" id="band" aria-labelledby="h-pl">
-          <div className="cv-in" id="cvIn">
-            <Head id="h-pl" title={content.heading} index={3} className="cv-head" />
-            <p className="cv-pg" id="h-discs">
-              <b>{content.crumbBold}</b>
-              {content.crumb}
-            </p>
-            {/* The script builds these frames (and keeps them in step with Spotify); this is the same markup for the first paint and the editor. */}
-            <div className="cv-frames" id="discs" role="group" aria-label="Playlists">
+      <Block name="playlists" mat={content.mat} data={data}>
+        <section className="pl focus-sec" id="band" aria-labelledby="h-pl">
+          <div className="pl-in">
+            <Head id="h-pl" title={content.heading} index={3} className="pl-head" />
+            <div className="pl-chips" role="group" aria-label="Playlists">
               {list.map((p, i) => (
-                <div key={i} className="cv-frame" data-on={i === 0 ? 1 : 0}>
-                  <span className="cv-fl">{frameName(p.title, i)}</span>
-                  <button className="disc" aria-pressed={i === 0} aria-label={`${p.title} playlist`} style={p.color ? { background: p.color } : undefined}>
-                    {p.cover ? <img src={p.cover} alt="" decoding="async" /> : null}
-                  </button>
-                  <div className="cv-sel" aria-hidden="true">
-                    <i />
-                    <i />
-                    <i />
-                    <i />
-                    <em />
-                  </div>
-                </div>
+                <button key={i} className="pl-chip" type="button" data-i={i} aria-pressed={i === 0}>
+                  {p.title}
+                </button>
               ))}
             </div>
-            <div className="cv-cursor" id="cvCursor" aria-hidden="true">
-              <svg viewBox="0 0 18 18">
-                <path d="M2 1.5l13 6.2-5.6 1.6-2.4 5.3z" fill="#F24E9C" stroke="#fff" strokeWidth="1.2" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div className="cv-tool" id="mw">
-              <button className="cv-b cv-skip" id="mwPrev" aria-label="Previous playlist">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M6 6h2v12H6z" fill="currentColor" />
-                  <path d="M9.5 12l8.5 6V6z" fill="currentColor" />
-                </svg>
-              </button>
-              <button className="cv-b cv-play" id="mwPlay" aria-label="Play" />
-              <button className="cv-b cv-skip" id="mwNext" aria-label="Next playlist">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M16 6h2v12h-2z" fill="currentColor" />
-                  <path d="M6 6v12l8.5-6z" fill="currentColor" />
-                </svg>
-              </button>
-              <span className="cv-sep" />
-              <div className="cv-mid">
-                <div className="cv-t">
-                  <span id="mwTitle">{list[0]?.title ?? ""}</span>
-                  <span className="cv-time" id="mwTime">
-                    00:00 / 00:00
-                  </span>
-                </div>
-                <div className="cv-bar" id="mwWave" role="slider" tabIndex={0} aria-label="Playback position" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}>
-                  <b id="mwFill" />
+            <div className="pl-stage">
+              <div className="pl-sleeves">
+                {list.map((p, i) => (
+                  <figure key={i} className="pl-rec" data-i={i} hidden={i !== 0}>
+                    <div className="pl-sleeve" style={p.color ? { background: p.color } : undefined}>
+                      {p.cover ? <img src={p.cover} alt="" decoding="async" /> : null}
+                    </div>
+                    <div className="pl-disc" aria-hidden="true">
+                      <span className="pl-lbl">{p.cover ? <img src={p.cover} alt="" decoding="async" /> : null}</span>
+                    </div>
+                  </figure>
+                ))}
+              </div>
+              <div className="pl-side">
+                {list.map((p, i) => (
+                  <Tracklist key={i} playlist={p} tracks={tracksFor(p)} index={i} shown={i === 0} />
+                ))}
+                <div className="pl-player">
+                  <div id="spHost" />
                 </div>
               </div>
-              <span className="cv-sep" />
-              <a className="cv-b" id="mwOpen" href="https://open.spotify.com/" target="_blank" rel="noopener" aria-label="Open in Spotify">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" strokeWidth="2" />
-                </svg>
-              </a>
             </div>
-          </div>
-          <p className="sp-hint">
-            <i aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="12" height="12">
-                <path d="M7 4.5v15l12.5-7.5z" fill="#fff" />
-              </svg>
-            </i>
-            {content.hint}
-          </p>
-          <div className="sp-host" aria-hidden="true">
-            <div id="spHost" />
           </div>
         </section>
       </Block>
