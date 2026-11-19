@@ -79,11 +79,43 @@ describe("renderPage", () => {
   it("escapes content", () => {
     const s = clone();
     (page("about", s).sections[0]!.children[1]!.content as { text: string }).text = '<script>alert(1)</script> "x"';
-    page("about", s).seo.description = '"><script>';
+    page("about", s).seo.title = '"><script>';
     const out = renderPage(s, page("about", s));
     expect(out).not.toContain("<script>alert(1)");
     expect(out).toContain("&lt;script&gt;alert(1)");
     expect(out).toContain('content="&quot;&gt;&lt;script&gt;"');
+  });
+});
+
+describe("share preview and favicon", () => {
+  const home = buildSite(site, { shareOrigin: "https://alexoostendurp.com" })["index.html"]!;
+  it("puts the Open Graph and Twitter tags on a built page, with the clover image by default", () => {
+    expect(home).toContain('<meta property="og:title" content="aoost">');
+    expect(home).toContain('<meta property="og:type" content="website">');
+    expect(home).toContain('<meta property="og:url" content="https://alexoostendurp.com/">');
+    expect(home).toContain('<meta property="og:image" content="https://alexoostendurp.com/og.png">');
+    expect(home).toContain('<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">');
+    expect(home).toContain('<meta name="twitter:card" content="summary_large_image">');
+  });
+  it("has no description text, even when one is set", () => {
+    const s = clone();
+    page("home", s).seo.description = "Something";
+    s.settings.defaultSeo.description = "Something else";
+    const out = renderPage(s, page("home", s));
+    expect(out).not.toMatch(/description/);
+  });
+  it("uses the share image from the site settings, and the page's own over that", () => {
+    const s = clone();
+    s.settings.defaultSeo.image = "/media/share.jpg";
+    expect(renderPage(s, page("work", s), { shareOrigin: "https://x.com" })).toContain('<meta property="og:image" content="https://x.com/media/share.jpg">');
+    page("work", s).seo.image = "/media/work.jpg";
+    expect(renderPage(s, page("work", s), { shareOrigin: "https://x.com" })).toContain('content="https://x.com/media/work.jpg"');
+  });
+  it("links the clover favicons and the apple-touch icon", () => {
+    expect(home).toContain('<link rel="icon" href="/favicon.ico" sizes="any">');
+    expect(home).toContain('<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">');
+    expect(home).toContain('<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">');
+    expect(home).toContain('<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">');
   });
 });
 

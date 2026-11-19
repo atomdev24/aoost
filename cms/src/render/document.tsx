@@ -8,6 +8,7 @@ import { baseCss } from "./base.styles";
 import { makeCtx } from "./context";
 import { navRenderer } from "./nav";
 import { addOverlayCss } from "./overlay-css";
+import { DEFAULT_SHARE_IMAGE } from "./share";
 import { OverlayView, SectionView } from "./SectionView";
 
 export type RenderOptions = {
@@ -17,7 +18,21 @@ export type RenderOptions = {
   preview?: { prefix: string };
   /** Cache-busting suffix for /assets/site.js. */
   assetVersion?: string;
+  /** Origin for the share tags (og:url, og:image) when siteUrl isn't set, e.g. from the CNAME file. */
+  shareOrigin?: string;
 };
+
+
+/** Favicons made from the clover (scripts/make-icons.ts), unless a custom one is set. */
+function iconLinks(site: Site): string {
+  if (site.settings.favicon) return `<link rel="icon" href="${esc(site.settings.favicon)}">`;
+  return (
+    `<link rel="icon" href="/favicon.ico" sizes="any">` +
+    `<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">` +
+    `<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">` +
+    `<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">`
+  );
+}
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -166,9 +181,11 @@ export function PageBody({ site, page, opts = {}, editing = false }: { site: Sit
 /** A complete static HTML document for one page. */
 export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): string {
   const title = pageTitle(site, page);
-  const description = page.seo.description ?? site.settings.defaultSeo.description ?? "";
-  const image = page.seo.image ?? site.settings.defaultSeo.image;
+  // No description text anywhere: the site stays barely there (SHARE-VIEWER.md).
+  const image = page.seo.image || site.settings.defaultSeo.image || DEFAULT_SHARE_IMAGE;
+  const origin = (opts.siteUrl || opts.shareOrigin || "").replace(/\/$/, "");
   const abs = (path: string) => (opts.siteUrl && path.startsWith("/") ? opts.siteUrl.replace(/\/$/, "") + path : path);
+  const share = (path: string) => (origin && path.startsWith("/") ? origin + path : path);
   const noindex = !!opts.preview || page.status !== "published";
   const v = opts.assetVersion ? `?v=${esc(opts.assetVersion)}` : "";
   const kits = pageKits(site, page);
@@ -177,15 +194,16 @@ export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): st
     `<meta charset="utf-8">`,
     `<meta name="viewport" content="width=device-width, initial-scale=1">`,
     `<title>${esc(title)}</title>`,
-    description ? `<meta name="description" content="${esc(description)}">` : "",
     noindex ? `<meta name="robots" content="noindex">` : "",
     opts.siteUrl && !noindex ? `<link rel="canonical" href="${esc(abs(page.slug))}">` : "",
     `<meta property="og:title" content="${esc(title)}">`,
-    description ? `<meta property="og:description" content="${esc(description)}">` : "",
     `<meta property="og:type" content="website">`,
-    image ? `<meta property="og:image" content="${esc(abs(image))}"><meta name="twitter:card" content="summary_large_image">` : "",
+    `<meta property="og:url" content="${esc(share(page.slug))}">`,
+    `<meta property="og:image" content="${esc(share(image))}">`,
+    `<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="theme-color" content="${esc(site.theme.colors.bone ?? "#F3EFE6")}">`,
-    site.settings.favicon ? `<link rel="icon" href="${esc(site.settings.favicon)}">` : `<link rel="icon" href="/seed/sun.svg" type="image/svg+xml">`,
+    iconLinks(site),
     fontPreload(site),
     fontLinks(site, kits.flatMap((k) => k.googleFonts ?? []), kits.some((k) => k.blockingFonts)),
     `<style>${pageCss(site, page)}</style>`,

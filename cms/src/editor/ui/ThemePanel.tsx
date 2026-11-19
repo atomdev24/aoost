@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { Theme, TypeStyle } from "../../schema";
+import { DEFAULT_SHARE_IMAGE } from "../../render/share";
+import { MediaInput } from "../fields/media";
 import { update, useEditor } from "../store";
 import { FontsPanel } from "./FontsPanel";
 import { NumberInput, Select, TextInput, Toggle } from "./kit";
@@ -18,6 +20,7 @@ const setTheme = (fn: (t: Theme) => Theme, label: string, merge?: string) => upd
  */
 export function ThemePanel() {
   const theme = useEditor((s) => s.site.theme);
+  const shareImage = useEditor((s) => s.site.settings.defaultSeo.image);
   const [open, setOpen] = useState<string | null>("h1");
   const [newColor, setNewColor] = useState("");
 
@@ -119,6 +122,19 @@ export function ThemePanel() {
         <span className="ed-caps">Spacing</span>
       </div>
       <Scale group="spacing" values={theme.spacing} />
+      <div className="ed-panel-head">
+        <span className="ed-caps">Site</span>
+      </div>
+      <div className="ed-field">
+        <span className="ed-field-label">Share image (link previews, 1200 × 630)</span>
+        <MediaInput
+          kind="image"
+          label="Share image"
+          value={shareImage || DEFAULT_SHARE_IMAGE}
+          onChange={(image) => update((site) => ({ ...site, settings: { ...site.settings, defaultSeo: { ...site.settings.defaultSeo, image: image && image !== DEFAULT_SHARE_IMAGE ? image : undefined } } }), "Change the share image")}
+        />
+        <span className="ed-hint">Every page uses this unless the page sets its own. Clear it to go back to the clover.</span>
+      </div>
     </div>
   );
 }
