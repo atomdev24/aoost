@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { summarizeChanges, type ChangeSummary } from "../../model/changes";
 import { useEditor } from "../store";
 import { closeSheet, publish, usePublish, type Step } from "./publish";
+import { resolveConflict, useSync } from "./sync";
 
 /** The unpublished changes, recounted shortly after edits settle. */
 export function useChanges(): ChangeSummary | null {
@@ -34,6 +35,9 @@ export function PublishSheet() {
   const error = usePublish((s) => s.error);
   const note = usePublish((s) => s.note);
   const changes = useChanges();
+  const conflicts = useSync((s) => s.info.conflicts);
+  const syncBusy = useSync((s) => s.busy);
+  const syncError = useSync((s) => s.error);
   const list = useMemo(() => changes?.pages ?? [], [changes]);
   useEffect(() => {
     if (!open) return;
@@ -75,6 +79,31 @@ export function PublishSheet() {
         </ul>
       ) : phase !== "live" ? (
         <p className="ed-hint">The draft matches what is live.</p>
+      ) : null}
+      {conflicts.length ? (
+        <>
+          <p className="ed-hint">
+            The live site changed {conflicts.length === 1 ? "a value" : `${conflicts.length} values`} you also changed. Your draft kept yours; choose for each:
+          </p>
+          <ul className="ed-sheet-conflicts" aria-label="Changed on both sides">
+            {conflicts.map((c) => (
+              <li key={c.id}>
+                <span className="ed-conflict-label">{c.label}</span>
+                <span className="ed-conflict-values">Mine: {c.draft}</span>
+                <span className="ed-conflict-values">Live: {c.live}</span>
+                <span className="ed-conflict-actions">
+                  <button type="button" className="ed-btn ed-btn-sm" disabled={syncBusy} onClick={() => void resolveConflict(c.id, "live")}>
+                    Use live
+                  </button>
+                  <button type="button" className="ed-btn ed-btn-sm" disabled={syncBusy} onClick={() => void resolveConflict(c.id, "mine")}>
+                    Keep mine
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+          {syncError ? <p className="ed-sheet-error">{syncError}</p> : null}
+        </>
       ) : null}
       <ol className="ed-steps" aria-label="Publish steps">
         {STEPS.map((s) => {

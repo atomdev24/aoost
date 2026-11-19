@@ -65,6 +65,18 @@ describe("publish (commit through the GitHub API)", () => {
     const result = await publishToGitHub({ "content/a.json": "x" }, opts(moved.fetcher));
     expect(result).toMatchObject({ ok: false, status: 422, error: expect.stringContaining("Try again") });
   });
+  it("refuses when the branch's content is newer than the draft's base", async () => {
+    const changed = fakeGitHub({ "content/a.json": "someone-else" });
+    const stale = await publishToGitHub({ "content/a.json": "x" }, { ...opts(changed.fetcher), base: { "content/a.json": "hello\n" } });
+    expect(stale).toMatchObject({ ok: false, status: 409, error: expect.stringContaining("newer content") });
+    expect(changed.calls.every((c) => c.method === "GET")).toBe(true);
+    const added = fakeGitHub({ "content/a.json": HELLO_SHA, "content/pages/new.json": "n" });
+    expect(await publishToGitHub({ "content/a.json": "x" }, { ...opts(added.fetcher), base: { "content/a.json": "hello\n" } })).toMatchObject({ ok: false, status: 409 });
+  });
+  it("publishes when the draft's base matches the branch", async () => {
+    const gh = fakeGitHub({ "content/a.json": HELLO_SHA });
+    expect(await publishToGitHub({ "content/a.json": "x" }, { ...opts(gh.fetcher), base: { "content/a.json": "hello\n" } })).toMatchObject({ ok: true, commit: "commit2" });
+  });
 });
 
 describe("build status", () => {

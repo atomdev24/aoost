@@ -184,7 +184,8 @@ export function AdjustImage() {
       e.stopPropagation();
       if (!canScale) return;
       const factor = Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.002));
-      writeFrame(target, (f) => scaleImage(f, factor));
+      const m = measure(target);
+      writeFrame(target, (f) => (m ? scaleImage(f, factor, { w: m.box.w, h: m.box.h }, m.natural, { overhang: e.altKey }) : f));
     };
     el.addEventListener("wheel", wheel, { passive: false });
     return () => el.removeEventListener("wheel", wheel);
@@ -211,7 +212,8 @@ export function AdjustImage() {
       const dx = (m.clientX - last.x) / z;
       const dy = (m.clientY - last.y) / z;
       last = { x: m.clientX, y: m.clientY };
-      writeFrame(target, (f) => dragImage(f, size.frame, size.natural, dx, dy));
+      // Alt lets the picture leave a gap in its frame; otherwise it always covers it.
+      writeFrame(target, (f) => dragImage(f, size.frame, size.natural, dx, dy, { overhang: m.altKey }));
     };
     const up = () => {
       el.removeEventListener("pointermove", move);
@@ -229,6 +231,8 @@ export function AdjustImage() {
     e.stopPropagation();
     const el = e.currentTarget;
     el.setPointerCapture(e.pointerId);
+    const size = frameSize();
+    if (!size) return;
     const bd = host.current!.getBoundingClientRect();
     const cx = bd.left + geo.image.x + geo.image.w / 2;
     const cy = bd.top + geo.image.y + geo.image.h / 2;
@@ -237,7 +241,7 @@ export function AdjustImage() {
       const d = Math.hypot(m.clientX - cx, m.clientY - cy) || 1;
       const factor = d / last;
       last = d;
-      writeFrame(target, (f) => scaleImage(f, factor));
+      writeFrame(target, (f) => scaleImage(f, factor, size.frame, size.natural, { overhang: m.altKey }));
     };
     const up = () => {
       el.removeEventListener("pointermove", move);
@@ -265,12 +269,13 @@ export function AdjustImage() {
         <>
           <img className="ed-adjust-ghost" src={src} alt="" draggable={false} style={{ left: geo.image.x, top: geo.image.y, width: geo.image.w, height: geo.image.h }} />
           <div className="ed-adjust-frame" style={{ left: geo.frame.x, top: geo.frame.y, width: geo.frame.w, height: geo.frame.h }} />
-          <div className="ed-adjust-hit" style={{ left: geo.image.x, top: geo.image.y, width: geo.image.w, height: geo.image.h }} onPointerDown={startMove} title={canScale ? "Drag to move the picture · scroll or pinch to scale" : "Drag to move the picture"}>
+          <div className="ed-adjust-hit" style={{ left: geo.image.x, top: geo.image.y, width: geo.image.w, height: geo.image.h }} onPointerDown={startMove} title={canScale ? "Drag to move the picture · scroll or pinch to scale · hold Alt to leave a gap" : "Drag to move the picture"}>
             {canScale ? (["nw", "ne", "se", "sw"] as const).map((c) => <span key={c} className={`ed-adjust-handle is-${c}`} onPointerDown={startScale} />) : null}
           </div>
           <span className="ed-adjust-tag" style={{ left: geo.frame.x, top: geo.frame.y + geo.frame.h + 6 }} role="status">
             {canScale ? `${pct}% · ` : ""}
-            {slot ? `${slot.label} · ` : ""}Esc to finish
+            {slot ? `${slot.label} · ` : ""}
+            {canScale ? "Alt: free move · " : ""}Esc to finish
           </span>
         </>
       ) : null}

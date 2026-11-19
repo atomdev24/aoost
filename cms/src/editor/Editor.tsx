@@ -19,6 +19,7 @@ import { ActionBar } from "./workspace/ActionBar";
 import { FieldLabel } from "./workspace/FieldLabel";
 import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
+import { SyncNotice } from "./workspace/SyncNotice";
 import { TopBar } from "./workspace/TopBar";
 import "./workspace/workspace.css";
 
@@ -83,6 +84,7 @@ export function Editor() {
         <PuckBridge />
         <div className={`ed-shell${interacting ? " is-interacting" : ""}`}>
           <TopBar />
+          <SyncNotice />
           <LeftPanel />
           <Board />
           <Inspector />

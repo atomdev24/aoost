@@ -5,6 +5,7 @@ import { overridesAt, REFERENCE, resetAt, resolve, setOnly } from "../../respons
 import { itemAt } from "../../components/aoost/frames";
 import type { FrameSlot } from "../../components/types";
 import { DEFAULT_FRAME_FIT, type FrameFit, type Node, type Responsive } from "../../schema";
+import { FILL_FRAME } from "../canvas/adjust";
 import { itemPathOfField, slotOf, withItemValue, withSlotFrame, type SlotPath } from "../canvas/slots";
 import { uploadFile } from "../media";
 import { currentPage, getState, updatePage, useEditor } from "../store";
@@ -171,6 +172,11 @@ function MediaPopover({ anchor, value, onChange, kind, label, node, slot, altKey
             </button>
           ))}
         </div>
+      ) : null}
+      {fit && isImage ? (
+        <button type="button" className="ed-btn ed-btn-sm ed-mediapop-fill" title="Cover the frame again, centred on the focal point" onClick={() => setFit({ ...FILL_FRAME })}>
+          Fill frame
+        </button>
       ) : null}
       {itemAlt !== null ? (
         <label className="ed-mediapop-field">

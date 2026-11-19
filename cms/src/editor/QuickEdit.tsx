@@ -6,6 +6,7 @@ import { api, ApiError } from "./api";
 import { MediaInput } from "./fields/media";
 import { currentPage, flush, setPage, setUnpublished, undo, update, updatePage, useEditor } from "./store";
 import { MediaPickerHost } from "./ui/MediaPicker";
+import { SyncNotice } from "./workspace/SyncNotice";
 import "./quick.css";
 
 /**
@@ -45,6 +46,7 @@ export function QuickEdit() {
   return (
     <div className="qe">
       <MediaPickerHost />
+      <SyncNotice />
       <header className="qe-top">
         <div className="qe-brand">
           <strong>aoost</strong>
