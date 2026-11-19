@@ -266,3 +266,29 @@ Summary:
 - Public output is byte-identical: `main` built to `/tmp/aoost-dist-before-sync` with the build timestamp pinned (`Date.now` preloaded), and `diff -rq -x admin` against this branch's pinned build shows no differences.
 - No full end-to-end test of a real sync: that would need a second deploy under `wrangler dev`. The merge, the publish guard and the sync API shape are covered by unit and browser tests.
 - Nothing for BLOCKERS.md.
+
+## Playlists as sleeve and tracklist; small homepage text changes (19 Nov 2026, PLAYLISTS-SLEEVE.md)
+
+- Generated track data lives in `cms/src/generated/playlists.json`, not `content/generated/`. Why: publishing from the editor commits the draft's `content/` files and deletes any other blob under `content/`, and the stale-base check compares every `content/` blob. A generated file there would be deleted on the next publish, or would block publishing.
+- `npm run playlists:refresh` (`cms/scripts/refresh-playlists.ts`) reads every AoostPlaylistBand in `content/pages`, fetches `open.spotify.com/embed/playlist/<id>` and parses `__NEXT_DATA__` (`props.pageProps.state.data.entity.trackList`). It never fails a build: a playlist it can't fetch keeps its last good copy. No timestamps go in the file, so it only changes when a tracklist changes. It runs in `deploy:preview` and as a step before `npm run build` in `.github/workflows/deploy-cms.yml`, but not in plain `npm run build`, so local and test builds don't depend on the network or dirty the committed copy.
+- Spotify's embed page lists at most 100 tracks, so "H | T | R" shows "+ 92 more" even if the playlist is longer. The link opens the full playlist anyway.
+- The band imports the generated file directly, so the editor canvas shows the same tracklists as the site. A manual tracklist override with at least one non-empty row replaces the fetched list. Manual rows have no duration and no URI, so they show as plain rows, not play buttons.
+- Chips use the playlist's own `title` from the content ("Rock"), not Spotify's long name ("Disc - 1 - Rock"). The oEmbed name and cover lookup from the old runtime is gone. Without your own cover the sleeve shows its colour (or plain dark grey).
+- Markup: one sleeve and one tracklist per playlist, server-rendered, with all but the selected one `hidden`. Unhiding restarts the CSS slide-out animation of the disc, so no JS animation is needed. `prefers-reduced-motion` turns the animation off (the disc just sits half out).
+- "Current track" is the first track until one is clicked. After that it is the clicked track, and it follows `playback_update`'s `playingURI` when Spotify sends it. A click before the controller is ready is queued.
+- The dark band keeps its colour (#1E1E1E) but drops the Figma-style dot grid, toolbar, pink cursor and selection boxes, which belonged to the canvas metaphor. Fonts unchanged (display heading, Inter, mono for numbers and durations).
+- Old fields `crumbBold`, `crumb` and `hint` are removed from the schema and the content. Old drafts that still carry them are fine, because zod drops unknown keys.
+- The band's CSS is now written by hand, and `port-aoost-css.py` no longer regenerates it.
+- The rodeo with an empty heading has no `<h2>`; the section takes `aria-label="Rodeo"` instead of `aria-labelledby`.
+- The footer line is a muted mono label in normal case, pushed to the left of the sign-off. On phones both stay on one row.
+- Section headings: only `content/pages/home.json` changed (Projects, Journals, Skills, Playlists, The wall). Component defaults stay as they were, except the playlists default heading ("Playlists"), which was rewritten with the block.
+- `scripts/compare-home.mjs` (the "looks like the original" test) now removes the playlists band from both captures, since it no longer follows the original. The rest of the page still matches.
+
+Summary:
+- Changed: `AoostPlaylistBand/` (component, Puck fields with the tracklist override, hand-written styles, new `spotify.ts` parser, fixture, tests), `runtime/playlists.js` (chips, tracks, iFrame API controller), `AoostRodeo` (optional heading), `AoostFooter` (optional `line`), `content/pages/home.json`, `cms/src/generated/playlists.json` (first copy: Rock 54, Alt 57, H | T | R 100 tracks), `package.json` (`playlists:refresh`), deploy workflow.
+- Unit tests 353/353 (new: embed parsing against a saved fixture, tracklist render, manual override, empty rodeo heading, footer line). Browser tests: 84 in the full run; the one failure (phone test still expecting the old touch player) was fixed, and home + home-editor then passed 18/18. New `tests/playlists.spec.ts` (4) on `/preview/` with the Spotify iFrame API stubbed: switching updates the sleeve and tracklist, the controller gets `loadUri(playlist)`, and clicking a track calls `loadUri(track)` then `play()`. Also covers reduced motion and the screenshots.
+- Screenshots: `docs/screenshots/playlists/playlists-{1440,390}.png`. Checked at 390, 834, 1440 and 1920 with no horizontal overflow.
+- `npm run build` passes. Public output: `main` and this branch built with `Date.now` pinned; `diff -rq -x admin` shows only `index.html`, `assets/aoost.js` (loaded only by the homepage) and `_published.json` (not public). `404.html` and `search.json` are identical. No other page uses the changed blocks.
+- Gemini (`ask-gemini`) was out of quota (resets in about 6 days), so Claude wrote all the code.
+- I couldn't open the design canvas from this session, so the layout follows the brief's wording.
+- Nothing for BLOCKERS.md.
