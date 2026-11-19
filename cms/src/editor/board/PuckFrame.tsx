@@ -2,6 +2,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import { components } from "../../components/registry";
 import { getState, useEditor } from "../store";
 import { attachCanvasDrops } from "../canvas/drops";
+import { attachPieceSelect } from "../canvas/ResizePiece";
 import { attachKeys } from "./keys";
 import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
 import { onBoardWheel } from "./wheel";
@@ -31,6 +32,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     if (!doc) return;
     const detach = attachKeys(doc);
     const detachDrops = attachCanvasDrops(doc);
+    const detachPieces = attachPieceSelect(doc);
     const wheel = (e: WheelEvent) => {
       const { view } = getBoard();
       const o = frameOrigin(getState().bp);
@@ -55,6 +57,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     return () => {
       detach();
       detachDrops();
+      detachPieces();
       doc.removeEventListener("wheel", wheel);
       doc.removeEventListener("pointerdown", closeUnpinnedFlyout, true);
       ro.disconnect();

@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { createNode, createSection } from "../../../model/page-ops";
+import { pageCss } from "../../../render/document";
+import { Site } from "../../../schema";
+import { fixtureSite } from "../../../seed/fixture";
 import { renderNode } from "../../test-utils";
 import { AoostProjects, AoostProjectsContent } from "./AoostProjects";
 
@@ -45,5 +49,46 @@ describe("AoostProjects", () => {
     const plain = renderNode("AoostProjects", { ...d, note: { show: true, style: "plain" } });
     expect(plain).toContain('<div class="sticky table-note" aria-hidden="true" data-note="0" data-note-style="plain"></div>');
     expect(AoostProjects.schema.safeParse({ ...d, note: { show: true, style: "doodle" } }).success).toBe(false);
+  });
+});
+
+describe("AoostProjects piece size", () => {
+  const site = Site.parse(fixtureSite);
+  const cssFor = (projects: AoostProjectsContent["projects"]) => {
+    const node = createNode("AoostProjects", { id: "pj1", content: { ...d, projects } });
+    return pageCss(site, { ...site.pages[0]!, sections: [createSection("flow", { id: "s1", children: [node] })], overlays: [] });
+  };
+  const pieces = d.projects.slice(0, 3);
+
+  it("writes nothing when no piece has a size, and the markup is unchanged", () => {
+    const css = cssFor(pieces);
+    expect(css).not.toMatch(/\.n-pj1 [^{]*\{[^}]*scale/);
+    expect(css).not.toContain(".n-pj1 .table>.piece");
+    expect(renderNode("AoostProjects", { ...d, projects: pieces })).not.toContain("size");
+  });
+
+  it("scales a piece around its own spot, per size", () => {
+    const css = cssFor([pieces[0]!, { ...pieces[1]!, size: { base: { scale: 1.5 }, desktop: { scale: 1 }, widescreen: { scale: 2 } } }, pieces[2]!]);
+    // The page's layout rules come last: the base rules, then one block per media query.
+    const at = css.lastIndexOf("@media (min-width:900px)");
+    const [mobile, rest] = [css.slice(0, at), css.slice(at)];
+    expect(mobile).toContain(".n-pj1 .table>.piece:nth-child(2){scale:1.5}");
+    expect(rest).toMatch(/@media \(min-width:900px\)\{[^@]*\.n-pj1 \.table>\.piece:nth-child\(2\)\{scale:initial\}/);
+    expect(rest).toMatch(/@media \(min-width:1600px\)\{[^@]*\.n-pj1 \.table>\.piece:nth-child\(2\)\{scale:2\}/);
+    expect(css).not.toContain("nth-child(1){scale");
+    expect(css).not.toContain("nth-child(3){scale");
+  });
+
+  it("a desktop-only size leaves mobile and tablet alone, and counts the shown pieces", () => {
+    const css = cssFor([{ ...pieces[0]!, hidden: true }, { ...pieces[1]!, size: { base: { scale: 1 }, desktop: { scale: 0.6 } } }]);
+    const mobile = css.slice(0, css.lastIndexOf("@media (min-width:900px)"));
+    expect(mobile).not.toContain(".n-pj1 .table>.piece");
+    expect(css).toMatch(/@media \(min-width:900px\)\{[^@]*\.n-pj1 \.table>\.piece:nth-child\(1\)\{scale:0\.6\}/);
+  });
+
+  it("only takes sizes from 40% to 250%", () => {
+    const ok = (scale: number) => AoostProjectsContent.safeParse({ ...d, projects: [{ image: "/a.png", size: { base: { scale } } }] }).success;
+    expect([ok(0.4), ok(1), ok(2.5)]).toEqual([true, true, true]);
+    expect([ok(0.3), ok(2.6)]).toEqual([false, false]);
   });
 });

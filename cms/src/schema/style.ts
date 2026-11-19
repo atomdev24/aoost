@@ -72,4 +72,9 @@ export const FrameFit = z.object({
 });
 export type FrameFit = z.infer<typeof FrameFit>;
 export const ResponsiveFrameFit = responsive(FrameFit);
+/** A content item's size on its own layout spot (a project piece): a multiplier on its laid-out size. */
+export const ItemSize = z.object({ scale: z.number().min(0.4).max(2.5) });
+export type ItemSize = z.infer<typeof ItemSize>;
+export const ResponsiveItemSize = responsive(ItemSize);
+export const DEFAULT_ITEM_SIZE: ItemSize = { scale: 1 };
 export const DEFAULT_FRAME_FIT: FrameFit = { fit: "fill", focalX: 50, focalY: 50, zoom: 1, panX: 0, panY: 0 };

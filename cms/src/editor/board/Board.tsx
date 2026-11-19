@@ -2,6 +2,7 @@ import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
 import { AdjustImage } from "../canvas/AdjustImage";
+import { ResizePiece } from "../canvas/ResizePiece";
 import { EmptyPage } from "../insert/EmptyPage";
 import { takeSnapshots, useSnapshot, watchSnapshots } from "./snapshots";
 import { currentPage, useEditor } from "../store";
@@ -249,6 +250,7 @@ export function Board() {
         </div>
       ) : null}
 
+      <ResizePiece />
       <AdjustImage />
       {!hidden[bp] ? <EmptyPage rect={{ ...screen(active.x, active.y), width: active.w * view.zoom, height: active.h * view.zoom }} /> : null}
       {loading ? (
