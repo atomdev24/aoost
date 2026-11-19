@@ -166,7 +166,32 @@ export function setHeight(bp: Breakpoint, h: number) {
   set({ heights: { ...state.heights, [bp]: height } });
 }
 
-export const fit = () => state.size.w && setView(fitAll(allRects(), state.size.w, state.size.h));
+/** Other things on the board that Fit should include (reference images). */
+let extraFitRects: () => Rect[] = () => [];
+export const setExtraFitRects = (fn: () => Rect[]) => {
+  extraFitRects = fn;
+};
+/**
+ * How much of the board's left and right edges the floating panels cover (an open left panel,
+ * the inspector), so Fit frames everything in the part you can actually see. Phones skip this:
+ * their inspector is a sheet along the bottom.
+ */
+function coveredEdges(): { left: number; right: number } {
+  const board = typeof document !== "undefined" ? document.querySelector(".bd")?.getBoundingClientRect() : undefined;
+  if (!board || board.width < 700) return { left: 0, right: 0 };
+  const flyout = document.querySelector(".ed-flyout")?.getBoundingClientRect();
+  const inspector = document.querySelector(".ed-inspector:not(.is-card)")?.getBoundingClientRect();
+  const left = flyout && flyout.width ? Math.max(0, flyout.right - board.left) : 0;
+  const right = inspector && inspector.width ? Math.max(0, board.right - inspector.left) : 0;
+  // Never squeeze the visible part below half the board.
+  return left + right > board.width / 2 ? { left: 0, right: 0 } : { left, right };
+}
+export const fit = () => {
+  if (!state.size.w) return;
+  const { left, right } = coveredEdges();
+  const v = fitAll([...allRects(), ...extraFitRects()], state.size.w - left - right, state.size.h);
+  setView({ ...v, x: v.x + left });
+};
 export const zoomTo = (zoom: number, px = state.size.w / 2, py = state.size.h / 2) => setView(zoomAt(state.view, clampZoom(zoom), px, py));
 export const zoomStep = (dir: 1 | -1) => zoomTo(stepZoom(state.view.zoom, dir));
 export const panBy = (dx: number, dy: number) => setView({ ...state.view, x: state.view.x + dx, y: state.view.y + dy });

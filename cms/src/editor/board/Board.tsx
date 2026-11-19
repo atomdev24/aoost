@@ -14,6 +14,8 @@ import { frameRects, getBoard, openPage, panBy, resetFramePositions, setFrameHid
 import { FRAME_GAP, isVisible, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
 import { ZoomBar } from "./ZoomBar";
+import { RefLayer, RefNotice } from "./RefLayer";
+import { attachRefDrops } from "./refs-store";
 import { attachGestures } from "../touch/gestures";
 import { LONG_PRESS_MS } from "../touch/longpress";
 import "./board.css";
@@ -96,6 +98,12 @@ export function Board() {
       onBoardWheel(e, { x: e.clientX - r.left, y: e.clientY - r.top });
     };
     el.addEventListener("wheel", wheel, { passive: false });
+    // Pictures dropped on empty board space become references (drops on a frame go to the page).
+    const detachDrops = attachRefDrops(el, (e) => {
+      const r = el.getBoundingClientRect();
+      const { view } = getBoard();
+      return { x: (e.clientX - r.left - view.x) / view.zoom, y: (e.clientY - r.top - view.y) / view.zoom };
+    });
     // Touch: one finger on empty board pans, two fingers pinch and pan. A tap on empty board clears the selection.
     const empty = (t: EventTarget | null) => t === el || (t as Element | null)?.classList?.contains("bd-world") === true;
     const detachTouch = attachGestures(el, {
@@ -109,6 +117,7 @@ export function Board() {
     });
     return () => {
       ro.disconnect();
+      detachDrops();
       el.removeEventListener("wheel", wheel);
       detachTouch();
     };
@@ -201,6 +210,8 @@ export function Board() {
       data-zoom={view.zoom.toFixed(3)}
     >
       <div className="bd-world" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})` }}>
+        {/* Reference images: behind the frames, never on the site. */}
+        <RefLayer pageId={pageId} zoom={view.zoom} />
         {/* Puck's editable frame. It stays the same element (moving an iframe reloads it) and slides to the active slot. */}
         <div className="bd-frame bd-frame-active" data-bp={bp} style={{ left: active.x, top: active.y, width: active.w, height: active.h, display: hidden[bp] ? "none" : undefined }}>
           <Puck.Preview />
@@ -277,6 +288,7 @@ export function Board() {
         </div>
       ) : null}
 
+      <RefNotice />
       <ResizePiece />
       <AdjustImage />
       {!hidden[bp] ? <EmptyPage rect={{ ...screen(active.x, active.y), width: active.w * view.zoom, height: active.h * view.zoom }} /> : null}

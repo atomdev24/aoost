@@ -5,6 +5,7 @@ import { applyOps, diffSite, type Op } from "../model/ops";
 import type { ClientMessage, EditorContext, ServerMessage, SyncInfo } from "../model/protocol";
 import { filesToSite, siteToFiles, validateSite, type Breakpoint, type ContentFiles, type Issue, type Site } from "../schema";
 import type { Env } from "./env";
+import { cleanRefs, type RefItem } from "../model/refs";
 
 const same = (a: ContentFiles, b: ContentFiles) => {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
@@ -29,6 +30,8 @@ const PUB = "pub:";
 const PUBLISHED_URL = "https://assets.local/_published.json";
 /** The live content the draft last matched (its "base"), and its fingerprint: the common ancestor for merging a newer deploy. */
 const BASE = "base:";
+/** Reference images per page on the editor board (never published). */
+const REFS = "refs:";
 const BASE_FP = "baseFp";
 /** Values both sides changed differently in the last merge (the draft kept its own). */
 const CONFLICTS = "conflicts";
@@ -287,6 +290,18 @@ export class DraftStore extends DurableObject<Env> {
       // no published snapshot: treat as dirty
     }
     return { version: this.version, dirty, editors: this.ctx.getWebSockets().length, context: (await this.ctx.storage.get<EditorContext>("context")) ?? null, sync: await this.syncInfo() };
+  }
+
+  /** A page's reference images on the board (editor only; never part of the site's content). */
+  async getRefs(pageId: string): Promise<RefItem[]> {
+    return (await this.ctx.storage.get<RefItem[]>(REFS + pageId)) ?? [];
+  }
+
+  async putRefs(pageId: string, items: unknown): Promise<RefItem[]> {
+    const clean = cleanRefs(items);
+    if (clean.length) await this.ctx.storage.put(REFS + pageId, clean);
+    else await this.ctx.storage.delete(REFS + pageId);
+    return clean;
   }
 
   /** The Claude connector made an authenticated call (shown as "Claude connected" in the editor). */

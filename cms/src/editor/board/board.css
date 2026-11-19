@@ -331,3 +331,48 @@
   --ed-glass-backdrop: none;
   --ed-glass-bg: rgba(30, 30, 34, 0.94);
 }
+
+/* Reference images on the board (never on the site). Sizes that should stay constant on screen are set inline from the zoom. */
+.bd-ref {
+  position: absolute;
+  cursor: grab;
+  outline: 0 solid var(--ed-accent);
+  touch-action: none;
+}
+.bd-ref img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.bd-ref.is-selected {
+  outline-style: solid;
+}
+.bd-ref-tag {
+  position: absolute;
+  left: 0;
+  white-space: nowrap;
+  background: var(--ed-accent);
+  color: #fff;
+  font-family: var(--ed-font);
+  line-height: 1.4;
+  pointer-events: none;
+}
+.bd-ref-handle {
+  position: absolute;
+  box-sizing: border-box;
+  background: #fff;
+  border: solid var(--ed-accent);
+  border-radius: 2px;
+  cursor: nwse-resize;
+}
+.bd.is-ref-drop {
+  box-shadow: inset 0 0 0 2px var(--ed-accent);
+}
+.bd-ref-notice {
+  bottom: 60px;
+}
