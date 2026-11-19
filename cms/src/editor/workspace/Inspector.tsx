@@ -67,7 +67,7 @@ function InspectorPanel() {
       ) : null}
       <header className="ed-inspector-head" onPointerDown={phone ? card.onPointerDown : undefined}>
         <div className="ed-inspector-title">
-          <strong>{subject.name}</strong>
+          <strong title={subject.name}>{subject.name}</strong>
           <span>{subject.type}</span>
         </div>
       </header>
