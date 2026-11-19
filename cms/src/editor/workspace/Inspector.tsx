@@ -9,6 +9,9 @@ import { setFrameHidden } from "../board/store";
 import { currentPage, updatePage, useEditor } from "../store";
 import { GlobalPanel } from "../ui/GlobalPanel";
 import { OverlayPanel } from "../ui/OverlayPanel";
+import { usePhone } from "../touch/device";
+import { nearestCardSize, type CardSize } from "./card";
+import { useRef, useState } from "react";
 
 const KIND: Record<Section["kind"], string> = { flow: "Section", grid: "Grid section", canvas: "Free-layout section" };
 
@@ -72,9 +75,16 @@ function InspectorPanel() {
   const globalId = useEditor((s) => s.globalId);
   const selected = useEditor((s) => s.selection.length > 0);
   const subject = useSubject();
+  const phone = usePhone();
+  const card = useCard();
   return (
-    <aside className="ed-inspector" aria-label="Inspector">
-      <header className="ed-inspector-head">
+    <aside className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? card.size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
+      {phone ? (
+        <button type="button" className="ed-card-grip" aria-label={card.size === "full" ? "Shrink the inspector" : "Expand the inspector"} aria-expanded={card.size === "full"} onPointerDown={card.onPointerDown} onClick={card.onClick}>
+          <span aria-hidden="true" />
+        </button>
+      ) : null}
+      <header className="ed-inspector-head" onPointerDown={phone ? card.onPointerDown : undefined}>
         <div className="ed-inspector-title">
           <strong>{subject.name}</strong>
           <span>{subject.type}</span>
@@ -87,6 +97,47 @@ function InspectorPanel() {
       </div>
     </aside>
   );
+}
+
+/**
+ * On a phone the inspector is a card at the bottom right. Drag its header (or
+ * the grip) to resize it: it settles at just its title, about half the screen,
+ * or nearly full height. A tap on the grip toggles full height.
+ */
+function useCard() {
+  const [size, setSize] = useState<CardSize>("half");
+  const [drag, setDrag] = useState<number | null>(null);
+  const moved = useRef(false);
+  const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
+    if ((e.target as Element).closest(".ed-bpswitch")) return;
+    const card = (e.currentTarget as HTMLElement).closest<HTMLElement>(".ed-inspector");
+    if (!card) return;
+    const startY = e.clientY;
+    const startH = card.getBoundingClientRect().height;
+    const top = card.offsetParent?.getBoundingClientRect().height ?? window.innerHeight;
+    moved.current = false;
+    const move = (m: PointerEvent) => {
+      const dy = m.clientY - startY;
+      if (!moved.current && Math.abs(dy) < 6) return;
+      moved.current = true;
+      setDrag(Math.max(48, Math.min(top - 60, startH - dy)));
+    };
+    const up = (m: PointerEvent) => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      if (moved.current) setSize(nearestCardSize(startH - (m.clientY - startY), top));
+      setDrag(null);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+  };
+  const onClick = () => {
+    if (moved.current) return void (moved.current = false);
+    setSize((s) => (s === "full" ? "half" : "full"));
+  };
+  return { size, drag, onPointerDown, onClick };
 }
 
 const DEVICE: Record<Breakpoint, string> = {

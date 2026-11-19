@@ -141,7 +141,8 @@ export function CanvasController() {
 
     const onKey = (e: KeyboardEvent) => {
       const delta = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
-      if (!delta) return;
+      // ⌘↑/↓ move the block in the page order (commands/shortcuts.ts), not nudge it.
+      if (!delta || e.metaKey || e.ctrlKey) return;
       const active = doc.activeElement as HTMLElement | null;
       if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) return;
       const step = e.shiftKey ? 10 : 1;

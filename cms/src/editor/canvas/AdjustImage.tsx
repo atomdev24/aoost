@@ -6,6 +6,8 @@ import { frameOrigin, getBoard, useBoard } from "../board/store";
 import { beginGesture, currentPage, endGesture, getState, updatePage, useEditor } from "../store";
 import { dragImage, imageRect, scaleImage, type Rect, type Size } from "./adjust";
 import { naturalSize, slotOf, withSlotFrame, type SlotPath } from "./slots";
+import { usePhone } from "../touch/device";
+import { pinchOf } from "../touch/gestures";
 
 // ------------------------------------------------------------ which image is being adjusted
 
@@ -117,6 +119,14 @@ export function AdjustImage() {
   const [geo, setGeo] = useState<Geo | null>(null);
   const [src, setSrc] = useState("");
   const host = useRef<HTMLDivElement>(null);
+  // Phones have no Alt key: the "Free move" chip lets the picture leave a gap instead.
+  const phone = usePhone();
+  const coarse = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+  const [free, setFree] = useState(false);
+  const freeRef = useRef(false);
+  freeRef.current = free;
+  const pinching = useRef(false);
+  useEffect(() => setFree(false), [id]);
   const node = id ? findNode(id) : null;
   const slot = target?.path && node ? slotOf(node, target.path) : null;
   const current = node && target ? frameOf(node, target) : undefined;
@@ -185,10 +195,48 @@ export function AdjustImage() {
       if (!canScale) return;
       const factor = Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.002));
       const m = measure(target);
-      writeFrame(target, (f) => (m ? scaleImage(f, factor, { w: m.box.w, h: m.box.h }, m.natural, { overhang: e.altKey }) : f));
+      writeFrame(target, (f) => (m ? scaleImage(f, factor, { w: m.box.w, h: m.box.h }, m.natural, { overhang: e.altKey || freeRef.current }) : f));
     };
     el.addEventListener("wheel", wheel, { passive: false });
-    return () => el.removeEventListener("wheel", wheel);
+    // Two fingers pinch to scale the picture.
+    const pts = new Map<number, { x: number; y: number }>();
+    let last = 0;
+    const down = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 2) {
+        const [a, b] = [...pts.values()];
+        last = pinchOf(a!, b!).dist;
+        pinching.current = true;
+      }
+    };
+    const move = (e: PointerEvent) => {
+      if (!pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (!pinching.current || pts.size < 2 || !canScale) return;
+      e.preventDefault();
+      const [a, b] = [...pts.values()];
+      const d = pinchOf(a!, b!).dist;
+      const factor = d / last;
+      last = d;
+      const m = measure(target);
+      if (m) writeFrame(target, (f) => scaleImage(f, factor, { w: m.box.w, h: m.box.h }, m.natural, { overhang: freeRef.current }));
+    };
+    const up = (e: PointerEvent) => {
+      pts.delete(e.pointerId);
+      if (pts.size === 0) pinching.current = false;
+    };
+    el.addEventListener("pointerdown", down, true);
+    el.addEventListener("pointermove", move, true);
+    el.addEventListener("pointerup", up, true);
+    el.addEventListener("pointercancel", up, true);
+    return () => {
+      el.removeEventListener("wheel", wheel);
+      el.removeEventListener("pointerdown", down, true);
+      el.removeEventListener("pointermove", move, true);
+      el.removeEventListener("pointerup", up, true);
+      el.removeEventListener("pointercancel", up, true);
+    };
   }, [target, canScale, geo !== null]);
 
   if (!target || !node) return null;
@@ -208,12 +256,13 @@ export function AdjustImage() {
     if (!size) return;
     let last = { x: e.clientX, y: e.clientY };
     const move = (m: PointerEvent) => {
+      if (pinching.current) return void (last = { x: m.clientX, y: m.clientY });
       const z = getBoard().view.zoom;
       const dx = (m.clientX - last.x) / z;
       const dy = (m.clientY - last.y) / z;
       last = { x: m.clientX, y: m.clientY };
       // Alt lets the picture leave a gap in its frame; otherwise it always covers it.
-      writeFrame(target, (f) => dragImage(f, size.frame, size.natural, dx, dy, { overhang: m.altKey }));
+      writeFrame(target, (f) => dragImage(f, size.frame, size.natural, dx, dy, { overhang: m.altKey || freeRef.current }));
     };
     const up = () => {
       el.removeEventListener("pointermove", move);
@@ -241,7 +290,7 @@ export function AdjustImage() {
       const d = Math.hypot(m.clientX - cx, m.clientY - cy) || 1;
       const factor = d / last;
       last = d;
-      writeFrame(target, (f) => scaleImage(f, factor, size.frame, size.natural, { overhang: m.altKey }));
+      writeFrame(target, (f) => scaleImage(f, factor, size.frame, size.natural, { overhang: m.altKey || freeRef.current }));
     };
     const up = () => {
       el.removeEventListener("pointermove", move);
@@ -275,7 +324,13 @@ export function AdjustImage() {
           <span className="ed-adjust-tag" style={{ left: geo.frame.x, top: geo.frame.y + geo.frame.h + 6 }} role="status">
             {canScale ? `${pct}% · ` : ""}
             {slot ? `${slot.label} · ` : ""}
-            {canScale ? "Alt: free move · " : ""}Esc to finish
+            {phone || coarse ? null : canScale ? "Alt: free move · " : ""}
+            {phone || coarse ? "Tap outside to finish" : "Esc to finish"}
+            {phone || coarse ? (
+              <button type="button" className="ed-adjust-chip" aria-pressed={free} title="Let the picture leave a gap in its frame" onPointerDown={(e) => e.stopPropagation()} onClick={() => setFree((f) => !f)}>
+                Free move
+              </button>
+            ) : null}
           </span>
         </>
       ) : null}

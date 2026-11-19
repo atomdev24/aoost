@@ -4,6 +4,7 @@ import { locate } from "../../model/page-ops";
 import { applyTool, setToolListener } from "../board/keys";
 import { TOOLS, type Tool } from "../board/tools";
 import { currentPage, useEditor } from "../store";
+import { usePalette } from "../commands/palette-store";
 
 /**
  * The segmented tool group in the middle of the top bar. Select is the
@@ -27,6 +28,12 @@ export function ToolGroup() {
     return () => setToolListener(null);
   }, []);
 
+  // The palette sent Claude a request: open this note to say so.
+  const asked = usePalette((s) => s.asked);
+  useEffect(() => {
+    if (asked) setAsking(true);
+  }, [asked]);
+
   useEffect(() => {
     if (!asking) return;
     const close = (e: MouseEvent | KeyboardEvent) => {
@@ -46,7 +53,7 @@ export function ToolGroup() {
         {TOOLS.map((t) => {
           const pressed = t.id === "claude" ? asking : t.id === "select" ? !flash && !asking : flash === t.id;
           return (
-            <button key={t.id} type="button" className="ed-tool" aria-label={t.label} aria-pressed={pressed} title={t.key ? `${t.label} (${t.key})` : t.label} onClick={() => applyTool(t.id)}>
+            <button key={t.id} type="button" className="ed-tool" data-tool={t.id} aria-label={t.label} aria-pressed={pressed} title={t.key ? `${t.label} (${t.key})` : t.label} onClick={() => applyTool(t.id)}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d={t.icon} />
               </svg>
@@ -63,10 +70,16 @@ function AskClaude() {
   const page = useEditor(currentPage);
   const selected = useEditor((s) => s.selection[0]);
   const at = selected ? locate(page, selected) : null;
+  const asked = usePalette((s) => s.asked);
   const name = at ? (at.kind === "section" ? (at.section.name ?? "a section") : (at.node.name ?? getComponent(at.node.type)?.label ?? at.node.type)) : null;
   return (
     <div className="ed-popover" role="dialog" aria-label="Ask Claude">
       <strong>Ask Claude</strong>
+      {asked ? (
+        <p className="ed-asked">
+          Sent to Claude: “{asked.text}”. In Claude, say <em>do what I asked in the editor</em>.
+        </p>
+      ) : null}
       <p>Claude edits this draft through the editor's connector and sees what you have selected here.</p>
       <p>{name ? `Selected: ${name} on ${page.title}. In Claude, ask about "the selected block".` : "Select a block first, then ask Claude about \"the selected block\"."}</p>
       <p className="ed-hint">Changes from Claude appear here live, and Undo takes them back.</p>

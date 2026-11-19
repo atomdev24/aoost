@@ -11,6 +11,7 @@ import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT } from "./frame-css";
 import { attachKeys } from "./keys";
 import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
 import { onBoardWheel } from "./wheel";
+import { attachFrameGestures } from "../touch/gestures";
 import { ZoomVar } from "./PuckFrame";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 
@@ -121,6 +122,15 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     };
     doc.addEventListener("wheel", wheel, { passive: false });
     doc.addEventListener("click", click, true);
+    const detachTouch = attachFrameGestures(
+      doc,
+      (e) => {
+        const { view } = getBoard();
+        const o = frameOrigin(bp);
+        return { x: (o.x + e.clientX) * view.zoom + view.x, y: (o.y + e.clientY) * view.zoom + view.y };
+      },
+      () => [],
+    );
     // A press inside a frame is a canvas click: unpinned flyouts close.
     doc.addEventListener("pointerdown", closeUnpinnedFlyout, true);
     const RO = doc.defaultView!.ResizeObserver;
@@ -132,6 +142,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     ro.observe(doc.body);
     return () => {
       detach();
+      detachTouch();
       doc.removeEventListener("wheel", wheel);
       doc.removeEventListener("click", click, true);
       doc.removeEventListener("pointerdown", closeUnpinnedFlyout, true);

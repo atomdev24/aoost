@@ -25,7 +25,9 @@ const remember = (key: string, value: string) => {
 
 const initialPanel = remembered<string>("aoost.rail.panel", "layers");
 const validPanels: PanelId[] = ["layers", "pages", "insert", "media", "nav", "theme", "fonts", "global"];
-const initialActive = validPanels.includes(initialPanel as PanelId) ? (initialPanel as PanelId) : null;
+// On a phone a flyout covers most of the canvas, so the editor opens with none.
+const phoneAtLoad = typeof window !== "undefined" && window.matchMedia?.("(max-width: 767px)").matches;
+const initialActive = !phoneAtLoad && validPanels.includes(initialPanel as PanelId) ? (initialPanel as PanelId) : null;
 
 let state: RailState = {
   active: initialActive,

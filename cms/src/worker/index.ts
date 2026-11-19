@@ -31,6 +31,8 @@ export default {
   },
 } satisfies ExportedHandler<Env>;
 
+const PWA_FILES = /^\/admin\/(manifest\.webmanifest|sw\.js|app-icon-\d+\.png)$/;
+
 async function route(request: Request, env: Env, url: URL, path: string): Promise<Response> {
   // Public API
   if (path === "/api/health") return json({ ok: true, authMode: env.AUTH_MODE });
@@ -63,6 +65,8 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
 
   if (path === "/admin" || path.startsWith("/admin/")) {
     if (path === "/admin/login") return who ? Response.redirect(new URL("/admin/", url).toString(), 302) : html(loginPage);
+    // The home-screen app's manifest, icons and service worker carry no content, so they load without the editor sign-in.
+    if (PWA_FILES.test(path)) return env.ASSETS.fetch(request);
     if (!who) return Response.redirect(new URL("/admin/login", url).toString(), 302);
     // The editor is a single-page app: every /admin route gets its shell.
     const isAsset = /\.[a-z0-9]+$/i.test(path);

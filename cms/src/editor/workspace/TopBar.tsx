@@ -10,6 +10,7 @@ import { loadPublished, openSheet, publish, usePublish } from "./publish";
 import { PublishSheet, useChanges } from "./PublishSheet";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
+import { openPalette } from "../commands/palette-store";
 
 /** "just now", "2 min ago", "at 14:05". */
 function ago(at: number, now: number): string {
@@ -37,6 +38,8 @@ const Icon = ({ d }: { d: string }) => (
 
 /** Widest first, as the frames sit on the board. */
 const ISLAND_ORDER: Breakpoint[] = ["widescreen", "desktop", "tablet", "mobile"];
+/** Short labels for the phone's top bar. */
+const SHORT: Record<Breakpoint, string> = { widescreen: "Wide", desktop: "Desk", tablet: "Tab", mobile: "Mob" };
 
 /** Three floating islands over the canvas: left (mark, page, save), centre (tools, breakpoints), right (Claude, preview, publish). */
 export function TopBar() {
@@ -92,6 +95,10 @@ export function TopBar() {
         <span className="ed-mark" aria-label="aoost editor" role="img">
           a
         </span>
+        {/* Phones open the palette from here (⌘K on a keyboard). */}
+        <button type="button" className="ed-icon ed-phone-only ed-search-btn" aria-label="Search and commands" title="Search and commands (⌘K)" onClick={openPalette}>
+          <Icon d="M7 2.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zM10.5 10.5L14 14" />
+        </button>
         <PageSwitcher />
         {editingMenu ? (
           <button type="button" className="ed-btn ed-btn-accent ed-btn-sm" onClick={() => returnPageId && setPage(returnPageId)}>
@@ -125,6 +132,8 @@ export function TopBar() {
               key={b}
               type="button"
               className={`ed-tool-bp${bp === b ? " is-active" : ""}${hidden[b] ? " is-hidden" : ""}`}
+              data-short={SHORT[b]}
+              aria-label={BREAKPOINT_LABEL[b]}
               aria-pressed={bp === b}
               title={`${BREAKPOINT_LABEL[b]} (${DESIGN_WIDTH[b]}px). ${hidden[b] ? "Click to show and edit." : "Shift-click to hide."}`}
               onClick={(e) => {
@@ -144,11 +153,11 @@ export function TopBar() {
       {/* Right island: Claude status pill, Preview, Discard draft, Publish */}
       <div className="ed-island ed-island-right" role="toolbar" aria-label="Publishing and preview">
         <ClaudePill />
-        <button type="button" className="ed-btn" onClick={preview}>
+        <button type="button" className="ed-btn ed-desk-only" onClick={preview}>
           Preview
         </button>
         <PublishButton phase={phase} count={count} disabled={!unpublished && save !== "error" && phase === "idle"} />
-        <MoreMenu canDiscard={unpublished} onDiscard={discard} />
+        <MoreMenu canDiscard={unpublished} onDiscard={discard} onPreview={() => void preview()} />
         <PublishSheet />
       </div>
     </header>
@@ -183,14 +192,14 @@ function PublishButton({ phase, count, disabled }: { phase: string; count: numbe
 }
 
 /** The right island's "…" menu: Discard draft lives here. */
-function MoreMenu({ canDiscard, onDiscard }: { canDiscard: boolean; onDiscard: () => void }) {
+function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; onDiscard: () => void; onPreview: () => void }) {
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
     const close = (e: MouseEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
   }, [open]);
   return (
     <div className="ed-more" ref={box}>
@@ -199,6 +208,19 @@ function MoreMenu({ canDiscard, onDiscard }: { canDiscard: boolean; onDiscard: (
       </button>
       {open ? (
         <ul className="ed-menu ed-more-menu" role="menu" aria-label="More">
+          {/* On a phone, Preview lives here to keep the top row short. */}
+          <li role="none" className="ed-phone-only">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                onPreview();
+              }}
+            >
+              Preview
+            </button>
+          </li>
           <li role="none">
             <button
               type="button"

@@ -8,18 +8,14 @@ import { noteVersion, onServerMessage, startSync } from "./socket";
 import { flush, getState, initStore, setOnSaved } from "./store";
 import { startSyncNotices } from "./workspace/sync";
 
-/** Below this width the editor switches to quick edit (precise drag layout is desktop-only). */
-const QUICK_BELOW = 900;
+/**
+ * Phones get the full editor too (adapted for touch). The older quick-edit
+ * form is still there at /admin/?quick for a plain list of fields.
+ */
+const quick = new URLSearchParams(location.search).has("quick");
 
 export function App() {
   const [ready, setReady] = useState(false);
-  const [small, setSmall] = useState(() => window.innerWidth < QUICK_BELOW);
-  useEffect(() => {
-    const mq = window.matchMedia(`(max-width: ${QUICK_BELOW - 1}px)`);
-    const onChange = () => setSmall(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,5 +41,5 @@ export function App() {
 
   if (error) return <div className="ed-splash">Could not load the draft: {error}</div>;
   if (!ready) return <div className="ed-splash">Loading the draft…</div>;
-  return small ? <QuickEdit /> : <Editor />;
+  return quick ? <QuickEdit /> : <Editor />;
 }

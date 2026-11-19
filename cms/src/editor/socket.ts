@@ -27,9 +27,23 @@ export const send = (msg: ClientMessage) => {
   if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(msg));
 };
 
+/** The latest request typed into the palette for Claude; it travels with the editor context. */
+let request: { text: string; at: number } | null = null;
+
+/**
+ * "Ask Claude to do this": the request goes to the draft store with what Alex
+ * is looking at (page, selection, size). Claude reads it with get_editor_context,
+ * the same path the toolbar's Ask Claude relies on for "the selected block".
+ */
+export function askClaude(text: string) {
+  request = { text: text.trim(), at: Date.now() };
+  sendContext(true);
+}
+export const lastClaudeRequest = () => request;
+
 function sendContext(force = false) {
   const s = getState();
-  const context = { pageId: s.pageId, selectedNodeIds: s.overlayId ? [s.overlayId] : s.selection, breakpoint: s.bp };
+  const context = { pageId: s.pageId, selectedNodeIds: s.overlayId ? [s.overlayId] : s.selection, breakpoint: s.bp, request };
   const key = JSON.stringify(context);
   if (!force && key === lastContext) return;
   lastContext = key;

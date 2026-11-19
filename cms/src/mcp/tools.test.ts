@@ -54,6 +54,15 @@ describe("read tools", () => {
     expect(c).toMatchObject({ page: { id: "home" }, breakpoint: "mobile", selected: [{ id: "home-photo", type: "Image", inSection: "home-art" }] });
     expect(runTool("get_editor_context", {}, ctx()).text).toMatch(/not open/);
   });
+  it("passes on a request typed into the editor's palette, for half an hour", () => {
+    const withRequest = (at: number) => {
+      const c = ctx(open("home", [], "desktop"));
+      c.editor = { ...c.editor!, request: { text: "make the hero darker", at } };
+      return JSON.parse(runTool("get_editor_context", {}, c).text);
+    };
+    expect(withRequest(Date.now() - 5_000).request).toMatchObject({ text: "make the hero darker" });
+    expect(withRequest(Date.now() - 31 * 60_000).request).toBeUndefined();
+  });
 });
 
 describe("editing tools", () => {
