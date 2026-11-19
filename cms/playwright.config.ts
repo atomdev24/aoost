@@ -13,7 +13,8 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   reporter: [["list"]],
-  use: { baseURL: `http://localhost:${port}`, trace: "off" },
+  // The editor's service worker stays out of the way (it would hide requests from page.route); the PWA spec turns it on.
+  use: { baseURL: `http://localhost:${port}`, trace: "off", serviceWorkers: "block" },
   webServer: {
     command: `npm run build && npx wrangler dev --port ${port} --var AUTH_MODE:password`,
     url: `http://localhost:${port}/api/health`,
