@@ -138,6 +138,14 @@
   font-size: 11px;
   font-weight: 600;
 }
+/* Zoomed out: the override count becomes a dot beside the name. */
+.bd-badge.is-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  margin-left: 6px;
+  background: var(--ed-accent);
+}
 
 /* Space held: the whole board pans. */
 .bd-shield {

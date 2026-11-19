@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { pinViewportUnits } from "./frame-css";
-import { clampZoom, fitAll, isVisible, layoutFrames, panelRoom, PANEL_ROOM, reveal, slotRect, stepZoom, zoomAt } from "./viewport";
+import { clampZoom, fitAll, isVisible, layoutFrames, panelRoom, PANEL_ROOM, reveal, shortLabels, slotRect, SHORT_LABEL_ZOOM, stepZoom, zoomAt } from "./viewport";
 
 describe("board layout", () => {
   const EXTRA_HIDDEN = { tablet: true, widescreen: true };
@@ -125,5 +125,15 @@ describe("room for panels", () => {
   it("never squeezes the visible part below half the board", () => {
     const r = panelRoom(1000, true);
     expect(r.left + r.right).toBeLessThanOrEqual(500);
+  });
+});
+
+describe("frame labels when zoomed out", () => {
+  it("shorten below the threshold", () => {
+    expect(SHORT_LABEL_ZOOM).toBe(0.35);
+    expect(shortLabels(0.2)).toBe(true);
+    expect(shortLabels(0.349)).toBe(true);
+    expect(shortLabels(0.35)).toBe(false);
+    expect(shortLabels(1)).toBe(false);
   });
 });

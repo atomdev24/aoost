@@ -187,3 +187,6 @@ export function panelRoom(boardWidth: number, flyoutOpen: boolean): { left: numb
   return left > 0 && left <= boardWidth / 2 ? { left, right: 0 } : { left: 0, right: 0 };
 }
 
+/** Below this zoom, frame labels shorten to the name (the width, note and badge text drop). */
+export const SHORT_LABEL_ZOOM = 0.35;
+export const shortLabels = (zoom: number) => zoom < SHORT_LABEL_ZOOM;
