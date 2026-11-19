@@ -49,7 +49,6 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
   size switch (top bar only), the block name on its own line, the opening view leaves room for
   panels, short frame labels below 35% zoom, sums in number fields (`48*2`, `+8`); the phone sheet
   opens short on Content and steps aside for left panels; no shortcuts sheet on touch.
-
 - Toolbars and labels no longer flicker or vanish while panning/zooming (own GPU layers; blur
   drops to a solid tint while moving); side frames no longer blank when panned back into view.
 - Board references (per page, never published); Fit includes them and leaves room for open panels.

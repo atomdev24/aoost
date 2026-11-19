@@ -359,7 +359,7 @@ Summary:
 - Gemini (`ask-gemini`) was out of quota (resets in about 6 days), so Claude wrote all the code.
 - BLOCKERS.md: lengthen the Access session to one month so the home-screen app stops asking for the email code.
 
-## Inspector and phone polish (EDITOR-INSPECTOR-PHONE.md)
+## Inspector and phone polish (19 Nov 2026, EDITOR-INSPECTOR-PHONE.md)
 
 - Number fields: a leading "+8" adds to the current value, but "-8" sets −8 (the brief had both as relative). Why: negative offsets and margins are common, and typing a negative number should just work.
 - Sections: the Background group (colour, picture, video) now comes first, above Layout, and is titled "Background" instead of sitting under "Frame". Why: the brief puts content first, and a section's background picture is its content. It is still set per screen size, as before.
