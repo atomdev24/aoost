@@ -1,7 +1,7 @@
-import { itemAt, withItemFrame } from "../../components/aoost/frames";
+import { itemAt, withItemFrame, withItemKey } from "../../components/aoost/frames";
 import { getComponent } from "../../components/registry";
 import type { FrameSlot } from "../../components/types";
-import type { FrameFit, Node, Responsive } from "../../schema";
+import type { FrameFit, ItemSize, Node, Responsive } from "../../schema";
 
 /**
  * Editor helpers for pictures framed inside a block's content (the aoost blocks' frame slots).
@@ -28,6 +28,15 @@ export function withSlotFrame(node: Node, path: SlotPath, frame: Responsive<Fram
   const content = itemAt(node.content, path) ? node.content : contentOf(node);
   return { ...node, content: withItemFrame(content, path, frame) };
 }
+
+/** The block with one item's size replaced (undefined removes it, so the item is stored as before). */
+export function withSlotSize(node: Node, path: SlotPath, size: Responsive<ItemSize> | undefined): Node {
+  const content = itemAt(node.content, path) ? node.content : contentOf(node);
+  return { ...node, content: withItemKey(content, path, "size", size) };
+}
+
+/** An item's stored size (read from the content with defaults, so it works for any item, shown or not). */
+export const itemSizeOf = (node: Node, path: SlotPath) => itemAt(contentOf(node), path)?.size as Responsive<ItemSize> | undefined;
 
 /** A field's Puck name ("reel[0].src", "note.image") → the path of the item it belongs to. */
 export function itemPathOfField(name: string | undefined): SlotPath | null {

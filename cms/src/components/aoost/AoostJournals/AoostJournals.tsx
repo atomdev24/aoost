@@ -6,6 +6,7 @@ import { Block, Head } from "../Block";
 import { shownSlots } from "../frames";
 import { aoostKit, matBand } from "../kit";
 import { css } from "./AoostJournals.styles";
+import { KRAFT_BROWN, materialCss } from "./materials.styles";
 
 /** A page inside a journal. Empty pages show as "work in progress". */
 export const AoostJournalPage = z.object({
@@ -32,6 +33,8 @@ export const AoostJournal = z.object({
   /** Framing of the cover image, per screen size. */
   frame: ResponsiveFrameFit.optional(),
   coverColor: z.string().optional(),
+  /** What the cover is made of. "none" (or nothing) is the plain printed cover. */
+  material: z.enum(["none", "kraft", "leather"]).optional(),
   /** A sticker centred on the cover. */
   sticker: z.string().optional(),
   /** The elastic band's colour. */
@@ -72,14 +75,20 @@ const pageCount = (j: AoostJournal) => {
   return n + (n % 2);
 };
 
+/** The cover material that changes the look ("" for the plain cover). */
+const materialOf = (j: AoostJournal) => (j.material === "kraft" || j.material === "leather" ? j.material : "");
+
 /** One book on the shelf: the same markup the script builds, so the editor and the first paint match it. */
 function ShelfBook({ j, i }: { j: AoostJournal; i: number }) {
   const o = j.options ?? {};
-  const cover = { "--cbg": j.cover ? `url('${j.cover.replace(/'/g, "%27")}') center/cover no-repeat,${j.coverColor || "#222"}` : j.coverColor || "#222", "--tone": "#333", "--band": j.band || "#141516" } as CSSProperties;
+  const mat = materialOf(j);
+  const base = j.coverColor || (mat === "kraft" ? KRAFT_BROWN : "#222");
+  const cover = { "--cbg": j.cover ? `url('${j.cover.replace(/'/g, "%27")}') center/cover no-repeat,${base}` : base, "--tone": "#333", "--band": j.band || "#141516" } as CSSProperties;
   return (
     <button type="button" className="jr" aria-label={`Open journal: ${j.title}`} style={{ "--r": `${j.tilt ?? 0}deg`, "--i": i } as CSSProperties}>
       {o.ribbon && o.ribbon !== "none" ? <span className="jrib" style={{ "--rib": o.ribbon } as CSSProperties} /> : null}
-      <span className="jr-cv cvx" style={cover}>
+      <span className={`jr-cv cvx${mat ? ` cv-${mat}${j.cover ? " cv-img" : ""}` : ""}`} style={cover}>
+        {mat ? <span className="jmat" /> : null}
         {j.sticker ? <img className="st" src={j.sticker} alt="" /> : null}
         <span className="jr-band" />
         {o.wear === "light" || o.wear === "heavy" ? <span className={`jw jw-${o.wear}`} /> : null}
@@ -148,7 +157,7 @@ export const AoostJournals = defineComponent<AoostJournalsContent>({
       ],
     },
   },
-  css,
+  css: css + materialCss,
   Render: ({ content }) => (
     <Block name="journals" mat={content.mat} data={content}>
       <section className="focus-sec journals" aria-labelledby="h-jr">

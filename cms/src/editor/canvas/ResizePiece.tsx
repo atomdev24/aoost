@@ -1,0 +1,208 @@
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { locate } from "../../model/page-ops";
+import { sizeAt } from "../../components/aoost/frames";
+import type { FrameSlot } from "../../components/types";
+import { BREAKPOINT_LABEL, type Breakpoint, type Node } from "../../schema";
+import { frameOrigin, getBoard } from "../board/store";
+import { clampScale, setItemScale } from "../fields/size";
+import { beginGesture, currentPage, endGesture, getState, useEditor } from "../store";
+import { itemSizeOf, nodeSlots, samePath, type SlotPath } from "./slots";
+
+/**
+ * Resizing the items of a block that sit on their own spot (the project pieces on the table).
+ * Click a piece, in any frame, and it gets corner handles; drag one to scale the piece around its
+ * own centre for that frame's size, keeping its shape. The whole drag is one undo step.
+ */
+
+export type PieceTarget = { id: string; path: SlotPath; bp: Breakpoint };
+
+let target: PieceTarget | null = null;
+const listeners = new Set<() => void>();
+const emit = () => listeners.forEach((l) => l());
+export const selectPiece = (t: PieceTarget | null) => {
+  if (target === t || (target && t && target.id === t.id && target.bp === t.bp && samePath(target.path, t.path))) return;
+  target = t;
+  emit();
+};
+export const getPiece = () => target;
+const usePiece = () =>
+  useSyncExternalStore(
+    (l) => {
+      listeners.add(l);
+      return () => listeners.delete(l);
+    },
+    () => target,
+  );
+
+/** The resizable item under a point (in the frame's own pixels) inside a block's element; the topmost wins. */
+export function pieceAtPoint(node: Node, blockEl: Element, x: number, y: number): FrameSlot | null {
+  const slots = nodeSlots(node).filter((s) => s.box);
+  for (let i = slots.length - 1; i >= 0; i--) {
+    const el = blockEl.querySelector(slots[i]!.box!);
+    const r = el?.getBoundingClientRect();
+    if (r && r.width && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return slots[i]!;
+  }
+  return null;
+}
+
+/** The piece hit by a click in a frame at `bp`, or null (which clears the piece selection). */
+export function pieceFromClick(doc: Document, e: MouseEvent, bp: Breakpoint): PieceTarget | null {
+  const el = (e.target as Element | null)?.closest?.("[data-node-id], .n");
+  if (!el) return null;
+  const id = el.getAttribute("data-node-id") ?? [...el.classList].find((c) => c.startsWith("n-"))?.slice(2) ?? "";
+  const at = locate(currentPage(getState()), id);
+  const node = at?.kind === "node" ? at.node : null;
+  if (!node) return null;
+  const block = doc.querySelector(`.n-${CSS.escape(node.id)}`) ?? el;
+  const slot = pieceAtPoint(node, block, e.clientX, e.clientY);
+  return slot ? { id: node.id, path: slot.path, bp } : null;
+}
+
+/** Clicks in Puck's editable frame pick (or drop) a piece. */
+export function attachPieceSelect(doc: Document) {
+  const click = (e: MouseEvent) => {
+    if (e.button !== 0 || e.shiftKey) return;
+    selectPiece(pieceFromClick(doc, e, getState().bp));
+  };
+  doc.addEventListener("click", click, true);
+  return () => doc.removeEventListener("click", click, true);
+}
+
+function findNode(id: string): Node | null {
+  const at = locate(currentPage(getState()), id);
+  return at?.kind === "node" ? at.node : null;
+}
+
+type Geo = { x: number; y: number; w: number; h: number };
+
+/** The piece's box as drawn (its layout box scaled around its centre), in the board's screen pixels. */
+function measure(t: PieceTarget): Geo | null {
+  const node = findNode(t.id);
+  const slot = node ? nodeSlots(node).find((s) => s.box && samePath(s.path, t.path)) : null;
+  const doc = document.querySelector<HTMLIFrameElement>("#preview-frame")?.contentDocument;
+  const block = doc?.querySelector(`[data-node-id="${CSS.escape(t.id)}"]`);
+  const piece = slot && block ? block.querySelector<HTMLElement>(slot.box!) : null;
+  const parent = piece?.offsetParent as HTMLElement | null;
+  if (!piece || !parent) return null;
+  const pr = parent.getBoundingClientRect();
+  const x = pr.left + parent.clientLeft + piece.offsetLeft;
+  const y = pr.top + parent.clientTop + piece.offsetTop;
+  const raw = piece.ownerDocument.defaultView!.getComputedStyle(piece).scale;
+  const s = raw && raw !== "none" ? Number(raw.split(" ")[0]) || 1 : 1;
+  const w = piece.offsetWidth * s;
+  const h = piece.offsetHeight * s;
+  const cx = x + piece.offsetWidth / 2;
+  const cy = y + piece.offsetHeight / 2;
+  const { view: v } = getBoard();
+  const o = frameOrigin(getState().bp);
+  return { x: (o.x + cx - w / 2) * v.zoom + v.x, y: (o.y + cy - h / 2) * v.zoom + v.y, w: w * v.zoom, h: h * v.zoom };
+}
+
+export function ResizePiece() {
+  const t = usePiece();
+  const bp = useEditor((s) => s.bp);
+  const pageId = useEditor((s) => s.pageId);
+  const selection = useEditor((s) => s.selection);
+  const page = useEditor(currentPage);
+  const [geo, setGeo] = useState<Geo | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const host = useRef<HTMLDivElement>(null);
+  const node = t ? findNode(t.id) : null;
+  const shown = !!t && t.bp === bp && !!node;
+
+  // Drop the piece when the page changes, another size becomes active, or another block is selected.
+  useEffect(() => () => selectPiece(null), [pageId]);
+  useEffect(() => {
+    if (target && target.bp !== bp) selectPiece(null);
+  }, [bp]);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) return void (first.current = false);
+    if (target && !selection.includes(target.id)) selectPiece(null);
+  }, [selection]);
+  useEffect(() => {
+    if (t && (!node || !nodeSlots(node).some((s) => s.box && samePath(s.path, t.path)))) selectPiece(null);
+  }, [t, node, page]);
+
+  // Follow the piece every frame (zoom, pan and edits all move it).
+  useLayoutEffect(() => {
+    if (!shown) return setGeo(null);
+    let raf = 0;
+    const tick = () => {
+      const g = target && measure(target);
+      setGeo((old) => (g && old && JSON.stringify(old) === JSON.stringify(g) ? old : g));
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
+  }, [shown, t]);
+
+  // Esc drops the piece (the block stays selected).
+  useEffect(() => {
+    if (!shown) return;
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      e.preventDefault();
+      selectPiece(null);
+    };
+    const win = document.querySelector<HTMLIFrameElement>("#preview-frame")?.contentWindow;
+    window.addEventListener("keydown", key, true);
+    win?.addEventListener("keydown", key, true);
+    return () => {
+      window.removeEventListener("keydown", key, true);
+      win?.removeEventListener("keydown", key, true);
+    };
+  }, [shown]);
+
+  if (!shown || !t || !node || !geo) return null;
+  const scale = sizeAt(itemSizeOf(node, t.path), bp).scale;
+  const label = nodeSlots(node).find((s) => samePath(s.path, t.path))?.label ?? "Piece";
+
+  const startResize = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const el = e.currentTarget;
+    el.setPointerCapture(e.pointerId);
+    const bd = host.current!.getBoundingClientRect();
+    const cx = bd.left + geo.x + geo.w / 2;
+    const cy = bd.top + geo.y + geo.h / 2;
+    const d0 = Math.hypot(e.clientX - cx, e.clientY - cy) || 1;
+    const s0 = scale;
+    let moved = false;
+    const move = (m: PointerEvent) => {
+      const next = clampScale((s0 * (Math.hypot(m.clientX - cx, m.clientY - cy) || 1)) / d0);
+      if (!moved) {
+        if (Math.abs(next - s0) < 0.01) return;
+        moved = true;
+        setDragging(true);
+        beginGesture();
+      }
+      setItemScale(t.id, t.path, next);
+    };
+    const up = () => {
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+      if (moved) endGesture();
+      setDragging(false);
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+  };
+
+  return (
+    <div ref={host} className="ed-piece" aria-label={`${label}: resize`}>
+      <div className={`ed-piece-box${dragging ? " is-dragging" : ""}`} style={{ left: geo.x, top: geo.y, width: geo.w, height: geo.h }} data-testid="piece-box">
+        {(["nw", "ne", "se", "sw"] as const).map((c) => (
+          <span key={c} className={`ed-piece-handle is-${c}`} data-piece-handle={c} onPointerDown={startResize} title="Drag to resize this piece on this size" />
+        ))}
+      </div>
+      <span className="ed-piece-tag" style={{ left: geo.x, top: geo.y + geo.h + 6 }} role="status">
+        {label} · {Math.round(scale * 100)}% · {BREAKPOINT_LABEL[bp]}
+      </span>
+    </div>
+  );
+}

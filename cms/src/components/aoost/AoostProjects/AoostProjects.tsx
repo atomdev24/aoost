@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ResponsiveFrameFit } from "../../../schema";
+import { ResponsiveFrameFit, ResponsiveItemSize } from "../../../schema";
 import { defineComponent } from "../../types";
 import { Block, Head, LineArt } from "../Block";
 import { shownSlots } from "../frames";
@@ -20,6 +20,8 @@ export const AoostProject = z.object({
   hidden: z.boolean().optional(),
   /** Framing of the image, per screen size. */
   frame: ResponsiveFrameFit.optional(),
+  /** Size of the piece on the table, per screen size (1 = as laid out). It grows around its own spot. */
+  size: ResponsiveItemSize.optional(),
 });
 
 export const AoostProjectsContent = z.object({
@@ -58,7 +60,7 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
   band: matBand,
   schema: AoostProjectsContent,
   frames: (content) => [
-    ...shownSlots(content.projects, (p) => !!p.image && !p.hidden, (p, i, k) => ({ path: ["projects", i], label: p.title || `Piece ${k}`, kind: "img", selector: `.table>.piece:nth-child(${k})>img`, src: p.image })),
+    ...shownSlots(content.projects, (p) => !!p.image && !p.hidden, (p, i, k) => ({ path: ["projects", i], label: p.title || `Piece ${k}`, kind: "img", selector: `.table>.piece:nth-child(${k})>img`, box: `.table>.piece:nth-child(${k})`, src: p.image })),
     ...(content.note.show && content.note.image ? [{ path: ["note"], label: "Sticky note", kind: "img" as const, selector: '.sticky[data-note="0"]>img', src: content.note.image, frame: content.note.frame }] : []),
   ],
   defaults: {

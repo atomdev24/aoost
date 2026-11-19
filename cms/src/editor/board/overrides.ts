@@ -1,6 +1,6 @@
 import { overridesAt, resetAt } from "../../responsive/resolve";
 import type { Breakpoint, Node, Page } from "../../schema";
-import { nodeSlots, withSlotFrame } from "../canvas/slots";
+import { nodeSlots, withSlotFrame, withSlotSize } from "../canvas/slots";
 
 /**
  * Per-size changes, counted and reset. Each size is compared with the size the
@@ -11,14 +11,20 @@ import { nodeSlots, withSlotFrame } from "../canvas/slots";
 /** A block's own values that differ at a size: layout and look, its frame, and the frames of pictures inside it. */
 function nodeOverrides(node: Node, bp: Breakpoint): number {
   let n = overridesAt(node.style, bp).length + (node.frame ? overridesAt(node.frame, bp).length : 0);
-  for (const s of nodeSlots(node)) if (s.frame) n += overridesAt(s.frame, bp).length;
+  for (const s of nodeSlots(node)) {
+    if (s.frame) n += overridesAt(s.frame, bp).length;
+    if (s.size) n += overridesAt(s.size, bp).length;
+  }
   return n;
 }
 
 /** The block with every difference at this size reset to the size it is compared with. */
 function resetNode(node: Node, bp: Breakpoint): Node {
   let next: Node = { ...node, style: resetAt(node.style, bp), ...(node.frame ? { frame: resetAt(node.frame, bp) } : {}) };
-  for (const s of nodeSlots(node)) if (s.frame && overridesAt(s.frame, bp).length) next = withSlotFrame(next, s.path, resetAt(s.frame, bp));
+  for (const s of nodeSlots(node)) {
+    if (s.frame && overridesAt(s.frame, bp).length) next = withSlotFrame(next, s.path, resetAt(s.frame, bp));
+    if (s.size && overridesAt(s.size, bp).length) next = withSlotSize(next, s.path, resetAt(s.size, bp));
+  }
   return next;
 }
 

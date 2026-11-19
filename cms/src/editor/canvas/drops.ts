@@ -4,6 +4,7 @@ import { currentPage, getState, updatePage } from "../store";
 import { selectBlock } from "../board/bridge";
 import { adjustable, startAdjust } from "./AdjustImage";
 import { slotAtPoint } from "./slots";
+import { selectPiece } from "./ResizePiece";
 
 /** What a media library item carries when it is dragged (see MediaLibrary). */
 export const MEDIA_MIME = "application/x-aoost-media";
@@ -75,6 +76,7 @@ export function attachCanvasDrops(doc: Document) {
       e.stopPropagation();
       // The block is selected too, so the inspector shows the picture being adjusted.
       if (!getState().selection.includes(owner.id)) selectBlock(owner.id);
+      selectPiece(null);
       startAdjust(owner.id, hit.slot.path);
       return;
     }

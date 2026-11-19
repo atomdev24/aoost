@@ -1,6 +1,6 @@
 import { frameDecls, type Decls, type Sheet } from "../../responsive/css";
 import { resolve } from "../../responsive/resolve";
-import { DEFAULT_FRAME_FIT, type Breakpoint, type FrameFit, type Responsive } from "../../schema";
+import { DEFAULT_FRAME_FIT, DEFAULT_ITEM_SIZE, type Breakpoint, type FrameFit, type ItemSize, type Responsive } from "../../schema";
 import type { FrameSlot } from "../types";
 
 /**
@@ -21,21 +21,24 @@ export function itemAt(content: unknown, path: (string | number)[]): Obj | undef
   return at !== null && typeof at === "object" ? (at as Obj) : undefined;
 }
 
-/** The content with one item's frame replaced (or removed when undefined). Nothing else is copied. */
-export function withItemFrame<C>(content: C, path: (string | number)[], frame: Responsive<FrameFit> | undefined): C {
+/** The content with one key of one item replaced (or removed when undefined). Nothing else is copied. */
+export function withItemKey<C>(content: C, path: (string | number)[], key: string, value: unknown): C {
   const set = (at: unknown, i: number): unknown => {
     if (i === path.length) {
       const item = { ...(at as Obj) };
-      if (frame) item.frame = frame;
-      else delete item.frame;
+      if (value !== undefined) item[key] = value;
+      else delete item[key];
       return item;
     }
-    const key = path[i]!;
-    if (Array.isArray(at)) return at.map((x, j) => (j === key ? set(x, i + 1) : x));
-    return { ...(at as Obj), [key]: set((at as Obj)[key as string], i + 1) };
+    const k = path[i]!;
+    if (Array.isArray(at)) return at.map((x, j) => (j === k ? set(x, i + 1) : x));
+    return { ...(at as Obj), [k]: set((at as Obj)[k as string], i + 1) };
   };
   return set(content, 0) as C;
 }
+
+/** The content with one item's frame replaced (or removed when undefined). */
+export const withItemFrame = <C>(content: C, path: (string | number)[], frame: Responsive<FrameFit> | undefined): C => withItemKey(content, path, "frame", frame);
 
 const r4 = (n: number) => `${Math.round(Math.max(0, n) * 10000) / 10000}%`;
 
@@ -65,9 +68,24 @@ export function slotBgDecls(f: FrameFit): Decls {
 /** The frame in effect at a breakpoint, complete. */
 export const frameAt = (r: Responsive<FrameFit> | undefined, bp: Breakpoint): FrameFit => ({ ...DEFAULT_FRAME_FIT, ...(r ? resolve(r, bp) : {}) });
 
+/** The size in effect at a breakpoint, complete. */
+export const sizeAt = (r: Responsive<ItemSize> | undefined, bp: Breakpoint): ItemSize => ({ ...DEFAULT_ITEM_SIZE, ...(r ? resolve(r, bp) : {}) });
+
+/**
+ * A resized item grows or shrinks around its own centre (CSS `scale`, on top of the transform the
+ * layout gives it), so its neighbours keep their places and it overlaps them like paper on a table.
+ * Full size writes nothing.
+ */
+export const sizeDecls = (s: ItemSize): Decls => (s.scale === 1 ? {} : { scale: String(Math.round(s.scale * 1000) / 1000) });
+
 /** One rule per framed picture: the mobile value, and each other size's in its media query (tablet and widescreen only when set). */
 export function addSlotCss(sheet: Sheet, nodeId: string, slots: FrameSlot[]) {
   for (const s of slots) {
+    if (s.box && s.size) {
+      const z = s.size;
+      const extra = { tablet: z.tablet ? sizeDecls(sizeAt(z, "tablet")) : undefined, widescreen: z.widescreen ? sizeDecls(sizeAt(z, "widescreen")) : undefined };
+      sheet.add(`.n-${nodeId} ${s.box}`, sizeDecls(sizeAt(z, "mobile")), sizeDecls(sizeAt(z, "desktop")), extra);
+    }
     if (!s.frame) continue;
     const decls = s.kind === "bg" ? slotBgDecls : slotImgDecls;
     const f = s.frame;
@@ -80,7 +98,7 @@ export function addSlotCss(sheet: Sheet, nodeId: string, slots: FrameSlot[]) {
 export function shownSlots<T extends Obj>(
   items: T[],
   shown: (item: T) => boolean,
-  slot: (item: T, i: number, k: number) => Omit<FrameSlot, "frame"> | null,
+  slot: (item: T, i: number, k: number) => Omit<FrameSlot, "frame" | "size"> | null,
 ): FrameSlot[] {
   const out: FrameSlot[] = [];
   let k = 0;
@@ -88,7 +106,7 @@ export function shownSlots<T extends Obj>(
     if (!shown(item)) return;
     k++;
     const s = slot(item, i, k);
-    if (s) out.push({ ...s, frame: item.frame as Responsive<FrameFit> | undefined });
+    if (s) out.push({ ...s, frame: item.frame as Responsive<FrameFit> | undefined, ...(s.box ? { size: item.size as Responsive<ItemSize> | undefined } : {}) });
   });
   return out;
 }
