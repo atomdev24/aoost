@@ -30,7 +30,7 @@ export function ClaudePill() {
       title={on ? "Claude has called the editor's connector in the last 15 minutes." : "The Claude connector has no working credentials yet, or hasn't been used in the last 15 minutes. See docs/auth.md."}
     >
       <span className="ed-pill-dot" aria-hidden="true" />
-      {connected === null ? "Checking Claude…" : on ? "Claude connected" : "Claude not connected"}
+      <span className="ed-pill-text">{connected === null ? "Checking Claude…" : on ? "Claude connected" : "Claude not connected"}</span>
     </span>
   );
 }

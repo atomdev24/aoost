@@ -5,6 +5,7 @@ import { selectBlock } from "../board/bridge";
 import { adjustable, startAdjust } from "./AdjustImage";
 import { slotAtPoint } from "./slots";
 import { selectPiece } from "./ResizePiece";
+import { attachDoubleTap } from "../touch/longpress";
 
 /** What a media library item carries when it is dragged (see MediaLibrary). */
 export const MEDIA_MIME = "application/x-aoost-media";
@@ -131,11 +132,14 @@ export function attachCanvasDrops(doc: Document) {
     if (!e.relatedTarget) mark(null);
   };
   doc.addEventListener("dblclick", dbl, true);
+  // Phones: a double tap does what a double-click does (enter Adjust image).
+  const detachTap = attachDoubleTap(doc, (e) => dbl(e));
   doc.addEventListener("dragover", over, true);
   doc.addEventListener("drop", drop, true);
   doc.addEventListener("dragleave", leave, true);
   return () => {
     doc.removeEventListener("dblclick", dbl, true);
+    detachTap();
     doc.removeEventListener("dragover", over, true);
     doc.removeEventListener("drop", drop, true);
     doc.removeEventListener("dragleave", leave, true);

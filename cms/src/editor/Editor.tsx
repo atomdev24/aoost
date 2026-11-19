@@ -4,10 +4,11 @@ import { useEffect, useMemo, useRef } from "react";
 import { deepEqual } from "../responsive/resolve";
 import { DESIGN_WIDTH } from "../schema";
 import { Board } from "./board/Board";
-import { connectPuck } from "./board/bridge";
+import { activateBreakpoint, connectPuck } from "./board/bridge";
+import { isPhone } from "./touch/device";
 import { attachKeys } from "./board/keys";
 import { PuckFrame } from "./board/PuckFrame";
-import { useBoard } from "./board/store";
+import { fitFrame, useBoard } from "./board/store";
 import "./editor.css";
 import { pageToPuck, puckToPage, type PuckData } from "./puck/adapter";
 import { puckConfig } from "./puck/config";
@@ -22,6 +23,7 @@ import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { TopBar } from "./workspace/TopBar";
 import "./workspace/workspace.css";
+import "./workspace/phone.css";
 
 const VIEWPORTS = [
   { width: DESIGN_WIDTH.desktop, height: "auto" as const, label: "Desktop", icon: "Monitor" as const },
@@ -33,7 +35,14 @@ const VIEWPORTS = [
 /** Lets code outside Puck's tree (frames, tools, shortcuts) reach Puck. */
 function PuckBridge() {
   const getPuck = useGetPuck();
-  useEffect(() => connectPuck(getPuck), [getPuck]);
+  useEffect(() => {
+    connectPuck(getPuck);
+    // A phone opens on the Mobile frame, fitted to the screen. The other frames stay on the board.
+    if (isPhone()) {
+      activateBreakpoint("mobile");
+      fitFrame("mobile");
+    }
+  }, [getPuck]);
   return null;
 }
 

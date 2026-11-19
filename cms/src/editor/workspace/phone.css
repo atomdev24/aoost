@@ -1,0 +1,300 @@
+/* The editor on a phone (under 768px): the same floating islands, rail, flyouts,
+   free canvas and inspector as on desktop, sized for fingers. Every target is at
+   least 40px, nothing scrolls sideways, and nothing sits behind the notch or the
+   home indicator (safe-area insets). Loaded after workspace.css. */
+
+.ed-phone-only {
+  display: none;
+}
+
+/* Board and frames take touch themselves (pan, pinch), never the browser. */
+.ed-shell > .bd {
+  touch-action: none;
+}
+
+@media (max-width: 767px) {
+  .ed-desk-only,
+  .ed-mark,
+  .ed-tool[data-tool="section"],
+  .ed-tool[data-tool="claude"],
+  .ed-pill-text,
+  .ed-status {
+    display: none !important;
+  }
+  .ed-phone-only {
+    display: revert;
+  }
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
+  /* -------------------------------------------------- islands: two rows */
+  .ed-islands {
+    top: calc(env(safe-area-inset-top) + 8px);
+    height: auto;
+    padding: 0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "left right" "center center";
+    gap: 8px;
+  }
+  .ed-island {
+    height: 48px;
+    padding: 0 4px;
+    gap: 2px;
+    min-width: 0;
+  }
+  .ed-island-left {
+    grid-area: left;
+    justify-self: start;
+    max-width: 100%;
+  }
+  .ed-island-right {
+    grid-area: right;
+  }
+  .ed-island-center {
+    grid-area: center;
+    justify-self: center;
+    position: relative;
+    left: auto;
+    transform: none;
+    padding: 0 4px;
+    gap: 4px;
+  }
+  .ed-switcher-btn {
+    height: 40px;
+    min-width: 0;
+    max-width: 150px;
+    padding: 0 8px;
+  }
+  .ed-switcher-btn > span:first-child,
+  .ed-switcher-btn strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ed-top .ed-icon,
+  .ed-icon {
+    width: 40px;
+    height: 40px;
+  }
+  .ed-tool {
+    width: 40px;
+    height: 40px;
+  }
+  .ed-tools {
+    gap: 0;
+  }
+  .ed-island-bps {
+    padding: 2px;
+    gap: 0;
+  }
+  .ed-tool-bp {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 6px;
+    font-size: 12px;
+  }
+  /* Short labels so all four sizes fit: Wide, Desk, Tab, Mob. */
+  .ed-tool-bp[data-short]::before {
+    content: attr(data-short);
+  }
+  .ed-tool-bp[data-short] {
+    font-size: 0;
+  }
+  .ed-tool-bp[data-short]::before {
+    font-size: 12px;
+  }
+  .ed-btn {
+    min-height: 40px;
+  }
+  .ed-publish-btn {
+    padding: 0 12px;
+  }
+  .ed-pill {
+    height: 40px;
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .ed-more-menu button,
+  .ed-menu button {
+    min-height: 44px;
+  }
+
+  /* -------------------------------------------------- rail and flyouts */
+  .ed-rail {
+    top: calc(env(safe-area-inset-top) + 120px);
+    left: max(8px, env(safe-area-inset-left));
+    width: 48px;
+    padding: 4px;
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 136px);
+    overflow-y: auto;
+  }
+  .ed-rail-btn {
+    width: 40px;
+    height: 40px;
+  }
+  .ed-flyout {
+    top: calc(env(safe-area-inset-top) + 120px);
+    left: calc(max(8px, env(safe-area-inset-left)) + 56px);
+    width: auto;
+    right: max(8px, env(safe-area-inset-right));
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 136px);
+  }
+  .ed-flyout-head {
+    height: 48px;
+  }
+  .ed-flyout .ed-mini {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* -------------------------------------------------- inspector: a card at the bottom right */
+  .ed-inspector.is-card {
+    top: auto;
+    right: max(8px, env(safe-area-inset-right));
+    bottom: calc(env(safe-area-inset-bottom) + 8px);
+    width: min(380px, calc(100vw - 16px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+    max-height: none;
+    height: 45dvh;
+    transition: height 180ms ease;
+    z-index: 110;
+  }
+  .ed-inspector.is-card[data-size="collapsed"] {
+    height: 64px;
+  }
+  .ed-inspector.is-card[data-size="full"] {
+    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 72px);
+  }
+  .ed-inspector.is-card[style*="height"] {
+    transition: none;
+  }
+  .ed-inspector.is-card .ed-inspector-head {
+    padding: 0 12px 10px;
+    min-height: 48px;
+    touch-action: none;
+    cursor: grab;
+  }
+  .ed-inspector.is-card[data-size="collapsed"] .ed-scope,
+  .ed-inspector.is-card[data-size="collapsed"] .ed-inspector-body {
+    display: none;
+  }
+  .ed-card-grip {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 16px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: grab;
+    touch-action: none;
+  }
+  .ed-card-grip span {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.28);
+  }
+  .ed-bpswitch button {
+    height: 40px;
+    min-width: 40px;
+  }
+  /* 16px text stops iOS from zooming into a field it focuses. */
+  .ed-shell input,
+  .ed-shell textarea,
+  .ed-shell select {
+    font-size: 16px !important;
+  }
+
+  /* -------------------------------------------------- board chrome */
+  .bd-zoombar {
+    right: max(8px, env(safe-area-inset-right));
+    bottom: calc(env(safe-area-inset-bottom) + 8px);
+  }
+  .bd-zb {
+    min-width: 40px;
+    height: 40px;
+  }
+  .ed-shell:has(.ed-inspector.is-card) .bd-zoombar {
+    display: none;
+  }
+  .bd-label {
+    min-height: 32px;
+  }
+  .bd-label-more {
+    min-width: 40px;
+    height: 40px;
+  }
+  .bd-hidden-chip,
+  .bd-loading-chip {
+    bottom: calc(env(safe-area-inset-bottom) + 64px);
+  }
+
+  /* -------------------------------------------------- dialogs */
+  .ed-qi-backdrop {
+    padding: calc(env(safe-area-inset-top) + 12px) 8px 0;
+  }
+  .ed-qi {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    height: min(420px, 70dvh);
+  }
+  .ed-qi-right {
+    display: none !important;
+  }
+  .ed-qi li {
+    min-height: 44px;
+  }
+}
+
+/* Coarse pointers (any size): name-tag actions and adjust chips big enough to tap. */
+@media (pointer: coarse) {
+  .ed-tag-name {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+  .ed-tag.is-open .ed-tag-actions {
+    max-width: 260px;
+    opacity: 1;
+  }
+  .ed-tag-actions button {
+    width: 36px;
+    height: 28px;
+  }
+  .ed-tag-actions svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+.ed-tag.is-open .ed-tag-actions {
+  max-width: 260px;
+  opacity: 1;
+}
+
+.ed-adjust-chip {
+  pointer-events: auto;
+  margin-left: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(28, 28, 30, 0.35);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.ed-adjust-chip[aria-pressed="true"] {
+  background: #1c1c1e;
+  color: #ffd60a;
+}
+.ed-adjust-tag:has(.ed-adjust-chip) {
+  display: flex;
+  align-items: center;
+  padding: 4px 4px 4px 8px;
+}

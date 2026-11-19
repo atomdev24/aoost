@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import type { Breakpoint } from "../../schema";
 import { activateBreakpoint } from "./bridge";
-import { clampZoom, fitAll, layoutFrames, loadPageBoard, reveal, savePageBoard, slotRect, stepZoom, zoomAt, type FrameRect, type Rect, type View } from "./viewport";
+import { clampZoom, fitAll, fitWidth, layoutFrames, loadPageBoard, reveal, savePageBoard, slotRect, stepZoom, zoomAt, type FrameRect, type Rect, type View } from "./viewport";
 
 const DOT_GRID_KEY = "aoost.board.dotGrid";
 const loadDotGridPref = (): boolean => {
@@ -110,7 +110,23 @@ export function setSize(w: number, h: number) {
   if (w === state.size.w && h === state.size.h) return;
   const first = !state.size.w;
   set({ size: { w, h } });
-  if (first && state.pageId && !loadPageBoard(state.pageId)) fit();
+  if (first && pendingFit) fitFrame(pendingFit);
+  else if (first && state.pageId && !loadPageBoard(state.pageId)) fit();
+}
+
+/** A frame to fit once the board knows its size (the phone opens on the Mobile frame). */
+let pendingFit: Breakpoint | null = null;
+
+/** Fit one frame's width to the screen, top aligned. Shows it if it was hidden. */
+export function fitFrame(bp: Breakpoint) {
+  if (!state.size.w) {
+    pendingFit = bp;
+    return;
+  }
+  pendingFit = null;
+  if (state.hidden[bp]) set({ hidden: { ...state.hidden, [bp]: false } });
+  const rect = frameRects().find((f) => f.bp === bp);
+  if (rect) setView(fitWidth(rect, state.size.w));
 }
 
 /** Open a page: its remembered view, hidden frames, and positions, or "Fit all" the first time. */
@@ -132,7 +148,8 @@ export function openPage(pageId: string) {
           positions: {},
         }),
   });
-  if (!saved && state.size.w) fit();
+  if (pendingFit) fitFrame(pendingFit);
+  else if (!saved && state.size.w) fit();
 }
 
 /** A frame has drawn the open page. */

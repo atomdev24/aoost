@@ -46,7 +46,7 @@ export function ToolGroup() {
         {TOOLS.map((t) => {
           const pressed = t.id === "claude" ? asking : t.id === "select" ? !flash && !asking : flash === t.id;
           return (
-            <button key={t.id} type="button" className="ed-tool" aria-label={t.label} aria-pressed={pressed} title={t.key ? `${t.label} (${t.key})` : t.label} onClick={() => applyTool(t.id)}>
+            <button key={t.id} type="button" className="ed-tool" data-tool={t.id} aria-label={t.label} aria-pressed={pressed} title={t.key ? `${t.label} (${t.key})` : t.label} onClick={() => applyTool(t.id)}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d={t.icon} />
               </svg>
