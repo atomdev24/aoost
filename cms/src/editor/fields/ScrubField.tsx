@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { beginGesture, endGesture, useEditor } from "../store";
 import { Menu, type Anchor } from "../ui/Popover";
 import { PX_PER_STEP, scrubUnit } from "./scrub";
+import { evalLengthInput, evalNumberInput, looksLikeSum } from "./maths";
 import { parseLength } from "./spacing";
 import { useLongPress } from "../touch/longpress";
 
@@ -116,8 +117,9 @@ export function ScrubNumber({ value, onChange, glyph, suffix, placeholder, id, a
   };
   const commit = (raw: string) => {
     if (raw.trim() === "") return value !== undefined && onChange(undefined);
-    const n = Number(raw);
-    if (Number.isNaN(n)) return setDraft(show(value));
+    // Plain numbers and simple sums ("48*2", "+8" adds to the current value).
+    const n = evalNumberInput(raw, value);
+    if (n === null) return setDraft(show(value));
     put(n);
     setDraft(show(clamp(decimals ? tidy(n) : Math.round(n), min, max)));
   };
@@ -177,7 +179,10 @@ export function ScrubLength({ value, onChange, validate, glyph, placeholder, id,
   live.current = value;
   useEffect(() => setDraft(value ?? ""), [value]);
   const commit = (raw: string) => {
-    const v = /^-?\d*\.?\d+$/.test(raw.trim()) ? `${raw.trim()}px` : raw.trim();
+    const text = looksLikeSum(raw) ? evalLengthInput(raw, live.current) : raw.trim();
+    if (text === null) return setDraft(value ?? "");
+    if (text !== raw.trim()) setDraft(text);
+    const v = /^-?\d*\.?\d+$/.test(text) ? `${text}px` : text;
     if (v !== "" && validate && !validate(v)) return setBad(true);
     setBad(false);
     if (v !== (live.current ?? "")) {
