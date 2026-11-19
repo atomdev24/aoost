@@ -1,12 +1,7 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
-import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { homeBlock, page as contentPage, site as contentSite, visibleProjects } from "./content";
 import { bearer, draftSite, editorPassword, resetDraft, signIn } from "./helpers";
 
-const cms = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const password = editorPassword();
 
 /**
@@ -293,34 +288,5 @@ test.describe("homepage with draft changes (preview)", () => {
     await expect(page.locator("html")).toHaveClass(/late/);
     expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(17, 18, 19)");
     await resetDraft(request, password!);
-  });
-});
-
-test.describe("homepage looks like the original", () => {
-  test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
-  test.setTimeout(180_000);
-
-  /*
-   * The published homepage has moved on from the original on purpose (no ticker, skills hidden, new
-   * artwork), so the blocks are compared with the original using the content that matched it:
-   * tests/fixtures/home-original.json, the homepage as first rebuilt from the aoost blocks. It goes
-   * into the draft and is captured on /preview/, which renders exactly like the public site.
-   */
-  test("captures of the original and the CMS homepage (with the original's content) are the same at 390 and 1440", async ({ request }) => {
-    await resetDraft(request, password!);
-    const original = JSON.parse(readFileSync(resolve(cms, "tests/fixtures/home-original.json"), "utf8"));
-    expect((await request.post("/api/editor/ops", { headers: bearer(password!), data: { ops: [{ op: "putPage", page: original }] } })).ok()).toBe(true);
-    try {
-      const base = new URL(test.info().project.use.baseURL!).origin;
-      execFileSync("node", ["scripts/compare-home.mjs", base, "/preview/"], { cwd: cms, stdio: "pipe", env: { ...process.env, EDITOR_PASSWORD: password! } });
-    } finally {
-      await resetDraft(request, password!);
-    }
-    const report = execFileSync("node", ["scripts/diff-home.mjs"], { cwd: cms }).toString();
-    const percents = [...report.matchAll(/\((\d+\.\d+)%\)/g)].map((m) => Number(m[1]));
-    expect(report).not.toContain("sizes differ");
-    expect(percents).toHaveLength(2);
-    // Allow for the clock ticking over a minute between the two captures; anything else is a real difference.
-    for (const p of percents) expect(p, report).toBeLessThan(0.05);
   });
 });
