@@ -119,6 +119,24 @@ describe("share preview and favicon", () => {
   });
 });
 
+describe("404: the clover", () => {
+  const nf = buildSite(site)["404.html"]!;
+  it("is the clover on black with 404 · back to /, titled aoost, and no other text", () => {
+    expect(nf).toContain("<title>aoost</title>");
+    expect(nf).toContain('<img class="nf-clover" src="/art/app-icon-512.png" width="200" height="200" alt="">');
+    expect(nf).toContain('<p class="nf-line">404 · <a href="/">back</a></p>');
+    expect(nf).toContain("background:#000");
+    expect(nf).toMatch(/animation:nf-turn 40s linear infinite/);
+    expect(nf).toMatch(/prefers-reduced-motion:reduce\)\{\.nf-clover\{animation:none\}/);
+    const text = nf.replace(/<head>[^]*<\/head>/, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    expect(text).toBe("404 · back");
+  });
+  it("carries the share tags and favicons too", () => {
+    expect(nf).toContain('<meta property="og:title" content="aoost">');
+    expect(nf).toContain('<link rel="icon" href="/favicon.ico" sizes="any">');
+  });
+});
+
 describe("buildSite", () => {
   it("builds published and unlisted pages, never drafts", () => {
     const s = clone();

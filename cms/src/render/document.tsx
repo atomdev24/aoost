@@ -23,8 +23,26 @@ export type RenderOptions = {
 };
 
 
+/**
+ * Link-preview tags: Open Graph and Twitter, with the share image (the page's own, the site's, or the clover).
+ * No description text anywhere: the site stays barely there (SHARE-VIEWER.md).
+ */
+export function shareTags(site: Site, page: Page, title: string, opts: RenderOptions = {}): string {
+  const image = page.seo.image || site.settings.defaultSeo.image || DEFAULT_SHARE_IMAGE;
+  const origin = (opts.siteUrl || opts.shareOrigin || "").replace(/\/$/, "");
+  const share = (path: string) => (origin && path.startsWith("/") ? origin + path : path);
+  return [
+    `<meta property="og:title" content="${esc(title)}">`,
+    `<meta property="og:type" content="website">`,
+    `<meta property="og:url" content="${esc(share(page.slug))}">`,
+    `<meta property="og:image" content="${esc(share(image))}">`,
+    `<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+  ].join("\n");
+}
+
 /** Favicons made from the clover (scripts/make-icons.ts), unless a custom one is set. */
-function iconLinks(site: Site): string {
+export function iconLinks(site: Site): string {
   if (site.settings.favicon) return `<link rel="icon" href="${esc(site.settings.favicon)}">`;
   return (
     `<link rel="icon" href="/favicon.ico" sizes="any">` +
@@ -34,7 +52,7 @@ function iconLinks(site: Site): string {
   );
 }
 
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+export const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 function navPanels(items: NavItem[]): Section[] {
   return items.flatMap((i) => [...(i.panel ?? []), ...navPanels(i.children ?? [])]);
@@ -181,11 +199,7 @@ export function PageBody({ site, page, opts = {}, editing = false }: { site: Sit
 /** A complete static HTML document for one page. */
 export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): string {
   const title = pageTitle(site, page);
-  // No description text anywhere: the site stays barely there (SHARE-VIEWER.md).
-  const image = page.seo.image || site.settings.defaultSeo.image || DEFAULT_SHARE_IMAGE;
-  const origin = (opts.siteUrl || opts.shareOrigin || "").replace(/\/$/, "");
   const abs = (path: string) => (opts.siteUrl && path.startsWith("/") ? opts.siteUrl.replace(/\/$/, "") + path : path);
-  const share = (path: string) => (origin && path.startsWith("/") ? origin + path : path);
   const noindex = !!opts.preview || page.status !== "published";
   const v = opts.assetVersion ? `?v=${esc(opts.assetVersion)}` : "";
   const kits = pageKits(site, page);
@@ -196,12 +210,7 @@ export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): st
     `<title>${esc(title)}</title>`,
     noindex ? `<meta name="robots" content="noindex">` : "",
     opts.siteUrl && !noindex ? `<link rel="canonical" href="${esc(abs(page.slug))}">` : "",
-    `<meta property="og:title" content="${esc(title)}">`,
-    `<meta property="og:type" content="website">`,
-    `<meta property="og:url" content="${esc(share(page.slug))}">`,
-    `<meta property="og:image" content="${esc(share(image))}">`,
-    `<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">`,
-    `<meta name="twitter:card" content="summary_large_image">`,
+    shareTags(site, page, title, opts),
     `<meta name="theme-color" content="${esc(site.theme.colors.bone ?? "#F3EFE6")}">`,
     iconLinks(site),
     fontPreload(site),
