@@ -6,7 +6,8 @@ import { css } from "./AoostRodeo.styles";
 
 export const AoostRodeoContent = z.object({
   mat: z.enum(["none", "light", "dark"]),
-  heading: z.string(),
+  /** Optional: empty renders no heading at all. */
+  heading: z.string().optional(),
   /** An optional line under the heading. The original has none. */
   copy: z.string(),
   /** The shared top-ten board under the game (Supabase). Off hides it and stops offering a place on it. */
@@ -28,8 +29,8 @@ export const AoostRodeo = defineComponent<AoostRodeoContent>({
     `\n.ao .rodeo-copy{margin:0;max-width:52ch;color:var(--ink-2)}\n.ao .rodeo .ao-off-note{position:absolute;left:50%;top:14px;transform:translateX(-50%);margin:0;padding:6px 10px;border:1px dashed #C9CCC5;background:#FBFBF8;color:#56595C;font:400 11px/1.4 "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}\n`,
   Render: ({ content, ctx }) => (
     <Block name="rodeo" mat={content.mat} data={{ showLeaderboard: content.showLeaderboard }}>
-      <section className="focus-sec" aria-labelledby="h-rodeo">
-        <Head id="h-rodeo" title={content.heading} index={5} />
+      <section className="focus-sec" {...(content.heading ? { "aria-labelledby": "h-rodeo" } : { "aria-label": "Rodeo" })}>
+        {content.heading ? <Head id="h-rodeo" title={content.heading} index={5} /> : null}
         {content.copy ? <p className="rodeo-copy">{content.copy}</p> : null}
         <div className="tumble" aria-hidden="true">
           <svg className="doodle" viewBox="0 0 40 40">

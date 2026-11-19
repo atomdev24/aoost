@@ -92,7 +92,7 @@
           "content": {
             "mat": "light",
             "intro": "Alex · Cape Town",
-            "heading": "projects",
+            "heading": "Projects",
             "projects": [
               {
                 "image": "/art/hero.jpg"
@@ -152,7 +152,7 @@
           "type": "AoostJournals",
           "content": {
             "mat": "light",
-            "heading": "journals",
+            "heading": "Journals",
             "sub": "",
             "journals": [
               {
@@ -244,7 +244,7 @@
           "type": "AoostTools",
           "content": {
             "mat": "light",
-            "heading": "skills",
+            "heading": "Skills",
             "tools": [
               {
                 "abbr": "Id",
@@ -307,10 +307,7 @@
           "type": "AoostPlaylistBand",
           "content": {
             "mat": "dark",
-            "heading": "playlists",
-            "crumbBold": "aoost",
-            "crumb": " / Page 1 / playlist",
-            "hint": "Tap play on the player below. Tap a disc to switch playlists.",
+            "heading": "Playlists",
             "playlists": [
               {
                 "title": "Rock",
@@ -353,7 +350,7 @@
           "content": {
             "mat": "dark",
             "show": false,
-            "heading": "the wall",
+            "heading": "The wall",
             "paint": [
               {
                 "name": "Black",
@@ -460,7 +457,7 @@
           "type": "AoostRodeo",
           "content": {
             "mat": "dark",
-            "heading": "rodeo",
+            "heading": "",
             "copy": "",
             "showLeaderboard": true,
             "leaderboardTitle": "Leaderboard"
@@ -488,6 +485,7 @@
           "type": "AoostFooter",
           "content": {
             "mat": "dark",
+            "line": "Things I make, when I get to them.",
             "text": "aoost · 2026",
             "showScorpion": true,
             "showSocials": false

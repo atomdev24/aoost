@@ -34,6 +34,8 @@ jobs:
           cache-dependency-path: cms/package-lock.json
       - run: npm ci
       - run: npm test
+      # Fresh track lists for the playlists band; keeps the committed copy when Spotify is unreachable.
+      - run: npm run playlists:refresh
       - run: npm run build
       - name: Deploy to workers.dev
         if: env.CLOUDFLARE_API_TOKEN != ''

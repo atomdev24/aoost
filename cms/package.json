@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.worker.json",
-    "deploy:preview": "npm run build && wrangler deploy"
+    "deploy:preview": "npm run playlists:refresh && npm run build && wrangler deploy",
+    "playlists:refresh": "tsx scripts/refresh-playlists.ts"
   },
   "dependencies": {
     "@google/model-viewer": "^4.4.0",

@@ -17,4 +17,9 @@ describe("AoostFooter", () => {
     expect(html).not.toContain("scorp");
     expect(html).toContain("aoost · 2027");
   });
+  it("renders the optional line quietly before the sign-off", () => {
+    const html = renderNode("AoostFooter", { ...d, line: "Things I make, when I get to them." });
+    expect(html).toContain('<span class="label ao-foot-line">Things I make, when I get to them.</span><span class="label">aoost · 2026</span></footer>');
+    expect(renderNode("AoostFooter", { ...d, line: "" })).not.toContain("ao-foot-line");
+  });
 });
