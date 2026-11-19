@@ -196,6 +196,12 @@
         },
         "showOn": "both",
         "hover": "tint"
+      },
+      {
+        "id": "nav-social",
+        "type": "social",
+        "showOn": "mobile",
+        "hover": "tint"
       }
     ]
   },

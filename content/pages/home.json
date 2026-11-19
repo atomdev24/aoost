@@ -34,15 +34,31 @@
             "reel": [
               {
                 "src": "/media/2026/hero-banner-halftone-viho.png",
-                "alt": ""
+                "alt": "",
+                "frame": {
+                  "base": {
+                    "fit": "free",
+                    "focalX": 63.4,
+                    "focalY": 50,
+                    "zoom": 1.02,
+                    "panX": 9.65,
+                    "panY": 0.6
+                  },
+                  "desktop": {
+                    "focalX": 50,
+                    "fit": "fill",
+                    "zoom": 1,
+                    "panX": 0,
+                    "panY": 0
+                  }
+                }
               }
             ],
             "reelSeconds": 5.2,
             "ticker": [],
             "tickerTopScore": true,
             "tickerVisitors": true,
-            "lateMode": false,
-            "showTicker": false
+            "lateMode": false
           },
           "style": {
             "base": {},
@@ -101,8 +117,7 @@
               }
             ],
             "note": {
-              "show": true,
-              "style": "plain"
+              "show": true
             },
             "keychain": {
               "show": true,
@@ -136,10 +151,10 @@
           "content": {
             "mat": "light",
             "heading": "journals",
-            "sub": "",
+            "sub": "tap a book to open it",
             "journals": [
               {
-                "title": "sketchbook 1",
+                "title": "sketchbook 01",
                 "year": "2025",
                 "cover": "/art/j-star1.jpg",
                 "band": "#141516",
@@ -173,7 +188,7 @@
                 ]
               },
               {
-                "title": "sketchbook 2",
+                "title": "hear no evil",
                 "year": "2025",
                 "coverColor": "#B48A5C",
                 "sticker": "/art/hear-no-evil-ring.png",
@@ -182,7 +197,7 @@
                 "pages": []
               },
               {
-                "title": "sketchbook 3",
+                "title": "stars & static",
                 "year": "2026",
                 "cover": "/art/j-star2.jpg",
                 "band": "#1B2BA0",
@@ -190,7 +205,7 @@
                 "pages": []
               },
               {
-                "title": "sketchbook 4",
+                "title": "late nights",
                 "year": "2026",
                 "coverColor": "#141516",
                 "sticker": "/art/j-monkey.png",
@@ -215,8 +230,7 @@
         "base": {
           "columns": 1,
           "gap": 0,
-          "padding": "0px",
-          "hidden": true
+          "padding": "0px"
         }
       },
       "children": [
