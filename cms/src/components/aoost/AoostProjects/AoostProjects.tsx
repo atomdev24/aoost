@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { z } from "zod";
 import { ResponsiveFrameFit, ResponsiveItemSize } from "../../../schema";
 import { defineComponent } from "../../types";
@@ -26,6 +27,21 @@ export const AoostProject = z.object({
   size: ResponsiveItemSize.optional(),
 });
 
+/**
+ * A fixture: an object that sits on the table above everything else (the metal clover).
+ * Pieces can be dragged underneath it, never on top. It doesn't take clicks, so a piece under it can still be picked up.
+ */
+export const AoostFixture = z.object({
+  image: z.string(),
+  /** Where its centre sits, as a percentage of the table's width and height. */
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  /** Width in px on a wide screen; it shrinks with the screen on phones. */
+  width: z.number().min(40).max(800),
+  rotate: z.number().min(-180).max(180).optional(),
+  hidden: z.boolean().optional(),
+});
+
 export const AoostProjectsContent = z.object({
   mat: z.enum(["none", "light", "dark"]),
   /** The line above the heading ("Alex · Cape Town"). */
@@ -41,6 +57,8 @@ export const AoostProjectsContent = z.object({
   /** Western line art: a cactus beside the intro line, a longhorn skull beside the heading. */
   showCactus: z.boolean(),
   showSkull: z.boolean(),
+  /** Objects fixed on top of the table (older content has none). */
+  fixtures: z.array(AoostFixture).optional(),
 });
 export type AoostProjectsContent = z.infer<typeof AoostProjectsContent>;
 
@@ -50,6 +68,8 @@ const extraCss = `
 .ao .table.ao-static .piece{position:relative}
 .ao .table.ao-static .piece:nth-child(odd){transform:rotate(-3deg)}
 .ao .table.ao-static .piece:nth-child(even){transform:rotate(2.500deg)}
+.ao .table{isolation:isolate}
+.ao .fixture{position:absolute;z-index:8;width:min(var(--fw,200px),36vw);height:auto;left:var(--fx,50%);top:var(--fy,50%);transform:translate(-50%,-50%) rotate(var(--fr,0deg));pointer-events:none;user-select:none;-webkit-user-drag:none}
 `;
 
 export const AoostProjects = defineComponent<AoostProjectsContent>({
@@ -104,6 +124,19 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
                   ))
                 : null}
             </div>
+            {(content.fixtures ?? [])
+              .filter((f) => f.image && !f.hidden)
+              .map((f, i) => (
+                <img
+                  key={i}
+                  className="fixture"
+                  src={f.image}
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  style={{ "--fx": `${f.x}%`, "--fy": `${f.y}%`, "--fw": `${f.width}px`, "--fr": `${f.rotate ?? 0}deg` } as CSSProperties}
+                />
+              ))}
             {content.keychain.show && content.keychain.image ? (
               <button className="keychain" id="keychain" type="button" aria-label={content.keychain.label}>
                 <span className="kc-pin" aria-hidden="true" />

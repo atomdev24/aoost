@@ -126,7 +126,16 @@
               "label": "Monkey keychain, give it a swing"
             },
             "showCactus": false,
-            "showSkull": false
+            "showSkull": false,
+            "fixtures": [
+              {
+                "image": "/art/clover-metal.png",
+                "x": 20,
+                "y": 26,
+                "width": 210,
+                "rotate": -8
+              }
+            ]
           },
           "style": {
             "base": {}

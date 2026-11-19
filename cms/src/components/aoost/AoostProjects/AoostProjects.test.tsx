@@ -37,6 +37,20 @@ describe("AoostProjects", () => {
     expect(html).toContain('class="doodle cactus"');
     expect(html).toContain('class="doodle skull"');
   });
+  it("puts fixtures above the table, out of the way of clicks, and skips hidden ones", () => {
+    const content = { ...d, fixtures: [{ image: "/art/clover-metal.png", x: 22, y: 30, width: 210, rotate: -8 }, { image: "/art/x.png", x: 50, y: 50, width: 100, hidden: true }] };
+    expect(AoostProjectsContent.safeParse(content).success).toBe(true);
+    const html = renderNode("AoostProjects", content);
+    expect(html.match(/class="fixture"/g)).toHaveLength(1);
+    expect(html).toContain('src="/art/clover-metal.png"');
+    expect(html).toContain("--fx:22%;--fy:30%;--fw:210px;--fr:-8deg");
+    // the fixture sits after the table so it stacks above every piece, even a lifted one
+    expect(html.indexOf('id="table"')).toBeLessThan(html.indexOf('class="fixture"'));
+    const css = AoostProjects.css!;
+    expect(css).toContain(".ao .table{isolation:isolate}");
+    expect(css).toMatch(/\.ao \.fixture\{[^}]*pointer-events:none/);
+    expect(AoostProjectsContent.safeParse(d).success).toBe(true); // older content without fixtures still works
+  });
   it("can drop the note, the keychain and the intro", () => {
     const html = renderNode("AoostProjects", { ...d, intro: "", note: { show: false }, keychain: { ...d.keychain, show: false } });
     expect(html).not.toContain("who-row");
