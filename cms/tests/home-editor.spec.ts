@@ -95,8 +95,8 @@ test.describe("homepage in the editor", () => {
     await title.fill("Sunday");
     await page.locator(`input[name="playlists[${playlists}].spotify"]:visible`).fill("https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M?si=abc");
     await expect.poll(async () => (await homeBlocks(request)).block("AoostPlaylistBand").content.playlists.length).toBe(playlists + 1);
-    await expect(canvas(page).locator("#discs .cv-frame")).toHaveCount(playlists + 1);
-    await expect(canvas(page).locator("#discs .cv-fl").nth(playlists)).toHaveText(`Disc ${playlists + 1} · Sunday`);
+    await expect(canvas(page).locator(".pl-chip")).toHaveCount(playlists + 1);
+    await expect(canvas(page).locator(".pl-chip").nth(playlists)).toHaveText("Sunday");
 
     // 4. skills above journals, 5. then hide the skills (on desktop and on mobile)
     await page.locator(".ed-rail").getByRole("button", { name: "Layers", exact: true }).click();
@@ -115,10 +115,10 @@ test.describe("homepage in the editor", () => {
     await expect(page.locator('.ao-b[data-ao="tools"]')).toBeHidden();
     await expect(page.locator('.ao-b[data-ao="journals"]')).toBeVisible();
     await expect(page.locator("#reel .hr-slide img").first()).toHaveAttribute("src", /grillz/);
-    await page.locator("#discs").evaluate((e) => e.scrollIntoView({ block: "center" }));
-    await expect(page.locator("#discs .cv-frame")).toHaveCount(playlists + 1);
-    await page.locator("#discs .disc").nth(playlists).click();
-    await expect(page.locator("#mwOpen")).toHaveAttribute("href", "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M");
+    await page.locator(".pl-chips").evaluate((e) => e.scrollIntoView({ block: "center" }));
+    await expect(page.locator(".pl-chip")).toHaveCount(playlists + 1);
+    await page.locator(".pl-chip").nth(playlists).click();
+    await expect(page.locator(`.pl-list[data-i="${playlists}"] .pl-more`)).toHaveAttribute("href", "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M");
     await page.locator("#table .piece").first().evaluate((e) => e.scrollIntoView({ block: "center" }));
     await page.locator("#table .piece").first().click();
     await expect(page.locator("#viewer")).toContainText("Fire breather");

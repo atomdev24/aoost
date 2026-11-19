@@ -1,7 +1,6 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import sharp from "sharp";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homeBlock, page as contentPage, site as contentSite, visibleProjects } from "./content";
@@ -142,28 +141,19 @@ test.describe("homepage: the original page, from aoost blocks", () => {
     await expect(page.locator(".jv")).toHaveCount(0, { timeout: 4000 });
   });
 
-  test("the discs switch playlists and the mini player plays", async ({ page }) => {
+  test("the playlist chips switch the sleeve and the tracklist", async ({ page }) => {
     const lists: { title: string; spotify: string; cover: string }[] = homeBlock("AoostPlaylistBand").playlists;
     expect(lists.length).toBeGreaterThanOrEqual(3);
-    const open = (id: string) => `https://open.spotify.com/playlist/${id}`;
+    // no real Spotify player in this test (tests/playlists.spec.ts drives a stubbed one)
+    await page.route(/open\.spotify\.com\/embed\/iframe-api/, (r) => r.fulfill({ contentType: "text/javascript", body: "" }));
     await home(page);
-    await page.locator("#discs").scrollIntoViewIfNeeded();
-    await expect(page.locator("#discs .cv-frame")).toHaveCount(lists.length);
-    await expect(page.locator('#discs .cv-frame[data-on="1"] .cv-fl')).toContainText(lists[0]!.title);
-    await expect(page.locator("#mwOpen")).toHaveAttribute("href", open(lists[0]!.spotify));
-
-    await page.locator("#discs .disc").nth(1).click();
-    await expect(page.locator('#discs .cv-frame[data-on="1"] .cv-fl')).toContainText(lists[1]!.title);
-    await expect(page.locator("#mwOpen")).toHaveAttribute("href", open(lists[1]!.spotify));
-    await expect(page.locator("#mwPlay")).toHaveAttribute("aria-label", "Pause"); // choosing a disc starts it
-    await expect(page.locator("#mwTime")).not.toHaveText("00:00 / 03:50", { timeout: 4000 }); // time runs
-    await page.locator("#mwPlay").click();
-    await expect(page.locator("#mwPlay")).toHaveAttribute("aria-label", "Play");
-    await page.locator("#mwNext").click();
-    await expect(page.locator('#discs .cv-frame[data-on="1"] .cv-fl')).toContainText(lists[2]!.title);
-    // the selection box shows the cover's real size
-    const cover = await sharp(resolve(cms, "..", lists[2]!.cover.replace(/^\//, ""))).metadata();
-    await expect(page.locator('#discs .cv-frame[data-on="1"] em')).toHaveText(`${cover.width} × ${cover.height}`);
+    await page.locator(".pl-chips").scrollIntoViewIfNeeded();
+    await expect(page.locator(".pl-chip")).toHaveText(lists.map((l) => l.title));
+    await expect(page.locator(".pl-rec:visible img").first()).toHaveAttribute("src", lists[0]!.cover);
+    await page.locator(".pl-chip").nth(1).click();
+    await expect(page.locator(".pl-chip").nth(1)).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator(".pl-rec:visible img").first()).toHaveAttribute("src", lists[1]!.cover);
+    await expect(page.locator(".pl-list:visible .pl-more")).toHaveAttribute("href", `https://open.spotify.com/playlist/${lists[1]!.spotify}`);
   });
 
   test("the rodeo plays: tap to ride, the run ends at the first obstacle, and the best score is kept", async ({ page }) => {
@@ -225,13 +215,14 @@ test.describe("homepage: the original page, from aoost blocks", () => {
 test.describe("homepage on a phone", () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
-  test("fits 390px, the game gets its thumb pad, and Spotify's own player is shown for the tap", async ({ page }) => {
+  test("fits 390px, the game gets its thumb pad, and the sleeve sits above the tracklist and Spotify's player", async ({ page }) => {
     await home(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     expect(await page.locator("#rodeo").evaluate((c) => c.getBoundingClientRect().height)).toBeGreaterThan(300); // includes the 112px thumb pad
-    await expect(page.locator("html")).toHaveClass(/sp-touch/);
-    await expect(page.locator("#mw")).toBeHidden();
-    await expect(page.locator(".sp-hint")).toBeVisible();
+    const [sleeve, list, player] = await Promise.all([".pl-rec:visible", ".pl-list:visible", ".pl-player"].map((s) => page.locator(s).boundingBox()));
+    expect(sleeve!.y + sleeve!.height).toBeLessThanOrEqual(list!.y);
+    expect(list!.y + list!.height).toBeLessThanOrEqual(player!.y);
+    expect(player!.height).toBeGreaterThan(60); // 80px, a little less while the focus effect scales the band
     if (!homeHidesNav && !liveNavPages) await expect(page.locator(".pill-menu")).toHaveCount(0); // no Menu with nothing to link to
   });
 });
