@@ -56,6 +56,10 @@ function handle(msg: ServerMessage) {
     case "ops": {
       lastVersion = msg.version;
       if (msg.origin === getState().clientId) break;
+      if (msg.origin === "sync") {
+        applyRemote(msg.ops, msg.summary ?? "Updated from the live site", msg.changedNodeIds);
+        break;
+      }
       const who = msg.origin === "mcp" ? "Claude" : "Another window";
       applyRemote(msg.ops, `${who}: ${msg.summary ?? "edit"}`, msg.changedNodeIds);
       break;

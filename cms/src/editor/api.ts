@@ -1,4 +1,5 @@
 import type { Op } from "../model/ops";
+import type { SyncInfo } from "../model/protocol";
 import type { Issue, Site } from "../schema";
 
 export class ApiError extends Error {
@@ -22,7 +23,7 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
-export type DraftState = { version: number; dirty: boolean; editors: number };
+export type DraftState = { version: number; dirty: boolean; editors: number; sync?: SyncInfo };
 
 export const api = {
   site: () => call<{ site: Site; version: number }>("/api/editor/site"),
@@ -30,6 +31,8 @@ export const api = {
   ops: (ops: Op[], clientId: string, summary?: string) => call<{ version: number }>("/api/editor/ops", { method: "POST", body: JSON.stringify({ ops, clientId, summary }) }),
   reset: () => call<{ version: number }>("/api/editor/reset", { method: "POST" }),
   publish: (message?: string) => call<{ commit: string | null; url: string | null; changed: string[] }>("/api/editor/publish", { method: "POST", body: JSON.stringify({ message }) }),
+  resolveConflict: (id: string, choice: "live" | "mine") => call<{ version: number }>("/api/editor/conflict", { method: "POST", body: JSON.stringify({ id, choice }) }),
+  keepDraft: () => call("/api/editor/sync/keep", { method: "POST" }),
   claude: () => call<{ connected: boolean; seenAt: number | null }>("/api/editor/claude"),
   logout: () => call("/api/logout", { method: "POST" }),
 };

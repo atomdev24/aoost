@@ -6,6 +6,7 @@ import { QuickEdit } from "./QuickEdit";
 import { capturePreview } from "./screenshot";
 import { noteVersion, onServerMessage, startSync } from "./socket";
 import { flush, getState, initStore, setOnSaved } from "./store";
+import { startSyncNotices } from "./workspace/sync";
 
 /** Below this width the editor switches to quick edit (precise drag layout is desktop-only). */
 const QUICK_BELOW = 900;
@@ -27,6 +28,7 @@ export function App() {
         initStore(site, state.dirty);
         setOnSaved(noteVersion);
         startSync();
+        startSyncNotices(state.sync);
         // Claude asked to see a page: capture the draft preview here and send it back.
         onServerMessage((msg) => {
           if (msg.type !== "screenshot-request") return;

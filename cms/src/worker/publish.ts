@@ -19,9 +19,19 @@ async function sha1(text: string): Promise<string> {
   return [...new Uint8Array(await crypto.subtle.digest("SHA-1", all))].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+export const STALE = "The live site has newer content than your draft (it may still be rebuilding). Nothing was published. Wait a minute, reload the editor so your draft picks up those changes, then publish again.";
+
 export async function publishToGitHub(
   files: ContentFiles,
-  opts: { repo: string; branch: string; token: string; message?: string; fetcher?: Fetcher },
+  opts: {
+    repo: string;
+    branch: string;
+    token: string;
+    message?: string;
+    fetcher?: Fetcher;
+    /** The live content the draft was built on. When given, publishing refuses if the branch's content/ is newer than it. */
+    base?: ContentFiles;
+  },
 ): Promise<PublishResult> {
   const fetcher = opts.fetcher ?? ((input, init) => fetch(input, init));
   const api = `https://api.github.com/repos/${opts.repo}`;
@@ -40,6 +50,18 @@ export async function publishToGitHub(
     const commit = await gh<{ tree: { sha: string } }>(`/git/commits/${head}`);
     const tree = await gh<{ tree: { path: string; type: string; sha: string }[]; truncated: boolean }>(`/git/trees/${commit.tree.sha}?recursive=1`);
     const existing = new Map(tree.tree.filter((e) => e.type === "blob" && e.path.startsWith("content/")).map((e) => [e.path, e.sha]));
+
+    if (opts.base) {
+      // The branch has content the draft hasn't seen (a commit not yet deployed, or not yet merged in):
+      // committing now would silently undo it.
+      const paths = new Set([...existing.keys(), ...Object.keys(opts.base)]);
+      for (const path of paths) {
+        const body = opts.base[path];
+        if (body === undefined || existing.get(path) !== (await sha1(body))) {
+          return { ok: false, status: 409, error: STALE };
+        }
+      }
+    }
 
     const entries: { path: string; mode: "100644"; type: "blob"; content?: string; sha?: null }[] = [];
     const changed: string[] = [];

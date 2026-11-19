@@ -1,7 +1,8 @@
 import { DurableObject } from "cloudflare:workers";
 import "../components/registry";
-import { applyOps, type Op } from "../model/ops";
-import type { ClientMessage, EditorContext, ServerMessage } from "../model/protocol";
+import { deepEqual, getAt, mergeFiles, pathLabel, serialize, setAt, type PathSeg } from "../model/merge";
+import { applyOps, diffSite, type Op } from "../model/ops";
+import type { ClientMessage, EditorContext, ServerMessage, SyncInfo } from "../model/protocol";
 import { filesToSite, siteToFiles, validateSite, type Breakpoint, type ContentFiles, type Issue, type Site } from "../schema";
 import type { Env } from "./env";
 
@@ -11,7 +12,7 @@ const same = (a: ContentFiles, b: ContentFiles) => {
 };
 
 export type ApplyResult = { ok: true; version: number } | { ok: false; issues: Issue[] };
-export type DraftState = { version: number; dirty: boolean; editors: number; context: EditorContext | null };
+export type DraftState = { version: number; dirty: boolean; editors: number; context: EditorContext | null; sync: SyncInfo };
 
 /** A short fingerprint of a set of content files (order-independent). */
 async function fingerprint(files: ContentFiles): Promise<string> {
@@ -26,6 +27,22 @@ const PUB_BASE = "pubBase";
 /** Snapshot of what was last published from here, until the next deploy catches up. */
 const PUB = "pub:";
 const PUBLISHED_URL = "https://assets.local/_published.json";
+/** The live content the draft last matched (its "base"), and its fingerprint: the common ancestor for merging a newer deploy. */
+const BASE = "base:";
+const BASE_FP = "baseFp";
+/** Values both sides changed differently in the last merge (the draft kept its own). */
+const CONFLICTS = "conflicts";
+/** A newer deploy that couldn't be merged (the result was invalid), until Alex chooses what to do. */
+const BLOCKED = "syncBlocked";
+const SYNCED_AT = "syncedAt";
+/** How often requests check for a newer deploy (publish always checks). */
+const SYNC_EVERY_MS = 5000;
+
+/** Where a conflict is; its two values are read from the draft and the base (= live) when shown. */
+type StoredConflict = { id: string; file: string; path: PathSeg[] };
+type Blocked = { liveFp: string; reason: string };
+const preview = (v: unknown) => (v === undefined ? "(removed)" : JSON.stringify(v).slice(0, 140));
+const parse = (text: string | undefined): unknown => (text === undefined ? undefined : JSON.parse(text));
 
 /**
  * The working draft for the site (SPEC §2). It stores the same files that
@@ -37,6 +54,8 @@ export class DraftStore extends DurableObject<Env> {
   private site: Site | null = null;
   private version = 0;
   private waiting = new Map<string, (png: string | null) => void>();
+  private lastSyncCheck = 0;
+  private syncing: Promise<{ blocked: string | null }> | null = null;
 
   /** The live content: the snapshot from our last publish if there is one, else what this deploy was built from. */
   private async published(): Promise<ContentFiles> {
@@ -73,10 +92,12 @@ export class DraftStore extends DurableObject<Env> {
     const stored = await this.ctx.storage.list<string>({ prefix: FILE });
     let files: ContentFiles = {};
     for (const [key, value] of stored) files[key.slice(FILE.length)] = value;
-    if (!stored.size) files = await this.published(); // first run: start from what is live
+    const fresh = !stored.size;
+    if (fresh) files = await this.published(); // first run: start from what is live
     const result = validateSite(filesToSite(files));
     if (!result.ok) throw new Error("stored draft is invalid: " + JSON.stringify(result.issues.slice(0, 5)));
     this.site = result.site;
+    if (fresh) await this.setBase(files);
     return this.site;
   }
 
@@ -92,10 +113,140 @@ export class DraftStore extends DurableObject<Env> {
     this.site = site;
   }
 
+  // ------------------------------------------------------------ base and sync
+
+  private async setBase(files: ContentFiles, fp?: string) {
+    const old = await this.ctx.storage.list<string>({ prefix: BASE });
+    if (old.size) await this.ctx.storage.delete([...old.keys()]);
+    await this.ctx.storage.put<string>({ ...Object.fromEntries(Object.entries(files).map(([path, body]) => [BASE + path, body])), [BASE_FP]: fp ?? (await fingerprint(files)) });
+  }
+
+  private async base(): Promise<ContentFiles> {
+    const files: ContentFiles = {};
+    for (const [key, value] of await this.ctx.storage.list<string>({ prefix: BASE })) files[key.slice(BASE.length)] = value;
+    return files;
+  }
+
+  /**
+   * Bring a newer deploy into the draft. When the live content differs from
+   * the draft's base (content changed in git, not through this editor), merge
+   * it in three ways per file, set the new base, save and tell open editors.
+   * Our own publish landing changes nothing: the base is then what we published.
+   * Returns why it couldn't merge, if it couldn't.
+   */
+  async sync(force = false): Promise<{ blocked: string | null }> {
+    // Callers that arrive while a sync runs wait for it, so the editor's first load sees its outcome.
+    if (this.syncing) return this.syncing;
+    this.syncing = this.syncOnce(force).finally(() => (this.syncing = null));
+    return this.syncing;
+  }
+
+  private async syncOnce(force: boolean): Promise<{ blocked: string | null }> {
+    const now = Date.now();
+    if (!force && now - this.lastSyncCheck < SYNC_EVERY_MS) return { blocked: (await this.ctx.storage.get<Blocked>(BLOCKED))?.reason ?? null };
+    this.lastSyncCheck = now;
+    const before = await this.load();
+    let live: ContentFiles;
+    try {
+      live = await this.published();
+    } catch {
+      return { blocked: null }; // no build to compare with (tests, local dev before a build)
+    }
+    const liveFp = await fingerprint(live);
+    const baseFp = await this.ctx.storage.get<string>(BASE_FP);
+    // A draft from before bases were recorded: take what is live now as its base.
+    if (baseFp === undefined) return await this.setBase(live, liveFp), { blocked: null };
+    if (baseFp === liveFp) return { blocked: null };
+    const blocked = await this.ctx.storage.get<Blocked>(BLOCKED);
+    if (blocked?.liveFp === liveFp) return { blocked: blocked.reason };
+
+    const draft = siteToFiles(before);
+    const merged = mergeFiles(await this.base(), draft, live);
+    let result: ReturnType<typeof validateSite>;
+    try {
+      result = validateSite(filesToSite(merged.files));
+    } catch (e) {
+      result = { ok: false, issues: [{ path: "", message: e instanceof Error ? e.message : String(e) }] };
+    }
+    if (!result.ok) {
+      const first = result.issues[0];
+      const reason = `The live site changed, and merging it into your draft would make the site invalid${first ? ` (${first.path ? first.path + ": " : ""}${first.message})` : ""}.`;
+      await this.ctx.storage.put<Blocked>(BLOCKED, { liveFp, reason });
+      this.broadcast({ type: "sync-blocked", reason });
+      return { blocked: reason };
+    }
+
+    // Earlier conflicts stay listed while the draft and the live site still disagree there.
+    const old = (await this.ctx.storage.get<StoredConflict[]>(CONFLICTS)) ?? [];
+    const mergedFiles = siteToFiles(result.site);
+    const still = old.filter((c) => !deepEqual(getAt(parse(live[c.file]), c.path), getAt(parse(mergedFiles[c.file]), c.path)));
+    const fresh = merged.conflicts.map((c) => ({ id: c.file + "#" + JSON.stringify(c.path), file: c.file, path: c.path }));
+    const conflicts = [...still.filter((c) => !fresh.some((f) => f.id === c.id)), ...fresh];
+
+    await this.save(result.site);
+    await this.setBase(live, liveFp);
+    await this.ctx.storage.put({ [CONFLICTS]: conflicts, [SYNCED_AT]: now });
+    await this.ctx.storage.delete(BLOCKED);
+    const ops = diffSite(before, result.site);
+    if (ops.length) this.broadcast({ type: "ops", ops, version: this.version, origin: "sync", summary: "Updated from the live site" });
+    this.broadcast({ type: "synced", at: now, conflicts: conflicts.length });
+    return { blocked: null };
+  }
+
+  private async syncInfo(): Promise<SyncInfo> {
+    const conflicts = (await this.ctx.storage.get<StoredConflict[]>(CONFLICTS)) ?? [];
+    const draft = conflicts.length ? siteToFiles(await this.load()) : {};
+    const live = conflicts.length ? await this.base() : {};
+    return {
+      at: (await this.ctx.storage.get<number>(SYNCED_AT)) ?? null,
+      conflicts: conflicts.map((c) => ({ id: c.id, label: pathLabel(c.file, c.path), draft: preview(getAt(parse(draft[c.file]), c.path)), live: preview(getAt(parse(live[c.file]), c.path)) })),
+      blocked: (await this.ctx.storage.get<Blocked>(BLOCKED))?.reason ?? null,
+    };
+  }
+
+  /** Settle one conflict: "live" takes the live site's value, "mine" keeps the draft's. */
+  async resolveConflict(id: string, choice: "live" | "mine", origin: string): Promise<ApplyResult> {
+    const conflicts = (await this.ctx.storage.get<StoredConflict[]>(CONFLICTS)) ?? [];
+    const c = conflicts.find((x) => x.id === id);
+    if (!c) return { ok: true, version: this.version };
+    if (choice === "live") {
+      const before = await this.load();
+      const files = siteToFiles(before);
+      const value = getAt(parse((await this.base())[c.file]), c.path);
+      const root = setAt(parse(files[c.file]), c.path, value);
+      if (root === undefined) delete files[c.file];
+      else files[c.file] = serialize(root);
+      let result: ReturnType<typeof validateSite>;
+      try {
+        result = validateSite(filesToSite(files));
+      } catch (e) {
+        result = { ok: false, issues: [{ path: c.file, message: e instanceof Error ? e.message : String(e) }] };
+      }
+      if (!result.ok) return { ok: false, issues: result.issues };
+      await this.save(result.site);
+      this.broadcast({ type: "ops", ops: diffSite(before, result.site), version: this.version, origin, summary: "Used the live value" }, origin);
+    }
+    await this.ctx.storage.put(CONFLICTS, conflicts.filter((x) => x.id !== id));
+    return { ok: true, version: this.version };
+  }
+
+  /** A blocked merge: keep the draft as it is and treat the current live site as its base. */
+  async keepDraft() {
+    const live = await this.published();
+    await this.setBase(live);
+    await this.ctx.storage.delete(BLOCKED);
+  }
+
+  /** What publish needs: the draft and the base it was built on. */
+  async getPublishFiles(): Promise<{ files: ContentFiles; base: ContentFiles }> {
+    return { files: siteToFiles(await this.load()), base: await this.base() };
+  }
+
   // ------------------------------------------------------------- RPC
 
   /** The draft as JSON text (RPC can't type arbitrary content, so it travels as a string). */
   async getSiteJson(): Promise<{ json: string; version: number }> {
+    await this.sync();
     return { json: JSON.stringify(await this.load()), version: this.version };
   }
 
@@ -115,16 +266,19 @@ export class DraftStore extends DurableObject<Env> {
 
   /** Throw the draft away and start again from the published content. */
   async reset(origin: string): Promise<ApplyResult> {
-    const result = validateSite(filesToSite(await this.published()));
+    const live = await this.published();
+    const result = validateSite(filesToSite(live));
     if (!result.ok) return { ok: false, issues: result.issues };
     const before = await this.load();
     await this.save(result.site);
-    const { diffSite } = await import("../model/ops");
+    await this.setBase(live);
+    await this.ctx.storage.delete([CONFLICTS, BLOCKED]);
     this.broadcast({ type: "ops", ops: diffSite(before, result.site), version: this.version, origin, summary: "Reset to published" }, origin);
     return { ok: true, version: this.version };
   }
 
   async state(): Promise<DraftState> {
+    await this.sync();
     const draft = siteToFiles(await this.load());
     let dirty = true;
     try {
@@ -132,7 +286,7 @@ export class DraftStore extends DurableObject<Env> {
     } catch {
       // no published snapshot: treat as dirty
     }
-    return { version: this.version, dirty, editors: this.ctx.getWebSockets().length, context: (await this.ctx.storage.get<EditorContext>("context")) ?? null };
+    return { version: this.version, dirty, editors: this.ctx.getWebSockets().length, context: (await this.ctx.storage.get<EditorContext>("context")) ?? null, sync: await this.syncInfo() };
   }
 
   /** The Claude connector made an authenticated call (shown as "Claude connected" in the editor). */
@@ -158,6 +312,8 @@ export class DraftStore extends DurableObject<Env> {
     await this.ctx.storage.put(Object.fromEntries(Object.entries(files).map(([path, body]) => [PUB + path, body])));
     const built = await this.built().catch(() => null);
     if (built) await this.ctx.storage.put(PUB_BASE, await fingerprint(built));
+    // What we just published is now the base: when its deploy lands there is nothing to merge.
+    await this.setBase(files);
     this.broadcast({ type: "published", version: this.version });
   }
 
