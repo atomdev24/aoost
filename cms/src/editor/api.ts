@@ -1,6 +1,7 @@
 import type { Op } from "../model/ops";
 import type { SyncInfo } from "../model/protocol";
 import type { Issue, Site } from "../schema";
+import type { RefItem } from "../model/refs";
 
 export class ApiError extends Error {
   constructor(
@@ -35,4 +36,6 @@ export const api = {
   keepDraft: () => call("/api/editor/sync/keep", { method: "POST" }),
   claude: () => call<{ connected: boolean; seenAt: number | null }>("/api/editor/claude"),
   logout: () => call("/api/logout", { method: "POST" }),
+  refs: (page: string) => call<{ items: RefItem[] }>(`/api/editor/refs?page=${encodeURIComponent(page)}`),
+  putRefs: (page: string, items: RefItem[]) => call<{ items: RefItem[] }>("/api/editor/refs", { method: "PUT", body: JSON.stringify({ page, items }) }),
 };

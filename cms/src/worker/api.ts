@@ -72,6 +72,16 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       const seenAt = await draft.connectorSeenAt();
       return json({ ok: true, connected: !!seenAt && Date.now() - seenAt < CONNECTOR_FRESH_MS, seenAt });
     }
+    case "GET /refs": {
+      const page = url.searchParams.get("page") ?? "";
+      if (!/^[\w:-]{1,80}$/.test(page)) return error(400, "Expected ?page=<page id>.");
+      return json({ ok: true, items: await draft.getRefs(page) });
+    }
+    case "PUT /refs": {
+      const body = await readJson<{ page?: string; items?: unknown }>(request);
+      if (!body?.page || !/^[\w:-]{1,80}$/.test(body.page)) return error(400, "Expected { page, items }.");
+      return json({ ok: true, items: await draft.putRefs(body.page, body.items) });
+    }
     case "GET /socket":
       return draft.fetch(request);
   }
