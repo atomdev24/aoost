@@ -140,7 +140,7 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
             {content.keychain.show && content.keychain.image ? (
               <button className="keychain" id="keychain" type="button" aria-label={content.keychain.label}>
                 <span className="kc-pin" aria-hidden="true" />
-                <img src={content.keychain.image} alt="" width="466" height="640" />
+                <img src={content.keychain.image} alt="" width="480" height="757" />
               </button>
             ) : null}
           </div>
