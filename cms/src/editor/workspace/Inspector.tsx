@@ -9,7 +9,8 @@ import { GlobalPanel } from "../ui/GlobalPanel";
 import { OverlayPanel } from "../ui/OverlayPanel";
 import { usePhone } from "../touch/device";
 import { nearestCardSize, type CardSize } from "./card";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRail } from "./rail-store";
 
 const KIND: Record<Section["kind"], string> = { flow: "Section", grid: "Grid section", canvas: "Free-layout section" };
 
@@ -58,10 +59,20 @@ function InspectorPanel() {
   const subject = useSubject();
   const phone = usePhone();
   const card = useCard();
+  // On a phone the sheet steps aside (just its title row) while a left panel is open.
+  const panelOpen = useRail((s) => s.active !== null);
+  const size = phone && panelOpen ? "collapsed" : card.size;
+  // Each new selection opens short, at the top: the Content fields.
+  const target = useEditor((s) => s.overlayId ?? s.globalId ?? s.selection[0] ?? null);
+  const body = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (phone) card.reset();
+    body.current?.scrollTo({ top: 0 });
+  }, [target, phone]);
   return (
-    <aside className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? card.size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
+    <aside className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
       {phone ? (
-        <button type="button" className="ed-card-grip" aria-label={card.size === "full" ? "Shrink the inspector" : "Expand the inspector"} aria-expanded={card.size === "full"} onPointerDown={card.onPointerDown} onClick={card.onClick}>
+        <button type="button" className="ed-card-grip" aria-label={size === "full" ? "Shrink the inspector" : "Expand the inspector"} aria-expanded={size === "full"} onPointerDown={card.onPointerDown} onClick={card.onClick}>
           <span aria-hidden="true" />
         </button>
       ) : null}
@@ -72,7 +83,7 @@ function InspectorPanel() {
         </div>
       </header>
       {selected || overlayId ? <ScopeBar /> : null}
-      <div className="ed-inspector-body">
+      <div className="ed-inspector-body" ref={body}>
         {overlayId ? <OverlayPanel overlayId={overlayId} /> : globalId ? <GlobalPanel globalId={globalId} /> : <Puck.Fields />}
       </div>
     </aside>
@@ -81,11 +92,11 @@ function InspectorPanel() {
 
 /**
  * On a phone the inspector is a card at the bottom right. Drag its header (or
- * the grip) to resize it: it settles at just its title, about half the screen,
+ * the grip) to resize it: it settles at just its title, about a third of the screen,
  * or nearly full height. A tap on the grip toggles full height.
  */
 function useCard() {
-  const [size, setSize] = useState<CardSize>("half");
+  const [size, setSize] = useState<CardSize>("short");
   const [drag, setDrag] = useState<number | null>(null);
   const moved = useRef(false);
   const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
@@ -114,9 +125,10 @@ function useCard() {
   };
   const onClick = () => {
     if (moved.current) return void (moved.current = false);
-    setSize((s) => (s === "full" ? "half" : "full"));
+    setSize((s) => (s === "full" ? "short" : "full"));
   };
-  return { size, drag, onPointerDown, onClick };
+  const reset = () => setSize("short");
+  return { size, drag, onPointerDown, onClick, reset };
 }
 
 const DEVICE: Record<Breakpoint, string> = {
