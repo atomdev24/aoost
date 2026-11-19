@@ -674,29 +674,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ed-bpswitch {
-  flex: none;
-  display: flex;
-  padding: 2px;
-  border-radius: 8px;
-  background: var(--ed-seg);
-}
-.ed-bpswitch button {
-  height: 24px;
-  padding: 0 6px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--ed-sub);
-  font: 500 11px var(--ed-font);
-  cursor: pointer;
-}
-.ed-bpswitch button[aria-pressed="true"] {
-  background: var(--ed-seg-on);
-  color: var(--ed-text);
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-}
 .ed-inspector-note {
   flex: none;
   margin: 0 14px 8px;

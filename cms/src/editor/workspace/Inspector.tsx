@@ -3,9 +3,7 @@ import { getComponent } from "../../components/registry";
 import { locate } from "../../model/page-ops";
 import { BREAKPOINT_LABEL, type Breakpoint, type Section } from "../../schema";
 import { REFERENCE } from "../../responsive/resolve";
-import { activateBreakpoint } from "../board/bridge";
 import { blockOverrides, resetBlockOverrides } from "../board/overrides";
-import { setFrameHidden } from "../board/store";
 import { currentPage, updatePage, useEditor } from "../store";
 import { GlobalPanel } from "../ui/GlobalPanel";
 import { OverlayPanel } from "../ui/OverlayPanel";
@@ -40,26 +38,9 @@ function useSubject(): { name: string; type: string } {
   return { name: page.title, type: "Page settings" };
 }
 
-/** The size switch for the breakpoint being edited. The active frame on the board follows it (a hidden frame is shown). */
-export function BreakpointSwitch() {
-  const bp = useEditor((s) => s.bp);
-  const opt = (value: Breakpoint, label: string) => (
-    <button type="button" aria-pressed={bp === value} aria-label={BP_NAME[value]} title={BP_NAME[value]} onClick={() => (setFrameHidden(value, false), activateBreakpoint(value))}>
-      {label}
-    </button>
-  );
-  return (
-    <div className="ed-bpswitch" role="group" aria-label="Editing breakpoint">
-      {opt("widescreen", "Wide")}
-      {opt("desktop", "Desktop")}
-      {opt("tablet", "Tablet")}
-      {opt("mobile", "Mobile")}
-    </div>
-  );
-}
-
 /**
- * The floating 284px inspector: what is selected, which breakpoint is being edited, and its settings.
+ * The floating 284px inspector: what is selected and its settings. The screen size being
+ * edited is picked in the top bar (or by clicking a frame label); the scope bar names it.
  * It only shows while something is selected; page settings live in the Pages flyout.
  */
 export function Inspector() {
@@ -89,7 +70,6 @@ function InspectorPanel() {
           <strong>{subject.name}</strong>
           <span>{subject.type}</span>
         </div>
-        <BreakpointSwitch />
       </header>
       {selected || overlayId ? <ScopeBar /> : null}
       <div className="ed-inspector-body">
@@ -109,7 +89,6 @@ function useCard() {
   const [drag, setDrag] = useState<number | null>(null);
   const moved = useRef(false);
   const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
-    if ((e.target as Element).closest(".ed-bpswitch")) return;
     const card = (e.currentTarget as HTMLElement).closest<HTMLElement>(".ed-inspector");
     if (!card) return;
     const startY = e.clientY;

@@ -363,3 +363,4 @@ Summary:
 
 - Number fields: a leading "+8" adds to the current value, but "-8" sets −8 (the brief had both as relative). Why: negative offsets and margins are common, and typing a negative number should just work.
 - Sections: the Background group (colour, picture, video) now comes first, above Layout, and is titled "Background" instead of sitting under "Frame". Why: the brief puts content first, and a section's background picture is its content. It is still set per screen size, as before.
+- One size switch: the inspector's switch is gone; the top bar's Wide/Desk/Tab/Mob buttons (and clicking a frame label) pick the size. The brief's phone menu in the scope bar was dropped. Why: the top bar's size buttons are already visible on a phone (checked at 390×844: all four 40px tall), so a second switch would only repeat them.

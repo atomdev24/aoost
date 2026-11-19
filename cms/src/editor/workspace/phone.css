@@ -199,10 +199,6 @@
     border-radius: 2px;
     background: rgba(255, 255, 255, 0.28);
   }
-  .ed-bpswitch button {
-    height: 40px;
-    min-width: 40px;
-  }
   /* 16px text stops iOS from zooming into a field it focuses. */
   .ed-shell input,
   .ed-shell textarea,

@@ -42,7 +42,7 @@ async function selectOnCanvas(page: Page, selector: string) {
   await page.mouse.click(x, y);
 }
 
-const toMobile = (page: Page) => page.locator(".ed-bpswitch").getByRole("button", { name: "Mobile" }).click();
+const toMobile = (page: Page) => page.locator(".ed-island-bps").getByRole("button", { name: "Mobile" }).click();
 
 /** A few files in the (local) media library: four pictures and a short video made in the browser. */
 async function seedMedia(page: Page): Promise<{ name: string; url: string }[]> {
