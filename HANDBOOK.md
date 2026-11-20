@@ -97,7 +97,7 @@ selection count, browser, OS, window size, build). People add their own notes wi
 the DraftStore (`problems`), never in content.
 
 **Flight recorder** (`editor/flight-recorder.ts`): the editor keeps a rolling record of the last
-15 seconds: slow frames and frames per second, the board starting and stopping (with zoom),
+60 seconds (a report takes it at the moment the dialog opens): slow frames and frames per second, the board starting and stopping (with zoom),
 every change to a toolbar (removed, hidden, faded, off screen), window and pixel-ratio changes,
 and the GPU name. A report, a freeze note and an automatic "Toolbars vanished" note all carry
 it. Reading it: if a toolbar changes in the record, the page really changed (a code bug); if
