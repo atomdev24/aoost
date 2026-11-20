@@ -2604,6 +2604,7 @@ button.ed-card {
 .ed-more-menu {
   position: absolute;
   top: calc(100% + 8px);
+  left: auto;
   right: 0;
   min-width: 180px;
   z-index: 10;
