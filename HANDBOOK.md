@@ -53,7 +53,9 @@ against `wrangler dev`).
 
 - **Responsive model:** four breakpoints. Mobile is the base; tablet (600–899) and desktop (900+)
   inherit from mobile; widescreen (1600+) inherits from desktop. Only changed values are stored.
-  Content (text, media, links) is never per-breakpoint; layout and style are.
+  Content (text, media, links) is never per-breakpoint; layout and style are. Mobile is the base in
+  *storage*; the editor *presents* Desktop as the reference ("Editing Desktop", "Reset to desktop")
+  and writes the base for you (see DECISIONS.md, the `setOnly` note).
 - **One draft, many views:** the board shows the page once per breakpoint. The active frame is
   Puck's editable preview; the others are live read-only renders of the same draft.
 - **Draft vs published:** edits go to the draft (DraftStore). Publish writes `content/` to GitHub.

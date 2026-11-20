@@ -1,4 +1,5 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
+import { evalNumberInput } from "../fields/maths";
 import { ColorField } from "../color/ColorField";
 
 /** Small dark-workspace form controls shared by every editor panel. */
@@ -103,7 +104,8 @@ export function NumberInput({
   useEffect(() => setDraft(value === undefined ? "" : String(value)), [value]);
   const commit = (raw: string) => {
     if (raw.trim() === "") return onCommit(undefined);
-    let n = Number(raw);
+    // Plain numbers and simple sums ("48*2", "+8" adds to the current value).
+    let n = evalNumberInput(raw, value) ?? NaN;
     if (Number.isNaN(n)) return setDraft(value === undefined ? "" : String(value));
     if (min !== undefined) n = Math.max(min, n);
     if (max !== undefined) n = Math.min(max, n);
@@ -114,17 +116,24 @@ export function NumberInput({
       <input
         id={id}
         className="ed-input"
-        type="number"
+        type="text"
         inputMode="decimal"
         value={draft}
-        min={min}
-        max={max}
-        step={step}
+        data-step={step}
         placeholder={placeholder}
         aria-label={ariaLabel}
         onChange={(e) => {
           setDraft(e.target.value);
-          commit(e.target.value);
+          // Plain numbers apply as you type; sums wait for Enter or leaving the field.
+          if (/^-?\d*\.?\d+$/.test(e.target.value.trim())) commit(e.target.value);
+        }}
+        onBlur={() => commit(draft)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commit(draft);
+          else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+            e.preventDefault();
+            commit(String((value ?? 0) + (e.key === "ArrowUp" ? 1 : -1) * (step ?? 1) * (e.shiftKey ? 10 : 1)));
+          }
         }}
       />
       {suffix ? <span className="ed-suffix">{suffix}</span> : null}

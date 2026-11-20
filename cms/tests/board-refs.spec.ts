@@ -52,7 +52,8 @@ test.describe("board references", () => {
     await page.mouse.down();
     await page.mouse.move(box!.x + box!.width / 2 + 100, box!.y + box!.height / 2, { steps: 5 });
     await page.mouse.up();
-    await expect.poll(async () => Math.round((await saved())[0]!.x - before.x)).toBe(Math.round(100 / zoom));
+    // Within a pixel: the drag lands on whole screen pixels, so the board position can round either way.
+    await expect.poll(async () => Math.abs((await saved())[0]!.x - before.x - 100 / zoom)).toBeLessThanOrEqual(1);
 
     // Never on the site: not in the draft's content and not in the preview.
     const site = (await (await request.get("/api/editor/site", { headers: bearer(password!) })).json()).site;

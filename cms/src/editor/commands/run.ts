@@ -11,6 +11,7 @@ import { currentPage, flush, getState, megaItemId, redo, undo, updatePage } from
 import { openSheet, publish } from "../workspace/publish";
 import { togglePanel } from "../workspace/rail-store";
 import { openPalette, toggleCheatSheet, togglePalette } from "./palette-store";
+import { isTouchOnly } from "../touch/device";
 import { actionById, type ActionId } from "./registry";
 
 const selected = () => getState().selection[0] ?? null;
@@ -125,7 +126,11 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
 };
 
 /** Can it run now? (Block actions need a selection.) */
-export const canRun = (id: ActionId) => !actionById(id).needsSelection || !!selected();
+export const canRun = (id: ActionId) => {
+  // The shortcuts sheet means nothing without a keyboard, so touch-only devices don't list it.
+  if (id === "help.shortcuts" && isTouchOnly()) return false;
+  return !actionById(id).needsSelection || !!selected();
+};
 
 /** Run an action. False when it had nothing to act on. */
 export function runAction(id: ActionId): boolean {

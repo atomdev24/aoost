@@ -31,10 +31,8 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Order of work
 
-1. Inspector and phone polish: content first in the inspector, one breakpoint switch (top bar
-   only), title on its own line, opening view leaves room for panels, short frame labels when
-   zoomed out, maths in number fields; phone sheet opens short on Content and closes when a left
-   panel opens; no shortcuts sheet on touch.
+1. ~~Inspector and phone polish~~ ✓ built (`EDITOR-INSPECTOR-PHONE.md`, PR open; Alex's Samsung A55
+   screenshots still to come).
 2. Long-page smoothness: show a snapshot of side frames while panning or zoomed out
    (currently 0.5–1 s stalls at 45–90 sections).
 3. References: on top of frames; drag into a frame to place it on the page and back out; notes,
@@ -47,6 +45,10 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (19 Nov 2026)
 
+- Inspector and phone polish: content first in the inspector (sections: Background first), one
+  size switch (top bar only), the block name on its own line, the opening view leaves room for
+  panels, short frame labels below 35% zoom, sums in number fields (`48*2`, `+8`); the phone sheet
+  opens short on Content and steps aside for left panels; no shortcuts sheet on touch.
 - Toolbars and labels no longer flicker or vanish while panning/zooming (own GPU layers; blur
   drops to a solid tint while moving); side frames no longer blank when panned back into view.
 - Board references (per page, never published); Fit includes them and leaves room for open panels.

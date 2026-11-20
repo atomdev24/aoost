@@ -358,3 +358,14 @@ Summary:
 - Public output is byte-identical: `main` built to `/tmp/aoost-dist-before-pp` with the build timestamp pinned, and `diff -rq -x admin` against this branch's pinned build shows no differences.
 - Gemini (`ask-gemini`) was out of quota (resets in about 6 days), so Claude wrote all the code.
 - BLOCKERS.md: lengthen the Access session to one month so the home-screen app stops asking for the email code.
+
+## Inspector and phone polish (19 Nov 2026, EDITOR-INSPECTOR-PHONE.md)
+
+- Number fields: a leading "+8" adds to the current value, but "-8" sets −8 (the brief had both as relative). Why: negative offsets and margins are common, and typing a negative number should just work.
+- Sections: the Background group (colour, picture, video) now comes first, above Layout, and is titled "Background" instead of sitting under "Frame". Why: the brief puts content first, and a section's background picture is its content. It is still set per screen size, as before.
+- One size switch: the inspector's switch is gone; the top bar's Wide/Desk/Tab/Mob buttons (and clicking a frame label) pick the size. The brief's phone menu in the scope bar was dropped. Why: the top bar's size buttons are already visible on a phone (checked at 390×844: all four 40px tall), so a second switch would only repeat them.
+- Opening view: Fit works out the panels' room from what is open (left panel open or not) and their known widths, not by measuring them on screen, and always keeps the inspector's width free on a desktop. Why: the first fit could run before the left panel had drawn, so frames started under it; and selecting a block then covered the frame under the inspector.
+- Frame labels: below 35% zoom they show only the size name; the width and "· from mobile" note drop, and the override count becomes a dot (its count stays in the tooltip). Why: zoomed out, the long labels ran into each other.
+- Phone sheet: resting sizes are now title row, short (34% of the screen, was "half" at 45%) and full. Each new selection opens it short and scrolled to the top, where Content now sits; while a left panel is open it shrinks to its title row and comes back when the panel closes. Why: the brief asks for the sheet to open short on Content and never stack with a panel.
+- No shortcuts on touch: on a touch-only device (no hover, coarse pointer) the cheat sheet never opens, "Show keyboard shortcuts" isn't listed in the palette, and the palette shows no key hints or key footer. A touch laptop with a trackpad keeps them. Why: there's no keyboard to learn on a phone.
+- Number fields keep the phone's number pad (`inputMode="decimal"`), so on most Android keyboards sums need the full keyboard; length fields already open the full keyboard. Open for Alex to confirm on his Samsung A55.

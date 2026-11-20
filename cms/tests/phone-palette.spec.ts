@@ -161,7 +161,7 @@ test.describe("the editor on a phone", () => {
     await editable(page).locator("[data-node-id]").nth(1).tap();
     const card = page.locator(".ed-inspector.is-card");
     await expect(card).toBeVisible();
-    await expect(card).toHaveAttribute("data-size", "half");
+    await expect(card).toHaveAttribute("data-size", "short");
     await settle(page);
     await page.screenshot({ path: `${shots}/phone-editor.png` });
     await page.getByRole("button", { name: "Expand the inspector" }).tap();

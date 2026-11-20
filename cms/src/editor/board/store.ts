@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from "react";
 import type { Breakpoint } from "../../schema";
 import { activateBreakpoint } from "./bridge";
-import { clampZoom, fitAll, fitWidth, layoutFrames, loadPageBoard, reveal, savePageBoard, slotRect, stepZoom, zoomAt, type FrameRect, type Rect, type View } from "./viewport";
+import { getRailState } from "../workspace/rail-store";
+import { clampZoom, fitAll, fitWidth, panelRoom, layoutFrames, loadPageBoard, reveal, savePageBoard, slotRect, stepZoom, zoomAt, type FrameRect, type Rect, type View } from "./viewport";
 
 const DOT_GRID_KEY = "aoost.board.dotGrid";
 const loadDotGridPref = (): boolean => {
@@ -171,20 +172,9 @@ let extraFitRects: () => Rect[] = () => [];
 export const setExtraFitRects = (fn: () => Rect[]) => {
   extraFitRects = fn;
 };
-/**
- * How much of the board's left and right edges the floating panels cover (an open left panel,
- * the inspector), so Fit frames everything in the part you can actually see. Phones skip this:
- * their inspector is a sheet along the bottom.
- */
+/** Room for the floating panels, from what is open rather than what has drawn yet (so the first fit is right). */
 function coveredEdges(): { left: number; right: number } {
-  const board = typeof document !== "undefined" ? document.querySelector(".bd")?.getBoundingClientRect() : undefined;
-  if (!board || board.width < 700) return { left: 0, right: 0 };
-  const flyout = document.querySelector(".ed-flyout")?.getBoundingClientRect();
-  const inspector = document.querySelector(".ed-inspector:not(.is-card)")?.getBoundingClientRect();
-  const left = flyout && flyout.width ? Math.max(0, flyout.right - board.left) : 0;
-  const right = inspector && inspector.width ? Math.max(0, board.right - inspector.left) : 0;
-  // Never squeeze the visible part below half the board.
-  return left + right > board.width / 2 ? { left: 0, right: 0 } : { left, right };
+  return panelRoom(state.size.w, getRailState().active !== null);
 }
 export const fit = () => {
   if (!state.size.w) return;

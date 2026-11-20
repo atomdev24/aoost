@@ -157,7 +157,7 @@
     bottom: calc(env(safe-area-inset-bottom) + 8px);
     width: min(380px, calc(100vw - 16px - env(safe-area-inset-left) - env(safe-area-inset-right)));
     max-height: none;
-    height: 45dvh;
+    height: 34dvh;
     transition: height 180ms ease;
     z-index: 110;
   }
@@ -198,10 +198,6 @@
     height: 4px;
     border-radius: 2px;
     background: rgba(255, 255, 255, 0.28);
-  }
-  .ed-bpswitch button {
-    height: 40px;
-    min-width: 40px;
   }
   /* 16px text stops iOS from zooming into a field it focuses. */
   .ed-shell input,

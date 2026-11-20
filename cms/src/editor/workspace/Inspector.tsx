@@ -3,15 +3,14 @@ import { getComponent } from "../../components/registry";
 import { locate } from "../../model/page-ops";
 import { BREAKPOINT_LABEL, type Breakpoint, type Section } from "../../schema";
 import { REFERENCE } from "../../responsive/resolve";
-import { activateBreakpoint } from "../board/bridge";
 import { blockOverrides, resetBlockOverrides } from "../board/overrides";
-import { setFrameHidden } from "../board/store";
 import { currentPage, updatePage, useEditor } from "../store";
 import { GlobalPanel } from "../ui/GlobalPanel";
 import { OverlayPanel } from "../ui/OverlayPanel";
 import { usePhone } from "../touch/device";
 import { nearestCardSize, type CardSize } from "./card";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRail } from "./rail-store";
 
 const KIND: Record<Section["kind"], string> = { flow: "Section", grid: "Grid section", canvas: "Free-layout section" };
 
@@ -40,26 +39,9 @@ function useSubject(): { name: string; type: string } {
   return { name: page.title, type: "Page settings" };
 }
 
-/** The size switch for the breakpoint being edited. The active frame on the board follows it (a hidden frame is shown). */
-export function BreakpointSwitch() {
-  const bp = useEditor((s) => s.bp);
-  const opt = (value: Breakpoint, label: string) => (
-    <button type="button" aria-pressed={bp === value} aria-label={BP_NAME[value]} title={BP_NAME[value]} onClick={() => (setFrameHidden(value, false), activateBreakpoint(value))}>
-      {label}
-    </button>
-  );
-  return (
-    <div className="ed-bpswitch" role="group" aria-label="Editing breakpoint">
-      {opt("widescreen", "Wide")}
-      {opt("desktop", "Desktop")}
-      {opt("tablet", "Tablet")}
-      {opt("mobile", "Mobile")}
-    </div>
-  );
-}
-
 /**
- * The floating 284px inspector: what is selected, which breakpoint is being edited, and its settings.
+ * The floating 284px inspector: what is selected and its settings. The screen size being
+ * edited is picked in the top bar (or by clicking a frame label); the scope bar names it.
  * It only shows while something is selected; page settings live in the Pages flyout.
  */
 export function Inspector() {
@@ -77,22 +59,31 @@ function InspectorPanel() {
   const subject = useSubject();
   const phone = usePhone();
   const card = useCard();
+  // On a phone the sheet steps aside (just its title row) while a left panel is open.
+  const panelOpen = useRail((s) => s.active !== null);
+  const size = phone && panelOpen ? "collapsed" : card.size;
+  // Each new selection opens short, at the top: the Content fields.
+  const target = useEditor((s) => s.overlayId ?? s.globalId ?? s.selection[0] ?? null);
+  const body = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (phone) card.reset();
+    body.current?.scrollTo({ top: 0 });
+  }, [target, phone]);
   return (
-    <aside className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? card.size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
+    <aside className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
       {phone ? (
-        <button type="button" className="ed-card-grip" aria-label={card.size === "full" ? "Shrink the inspector" : "Expand the inspector"} aria-expanded={card.size === "full"} onPointerDown={card.onPointerDown} onClick={card.onClick}>
+        <button type="button" className="ed-card-grip" aria-label={size === "full" ? "Shrink the inspector" : "Expand the inspector"} aria-expanded={size === "full"} onPointerDown={card.onPointerDown} onClick={card.onClick}>
           <span aria-hidden="true" />
         </button>
       ) : null}
       <header className="ed-inspector-head" onPointerDown={phone ? card.onPointerDown : undefined}>
         <div className="ed-inspector-title">
-          <strong>{subject.name}</strong>
+          <strong title={subject.name}>{subject.name}</strong>
           <span>{subject.type}</span>
         </div>
-        <BreakpointSwitch />
       </header>
       {selected || overlayId ? <ScopeBar /> : null}
-      <div className="ed-inspector-body">
+      <div className="ed-inspector-body" ref={body}>
         {overlayId ? <OverlayPanel overlayId={overlayId} /> : globalId ? <GlobalPanel globalId={globalId} /> : <Puck.Fields />}
       </div>
     </aside>
@@ -101,15 +92,14 @@ function InspectorPanel() {
 
 /**
  * On a phone the inspector is a card at the bottom right. Drag its header (or
- * the grip) to resize it: it settles at just its title, about half the screen,
+ * the grip) to resize it: it settles at just its title, about a third of the screen,
  * or nearly full height. A tap on the grip toggles full height.
  */
 function useCard() {
-  const [size, setSize] = useState<CardSize>("half");
+  const [size, setSize] = useState<CardSize>("short");
   const [drag, setDrag] = useState<number | null>(null);
   const moved = useRef(false);
   const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
-    if ((e.target as Element).closest(".ed-bpswitch")) return;
     const card = (e.currentTarget as HTMLElement).closest<HTMLElement>(".ed-inspector");
     if (!card) return;
     const startY = e.clientY;
@@ -135,9 +125,10 @@ function useCard() {
   };
   const onClick = () => {
     if (moved.current) return void (moved.current = false);
-    setSize((s) => (s === "full" ? "half" : "full"));
+    setSize((s) => (s === "full" ? "short" : "full"));
   };
-  return { size, drag, onPointerDown, onClick };
+  const reset = () => setSize("short");
+  return { size, drag, onPointerDown, onClick, reset };
 }
 
 const DEVICE: Record<Breakpoint, string> = {

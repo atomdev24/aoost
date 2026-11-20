@@ -16,3 +16,10 @@ export function usePhone(): boolean {
     isPhone,
   );
 }
+
+/**
+ * A touch-only device (a phone or tablet with no mouse or trackpad): no hover and a coarse
+ * pointer. A touch laptop with a trackpad doesn't count, so its keyboard shortcuts stay.
+ */
+export const TOUCH_ONLY_QUERY = "(hover: none) and (pointer: coarse)";
+export const isTouchOnly = () => typeof window !== "undefined" && !!window.matchMedia?.(TOUCH_ONLY_QUERY).matches;

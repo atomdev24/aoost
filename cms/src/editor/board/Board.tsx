@@ -11,7 +11,7 @@ import { activateBreakpoint } from "./bridge";
 import { LiveFrame } from "./LiveFrame";
 import { countOverrides } from "./overrides";
 import { frameRects, getBoard, openPage, panBy, resetFramePositions, setFrameHidden, setFramePosition, setHeight, setInteracting, setSize, toggleFrameHidden, useBoard, visibleFrameRects } from "./store";
-import { FRAME_GAP, isVisible, slotRect } from "./viewport";
+import { FRAME_GAP, isVisible, shortLabels, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
 import { ZoomBar } from "./ZoomBar";
 import { RefLayer, RefNotice } from "./RefLayer";
@@ -193,6 +193,7 @@ export function Board() {
   };
 
   const screen = (x: number, y: number) => ({ left: x * view.zoom + view.x, top: y * view.zoom + view.y });
+  const short = shortLabels(view.zoom);
 
   return (
     <div
@@ -267,9 +268,19 @@ export function Board() {
             aria-label={`Edit the ${NAME[f.bp]} frame`}
             title="Click to edit, drag to move"
           >
-            <strong>{NAME[f.bp]}</strong> {f.w}
-            {NOTE[f.bp] ?? null}
-            {overrides[f.bp] ? <span className="bd-badge">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span> : null}
+            <strong>{NAME[f.bp]}</strong>
+            {/* Zoomed out, the label is just the name; overrides shrink to a dot. */}
+            {short ? null : ` ${f.w}`}
+            {short ? null : (NOTE[f.bp] ?? null)}
+            {overrides[f.bp] ? (
+              short ? (
+                <span className="bd-badge is-dot" title={overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}>
+                  <span className="ed-visually-hidden">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span>
+                </span>
+              ) : (
+                <span className="bd-badge">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span>
+              )
+            ) : null}
           </button>
           <FrameMenu bp={f.bp} canHide={frames.length > 1} open={menuFor === f.bp} setOpen={(open) => setMenuFor(open ? f.bp : null)} />
         </div>
