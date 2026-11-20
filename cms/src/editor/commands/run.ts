@@ -1,3 +1,4 @@
+import { openProblemLog, openReport } from "../problems";
 import { locate } from "../../model/page-ops";
 import type { Breakpoint } from "../../schema";
 import { activateBreakpoint, selectBlock } from "../board/bridge";
@@ -80,6 +81,8 @@ const withSelection = (fn: (id: string) => void) => () => {
 export const RUNNERS: Record<ActionId, () => boolean | void> = {
   "palette.open": togglePalette,
   "help.shortcuts": toggleCheatSheet,
+  "help.report": openReport,
+  "help.problems": openProblemLog,
   "tool.select": () => applyTool("select"),
   "tool.frame": () => applyTool("frame"),
   "tool.text": () => applyTool("text"),

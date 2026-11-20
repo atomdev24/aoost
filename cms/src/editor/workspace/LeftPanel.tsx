@@ -14,6 +14,10 @@ import { PagesPanel } from "../ui/PagesPanel";
 import { ThemePanel } from "../ui/ThemePanel";
 import {
   closeFlyout,
+  getRailState,
+  RAIL_HOME,
+  railLayout,
+  setRailPos,
   togglePanel,
   togglePinned,
   useRail,
@@ -170,7 +174,65 @@ const BOTTOM_PANELS: PanelId[] = ["nav", "theme", "fonts", "global"];
 export function LeftPanel() {
   const active = useRail((s) => s.active);
   const pinned = useRail((s) => s.pinned);
+  const pos = useRail((s) => s.pos);
   const pageId = useEditor((s) => s.pageId);
+  const railRef = useRef<HTMLElement>(null);
+  const [win, setWin] = useState(() => ({ w: innerWidth, h: innerHeight }));
+  const [railH, setRailH] = useState(330);
+  useEffect(() => {
+    const onResize = () => setWin({ w: innerWidth, h: innerHeight });
+    addEventListener("resize", onResize);
+    const ro = railRef.current ? new ResizeObserver(() => setRailH(railRef.current?.offsetHeight ?? 330)) : null;
+    if (railRef.current) ro?.observe(railRef.current);
+    return () => {
+      removeEventListener("resize", onResize);
+      ro?.disconnect();
+    };
+  }, []);
+  // Phones keep their own layout; on a desktop the rail can be dragged anywhere by its grip.
+  const movable = win.w >= 768;
+  const place = movable ? railLayout(pos, win.w, win.h, railH) : null;
+  const [dragging, setDragging] = useState(false);
+
+  const startDrag = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.button !== 0 || !place) return;
+    e.preventDefault();
+    const el = e.currentTarget;
+    el.setPointerCapture(e.pointerId);
+    const start = { x: e.clientX, y: e.clientY, rx: place.x, ry: place.y };
+    let moved = false;
+    const move = (m: PointerEvent) => {
+      const dx = m.clientX - start.x;
+      const dy = m.clientY - start.y;
+      if (!moved && Math.hypot(dx, dy) < 3) return;
+      if (!moved) setDragging(true);
+      moved = true;
+      setRailPos({ x: start.rx + dx, y: start.ry + dy });
+    };
+    const up = () => {
+      setDragging(false);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+      // Settle where it's drawn (snapped and kept on screen), or home when it ends up there.
+      const p = getRailState().pos;
+      if (p) {
+        const settled = railLayout(p, innerWidth, innerHeight, railRef.current?.offsetHeight ?? 330);
+        setRailPos(settled.x === RAIL_HOME.x && settled.y <= RAIL_HOME.y + 4 ? null : { x: settled.x, y: settled.y });
+      }
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+  };
+  const nudge = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (!place) return;
+    const step = e.shiftKey ? 40 : 10;
+    const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if (!d) return;
+    e.preventDefault();
+    setRailPos({ x: place.x + d[0]!, y: place.y + d[1]! });
+  };
 
   const renderPanelButton = (id: PanelId) => {
     const isSelected = active === id;
@@ -192,7 +254,22 @@ export function LeftPanel() {
 
   return (
     <>
-      <nav className="ed-rail" aria-label="Editor panels">
+      <nav ref={railRef} className={`ed-rail${dragging ? " is-dragging" : ""}${place && place.side !== "left" ? " is-moved" : ""}`} aria-label="Editor panels" style={place && pos ? { left: place.x, top: place.y } : undefined}>
+        {movable ? (
+          <button
+            type="button"
+            className="ed-rail-grip"
+            aria-label="Move the panel bar (drag, or arrow keys; double-click to put it back)"
+            title="Drag to move · double-click to put back"
+            onPointerDown={startDrag}
+            onDoubleClick={() => setRailPos(null)}
+            onKeyDown={nudge}
+          >
+            <svg width="14" height="6" viewBox="0 0 14 6" fill="currentColor" aria-hidden="true">
+              {[2, 7, 12].flatMap((x) => [1.5, 4.5].map((y) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.1" />))}
+            </svg>
+          </button>
+        ) : null}
         <div className="ed-rail-group">
           {TOP_PANELS.map(renderPanelButton)}
         </div>
@@ -207,6 +284,8 @@ export function LeftPanel() {
           className={`ed-flyout${pinned ? " is-pinned" : ""}`}
           aria-label={PANEL_TITLES[active]}
           data-panel={active}
+          data-side={place?.side ?? "left"}
+          style={place && pos ? { left: place.flyoutX, top: place.flyoutY, maxHeight: `calc(100dvh - ${place.flyoutY + 10}px)` } : undefined}
         >
           <header className="ed-flyout-head">
             <strong className="ed-flyout-title">{PANEL_TITLES[active]}</strong>

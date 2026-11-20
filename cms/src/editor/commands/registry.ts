@@ -6,6 +6,8 @@
 export const ACTION_IDS = [
   "palette.open",
   "help.shortcuts",
+  "help.report",
+  "help.problems",
   "tool.select",
   "tool.frame",
   "tool.text",
@@ -67,6 +69,8 @@ export type ActionMeta = {
 export const ACTIONS: ActionMeta[] = [
   { id: "palette.open", title: "Search and commands", group: "Palette and help", hidden: true },
   { id: "help.shortcuts", title: "Show keyboard shortcuts", group: "Palette and help", keywords: "cheat sheet keys help", common: true },
+  { id: "help.report", title: "Report a problem", group: "Palette and help", keywords: "bug issue broken flicker feedback" },
+  { id: "help.problems", title: "Problem log", group: "Palette and help", keywords: "errors issues diagnostics log bugs" },
 
   { id: "tool.select", title: "Select tool", group: "Tools", keywords: "pointer move" },
   { id: "tool.frame", title: "Add a free-layout section (Frame)", group: "Tools", keywords: "frame canvas" },

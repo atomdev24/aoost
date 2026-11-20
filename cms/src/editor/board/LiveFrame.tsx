@@ -14,6 +14,7 @@ import { onBoardWheel } from "./wheel";
 import { attachFrameGestures } from "../touch/gestures";
 import { ZoomVar } from "./PuckFrame";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
+import { watchWindow } from "../problems";
 
 /** Editor-only rules for a passive frame: still motion, no live media, nav drawn in place. */
 const passiveCss = `
@@ -108,6 +109,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
   useEffect(() => {
     if (!doc) return;
     const detach = attachKeys(doc);
+    const unwatch = watchWindow(doc.defaultView!, `${bp} frame`);
     const wheel = (e: WheelEvent) => {
       const { view } = getBoard();
       const o = frameOrigin(bp);
@@ -142,6 +144,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     ro.observe(doc.body);
     return () => {
       detach();
+      unwatch();
       detachTouch();
       doc.removeEventListener("wheel", wheel);
       doc.removeEventListener("click", click, true);

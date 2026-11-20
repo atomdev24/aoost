@@ -86,7 +86,25 @@ E2E_PORT=8787 npx playwright test                       # browser tests
 - Media for local dev lives only in the cloud R2 bucket, so images uploaded through the editor show
   as broken locally. That's expected.
 
-## 6. Accounts and access
+## 5b. When something goes wrong: the problem log
+
+The editor keeps a log of what goes wrong while people edit: script errors (editor and frames),
+failed requests and saves (with status and message), the live connection dropping for more than
+5 seconds, freezes over 400 ms (Chrome only reports these), and failed publishes. Each entry has
+when, who (their login), what happened and where the editor was (page, screen size, zoom,
+selection count, browser, OS, window size, build). People add their own notes with
+**Report a problem** in the command palette (⌘K). The newest 400 entries are kept in the
+DraftStore (`problems`), never in content.
+
+Read it:
+- In the editor: ⌘K → **Problem log** (Copy all for a message or a chat with Claude; Clear).
+- As text: `GET /api/editor/problems?format=text&limit=100` (signed in).
+- Through the Claude connector: the `get_problem_log` tool (optionally `kind`: error, request,
+  connection, stall, publish, report).
+
+When Alex says "something went wrong", read the problem log first.
+
+
 
 - GitHub repo: `atomdev24/aoost` (Alex's personal account).
 - Cloudflare: Worker `aoost-cms`, R2 `aoost-media`, Access policy for the editor.

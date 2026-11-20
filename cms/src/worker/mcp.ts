@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { diffSite } from "../model/ops";
 import { tools, toolByName, runTool, type ToolContext } from "../mcp/tools";
+import { problemsReport } from "../model/problems";
 import { DESIGN_WIDTH, validateSite, type Breakpoint } from "../schema";
 import { draftStub, readDraft, type Env } from "./env";
 import { extOf, MAX_UPLOAD, MEDIA_TYPES, storeMedia } from "./media";
@@ -40,6 +41,12 @@ async function callTool(name: string, args: Record<string, unknown>, env: Env, o
   const parsed = tool.input.safeParse(args ?? {});
   if (!parsed.success) return text(`Invalid arguments: ${parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; ")}`, true);
   const draft = draftStub(env);
+
+  if (name === "get_problem_log") {
+    const a = parsed.data as { limit: number; kind?: string };
+    const items = (await draft.getProblems()).filter((p) => !a.kind || p.kind === a.kind);
+    return text(problemsReport(items, a.limit));
+  }
 
   if (name === "upload_media_from_url") {
     const a = parsed.data as { url: string; name?: string };

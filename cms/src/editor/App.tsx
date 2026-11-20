@@ -5,6 +5,7 @@ import { Editor } from "./Editor";
 import { QuickEdit } from "./QuickEdit";
 import { capturePreview } from "./screenshot";
 import { noteVersion, onServerMessage, startSync } from "./socket";
+import { startProblemLog } from "./problems";
 import { flush, getState, initStore, setOnSaved } from "./store";
 import { startSyncNotices } from "./workspace/sync";
 
@@ -24,6 +25,7 @@ export function App() {
         initStore(site, state.dirty);
         setOnSaved(noteVersion);
         startSync();
+        startProblemLog();
         startSyncNotices(state.sync);
         // Claude asked to see a page: capture the draft preview here and send it back.
         onServerMessage((msg) => {

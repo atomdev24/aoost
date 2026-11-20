@@ -8,6 +8,7 @@ import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
 import { onBoardWheel } from "./wheel";
 import { attachFrameGestures } from "../touch/gestures";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
+import { watchWindow } from "../problems";
 
 /**
  * Runs inside Puck's editable frame (Puck's `iframe` override): loads the
@@ -34,6 +35,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     const detach = attachKeys(doc);
     const detachDrops = attachCanvasDrops(doc);
     const detachPieces = attachPieceSelect(doc);
+    const unwatch = watchWindow(doc.defaultView!, "editable frame");
     const wheel = (e: WheelEvent) => {
       const { view } = getBoard();
       const o = frameOrigin(getState().bp);
@@ -68,6 +70,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       detach();
       detachDrops();
       detachPieces();
+      unwatch();
       detachTouch();
       doc.removeEventListener("wheel", wheel);
       doc.removeEventListener("pointerdown", closeUnpinnedFlyout, true);
@@ -84,11 +87,19 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
   );
 }
 
-/** Sets --ed-px (1 / zoom) on a frame's root so selection lines and handles keep their on-screen size. */
+/**
+ * Sets --ed-px (1 / zoom) on a frame's root so selection lines and handles keep their on-screen size.
+ * Changing it restyles the whole page in the frame, so while a pinch or wheel zoom is under way it
+ * waits until the board is still (the lines scale with the page for that moment). Doing it on every
+ * zoom step made the pages flicker.
+ */
 export function ZoomVar({ doc }: { doc?: Document | null }) {
   const zoom = useBoard((s) => s.view.zoom);
+  const moving = useBoard((s) => s.moving);
   useEffect(() => {
-    doc?.documentElement.style.setProperty("--ed-px", String(1 / zoom));
-  }, [doc, zoom]);
+    if (!doc || moving) return;
+    const value = String(+(1 / zoom).toFixed(3));
+    if (doc.documentElement.style.getPropertyValue("--ed-px") !== value) doc.documentElement.style.setProperty("--ed-px", value);
+  }, [doc, zoom, moving]);
   return null;
 }

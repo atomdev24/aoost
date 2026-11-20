@@ -5,6 +5,7 @@ import type { Identity } from "./auth";
 import { draftStub, readDraft, type Env } from "./env";
 import { error, html, json, readJson } from "./http";
 import { mediaApi } from "./media";
+import { problemsReport } from "../model/problems";
 import { buildStatus, publishToGitHub } from "./publish";
 
 /** How recently the connector must have called for the editor to show "Claude connected". */
@@ -72,6 +73,19 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       const seenAt = await draft.connectorSeenAt();
       return json({ ok: true, connected: !!seenAt && Date.now() - seenAt < CONNECTOR_FRESH_MS, seenAt });
     }
+    case "POST /problems": {
+      const body = await readJson<{ items?: unknown }>(request);
+      return json({ ok: true, kept: await draft.addProblems(body?.items, who.who) });
+    }
+    case "GET /problems": {
+      const items = await draft.getProblems();
+      const limit = Math.max(1, Math.min(400, Number(url.searchParams.get("limit") ?? 100) || 100));
+      if (url.searchParams.get("format") === "text") return new Response(problemsReport(items, limit), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+      return json({ ok: true, items: items.slice(-limit) });
+    }
+    case "DELETE /problems":
+      await draft.clearProblems();
+      return json({ ok: true });
     case "GET /refs": {
       const page = url.searchParams.get("page") ?? "";
       if (!/^[\w:-]{1,80}$/.test(page)) return error(400, "Expected ?page=<page id>.");

@@ -318,8 +318,8 @@
 /*
  * Smooth panning and zooming. The floating bars sit on their own GPU layers, so Chrome does not drop
  * them for a frame while it redraws the zoomed frames underneath (toolbars used to flicker or vanish).
- * While the board moves, the glass loses its blur (a solid tint instead), which is the costly part to
- * redraw every frame; it comes back as soon as the board is still.
+ * The glass keeps its look while the board moves: swapping it for a solid tint made the panels
+ * visibly change every time a pinch started and stopped.
  */
 .bd-world {
   z-index: 0;
@@ -333,11 +333,6 @@
 .ed-flyout,
 .ed-inspector {
   will-change: transform;
-}
-.ed-shell.is-moving,
-.ed-shell.is-interacting {
-  --ed-glass-backdrop: none;
-  --ed-glass-bg: rgba(30, 30, 34, 0.94);
 }
 
 /* Reference images on the board (never on the site). Sizes that should stay constant on screen are set inline from the zoom. */
