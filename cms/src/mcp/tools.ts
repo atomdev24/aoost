@@ -336,6 +336,11 @@ export const tools: Tool[] = [
     },
   ),
 
+  tool(
+    "get_problem_log",
+    "Read the editor's problem log: errors, failed saves or requests, lost live connection, long freezes, failed publishes, and problems people reported with Report a problem. Newest first, each with when, who, what happened and where the editor was (page, screen size, zoom, browser, build). Use it first when Alex says something in the editor went wrong.",
+    z.object({ limit: z.number().int().min(1).max(400).default(50).describe("How many of the newest entries."), kind: z.enum(["error", "request", "connection", "stall", "publish", "report"]).optional().describe("Only this kind.") }),
+  ),
   // The three tools below need the Worker (network, R2, an open editor, GitHub); it supplies their behaviour.
   tool(
     "upload_media_from_url",

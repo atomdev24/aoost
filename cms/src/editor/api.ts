@@ -2,6 +2,7 @@ import type { Op } from "../model/ops";
 import type { SyncInfo } from "../model/protocol";
 import type { Issue, Site } from "../schema";
 import type { RefItem } from "../model/refs";
+import { noteProblem } from "./problems";
 
 export class ApiError extends Error {
   constructor(
@@ -14,12 +15,19 @@ export class ApiError extends Error {
 }
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, { credentials: "same-origin", ...init, headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...init?.headers } });
+  let res: Response;
+  try {
+    res = await fetch(path, { credentials: "same-origin", ...init, headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...init?.headers } });
+  } catch (e) {
+    noteProblem("request", `${init?.method ?? "GET"} ${path.split("?")[0]} didn't reach the server`, e instanceof Error ? e.message : undefined);
+    throw e;
+  }
   if (res.status === 401) {
     location.href = "/admin/login";
     throw new ApiError("Signed out.", 401);
   }
   const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; issues?: Issue[] } & T;
+  if (!res.ok || data.ok === false) noteProblem("request", `${init?.method ?? "GET"} ${path.split("?")[0]} failed (${res.status}): ${data.error ?? "no message"}`, data.issues ? JSON.stringify(data.issues).slice(0, 2000) : undefined);
   if (!res.ok || data.ok === false) throw new ApiError(data.error ?? `Request failed (${res.status}).`, res.status, data.issues);
   return data;
 }

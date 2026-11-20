@@ -178,10 +178,11 @@ export function saveView(pageId: string, view: View) {
  * below half the board.
  */
 export const PANEL_ROOM = { flyout: 312 + 12, inspector: 284 + 10 + 12 };
-export function panelRoom(boardWidth: number, flyoutOpen: boolean): { left: number; right: number } {
+export function panelRoom(boardWidth: number, flyoutOpen: boolean, flyoutOnRight = false): { left: number; right: number } {
   if (boardWidth < 700) return { left: 0, right: 0 };
   const left = flyoutOpen ? PANEL_ROOM.flyout : 0;
-  const right = PANEL_ROOM.inspector;
+  // The rail moved to the right edge: its flyout opens beside the inspector, so that side needs both.
+  const right = flyoutOnRight ? PANEL_ROOM.inspector + PANEL_ROOM.flyout : PANEL_ROOM.inspector;
   if (left + right <= boardWidth / 2) return { left, right };
   // Not enough room for both: keep the left panel's room if it fits, else neither.
   return left > 0 && left <= boardWidth / 2 ? { left, right: 0 } : { left: 0, right: 0 };

@@ -1,3 +1,4 @@
+import { noteProblem } from "../problems";
 import { useSyncExternalStore } from "react";
 import type { Site } from "../../schema";
 import { api, ApiError } from "../api";
@@ -99,5 +100,6 @@ export async function publish() {
     void watchRebuild(result.commit);
   } catch (e) {
     set({ phase: "error", failed: "github", error: e instanceof ApiError || e instanceof Error ? e.message : "Publishing failed.", sheet: true });
+    noteProblem("publish", `Publishing failed: ${e instanceof Error ? e.message : "unknown"}`);
   }
 }

@@ -1,3 +1,4 @@
+import { noteProblem } from "./problems";
 import type { ClientMessage, ServerMessage } from "../model/protocol";
 import { api } from "./api";
 import { applyRemote, getState, hasUnsavedChanges, replaceSite, setClientId, setLive, setUnpublished, subscribe } from "./store";
@@ -85,10 +86,14 @@ function handle(msg: ServerMessage) {
   handlers.forEach((fn) => fn(msg));
 }
 
+let droppedAt = 0;
+
 export function connect() {
   if (socket && socket.readyState <= WebSocket.OPEN) return;
   socket = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/api/editor/socket`);
   socket.onopen = () => {
+    if (droppedAt && Date.now() - droppedAt > 5000) noteProblem("connection", `Live sync was off for ${Math.round((Date.now() - droppedAt) / 1000)} s, now back`, `${retry} reconnect attempts`);
+    droppedAt = 0;
     retry = 0;
   };
   socket.onmessage = (e) => {
@@ -99,6 +104,7 @@ export function connect() {
     }
   };
   socket.onclose = () => {
+    if (!droppedAt) droppedAt = Date.now();
     setLive(false);
     socket = null;
     setTimeout(connect, Math.min(15000, 500 * 2 ** retry++));

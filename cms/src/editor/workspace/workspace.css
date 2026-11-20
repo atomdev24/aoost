@@ -2910,3 +2910,45 @@ button.ed-card {
   display: flex;
   gap: 6px;
 }
+
+/* The rail's grip: drag the panel bar anywhere on the canvas (desktop). */
+.ed-rail-grip {
+  width: 28px;
+  height: 14px;
+  margin: 0 0 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ed-sub);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: none;
+}
+.ed-rail-grip:hover,
+.ed-rail-grip:focus-visible {
+  background: var(--ed-seg);
+  color: var(--ed-text);
+}
+.ed-rail.is-dragging,
+.ed-rail.is-dragging .ed-rail-grip {
+  cursor: grabbing;
+}
+.ed-rail.is-dragging {
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+}
+.ed-flyout[data-side="right"] {
+  animation-name: ed-flyout-in-right;
+}
+@keyframes ed-flyout-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

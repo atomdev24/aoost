@@ -43,6 +43,16 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 6. Masks and colour adjustments for board images; video and link references; shared scrapbook board.
 7. Engine / site-pack split for the Aerobotics website (see HANDBOOK.md §7).
 
+## Done (20 Nov 2026)
+
+- Zoom flicker: the page frames no longer restyle on every zoom step (the outline-width setting
+  waits until the zoom settles), which made pages flicker, especially in Safari. WebKit zoom went
+  from about 16 to 55 frames a second. The frosted glass no longer swaps to a solid tint while
+  moving.
+- Movable panel bar: drag the left rail by its grip anywhere on the canvas; its panels open on the
+  side with room; remembered; double-click the grip (or snap to the left edge) to put it back.
+- Problem log and Report a problem (HANDBOOK §5b), readable in the editor, as text and by Claude.
+
 ## Done (19 Nov 2026)
 
 - Inspector and phone polish: content first in the inspector (sections: Background first), one

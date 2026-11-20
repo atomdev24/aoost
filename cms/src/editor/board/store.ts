@@ -174,7 +174,10 @@ export const setExtraFitRects = (fn: () => Rect[]) => {
 };
 /** Room for the floating panels, from what is open rather than what has drawn yet (so the first fit is right). */
 function coveredEdges(): { left: number; right: number } {
-  return panelRoom(state.size.w, getRailState().active !== null);
+  const rail = getRailState();
+  // A rail dragged out onto the canvas (or to the right edge) doesn't cover the left edge.
+  const side = !rail.pos ? "left" : rail.pos.x <= 12 ? "left" : typeof innerWidth === "number" && rail.pos.x >= innerWidth - 60 ? "right" : "none";
+  return panelRoom(state.size.w, rail.active !== null && side === "left", rail.active !== null && side === "right");
 }
 export const fit = () => {
   if (!state.size.w) return;

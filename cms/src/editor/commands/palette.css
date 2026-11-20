@@ -239,3 +239,69 @@
     animation: none;
   }
 }
+
+/* Report a problem / Problem log */
+.ed-problems-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 16px;
+  overflow: auto;
+  color: var(--ed-text);
+  font-size: 13px;
+}
+.ed-problems-body p {
+  margin: 0;
+}
+.ed-problems-body textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font: inherit;
+}
+.ed-problems-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+.ed-problems-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ed-problems-list li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.ed-problems-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.ed-problems-kind {
+  font-weight: 600;
+  color: var(--ed-text);
+}
+.ed-problems-list li[data-kind="error"] .ed-problems-kind,
+.ed-problems-list li[data-kind="publish"] .ed-problems-kind {
+  color: #ff6b6b;
+}
+.ed-problems-list li[data-kind="report"] .ed-problems-kind {
+  color: var(--ed-accent);
+}
+.ed-problems-msg {
+  margin-top: 2px;
+  word-break: break-word;
+}
+.ed-problems-ctx {
+  margin-top: 2px;
+  color: var(--ed-sub);
+  font-size: 11px;
+}

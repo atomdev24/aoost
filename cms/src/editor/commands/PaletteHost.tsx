@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { insertAnchorName } from "../insert/catalog";
 import { currentPage, getState, megaItemId, subscribe } from "../store";
 import { CheatSheet } from "./CheatSheet";
+import { ProblemsDialog } from "./ProblemsDialog";
 import { Palette } from "./Palette";
 import { noteRecent } from "./palette-store";
 
@@ -31,6 +32,7 @@ export function PaletteHost() {
     <>
       <Palette />
       <CheatSheet />
+      <ProblemsDialog />
     </>
   );
 }

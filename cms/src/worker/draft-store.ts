@@ -6,6 +6,7 @@ import type { ClientMessage, EditorContext, ServerMessage, SyncInfo } from "../m
 import { filesToSite, siteToFiles, validateSite, type Breakpoint, type ContentFiles, type Issue, type Site } from "../schema";
 import type { Env } from "./env";
 import { cleanRefs, type RefItem } from "../model/refs";
+import { appendProblems, cleanProblems, type StoredProblem } from "../model/problems";
 
 const same = (a: ContentFiles, b: ContentFiles) => {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
@@ -32,6 +33,8 @@ const PUBLISHED_URL = "https://assets.local/_published.json";
 const BASE = "base:";
 /** Reference images per page on the editor board (never published). */
 const REFS = "refs:";
+/** The editor's problem log (errors, failed requests, freezes, reports). */
+const PROBLEMS = "problems";
 const BASE_FP = "baseFp";
 /** Values both sides changed differently in the last merge (the draft kept its own). */
 const CONFLICTS = "conflicts";
@@ -290,6 +293,23 @@ export class DraftStore extends DurableObject<Env> {
       // no published snapshot: treat as dirty
     }
     return { version: this.version, dirty, editors: this.ctx.getWebSockets().length, context: (await this.ctx.storage.get<EditorContext>("context")) ?? null, sync: await this.syncInfo() };
+  }
+
+  /** Add entries to the problem log; returns how many were kept. */
+  async addProblems(items: unknown, who: string): Promise<number> {
+    const clean = cleanProblems(items);
+    if (!clean.length) return 0;
+    const stored = (await this.ctx.storage.get<StoredProblem[]>(PROBLEMS)) ?? [];
+    await this.ctx.storage.put(PROBLEMS, appendProblems(stored, clean, who));
+    return clean.length;
+  }
+
+  async getProblems(): Promise<StoredProblem[]> {
+    return (await this.ctx.storage.get<StoredProblem[]>(PROBLEMS)) ?? [];
+  }
+
+  async clearProblems() {
+    await this.ctx.storage.delete(PROBLEMS);
   }
 
   /** A page's reference images on the board (editor only; never part of the site's content). */
