@@ -19,6 +19,58 @@
   </head>
   <body>
     <div id="root"></div>
+    <!--
+      Start-up guard, kept inline so it works even when the editor's own build files don't load
+      (e.g. a tab still on an older build after a deploy). If a build file fails, or nothing has
+      drawn after 15 s, it notes it in the problem log and reloads once; after that it offers a
+      Reload button instead of a blank screen.
+    -->
+    <script>
+      (function () {
+        var KEY = "aoost.loadGuard.reloadedAt";
+        function note(msg, detail) {
+          try {
+            var body = JSON.stringify({ items: [{ t: Date.now(), kind: "error", message: msg, detail: String(detail || "").slice(0, 2000), context: { browser: navigator.userAgent.slice(0, 120), window: innerWidth + "x" + innerHeight + "@" + devicePixelRatio } }] });
+            navigator.sendBeacon && navigator.sendBeacon("/api/editor/problems", new Blob([body], { type: "application/json" }));
+          } catch (e) {}
+        }
+        function reloadOnce(msg, detail) {
+          var last = 0;
+          try { last = +(sessionStorage.getItem(KEY) || 0); } catch (e) {}
+          note(msg, detail);
+          if (Date.now() - last < 60000) return false;
+          try { sessionStorage.setItem(KEY, String(Date.now())); } catch (e) {}
+          setTimeout(function () { location.reload(); }, 300);
+          return true;
+        }
+        function banner() {
+          if (document.getElementById("ed-load-banner")) return;
+          var bar = document.createElement("div");
+          bar.id = "ed-load-banner";
+          bar.setAttribute("role", "alert");
+          bar.style.cssText = "position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:2147483647;display:flex;gap:12px;align-items:center;padding:10px 14px;border-radius:12px;background:#2a2a2e;color:#f2f2f2;font:13px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.45)";
+          bar.innerHTML = "<span>The editor didn't finish loading.</span>";
+          var b = document.createElement("button");
+          b.type = "button";
+          b.textContent = "Reload";
+          b.style.cssText = "border:0;border-radius:8px;padding:6px 12px;background:#3d6bff;color:#fff;font:inherit;cursor:pointer";
+          b.onclick = function () { location.reload(); };
+          bar.appendChild(b);
+          document.body.appendChild(bar);
+        }
+        addEventListener("error", function (e) {
+          var el = e.target;
+          var src = el && (el.src || el.href);
+          if (src && /\/admin\/assets\//.test(src) && (el.tagName === "SCRIPT" || el.tagName === "LINK")) {
+            if (!reloadOnce("A build file failed to load", src.split("/").pop())) banner();
+          }
+        }, true);
+        setTimeout(function () {
+          var root = document.getElementById("root");
+          if (root && !root.childElementCount && !reloadOnce("The editor never drew (15 s)", "")) banner();
+        }, 15000);
+      })();
+    </script>
     <script type="module" src="/src/editor/main.tsx"></script>
   </body>
 </html>

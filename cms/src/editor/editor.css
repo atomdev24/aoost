@@ -32,6 +32,12 @@
   --ed-ink: #141414;
   color-scheme: dark;
 }
+/* Glass switched off in the "…" menu: plain solid panels, no blur. */
+html.ed-no-glass {
+  --ed-glass-bg: rgba(34, 34, 38, 0.97);
+  --ed-glass-backdrop: none;
+}
+
 html,
 body,
 #root {

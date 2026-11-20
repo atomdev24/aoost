@@ -45,6 +45,14 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (20 Nov 2026)
 
+- Toolbars missing after a refresh: the service worker served the editor page from its cache
+  first, so the first refresh after a deploy loaded the old build, whose files the server no
+  longer has. The page is now network-first, build files survive one deploy, and a start-up
+  guard reloads once (then shows Reload) if anything fails to load.
+- Diagnostics: a 15-second flight recorder attached to reports, freezes and an automatic
+  "Toolbars vanished" note; Report a problem and Problem log in the "…" menu; a Glass toolbars
+  switch for graphics setups that flicker (Chrome at a page zoom other than 100% draws at a
+  fractional pixel ratio).
 - Zoom flicker: the page frames no longer restyle on every zoom step (the outline-width setting
   waits until the zoom settles), which made pages flicker, especially in Safari. WebKit zoom went
   from about 16 to 55 frames a second. The frosted glass no longer swaps to a solid tint while

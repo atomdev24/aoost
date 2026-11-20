@@ -16,7 +16,7 @@ export const Problem = z.object({
   /** One line: what happened. */
   message: z.string().min(1).max(500),
   /** Anything that helps pin it down (stack, URL and status, duration). */
-  detail: z.string().max(4000).optional(),
+  detail: z.string().max(12000).optional(),
   /** Where the editor was: page, screen size, zoom, selection, browser, window size, build. */
   context: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
 });
@@ -53,7 +53,7 @@ export function problemsReport(items: StoredProblem[], limit = 100): string {
     .map((p) => {
       const when = new Date(p.t).toISOString().replace("T", " ").slice(0, 19);
       const ctx = p.context ? Object.entries(p.context).map(([k, v]) => `${k}=${v}`).join(" · ") : "";
-      return [`${when} UTC · ${p.kind} · ${p.who}`, `  ${p.message}`, ctx && `  ${ctx}`, p.detail && `  ${p.detail.split("\n").slice(0, 6).join("\n  ")}`].filter(Boolean).join("\n");
+      return [`${when} UTC · ${p.kind} · ${p.who}`, `  ${p.message}`, ctx && `  ${ctx}`, p.detail && `  ${p.detail.split("\n").slice(0, p.kind === "report" ? 200 : 6).join("\n  ")}`].filter(Boolean).join("\n");
     })
     .join("\n\n");
 }
