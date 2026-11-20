@@ -1,6 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { startLoadGuard } from "./load-guard";
+import { startDisplay } from "./display";
 import "./editor.css";
 import "./workspace/workspace.css";
 
@@ -8,6 +10,9 @@ import "./workspace/workspace.css";
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => void navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" }).catch(() => undefined));
 }
+
+startDisplay();
+if (import.meta.env.PROD) startLoadGuard();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

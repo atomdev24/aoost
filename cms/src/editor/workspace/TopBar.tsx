@@ -11,6 +11,8 @@ import { PublishSheet, useChanges } from "./PublishSheet";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
 import { openPalette } from "../commands/palette-store";
+import { openProblemLog, openReport } from "../problems";
+import { setGlass, useGlass } from "../display";
 
 /** "just now", "2 min ago", "at 14:05". */
 function ago(at: number, now: number): string {
@@ -194,6 +196,7 @@ function PublishButton({ phase, count, disabled }: { phase: string; count: numbe
 /** The right island's "…" menu: Discard draft lives here. */
 function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; onDiscard: () => void; onPreview: () => void }) {
   const [open, setOpen] = useState(false);
+  const glass = useGlass();
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -233,6 +236,43 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
               }}
             >
               Discard draft
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              role="menuitemcheckbox"
+              aria-checked={glass}
+              title="The blurred see-through toolbars. Turn off if the toolbars flicker."
+              onClick={() => setGlass(!glass)}
+            >
+              {glass ? "✓ " : ""}Glass toolbars
+            </button>
+          </li>
+          <li role="separator" className="ed-menu-sep" />
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              title="Tell Claude what went wrong; the editor attaches what it saw"
+              onClick={() => {
+                setOpen(false);
+                openReport();
+              }}
+            >
+              Report a problem…
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                openProblemLog();
+              }}
+            >
+              Problem log
             </button>
           </li>
         </ul>

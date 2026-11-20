@@ -93,11 +93,26 @@ failed requests and saves (with status and message), the live connection droppin
 5 seconds, freezes over 400 ms (Chrome only reports these), and failed publishes. Each entry has
 when, who (their login), what happened and where the editor was (page, screen size, zoom,
 selection count, browser, OS, window size, build). People add their own notes with
-**Report a problem** in the command palette (⌘K). The newest 400 entries are kept in the
-DraftStore (`problems`), never in content.
+**Report a problem…** in the top-right "…" menu (or ⌘K). The newest 400 entries are kept in
+the DraftStore (`problems`), never in content.
+
+**Flight recorder** (`editor/flight-recorder.ts`): the editor keeps a rolling record of the last
+15 seconds: slow frames and frames per second, the board starting and stopping (with zoom),
+every change to a toolbar (removed, hidden, faded, off screen), window and pixel-ratio changes,
+and the GPU name. A report, a freeze note and an automatic "Toolbars vanished" note all carry
+it. Reading it: if a toolbar changes in the record, the page really changed (a code bug); if
+the record shows the toolbars steady while the person saw them flicker, the browser's drawing
+dropped them (graphics; try **Glass toolbars** off in the "…" menu, kept per browser).
+
+**Start-up guard**: an inline script in `index.html` reloads once (and notes it) if a build file
+fails to load or nothing draws in 15 s, then offers a Reload button; `editor/load-guard.ts` does
+the same for on-demand parts and for an editor drawn without its toolbars. The service worker
+serves the editor page network-first (cache only when offline or after 4 s), so a refresh after
+a deploy always gets the new build; build files are kept across one deploy in
+`aoost-editor-assets`.
 
 Read it:
-- In the editor: ⌘K → **Problem log** (Copy all for a message or a chat with Claude; Clear).
+- In the editor: "…" menu or ⌘K → **Problem log** (Copy all for a message or a chat with Claude; Clear).
 - As text: `GET /api/editor/problems?format=text&limit=100` (signed in).
 - Through the Claude connector: the `get_problem_log` tool (optionally `kind`: error, request,
   connection, stall, publish, report).

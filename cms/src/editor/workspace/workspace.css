@@ -2605,8 +2605,14 @@ button.ed-card {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 160px;
+  min-width: 180px;
   z-index: 10;
+}
+.ed-menu-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: rgba(255, 255, 255, 0.1);
+  list-style: none;
 }
 .ed-sheet {
   position: absolute;

@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import type { Problem, ProblemKind, StoredProblem } from "../model/problems";
 import { getBoard } from "./board/store";
 import { getState } from "./store";
+import { flightSnapshot, startFlightRecorder } from "./flight-recorder";
 
 /**
  * The editor's problem log, browser side. It notices what goes wrong while someone edits
@@ -48,7 +49,7 @@ export function noteProblem(kind: ProblemKind, message: string, detail?: string)
   } catch {
     context = undefined;
   }
-  queue.push({ t: now, kind, message: message.slice(0, 500), detail: detail?.slice(0, 4000), context });
+  queue.push({ t: now, kind, message: message.slice(0, 500), detail: detail?.slice(0, 12000), context });
   clearTimeout(timer);
   timer = setTimeout(flush, kind === "report" ? 0 : 4000);
 }
@@ -104,6 +105,7 @@ export function startProblemLog() {
   if (started || typeof window === "undefined") return;
   started = true;
   watchWindow(window);
+  startFlightRecorder((what) => noteProblem("error", `Toolbars vanished: ${what}`, flightSnapshot()));
   // Long freezes: one frame that took over 400 ms (at most one note every 30 s). The first
   // seconds are skipped: drawing the page when the editor opens always takes one long frame.
   let lastStall = 0;
@@ -114,7 +116,7 @@ export function startProblemLog() {
         if (e.duration < 400 || e.startTime - since < 6000 || Date.now() - lastStall < 30_000) continue;
         lastStall = Date.now();
         const b = getBoard();
-        noteProblem("stall", `The editor froze for ${Math.round(e.duration)} ms`, `while ${b.moving ? "panning or zooming" : b.interacting ? "dragging" : "idle or editing"}`);
+        noteProblem("stall", `The editor froze for ${Math.round(e.duration)} ms`, `while ${b.moving ? "panning or zooming" : b.interacting ? "dragging" : "idle or editing"}\n${flightSnapshot()}`);
       }
     }).observe({ type: "long-animation-frame", buffered: false });
   } catch {
@@ -148,7 +150,14 @@ export function useProblemsDialog() {
 
 /** Send a report now (the person's own words). */
 export async function sendReport(text: string) {
-  noteProblem("report", text.trim().slice(0, 500) || "(no description)", text.length > 500 ? text.slice(500) : undefined);
+  const rest = text.length > 500 ? text.slice(500) : "";
+  let recording = "";
+  try {
+    recording = flightSnapshot();
+  } catch {
+    /* recorder not running */
+  }
+  noteProblem("report", text.trim().slice(0, 500) || "(no description)", [rest, recording].filter(Boolean).join("\n\n") || undefined);
   await flush();
 }
 
