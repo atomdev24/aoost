@@ -1,7 +1,7 @@
 import { getBoard } from "./board/store";
 
 /*
- * The editor's flight recorder: a rolling record of the last 15 seconds, so a
+ * The editor's flight recorder: a rolling record of the last 60 seconds, so a
  * report sent right after a glitch shows what happened in the moment.
  *
  * It keeps:
@@ -18,7 +18,7 @@ import { getBoard } from "./board/store";
  */
 
 type Entry = { t: number; what: string };
-const KEEP_MS = 15_000;
+const KEEP_MS = 60_000;
 const entries: Entry[] = [];
 let started = false;
 let onVanish: ((what: string) => void) | null = null;
@@ -157,12 +157,12 @@ function gpu(): string {
   return gpuName.replace(/^ANGLE \((.*)\)$/, "$1").slice(0, 80);
 }
 
-/** The last 15 seconds as text, oldest first. */
+/** The last 60 seconds as text, oldest first. */
 export function flightSnapshot(): string {
   const end = now();
   const lines = entries.filter((e) => end - e.t <= KEEP_MS).map((e) => `-${((end - e.t) / 1000).toFixed(2)}s  ${e.what}`);
   const panels = Object.entries(PANELS)
     .map(([name, sel]) => `${name}: ${describe(document.querySelector(sel))}`)
     .join(", ");
-  return [`Last 15 s (${gpu()}, pixel ratio ${devicePixelRatio}, glass ${document.documentElement.classList.contains("ed-no-glass") ? "off" : "on"}):`, ...lines.slice(-150), `Now: ${panels}`].join("\n");
+  return [`Last 60 s (${gpu()}, pixel ratio ${devicePixelRatio}, glass ${document.documentElement.classList.contains("ed-no-glass") ? "off" : "on"}):`, ...lines.slice(-220), `Now: ${panels}`].join("\n");
 }

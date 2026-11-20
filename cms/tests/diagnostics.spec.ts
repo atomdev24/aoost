@@ -5,7 +5,7 @@ import { bearer, editorPassword, signIn } from "./helpers";
  * Keeping the editor whole and reporting what goes wrong:
  * - a refresh after a deploy loads the new build (the page is never served stale from the cache);
  * - if part of the editor fails to load, it reloads itself once and notes why;
- * - "Report a problem" and the problem log are in the "…" menu, and a report carries the last 15 s;
+ * - "Report a problem" and the problem log are in the "…" menu, and a report carries the last 60 s, taken when it opens;
  * - the glass toolbars can be switched off (and stay off) for graphics setups that flicker.
  */
 const password = editorPassword();
@@ -27,7 +27,7 @@ test.describe("editor diagnostics", () => {
     await expect.poll(async () => (await log(request)).some((p) => /build file failed to load/.test(p.message)), { timeout: 15_000 }).toBe(true);
   });
 
-  test("the … menu has Report a problem and the log; a report carries the last 15 seconds", async ({ page, request }) => {
+  test("the … menu has Report a problem and the log; a report carries what happened before it was opened", async ({ page, request }) => {
     await request.delete("/api/editor/problems", { headers: bearer(password!) });
     await signIn(page, password!);
     await page.goto("/admin/?page=home");
@@ -45,12 +45,12 @@ test.describe("editor diagnostics", () => {
     await page.getByLabel("What happened?").fill("Toolbar blinked while zooming");
     await page.getByRole("button", { name: "Save report" }).click();
     await expect(page.getByText("Saved to the problem log")).toBeVisible();
-    await expect.poll(async () => (await log(request)).find((p) => p.kind === "report")?.detail ?? "").toContain("Last 15 s");
+    await expect.poll(async () => (await log(request)).find((p) => p.kind === "report")?.detail ?? "").toMatch(/Last 60 s/);
     const detail = (await log(request)).find((p) => p.kind === "report")!.detail!;
     expect(detail).toMatch(/board moving \(zoom/);
     expect(detail).toMatch(/Now: top bar left: shown/);
     const text = await (await request.get("/api/editor/problems?format=text", { headers: bearer(password!) })).text();
-    expect(text).toContain("Last 15 s");
+    expect(text).toMatch(/Last 60 s/);
 
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "More", exact: true }).click();

@@ -135,7 +135,16 @@ const setDialog = (open: DialogState["open"]) => {
   dialog = { open };
   listeners.forEach((l) => l());
 };
-export const openReport = () => setDialog("report");
+/** The recording as it was when the report opened: typing the note can take longer than the glitch. */
+let reportRecording = "";
+export const openReport = () => {
+  try {
+    reportRecording = flightSnapshot();
+  } catch {
+    reportRecording = "";
+  }
+  setDialog("report");
+};
 export const openProblemLog = () => setDialog("log");
 export const closeProblems = () => setDialog(null);
 export function useProblemsDialog() {
@@ -151,12 +160,14 @@ export function useProblemsDialog() {
 /** Send a report now (the person's own words). */
 export async function sendReport(text: string) {
   const rest = text.length > 500 ? text.slice(500) : "";
-  let recording = "";
-  try {
-    recording = flightSnapshot();
-  } catch {
-    /* recorder not running */
-  }
+  let recording = reportRecording;
+  reportRecording = "";
+  if (!recording)
+    try {
+      recording = flightSnapshot();
+    } catch {
+      /* recorder not running */
+    }
   noteProblem("report", text.trim().slice(0, 500) || "(no description)", [rest, recording].filter(Boolean).join("\n\n") || undefined);
   await flush();
 }
