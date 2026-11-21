@@ -74,7 +74,7 @@
             "showTicker": true,
             "tickerStyle": "dots",
             "dotGrid": true,
-            "dotSeconds": 2.9,
+            "dotSeconds": 3.4,
             "reelBar": false,
             "reelViewer": false
           },
