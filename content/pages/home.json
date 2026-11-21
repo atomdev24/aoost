@@ -83,7 +83,8 @@
             "reelViewer": false,
             "artPan": "rtl",
             "dotAfter": "wave",
-            "dotEffect": "resolve"
+            "dotEffect": "resolve",
+            "dotTextSize": 30
           },
           "style": {
             "base": {},
