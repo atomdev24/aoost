@@ -43,6 +43,13 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 6. Masks and colour adjustments for board images; video and link references; shared scrapbook board.
 7. Engine / site-pack split for the Aerobotics website (see HANDBOOK.md §7).
 
+## Done (21 Nov 2026)
+
+- Chrome flicker: a flight-recorder report showed 60 fps and every toolbar steady in the page
+  while the screen flickered, so the cause is Chrome drawing the blurred glass panels. Chrome,
+  Edge, Brave and Arc now start with solid panels; Safari keeps the glass; the "…" menu
+  switches it.
+
 ## Done (20 Nov 2026)
 
 - Toolbars missing after a refresh: the service worker served the editor page from its cache

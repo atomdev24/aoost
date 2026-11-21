@@ -6,7 +6,7 @@ import { bearer, editorPassword, signIn } from "./helpers";
  * - a refresh after a deploy loads the new build (the page is never served stale from the cache);
  * - if part of the editor fails to load, it reloads itself once and notes why;
  * - "Report a problem" and the problem log are in the "…" menu, and a report carries the last 60 s, taken when it opens;
- * - the glass toolbars can be switched off (and stay off) for graphics setups that flicker.
+ * - Chrome starts with solid toolbars (its blur flickers while zooming); glass is a switch in the "…" menu.
  */
 const password = editorPassword();
 type Item = { kind: string; message: string; detail?: string };
@@ -59,22 +59,24 @@ test.describe("editor diagnostics", () => {
     await request.delete("/api/editor/problems", { headers: bearer(password!) });
   });
 
-  test("glass toolbars switch off, stay off after a reload, and switch back on", async ({ page }) => {
+  test("Chrome starts with solid toolbars (its blur flickers while zooming); glass switches on, stays on after a reload, and back off", async ({ page }) => {
     await signIn(page, password!);
     await page.goto("/admin/?page=home");
     await page.waitForSelector(".ed-island-right");
     const blur = () => page.locator(".ed-island-right").evaluate((e) => getComputedStyle(e).backdropFilter);
-    expect(await blur()).toContain("blur");
-    await page.getByRole("button", { name: "More", exact: true }).click();
-    await page.getByRole("menuitemcheckbox", { name: /Glass toolbars/ }).click();
-    await expect.poll(blur).toBe("none");
-    await page.reload();
-    await page.waitForSelector(".ed-island-right");
+    const glassItem = () => page.getByRole("menuitemcheckbox", { name: /Glass toolbars/ });
     expect(await blur()).toBe("none");
     await page.getByRole("button", { name: "More", exact: true }).click();
-    await expect(page.getByRole("menuitemcheckbox", { name: /Glass toolbars/ })).toHaveAttribute("aria-checked", "false");
-    await page.getByRole("menuitemcheckbox", { name: /Glass toolbars/ }).click();
+    await expect(glassItem()).toHaveAttribute("aria-checked", "false");
+    await glassItem().click();
     await expect.poll(blur).toContain("blur");
+    await page.reload();
+    await page.waitForSelector(".ed-island-right");
+    expect(await blur()).toContain("blur");
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    await expect(glassItem()).toHaveAttribute("aria-checked", "true");
+    await glassItem().click();
+    await expect.poll(blur).toBe("none");
   });
 });
 
