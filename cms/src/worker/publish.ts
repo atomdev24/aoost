@@ -28,6 +28,8 @@ export async function publishToGitHub(
     branch: string;
     token: string;
     message?: string;
+    /** Who published (a first name or handle), added to the commit message as "(by …)" for the history. */
+    by?: string | null;
     fetcher?: Fetcher;
     /** The live content the draft was built on. When given, publishing refuses if the branch's content/ is newer than it. */
     base?: ContentFiles;
@@ -82,7 +84,7 @@ export async function publishToGitHub(
     const summary = changed.length === 1 ? changed[0]! : `${changed.length} files`;
     const made = await gh<{ sha: string; html_url: string }>("/git/commits", {
       method: "POST",
-      body: JSON.stringify({ message: opts.message?.trim() || `Publish from the editor: ${summary}`, tree: newTree.sha, parents: [head] }),
+      body: JSON.stringify({ message: `${opts.message?.trim() || `Publish from the editor: ${summary}`}${opts.by ? ` (by ${opts.by})` : ""}`, tree: newTree.sha, parents: [head] }),
     });
     // Not forced: if the branch moved since we read it, this fails and nothing is overwritten.
     await gh(`/git/refs/heads/${encodeURIComponent(opts.branch)}`, { method: "PATCH", body: JSON.stringify({ sha: made.sha, force: false }) });

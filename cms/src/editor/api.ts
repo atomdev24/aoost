@@ -32,6 +32,9 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
+/** One published version (a commit that changed content/). */
+export type Version = { sha: string; at: string; message: string; who: string | null };
+
 /** What is in staging and its share link. */
 export type StagingInfo = { at: number; label: string; by: string; url: string };
 type StagingPath = Omit<StagingInfo, "url"> & { path: string };
@@ -52,6 +55,8 @@ export const api = {
   sendToStaging: (label: string) => call<{ staging: StagingPath }>("/api/editor/staging", { method: "POST", body: JSON.stringify({ label }) }).then((r) => withUrl(r.staging)),
   clearStaging: () => call("/api/editor/staging", { method: "DELETE" }),
   pushStaging: (message?: string) => call<{ commit: string | null; url: string | null; changed: string[] }>("/api/editor/staging/push", { method: "POST", body: JSON.stringify({ message }) }),
+  history: () => call<{ versions: Version[]; unavailable?: string }>("/api/editor/history"),
+  version: (sha: string) => call<{ site: Site }>(`/api/editor/history/version?sha=${encodeURIComponent(sha)}`),
   logout: () => call("/api/logout", { method: "POST" }),
   refs: (page: string) => call<{ items: RefItem[] }>(`/api/editor/refs?page=${encodeURIComponent(page)}`),
   putRefs: (page: string, items: RefItem[]) => call<{ items: RefItem[] }>("/api/editor/refs", { method: "PUT", body: JSON.stringify({ page, items }) }),

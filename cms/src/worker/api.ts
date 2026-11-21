@@ -9,6 +9,8 @@ import { error, html, json, readJson } from "./http";
 import { mediaApi } from "./media";
 import { problemsReport } from "../model/problems";
 import { buildStatus, publishToGitHub } from "./publish";
+import { cachedVersionFiles, listVersions } from "./history";
+import { filesToSite } from "../schema";
 
 /** How recently the connector must have called for the editor to show "Claude connected". */
 const CONNECTOR_FRESH_MS = 15 * 60_000;
@@ -29,6 +31,9 @@ function publishLocked(env: Env, url: URL): Response | null {
 }
 
 /** The link is a path: the editor adds its own address (wrangler dev reports the real domain as the origin). */
+/** The name to sign a publish with: the part of a sign-in email before the @ (password and token sign-ins have none). */
+const byline = (who: Identity) => (who.who.includes("@") ? who.who.split("@")[0]!.slice(0, 40) : null);
+
 const stagingInfo = (meta: StagingMeta) => ({ at: meta.at, label: meta.label, by: meta.by, path: `/staging/${meta.token}/` });
 
 export async function editorApi(request: Request, env: Env, url: URL, who: Identity): Promise<Response> {
@@ -59,10 +64,30 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       const { blocked } = await draft.sync(true);
       if (blocked) return error(409, blocked + " Choose “Start the draft from the live site” or “Keep my draft” first.");
       const { files, base } = await draft.getPublishFiles();
-      const result = await publishToGitHub(files, { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN!, message: body?.message, base });
+      const result = await publishToGitHub(files, { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN!, message: body?.message, by: byline(who), base });
       if (!result.ok) return error(result.status === 401 || result.status === 403 ? 502 : result.status === 422 || result.status === 409 ? 409 : 502, result.error);
       await draft.markPublished();
       return json({ ok: true, commit: result.commit, url: result.url, changed: result.changed });
+    }
+    case "GET /history": {
+      if (!env.GITHUB_TOKEN) return json({ ok: true, versions: [], unavailable: "Version history reads the site's GitHub history, which this server can't reach (no GITHUB_TOKEN). It works on the live editor." });
+      try {
+        const limit = Number(url.searchParams.get("limit") ?? 30) || 30;
+        return json({ ok: true, versions: await listVersions({ repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN }, limit) });
+      } catch (e) {
+        return error(502, `Couldn't read the history from GitHub: ${e instanceof Error ? e.message : "unknown error"}.`);
+      }
+    }
+    case "GET /history/version": {
+      if (!env.GITHUB_TOKEN) return error(503, "Version history needs GITHUB_TOKEN.");
+      const sha = url.searchParams.get("sha") ?? "";
+      try {
+        const parsed = validateSite(filesToSite(await cachedVersionFiles(sha, { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN })));
+        if (!parsed.ok) return error(422, "That version can't be read by this editor.", { issues: parsed.issues });
+        return json({ ok: true, site: parsed.site });
+      } catch (e) {
+        return error((e as { status?: number }).status === 400 ? 400 : 502, `Couldn't read that version: ${e instanceof Error ? e.message : "unknown error"}.`);
+      }
     }
     case "GET /staging": {
       const meta = await draft.getStaging();
@@ -85,7 +110,9 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       if (!staged) return error(409, "Nothing is in staging.");
       if (staged.liveMoved) return error(409, "The live site changed after this was sent to staging. Send it to staging again, check the link, then push.");
       const body = await readJson<{ message?: string }>(request);
-      const result = await publishToGitHub(staged.files, { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN!, message: body?.message, base: staged.base });
+      const label = (await draft.getStaging())?.label;
+      const message = body?.message || `Push to production${label ? `: ${label}` : ""}`;
+      const result = await publishToGitHub(staged.files, { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN!, message, by: byline(who), base: staged.base });
       if (!result.ok) return error(result.status === 401 || result.status === 403 ? 502 : result.status === 422 || result.status === 409 ? 409 : 502, result.error);
       await draft.markPublished(staged.files);
       await draft.clearStaging();
@@ -184,4 +211,28 @@ export async function staging(env: Env, url: URL): Promise<Response> {
   res.headers.set("X-Robots-Tag", "noindex");
   res.headers.set("Cache-Control", "no-store");
   return res;
+}
+
+/** /preview/_version/<sha>/<slug> (an address no page can have): a past version, rendered exactly like the site. Behind the editor sign-in. */
+export async function historyPage(env: Env, url: URL): Promise<Response> {
+  const m = /^\/preview\/_version\/([0-9a-f]{7,40})(\/.*)?$/.exec(url.pathname);
+  if (!m) return html("<!doctype html><meta charset=utf-8><title>Not found</title><p style='font:16px system-ui;padding:40px'>No such version.</p>", 404);
+  const sha = m[1]!;
+  if (!m[2]) return Response.redirect(new URL(`/preview/_version/${sha}/`, url).toString(), 301);
+  if (!env.GITHUB_TOKEN) return html("<!doctype html><meta charset=utf-8><title>History unavailable</title><p style='font:16px system-ui;padding:40px'>Version history needs GITHUB_TOKEN.</p>", 503);
+  let site;
+  try {
+    const parsed = validateSite(filesToSite(await cachedVersionFiles(sha, { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN })));
+    if (!parsed.ok) throw new Error("invalid");
+    site = parsed.site;
+  } catch {
+    return html("<!doctype html><meta charset=utf-8><title>Can't show this version</title><p style='font:16px system-ui;padding:40px'>This version couldn't be read.</p>", 502);
+  }
+  const prefix = `/preview/_version/${sha}`;
+  const path = m[2].replace(/\/$/, "") || "/";
+  if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: prefix + e.url })));
+  const page = site.pages.find((p) => p.slug === path && p.status !== "draft" && p.variantOf === undefined);
+  if (!page) return html("<!doctype html><meta charset=utf-8><title>Not in this version</title><p style='font:16px system-ui;padding:40px'>No page at this address in this version.</p>", 404);
+  const tag = STAGING_TAG.replace("Staging preview", `Version ${sha.slice(0, 7)}`).replace("#8e44ff", "#444");
+  return html(renderPage(site, page, { preview: { prefix }, assetVersion: sha.slice(0, 12) }).replace("</body>", `${tag}</body>`));
 }

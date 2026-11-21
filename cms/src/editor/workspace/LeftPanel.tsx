@@ -11,6 +11,7 @@ import { LayersPanel } from "../ui/LayersPanel";
 import { MediaLibrary } from "../ui/MediaLibrary";
 import { NavPanel } from "../ui/NavPanel";
 import { PagesPanel } from "../ui/PagesPanel";
+import { HistoryPanel } from "../ui/HistoryPanel";
 import { ThemePanel } from "../ui/ThemePanel";
 import {
   closeFlyout,
@@ -29,6 +30,7 @@ const PANEL_TITLES: Record<PanelId, string> = {
   pages: "Pages",
   insert: "Insert",
   media: "Media",
+  history: "History",
   nav: "Navigation",
   theme: "Theme",
   fonts: "Fonts",
@@ -131,6 +133,13 @@ const RailIcon = ({ id }: { id: PanelId }) => {
           <path d="M3 4h10M8 4v9M5.5 13h5" />
         </svg>
       );
+    case "history":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9" />
+          <path d="M2.2 2.5v2.6h2.6M8 5v3.2l2.2 1.4" />
+        </svg>
+      );
     case "global":
       return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
@@ -165,7 +174,7 @@ const CloseIcon = () => (
   </svg>
 );
 
-const TOP_PANELS: PanelId[] = ["layers", "pages", "insert", "media"];
+const TOP_PANELS: PanelId[] = ["layers", "pages", "insert", "media", "history"];
 const BOTTOM_PANELS: PanelId[] = ["nav", "theme", "fonts", "global"];
 
 /**
@@ -319,6 +328,7 @@ export function LeftPanel() {
               </>
             ) : null}
             {active === "pages" ? <PagesPanel /> : null}
+            {active === "history" ? <HistoryPanel /> : null}
             {active === "insert" ? <InsertPanel /> : null}
             {active === "media" ? (
               <div className="ed-panel ed-theme">
