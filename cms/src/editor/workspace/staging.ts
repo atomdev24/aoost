@@ -1,10 +1,12 @@
 import { useSyncExternalStore } from "react";
+import { pageItems } from "../../model/changes";
 import { electVariant, ownerPage } from "../../model/variants";
+import { closeCompare, openCompare } from "./compare";
 import { api, ApiError, type StagingInfo } from "../api";
 import { noteProblem } from "../problems";
 import { onServerMessage } from "../socket";
 import { currentPage, flush, getState, setPage, update } from "../store";
-import { openSheet } from "./publish";
+import { getPublish, loadPublished, openSheet } from "./publish";
 
 /**
  * Staging: a frozen copy of the draft with a share link anyone can open (like
@@ -97,4 +99,32 @@ export async function copyStagingLink() {
   } catch {
     window.prompt("Copy the staging link:", state.info.url);
   }
+}
+
+const previewPath = (slug: string) => (slug === "/" ? "/" : `${slug}/`);
+
+/** Compare the variant on screen with its live page, side by side; Elect from there. */
+export async function compareCurrentVariant() {
+  const s = getState();
+  const v = currentPage(s);
+  if (!v.variantOf) return;
+  const page = ownerPage(s.site, v);
+  await flush();
+  if (!getPublish().published) await loadPublished();
+  const live = getPublish().published?.pages.find((p) => p.id === page.id);
+  const elected = electVariant(getState().site, v.id)?.pages.find((p) => p.id === page.id);
+  const items = !elected ? [] : live ? pageItems(live, elected) : ["New page"];
+  openCompare({
+    title: `${v.variantName ?? "Variant"} compared with live ${page.title}`,
+    left: { label: `Live: ${page.title}`, src: `/preview/_live${previewPath(page.slug)}` },
+    right: { label: `${v.variantName ?? "Variant"} (what electing would make live)`, src: `/preview${previewPath(v.slug)}` },
+    changes: items.length ? [{ title: page.title, items }] : [],
+    action: {
+      label: "Elect to staging",
+      run: async () => {
+        closeCompare();
+        await electCurrentVariant();
+      },
+    },
+  });
 }

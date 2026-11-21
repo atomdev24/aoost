@@ -18,7 +18,8 @@ const META: { key: keyof Site; name: string }[] = [
 
 const nodeName = (n: Node) => n.name ?? getComponent(n.type)?.label.split(":")[0] ?? n.type;
 
-function pageItems(before: Page, after: Page): string[] {
+/** What changed on one page, in the publish sheet's words ("Added Text", "Removed section", "Section order"). */
+export function pageItems(before: Page, after: Page): string[] {
   const items: string[] = [];
   const { sections: sa, overlays: oa, ...restA } = before;
   const { sections: sb, overlays: ob, ...restB } = after;

@@ -45,6 +45,9 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Compare: a variant or a past version side by side with the live page (Desktop or Mobile,
+  scrolling together) with the list of changes, and Elect or Restore from there.
+
 - Version history: a History panel lists every publish and push (who and when), previews any
   version as it was, and restores one into the draft and staging (never straight live).
 

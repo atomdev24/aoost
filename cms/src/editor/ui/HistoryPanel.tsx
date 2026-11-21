@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
+import { summarizeChanges } from "../../model/changes";
 import { restoreVersion } from "../../model/versions";
+import { closeCompare, openCompare } from "../workspace/compare";
+import { getPublish, loadPublished } from "../workspace/publish";
+import { ownerPage } from "../../model/variants";
+import { currentPage } from "../store";
 import { api, ApiError, type Version } from "../api";
 import { flush, getState, update, useEditor } from "../store";
 import { openSheet } from "../workspace/publish";
@@ -79,6 +84,37 @@ export function HistoryPanel() {
     }
   };
 
+  /** This version of the page on screen beside the live one, with everything the version changes across the site. */
+  const compare = async (v: Version) => {
+    setBusy(v.sha);
+    setError(null);
+    try {
+      const page = ownerPage(getState().site, currentPage(getState()));
+      if (!getPublish().published) await loadPublished();
+      const old = (await api.version(v.sha)).site;
+      const live = getPublish().published;
+      const diff = live ? summarizeChanges(live, old) : { pages: [] };
+      const path = page.slug === "/" ? "/" : `${page.slug}/`;
+      openCompare({
+        title: `${describe(v, titles)}, ${when(v.at)}, compared with live`,
+        left: { label: `Live: ${page.title}`, src: `/preview/_live${path}` },
+        right: { label: `${page.title} in that version (${v.sha.slice(0, 7)})`, src: `/preview/_version/${v.sha}${path}` },
+        changes: diff.pages.map((p) => ({ title: p.title, items: p.items })),
+        action: {
+          label: "Restore this version",
+          run: async () => {
+            closeCompare();
+            await restore(v);
+          },
+        },
+      });
+    } catch (e) {
+      setError(e instanceof ApiError || e instanceof Error ? e.message : "Couldn't compare that version.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <div className="ed-panel ed-versions">
       <p className="ed-panel-note">Every publish and push to production. Restore puts a version in staging first, so you can check and share it before pushing it live.</p>
@@ -104,6 +140,11 @@ export function HistoryPanel() {
                 <a className="ed-btn ed-btn-sm" href={`/preview/_version/${v.sha}/`} target="_blank" rel="noreferrer" aria-label={`Preview the version from ${when(v.at)}`}>
                   Preview
                 </a>
+                {i > 0 ? (
+                  <button type="button" className="ed-btn ed-btn-sm" disabled={!!busy} aria-label={`Compare the version from ${when(v.at)} with live`} onClick={() => void compare(v)}>
+                    Compare
+                  </button>
+                ) : null}
                 {i > 0 ? (
                   <button type="button" className="ed-btn ed-btn-sm" disabled={!!busy} aria-label={`Restore the version from ${when(v.at)}`} onClick={() => void restore(v)}>
                     {busy === v.sha ? "Restoring…" : "Restore"}

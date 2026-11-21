@@ -87,8 +87,15 @@ against `wrangler dev`).
     the editor sign-in), rendered from that commit's files. **Restore** puts that version in the
     draft (keeping today's variants where their page exists; ⌘Z undoes it) and sends it to
     staging, so it is checked and pushed like anything else.
-  - Not yet: roles (anyone signed in can elect, restore and push), compare with live before
-    electing (ROADMAP).
+  - **Compare** (`workspace/CompareView.tsx`, `workspace/compare.ts`): a full-screen view with
+    two renders side by side at Desktop (1440) or Mobile (390) width, scaled to fit, scrolling
+    together, and the change list underneath (`pageItems` / `summarizeChanges`, the publish
+    sheet's words). From the variant band ("Compare": live page vs what electing would make
+    live, then Elect) and from History ("Compare": that version vs live, everything it changes
+    across the site, then Restore). The live side renders the published content at
+    `/preview/_live/<slug>/`; version and live previews show draft pages too (signed in).
+  - The variant band sits bottom centre, beside the zoom bar, so it never covers the page.
+  - Not yet: roles (anyone signed in can elect, restore and push).
 
 ## 5. How to work on it
 

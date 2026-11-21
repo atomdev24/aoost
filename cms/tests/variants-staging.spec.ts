@@ -50,7 +50,18 @@ test.describe("variants and staging", () => {
 
     // The variant never shows on the public preview of the page.
     // Elect: its content goes onto the page, the variant goes, the draft goes to staging.
-    await band.getByRole("button", { name: "Elect to staging" }).click();
+    // Compare with live: both pages side by side, the change listed, Elect from there.
+    await band.getByRole("button", { name: "Compare" }).click();
+    const compare = page.getByRole("dialog", { name: /compared with live Sample/ });
+    await expect(compare).toBeVisible();
+    await expect(compare.getByRole("region", { name: "What changed" })).toContainText("Sample");
+    await expect(compare.getByRole("region", { name: "What changed" })).not.toContainText("No differences");
+    await expect(compare.frameLocator('iframe[title^="Live"]').locator("main h1").first()).not.toContainText("from staging");
+    await expect(compare.frameLocator('iframe[title^="Variant 1"]').locator("main h1").first()).toContainText("from staging");
+    await compare.getByRole("button", { name: "Mobile" }).click();
+    await expect(compare.frameLocator('iframe[title^="Variant 1"]').locator("main h1").first()).toContainText("from staging");
+    await compare.getByRole("button", { name: "Elect to staging" }).click();
+    await expect(compare).toBeHidden();
     await expect(band).toBeHidden();
     const link = page.getByLabel("Staging link");
     await expect(link).toBeVisible();

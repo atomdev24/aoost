@@ -23,6 +23,7 @@ import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { VariantBand } from "./workspace/VariantBand";
+import { CompareView } from "./workspace/CompareView";
 import { TopBar } from "./workspace/TopBar";
 import { BrowserZoomNotice } from "./workspace/BrowserZoomNotice";
 import { warmUp } from "./warmup";
@@ -102,6 +103,7 @@ export function Editor() {
           <TopBar />
           <SyncNotice />
           <VariantBand />
+          <CompareView />
           <LeftPanel />
           <Board />
           <Inspector />

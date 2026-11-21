@@ -52,8 +52,16 @@ test.describe("version history", () => {
     await expect(list.locator("li").first().getByRole("button", { name: /Restore/ })).toHaveCount(0);
     await expect(list.locator("li").nth(1).getByRole("link", { name: /Preview/ })).toHaveAttribute("href", `/preview/_version/${b}/`);
 
+    // Compare: that version beside the live page, with what it changes; Restore from there.
+    await list.locator("li").nth(1).getByRole("button", { name: /Compare/ }).click();
+    const compare = page.getByRole("dialog", { name: /compared with live/ });
+    await expect(compare).toBeVisible();
+    await expect(compare.getByRole("region", { name: "What changed" })).toContainText("Sample");
+    await expect(compare.locator('iframe[title^="Sample in that version"]')).toHaveAttribute("src", `/preview/_version/${b}/sample/`);
+    await expect(compare.locator('iframe[title^="Live"]')).toHaveAttribute("src", "/preview/_live/sample/");
     page.once("dialog", (d) => void d.accept()); // the draft has unpublished changes
-    await list.locator("li").nth(1).getByRole("button", { name: /Restore/ }).click();
+    await compare.getByRole("button", { name: "Restore this version" }).click();
+    await expect(compare).toBeHidden();
     await expect(page.getByLabel("Staging link")).toBeVisible();
     await expect(page.locator(".ed-staging-head")).toContainText("Restore: Published Sample");
     await expect(page.frameLocator("#preview-frame").locator("main h1").first()).toContainText("an older take");
