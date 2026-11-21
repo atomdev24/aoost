@@ -53,9 +53,24 @@ export function FrameStill({ bp, pageId, active }: { bp: Breakpoint; pageId: str
       aria-hidden="true"
       onClick={active ? undefined : (e) => clickThrough(bp, e.currentTarget, e.clientX, e.clientY)}
     >
-      <img src={still.url} alt="" draggable={false} width={still.w} height={still.h} decoding="sync" />
+      <StillCanvas canvas={still.canvas} />
     </div>
   );
+}
+
+/** Shows the picture's own canvas (one per frame, moved here rather than copied). */
+function StillCanvas({ canvas }: { canvas: HTMLCanvasElement }) {
+  const box = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    canvas.className = "bd-still-canvas";
+    el.replaceChildren(canvas);
+    return () => {
+      if (canvas.parentElement === el) el.removeChild(canvas);
+    };
+  }, [canvas]);
+  return <div ref={box} className="bd-still-box" />;
 }
 
 /**

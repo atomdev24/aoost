@@ -23,7 +23,8 @@ export const frameBaseCss = `html,body,#frame-root{height:auto!important;min-hei
 export function stillMotion(doc: Document): () => void {
   const style = doc.createElement("style");
   style.id = "ed-still-motion";
-  style.textContent = "*,*::before,*::after{animation-play-state:paused!important;transition:none!important}";
+  // The editor's own flash (a block Claude just changed) keeps playing.
+  style.textContent = "*,*::before,*::after{animation-play-state:paused!important;transition:none!important}.ed-flash,[data-ed-flash]{animation-play-state:running!important}";
   doc.head.appendChild(style);
   return () => style.remove();
 }

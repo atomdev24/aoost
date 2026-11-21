@@ -97,3 +97,12 @@ test.describe("editor service worker", () => {
     await expect(page.locator(".ed-island-right")).toBeVisible({ timeout: 20_000 });
   });
 });
+
+test.describe("local test servers", () => {
+  test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
+  test("never publish, whatever credentials they have", async ({ request }) => {
+    const res = await request.post("/api/editor/publish", { headers: bearer(password!), data: {} });
+    expect(res.status()).toBe(403);
+    expect((await res.json()).error).toMatch(/local test server/);
+  });
+});

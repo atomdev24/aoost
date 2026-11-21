@@ -26,6 +26,9 @@ html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!imp
 .n iframe,.n video,.n audio,.n model-viewer{pointer-events:none}
 body{cursor:default}
 a{cursor:default}
+[data-ed-sel]{outline:calc(1px * var(--ed-px,1)) dashed #0A84FF!important;outline-offset:calc(-1px * var(--ed-px,1))}
+[data-ed-flash]{animation:ed-flash 2s ease-out}
+@keyframes ed-flash{0%,60%{outline:3px solid #0A84FF;outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}
 `;
 
 /** Re-render at most every `ms` while values keep changing (typing in a frame or a field). */
@@ -167,13 +170,19 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
 
   const model = useMemo(() => frameModel(site, page), [site, page]);
   const css = useMemo(() => pinViewportUnits(pageCss(model.site, model.page), SCREEN_HEIGHT[bp]), [model, bp]);
-  // Linked selection: the block selected in the active frame is outlined here too.
-  const selectionCss = useMemo(() => {
-    const ids = linked ? selection : [];
-    const sel = ids.flatMap((id) => [`.n-${CSS.escape(id)}`, `.s#${CSS.escape(id)}`]).join(",");
-    const flash = highlight.flatMap((id) => [`.n-${CSS.escape(id)}`, `.s#${CSS.escape(id)}`]).join(",");
-    return [sel && `${sel}{outline:calc(1px * var(--ed-px,1)) dashed #0A84FF!important;outline-offset:calc(-1px * var(--ed-px,1))}`, flash && `${flash}{animation:ed-flash 2s ease-out}@keyframes ed-flash{0%,60%{outline:3px solid #0A84FF;outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}`].filter(Boolean).join("");
-  }, [selection, highlight, linked]);
+  // Linked selection: the block selected in the active frame is outlined here too. The outline
+  // rules are fixed (passiveCss); only the selected and flashing blocks get a marker. (Rewriting a
+  // style sheet on every selection made Chrome restyle and lay out the whole page in every frame.)
+  useEffect(() => {
+    if (!doc || !visible) return;
+    const mark = (attr: string, ids: string[]) => {
+      const want = new Set(ids.length ? doc.querySelectorAll(ids.flatMap((id) => [`.n-${CSS.escape(id)}`, `.s#${CSS.escape(id)}`]).join(",")) : []);
+      doc.querySelectorAll(`[${attr}]`).forEach((el) => !want.has(el) && el.removeAttribute(attr));
+      want.forEach((el) => !el.hasAttribute(attr) && el.setAttribute(attr, ""));
+    };
+    mark("data-ed-sel", linked ? selection : []);
+    mark("data-ed-flash", highlight);
+  }, [doc, visible, selection, highlight, linked, model]);
 
   return (
     <>
@@ -183,7 +192,6 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
             <>
               <style>{css}</style>
               <style>{frameBaseCss + passiveCss}</style>
-              <style>{selectionCss}</style>
               <ZoomVar doc={doc} />
               <PageBody site={model.site} page={model.page} editing />
             </>,

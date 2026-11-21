@@ -305,3 +305,12 @@
   color: var(--ed-sub);
   font-size: 11px;
 }
+
+/* The report box: room for a sentence or two (the shared input style made it one line high). */
+.ed-problems textarea.ed-input {
+  height: auto;
+  min-height: 96px;
+  padding: 8px 10px;
+  line-height: 1.45;
+  resize: vertical;
+}

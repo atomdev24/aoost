@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import type { Breakpoint } from "../../schema";
 import { currentPage, getState, subscribe as subscribeEditor } from "../store";
 import { getBoard, subscribeBoard } from "./store";
+import { saveSnapshot } from "./snapshots";
 
 /*
  * Still pictures of the board's frames.
@@ -13,11 +14,11 @@ import { getBoard, subscribeBoard } from "./store";
  * real fonts), and the board shows it in place of the live page while it moves, and for every
  * frame except the one being edited (see FrameStill).
  *
- * Pictures are retaken after edits, once things have been quiet for a moment and never while the
+ * Pictures are retaken after edits (only if the page or its size changed), once things have been quiet for a moment and never while the
  * board moves: one capture blocks the page for about a tenth of a second.
  */
 
-export type Still = { url: string; pageId: string; w: number; h: number; at: number };
+export type Still = { canvas: HTMLCanvasElement; pageId: string; sig: string; w: number; h: number; at: number };
 
 const BPS: Breakpoint[] = ["widescreen", "desktop", "tablet", "mobile"];
 const QUIET_MS = 1200;
@@ -44,14 +45,10 @@ export function useStill(bp: Breakpoint): Still | null {
   );
 }
 function setStill(bp: Breakpoint, still: Still) {
-  const old = stills.get(bp);
   stills.set(bp, still);
   emit();
-  // Let the old picture go once the new one has had time to draw.
-  if (old) setTimeout(() => URL.revokeObjectURL(old.url), 2000);
 }
 function clearStills() {
-  for (const s of stills.values()) URL.revokeObjectURL(s.url);
   stills.clear();
   emit();
 }
@@ -82,6 +79,30 @@ function toData(url: string): Promise<string | null> {
   return p;
 }
 
+const shownCache = new Map<string, string>();
+/** A decoded <img> redrawn at twice the size it's shown (capped by its own size), as a small data URL. */
+function shownCopy(img: HTMLImageElement): string | null {
+  if (!img.complete || !img.naturalWidth) return null;
+  const r = img.getBoundingClientRect();
+  const scale = Math.min(1, (2 * Math.max(r.width, 1)) / img.naturalWidth, (2 * Math.max(r.height, 1)) / img.naturalHeight);
+  const w = Math.max(1, Math.round(img.naturalWidth * scale));
+  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+  const key = `${img.currentSrc}|${w}x${h}`;
+  const hit = shownCache.get(key);
+  if (hit) return hit;
+  try {
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    c.getContext("2d")!.drawImage(img, 0, 0, w, h);
+    const url = c.toDataURL(/\.jpe?g($|\?)/i.test(img.currentSrc) ? "image/jpeg" : "image/png", 0.9);
+    shownCache.set(key, url);
+    return url;
+  } catch {
+    return null;
+  }
+}
+
 const URL_RE = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
 const external = (u: string) => !u.startsWith("data:") && !u.startsWith("#");
 
@@ -94,13 +115,17 @@ async function inlineUrls(css: string, base: string): Promise<string> {
   return css.replace(URL_RE, (all, _q: string, u: string) => (external(u) ? (map.get(new URL(u, base).href) ? `url("${map.get(new URL(u, base).href)}")` : "none") : all));
 }
 
+/** Google Fonts sends one face per alphabet; the pages are Latin, so only those are embedded. */
+const latinOnly = (css: string) =>
+  css.replace(/\/\*[^*]*\*\/\s*/g, "").replace(/@font-face\s*{[^}]*}/g, (face) => (!/unicode-range/.test(face) || /U\+0000-00FF/i.test(face) ? face : ""));
+
 const sheetCache = new Map<string, Promise<string>>();
 const sheet = (href: string) => {
   let p = sheetCache.get(href);
   if (!p) {
     p = fetch(href)
       .then((r) => (r.ok ? r.text() : ""))
-      .then((css) => inlineUrls(css, href))
+      .then((css) => inlineUrls(latinOnly(css), href))
       .catch(() => "");
     sheetCache.set(href, p);
   }
@@ -112,7 +137,7 @@ const sheet = (href: string) => {
  * The page is copied (no scripts, media as plain boxes), its images, fonts and style sheets are
  * embedded, and the copy is drawn through an SVG image onto a canvas.
  */
-export async function captureFrame(doc: Document): Promise<{ blob: Blob; w: number; h: number } | null> {
+export async function captureFrame(doc: Document): Promise<{ canvas: HTMLCanvasElement; w: number; h: number } | null> {
   const w = doc.documentElement.clientWidth;
   const h = Math.min(MAX_HEIGHT, doc.documentElement.scrollHeight);
   if (w < 50 || h < 50 || !doc.body?.childElementCount) return null;
@@ -152,12 +177,14 @@ export async function captureFrame(doc: Document): Promise<{ blob: Blob; w: numb
   const imgs = [...doc.querySelectorAll("img")];
   await Promise.all(
     [...clone.querySelectorAll("img")].map(async (img, i) => {
-      const src = imgs[i]?.currentSrc || img.getAttribute("src");
+      const live = imgs[i];
+      const src = live?.currentSrc || img.getAttribute("src");
       img.removeAttribute("srcset");
       img.removeAttribute("sizes");
       img.removeAttribute("loading");
       if (!src || src.startsWith("data:")) return;
-      const data = await toData(new URL(src, base).href);
+      // The frame already has this picture decoded: copy it at the size it's shown (not the original file).
+      const data = (live && shownCopy(live)) || (await toData(new URL(src, base).href));
       if (data) img.setAttribute("src", data);
       else img.removeAttribute("src");
     }),
@@ -179,8 +206,8 @@ export async function captureFrame(doc: Document): Promise<{ blob: Blob; w: numb
   ctx.fillStyle = getComputedStyle(doc.body).backgroundColor || "#fff";
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(image, 0, 0);
-  const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/webp", 0.9));
-  return blob ? { blob, w, h } : null;
+  // Kept as the canvas it was drawn on: encoding it to a file took over a second on the main thread.
+  return { canvas, w, h };
 }
 
 // ------------------------------------------------------------------ when to take them
@@ -198,6 +225,8 @@ const dirty = new Set<Breakpoint>();
 let timer: ReturnType<typeof setTimeout> | undefined;
 let running = false;
 let started = false;
+/** Bumped on every change to the page or site: a picture taken at the same version and size is still right. */
+let contentVersion = 0;
 
 /** Ask for fresh pictures (all frames, or one), after things have been quiet for a moment. */
 export function refreshStills(bp?: Breakpoint) {
@@ -232,10 +261,15 @@ async function run() {
       if (!doc) continue;
       await idle();
       const pageId = getState().pageId;
+      const sig = `${pageId}|${contentVersion}|${doc.documentElement.clientWidth}x${Math.min(MAX_HEIGHT, doc.documentElement.scrollHeight)}`;
+      // Nothing about this page has changed since its picture was taken.
+      if (stills.get(bp)?.sig === sig) continue;
       const shot = await captureFrame(doc).catch(() => null);
       // The page changed while we drew it: that picture is already out of date.
       if (!shot || getState().pageId !== pageId) continue;
-      setStill(bp, { url: URL.createObjectURL(shot.blob), pageId, w: shot.w, h: shot.h, at: Date.now() });
+      setStill(bp, { canvas: shot.canvas, pageId, sig, w: shot.w, h: shot.h, at: Date.now() });
+      // Also the page's loading picture for next time.
+      void saveSnapshot(pageId, bp, shot.canvas);
     }
   } finally {
     running = false;
@@ -260,6 +294,7 @@ export function startStills(): () => void {
     if (p !== page || s.site !== site) {
       page = p;
       site = s.site;
+      contentVersion++;
       refreshStills();
     }
   });

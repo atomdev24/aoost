@@ -24,6 +24,7 @@ import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { TopBar } from "./workspace/TopBar";
 import { BrowserZoomNotice } from "./workspace/BrowserZoomNotice";
+import { warmUp } from "./warmup";
 import "./workspace/workspace.css";
 import "./workspace/phone.css";
 
@@ -60,6 +61,7 @@ export function Editor() {
   const interacting = useBoard((s) => s.interacting);
   const moving = useBoard((s) => s.moving);
   useEffect(() => attachKeys(document), []);
+  useEffect(() => warmUp(), []);
 
   // Initial data per page; later store changes reach Puck through <PuckSync>.
   const initial = useMemo(() => pageToPuck(currentPage(getState())), [pageId]);

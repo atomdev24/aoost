@@ -4,7 +4,7 @@ import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
 import { AdjustImage } from "../canvas/AdjustImage";
 import { ResizePiece } from "../canvas/ResizePiece";
 import { EmptyPage } from "../insert/EmptyPage";
-import { takeSnapshots, useSnapshot, watchSnapshots } from "./snapshots";
+import { useSnapshot } from "./snapshots";
 import { currentPage, getState, useEditor } from "../store";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { activateBreakpoint } from "./bridge";
@@ -31,8 +31,8 @@ const hold = new URLSearchParams(location.search).get("snapshot") === "hold";
 
 /**
  * While a frame hasn't drawn the open page yet, it shows that page's last
- * snapshot at 55%, then crossfades to the live frame. With no snapshot the
- * frame stays plain. A first snapshot is taken once the page has loaded.
+ * snapshot (a sharp copy, as it is), then crossfades to the live frame. With no snapshot the
+ * frame stays plain. Snapshots come from the board's still pictures (stills.ts).
  */
 function LoadingCover({ bp, pageId, slug, ready }: { bp: Breakpoint; pageId: string; slug: string; ready: boolean }) {
   const snap = useSnapshot(pageId, bp);
@@ -41,10 +41,6 @@ function LoadingCover({ bp, pageId, slug, ready }: { bp: Breakpoint; pageId: str
   useEffect(() => {
     if (!ready) return;
     const t = setTimeout(() => setGone(true), 320);
-    if (snap === null) {
-      const s = setTimeout(() => void takeSnapshots(pageId, slug), 4000);
-      return () => (clearTimeout(t), clearTimeout(s));
-    }
     return () => clearTimeout(t);
   }, [ready, snap, pageId, slug]);
   // Until the frame has drawn, it takes the snapshot's height.
@@ -87,7 +83,6 @@ export function Board() {
   const addable = EXTRA_FRAMES.filter((b) => hidden[b]);
   const ready = useBoard((s) => s.ready);
   const loading = hold || frames.some((f) => !ready[f.bp] && (f.bp === bp || !size.w || isVisible(view, f, size.w, size.h)));
-  useEffect(() => watchSnapshots(), []);
   useEffect(() => startStills(), []);
 
   useLayoutEffect(() => openPage(pageId), [pageId]);

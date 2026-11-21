@@ -12,6 +12,8 @@ export interface Env {
   PUBLISH_BRANCH: string;
   EDITOR_PASSWORD?: string;
   GITHUB_TOKEN?: string;
+  /** "1" lets a password-mode or localhost server publish for real (off by default: those are test servers). */
+  ALLOW_LOCAL_PUBLISH?: string;
 }
 
 /** One draft per site: a single, fixed Durable Object. */

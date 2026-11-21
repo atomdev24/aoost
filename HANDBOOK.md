@@ -86,6 +86,11 @@ E2E_PORT=8787 npx playwright test                       # browser tests
 - Media for local dev lives only in the cloud R2 bucket, so images uploaded through the editor show
   as broken locally. That's expected.
 
+**Test servers never publish.** `POST /api/editor/publish` answers 403 when the server signs in
+with the password (`AUTH_MODE=password`, what every local/test server uses; production uses Access)
+or runs on localhost, unless `ALLOW_LOCAL_PUBLISH=1` (a stress test once clicked Publish on a local server holding the real
+GitHub token and changed the live homepage). Test copies of `.dev.vars` also leave out `GITHUB_TOKEN`.
+
 ## 5b. When something goes wrong: the problem log
 
 The editor keeps a log of what goes wrong while people edit: script errors (editor and frames),
@@ -117,12 +122,25 @@ you aren't editing; the edited frame fades back to live ~0.2 s after it stops. A
 is forwarded to the page under it (same block gets picked). Pictures are retaken 1.2 s after edits,
 frame loads or height changes, never while the board moves (one capture blocks ~0.1 s). The site's
 own animations are paused in the board's frames (`stillMotion`); Preview and the site still move.
-`.probe/tiles.mjs` and `.probe/stills.mjs` measure it in real Chrome.
+`scripts/probes/tiles.mjs` and `stills.mjs` measure it in real Chrome.
+
+**Warm-up** (`editor/warmup.ts`): in idle time after opening, every character the panels use is
+drawn once out of sight (one small piece per idle moment), so the first inspector doesn't pay for
+the font lookup (~170 ms on Alex's Mac).
+
+**Undo in fields** (`board/keys.ts`): ⌘Z / ⇧⌘Z in a page field (inspector, panels, text typed in
+a frame) is the editor's undo; the field is left first so it shows the undone value. Search boxes
+keep the browser's own undo. `PuckSync` skips the echo of a canvas edit only once (redo brings that
+same page object back and must reach the canvas).
+
+**Measuring** (`cms/scripts/probes/`, see its README): `audit.mjs` (every flow, Event Timing input→paint, LoAF with source,
+errors, screenshots; never clicks Publish), `trace-click.mjs` (Chrome trace of one action, broken
+down), `profile.mjs` (CPU profile mapped to source; build with `SOURCEMAP=1`), `undo.mjs`.
 
 **Board layer hint**: `.bd-world` gets `will-change: transform` only while the board moves
 (`is-moving` / `is-interacting`). Left on, Chrome kept the pages at the detail they were first
 drawn at; after zooming in then out, four long pages overran the graphics memory and pieces of the
-previews dropped out even with the board still (`.probe/tiles.mjs`: 277 of 294 frames bad on
+previews dropped out even with the board still (`scripts/probes/tiles.mjs`: 277 of 294 frames bad on
 Alex's M1, 0 after).
 
 **Pinch guard** (`editor/pinch-guard.ts`): a trackpad pinch reaches Chrome as ctrl + wheel and

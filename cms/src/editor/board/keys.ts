@@ -22,6 +22,22 @@ const typing = (doc: Document) => {
   return !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
 };
 
+/**
+ * A field that edits the page: the inspector, the panels, or text typed straight into a frame.
+ * ⌘Z there is the editor's undo, not the browser's: the browser's own field undo counted the
+ * editor rewriting the field as a step, so a second ⌘Z put the undone typing back.
+ */
+const PAGE_FIELDS = ".ed-inspector, .ed-flyout, [data-page-field]";
+const pageField = (doc: Document) => {
+  const el = doc.activeElement as HTMLElement | null;
+  if (!el) return false;
+  if (el.isContentEditable && doc !== document) return true;
+  // Search boxes keep the browser's own undo: typing a search isn't an edit.
+  if (el.matches('input[type="search"], [role="searchbox"], [role="combobox"]')) return false;
+  return !!el.closest(PAGE_FIELDS);
+};
+const HISTORY = new Set(["history.undo", "history.redo"]);
+
 export function applyTool(tool: Tool) {
   onTool?.(tool);
   if (tool === "select" || tool === "claude") return;
@@ -33,7 +49,7 @@ export function attachKeys(doc: Document): () => void {
   const down = (e: KeyboardEvent) => {
     const sc = matchShortcut(e);
     if (!sc) return;
-    if (typing(doc) && !sc.whileTyping) return;
+    if (typing(doc) && !sc.whileTyping && !(HISTORY.has(sc.id) && pageField(doc))) return;
     // The cheat sheet is up: only ? (and its own Esc) reach the editor.
     if (getPalette().cheat && sc.id !== "help.shortcuts" && sc.id !== "palette.open") return;
     if (sc.id === "canvas.pan") {
@@ -51,6 +67,9 @@ export function attachKeys(doc: Document): () => void {
         return;
       }
     }
+    // Undo from inside a page field: leave the field first, so it shows the undone value
+    // (a field keeps its own text while it has the cursor).
+    if (HISTORY.has(sc.id) && typing(doc) && pageField(doc)) (doc.activeElement as HTMLElement).blur();
     if (!sc.action || !runAction(sc.action)) return;
     // Ours, not the browser's (⌘1–4, ⌘+/−, ⌘D, ⌘K…) and not Puck's (⌘Z, Delete).
     e.preventDefault();
