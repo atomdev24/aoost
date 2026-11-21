@@ -60,11 +60,11 @@
             "reelSeconds": 3,
             "ticker": [
               {
-                "text": "Welcome",
+                "text": "Hey, welcome",
                 "mode": "both"
               },
               {
-                "text": "",
+                "text": "take a look around",
                 "mode": "both"
               }
             ],
@@ -162,14 +162,14 @@
               },
               {
                 "image": "/media/2026/aoost-skull-resin-transparent-wide-1-bjma.png",
-                "x": 81,
-                "y": 91,
+                "x": 3,
+                "y": 78,
                 "width": 200
               },
               {
                 "image": "/media/2026/aoost-skull-side-black-transparent-wide-1-p8mv.png",
-                "x": 3,
-                "y": 24,
+                "x": 19,
+                "y": 77,
                 "width": 200
               },
               {
@@ -177,6 +177,12 @@
                 "x": 8,
                 "y": 100,
                 "width": 243
+              },
+              {
+                "image": "/media/2026/aoost-sticky-stack-transparent-wide-bw6k.png",
+                "x": 98,
+                "y": 6,
+                "width": 200
               }
             ],
             "viewer": false
