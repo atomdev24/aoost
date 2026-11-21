@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { balanceLine, EFFECTS, wrapLine } from "./dots.js";
+import { balanceLine, EFFECTS, sentenceCase, wrapLine } from "./dots.js";
 
 describe("dot board", () => {
+  it("shows lines in sentence case, leaving the rest as written", () => {
+    expect(sentenceCase("welcome")).toBe("Welcome");
+    expect(sentenceCase("beat the game, top score 9749 by J WARELEY")).toBe("Beat the game, top score 9749 by J WARELEY");
+    expect(sentenceCase("  pick a playlist")).toBe("  Pick a playlist");
+    expect(sentenceCase("")).toBe("");
+  });
+
   it("splits a long line at word breaks into frames that fit", () => {
     const fits = (s: string) => s.length <= 12;
     expect(wrapLine("beat the game, be the first on the board".split(" "), fits)).toEqual(["beat the", "game, be the", "first on the", "board"]);

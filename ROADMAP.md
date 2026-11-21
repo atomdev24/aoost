@@ -45,6 +45,10 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Hero fixes: parallax moves the artwork inside its frame and no longer cancels the enter
+  slide; switches for the progress line and for opening artwork full screen (hero and projects
+  table); dot board finer and smoother, sentence case, with an opening wave.
+
 - Dot board: a second strip style for the hero. Each line appears as square dots that grow in
   with a sweep, breathe while held and shrink away; long lines split into even frames. The
   scrolling ticker stays the default; switch with Hero → Strip style. Also fixed the editor's

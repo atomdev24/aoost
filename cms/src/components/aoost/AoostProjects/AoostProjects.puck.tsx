@@ -60,6 +60,7 @@ export const fields: Fields<AoostProjectsContent> = {
     defaultItemProps: { image: "", x: 30, y: 30, width: 200 },
     getItemSummary: (item, i) => item.image?.split("/").pop() || `Fixture ${(i ?? 0) + 1}`,
   },
+  viewer: onOff("Tap a piece to open it full screen"),
   showCactus: onOff("Cactus beside the intro line"),
   showSkull: onOff("Longhorn skull beside the heading"),
   mat: matField,

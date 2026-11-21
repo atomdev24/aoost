@@ -3,3 +3,4 @@ export function wrapLine(words: string[], fits: (s: string) => boolean): string[
 export function balanceLine(words: string[], width: (s: string) => number, room: number): string[];
 export const EFFECTS: Record<string, unknown>;
 export function startDotBoard(canvas: HTMLCanvasElement, opts?: { lines?: string[]; seconds?: number; grid?: boolean; effect?: string }): { setLines(lines: string[]): void; stop(): void };
+export function sentenceCase(s: string): string;
