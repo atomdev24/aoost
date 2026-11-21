@@ -188,7 +188,9 @@
                     "scale": 1
                   },
                   "desktop": {
-                    "scale": 0.68
+                    "scale": 0.68,
+                    "x": 0.1363,
+                    "y": 0.6593
                   }
                 },
                 "sticker": false
