@@ -52,7 +52,12 @@ export function initProjects(){
     const up=e=>{if(e.pointerId!==id)return;id=null;el.classList.remove('lifted');st.rot=(Math.random()-.5)*8;
       /* let go off the edge: it springs back to where it's fully on the table */
       const back=settle(st);el.style.transition=reduce?'none':back?'transform .55s cubic-bezier(.34,1.45,.5,1), box-shadow .2s':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);if(moved)makeRoom(st);else open(st);};
-    el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{moved=true;up(e);});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open(st);}});}
+    el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{moved=true;up(e);});
+    /* a simulated visitor (phantoms.js) moving the piece: the same drag, never a tap; ignored while someone real holds it */
+    el.addEventListener('ghostdrag',e=>{const d=e.detail||{};if(id!==null&&id!=='ghost')return;
+      if(d.type==='down'){id='ghost';sx=d.x;sy=d.y;ox=st.x;oy=st.y;moved=true;el.style.zIndex=++z+10;el.style.transition='box-shadow .2s';el.classList.add('lifted');st.rot*=.4;place(st);}
+      else if(d.type==='move'&&id==='ghost'){const dx=d.x-sx,dy=d.y-sy;st.rot=Math.max(-10,Math.min(10,dx*.04));const r=range(st,st.rot);st.x=rubber(ox+dx+r.w/2,r.x0,r.x1)-r.w/2;st.y=rubber(oy+dy+r.h/2,r.y0,r.y1)-r.h/2;place(st);}
+      else if(d.type==='up'&&id==='ghost'){id=null;el.classList.remove('lifted');st.rot=(Math.random()-.5)*8;const back=settle(st);el.style.transition=reduce?'none':back?'transform .55s cubic-bezier(.34,1.45,.5,1), box-shadow .2s':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);makeRoom(st);}});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open(st);}});}
   /* the whole table is the room's sequence, starting from the piece tapped */
   function open(st){if(D.viewer===false)return;openViewer(els.map(s=>s.item),els.indexOf(st),st.el);}
   /* a piece carries its project's plaque (title, medium, year, note, link); the viewer shows it only if there's text */

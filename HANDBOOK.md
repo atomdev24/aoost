@@ -124,12 +124,17 @@ against `wrangler dev`).
   over time, so adding one is a function plus an editor option). Lines that arrive later (the
   visitor number) still get their turn, then it idles again. "Idle animation speed" scales its
   time (0.5 = slow). "Text size" is the letter height as % of the strip.
-- **Simulated visitors.** Hero → "Simulated visitors" (off by default) and "how often" (rare /
-  sometimes / often). `runtime/phantoms.js`: on some visits only (35/60/90%), after a wait, a cursor
-  in the real ghost style turns up and follows one to three habits (`BEHAVIOURS`: reader, browser,
-  fidget, wanderer), then leaves off an edge or just fades. Moves use minimum-jerk easing on a
-  slight curve, reach time grows with log distance, long reaches sometimes overshoot and correct,
-  and rests keep a small drift. Nothing is sent or counted. `?ghosts=demo` shows them quickly.
+- **Simulated visitors.** Hero → "Simulated visitors" and "how often" (rare / sometimes / often).
+  `runtime/phantoms.js`: on some visits only (35/60/90%), after a wait, a cursor in the real ghost
+  style turns up with its own hand (pace, how much it arcs, which way) and strings together one to
+  four habits (`BEHAVIOURS`: reader, browser, arranger, fiddle, wanderer), then leaves off an edge
+  or just stops. Reaches are quick (Fitts-like, ~0.15–0.6 s), each a cubic curve of its own shape
+  (nearly straight, shallow or deep arc, S-bend) with a slow wobble; long reaches land a little
+  short or wide and get one or two small corrections; resting hands drift. The arranger really
+  picks up a projects-table piece and moves it, through a `ghostdrag` event that projects.js
+  handles like a drag (never a tap, ignored while a real person holds the piece). Nothing is sent
+  or counted. Skipped for reduced motion, inside Claude's previews and in automated browsers
+  (`navigator.webdriver`); `?ghosts=demo` shows them quickly anywhere.
 - **Hero switches.** "Progress line under the artwork" (`reelBar`) and "Click artwork to open it
   full screen" (`reelViewer`); the projects table has "Tap a piece to open it full screen"
   (`viewer`). Older content: all on.

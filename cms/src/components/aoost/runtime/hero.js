@@ -99,6 +99,6 @@ export function initHero(){
     }catch(e){}};document.head.appendChild(s);}
   /* simulated visitors: the odd cursor drifting through, like people browsing (?ghosts=demo shows them quickly) */
   const demo=/[?&]ghosts=demo/.test(location.search);
-  if((D.phantoms||demo)&&!IN_CLAUDE&&!reduce){const pl=document.createElement('div');pl.className='ghosts';pl.setAttribute('aria-hidden','true');overlays().appendChild(pl);
+  if(demo||(D.phantoms&&!navigator.webdriver&&!IN_CLAUDE&&!reduce)){const pl=document.createElement('div');pl.className='ghosts';pl.setAttribute('aria-hidden','true');overlays().appendChild(pl);
     startPhantoms(pl,demo?'demo':D.phantomRate||'sometimes');}
 }
