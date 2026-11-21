@@ -85,7 +85,7 @@
             "dotAfter": "wave",
             "dotEffect": "resolve",
             "dotTextSize": 40,
-            "dotLook": "glass",
+            "dotLook": "glassblock",
             "phantoms": true,
             "phantomRate": "sometimes"
           },
