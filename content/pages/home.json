@@ -79,7 +79,7 @@
             }
           },
           "effects": {
-            "enter": "slide-up",
+            "enter": "slide-left",
             "parallax": 0.35
           }
         }
