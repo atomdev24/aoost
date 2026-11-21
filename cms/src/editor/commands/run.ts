@@ -115,6 +115,7 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
   "panel.layers": () => togglePanel("layers"),
   "panel.pages": () => togglePanel("pages"),
   "panel.media": () => togglePanel("media"),
+  "panel.history": () => togglePanel("history"),
   "panel.insert": () => togglePanel("insert"),
   "panel.nav": () => togglePanel("nav"),
   "panel.theme": () => togglePanel("theme"),

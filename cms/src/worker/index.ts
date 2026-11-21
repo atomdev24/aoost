@@ -1,5 +1,5 @@
 import { authenticate, login, logout } from "./auth";
-import { editorApi, preview, staging } from "./api";
+import { editorApi, historyPage, preview, staging } from "./api";
 import { draftStub, type Env } from "./env";
 import { error, html, json } from "./http";
 import { loginPage } from "./login-page";
@@ -60,8 +60,11 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
     return mcp(request, env);
   }
 
+
   if (path === "/preview" || path.startsWith("/preview/")) {
     if (!who) return Response.redirect(new URL("/admin/login", url).toString(), 302);
+    // A past version (the sign-in that covers /preview covers these too).
+    if (path.startsWith("/preview/_version/")) return historyPage(env, url);
     return preview(env, url);
   }
 

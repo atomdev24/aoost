@@ -3172,3 +3172,51 @@ button.ed-card {
     display: inline-flex;
   }
 }
+
+/* History panel */
+.ed-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.ed-history-item {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+.ed-history-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.ed-history-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.ed-history-title {
+  font-size: 12.5px;
+  color: var(--ed-text);
+  overflow-wrap: anywhere;
+}
+.ed-history-title em {
+  margin-left: 6px;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 600;
+  color: #32d74b;
+}
+.ed-history-meta {
+  font-size: 11px;
+  color: var(--ed-text-dim, #8e8e93);
+}
+.ed-history-actions {
+  display: flex;
+  gap: 6px;
+}
+.ed-history-actions a.ed-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}

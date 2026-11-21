@@ -80,8 +80,15 @@ against `wrangler dev`).
   - **Push to production** publishes exactly what is in staging (not the draft as it is now),
     through the same GitHub commit and rebuild as Publish, and refuses if the live site changed
     since it was staged (send it again first). Publish still publishes the draft directly.
-  - Not yet: roles (anyone signed in can elect and push), compare with live before electing,
-    version history and restore (ROADMAP).
+  - **Version history** (`worker/history.ts`, `ui/HistoryPanel.tsx`, rail clock icon): the
+    publish branch's commits that changed `content/`, newest first, read from GitHub (so it
+    needs GITHUB_TOKEN; a test server shows "works on the live editor"). Commits now end in
+    "(by <name>)" from the sign-in email. **Preview** opens `/preview/_version/<sha>/…` (behind
+    the editor sign-in), rendered from that commit's files. **Restore** puts that version in the
+    draft (keeping today's variants where their page exists; ⌘Z undoes it) and sends it to
+    staging, so it is checked and pushed like anything else.
+  - Not yet: roles (anyone signed in can elect, restore and push), compare with live before
+    electing (ROADMAP).
 
 ## 5. How to work on it
 

@@ -45,6 +45,9 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Version history: a History panel lists every publish and push (who and when), previews any
+  version as it was, and restores one into the draft and staging (never straight live).
+
 - Variants, staging and Push to production (for Monday's demo; plan in the "aoost editor: faster
   opening plan and Figma gap list" doc, Roadmap tab): make a variant of any page from the page
   switcher, edit it while the page stays as it was (purple frames, a band with Back and Elect),
