@@ -67,10 +67,45 @@ export const EFFECTS = {
 };
 
 /**
+ * Idle animations: what the board does once every line has shown (instead of repeating them).
+ * Each gives, for a cell at time t (seconds, already scaled by the speed setting), a level from
+ * 0 (a faint grid dot) to 1 (a full lit square). Add more here, and to the editor's options.
+ */
+const fract = (v) => v - Math.floor(v);
+const noise = (x, y) => fract(Math.sin(x * 127.1 + y * 311.7) * 43758.5453);
+export const IDLE = {
+  /** A soft band of light rolling across the board, like a breeze through the dots. */
+  wave: {
+    level(x, y, t, cols, rows) {
+      const u = x / cols, v = y / rows;
+      const a = Math.sin(u * 9 - t * 1.1 + Math.sin(v * 3 + t * 0.6) * 1.4);
+      const b = Math.sin(u * 4.3 + v * 2.2 + t * 0.7);
+      const k = Math.max(0, (a * 0.65 + b * 0.35));
+      return k * k * 0.85;
+    },
+  },
+  /** Blocks of dots that glow up and fade at their own pace, scattered across the board. */
+  twinkle: {
+    level(x, y, t) {
+      const bx = Math.floor(x / 7), by = Math.floor(y / 5);
+      const seed = noise(bx, by), rate = 0.35 + seed * 0.5;
+      const glow = Math.max(0, Math.sin(t * rate * 2 + seed * 40));
+      const g = glow * glow * glow * glow;
+      return noise(x, y) < 0.88 ? g * (0.6 + 0.4 * noise(x + 9, y)) : g * 0.15;
+    },
+  },
+};
+
+/**
  * Start a dot board on a canvas that fills its strip. Options: lines (strings), seconds per frame,
  * grid (the faint dot grid behind), effect (a key of EFFECTS). Returns { setLines, stop }.
  */
-export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe' } = {}) {
+export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe', after = 'loop', idleSpeed = 0.5, textSize = 70 } = {}) {
+  const idleFx = after !== 'loop' ? IDLE[after] || IDLE.wave : null;
+  const glyphOf = (rows) => Math.max(7, Math.round(rows * Math.min(0.95, Math.max(0.3, textSize / 100))));
+  // With an idle animation, each frame shows once; then the board idles (new lines still get their turn).
+  const shown = new Set();
+  let idle = false, idleT0 = -1;
   const doc = canvas.ownerDocument, win = doc.defaultView;
   const reduce = win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fx = EFFECTS[effect] || EFFECTS.breathe;
@@ -97,7 +132,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
    * keeps its share of ink (w): full inside the letters, smaller dots along their edges.
    */
   function rasterize(text, seed) {
-    const glyph = Math.max(7, Math.round(rows * 0.7));
+    const glyph = glyphOf(rows);
     const cw = cols * SS, ch = rows * SS;
     scratch.canvas.width = cw; scratch.canvas.height = ch;
     let fs = glyph;
@@ -123,7 +158,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   function build() {
     if (!cols || !rows) return;
     scratch.setTransform(1, 0, 0, 1, 0, 0);
-    scratch.font = fontAt(Math.max(7, Math.round(rows * 0.7)));
+    scratch.font = fontAt(glyphOf(rows));
     const room = cols * 0.88;
     frames = items.flatMap((line) => balanceLine(String(line).split(/\s+/).filter(Boolean), (s) => scratch.measureText(s).width, room))
       .map((text) => ({ text, cells: rasterize(text, hash(text)) }));
@@ -188,6 +223,33 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     ctx.globalAlpha = 1;
   }
 
+  /** The idle animation, fading up over a second. */
+  function drawIdle(t) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = INK;
+    const fade = Math.min(1, t / 1.2), ts = t * idleSpeed;
+    const full = pitch * 0.8, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      const k = idleFx.level(x, y, ts, cols, rows) * fade;
+      if (k <= 0.03) continue;
+      const s = dot + (full - dot) * k;
+      ctx.globalAlpha = 0.14 + 0.8 * k;
+      ctx.fillRect(ox + x * pitch + pitch / 2 - s / 2, oy + y * pitch + pitch / 2 - s / 2, s, s);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /** The next frame to show, or -1 to idle. */
+  function nextFrame() {
+    if (!frames.length) return idleFx ? -1 : 0;
+    if (!idleFx) return (at + 1) % frames.length;
+    for (let i = 1; i <= frames.length; i++) { const j = (at + i) % frames.length; if (!shown.has(frames[j].text)) return j; }
+    return -1;
+  }
+
   function loop(now) {
     raf = 0;
     if (stopped) return;
@@ -198,9 +260,20 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
       if (it < INTRO) { drawIntro(it); if (visible && !doc.hidden) raf = win.requestAnimationFrame(loop); return; }
       intro = false; t0 = now;
     }
+    if (idle) {
+      if (idleT0 < 0) idleT0 = now;
+      drawIdle((now - idleT0) / 1000);
+      if (visible && !doc.hidden) raf = win.requestAnimationFrame(loop);
+      return;
+    }
     const T = timing();
     let t = (now - t0) / 1000;
-    if (t >= T.total + 0.25) { at = frames.length ? (at + 1) % frames.length : 0; t0 = now; t = 0; }
+    if (frames[at]) shown.add(frames[at].text);
+    if (t >= T.total + 0.25) {
+      const n = nextFrame();
+      if (n < 0) { idle = true; idleT0 = now; drawIdle(0); if (visible && !doc.hidden) raf = win.requestAnimationFrame(loop); return; }
+      at = n; t0 = now; t = 0;
+    }
     draw(Math.min(t, T.total));
     if (visible && !doc.hidden) raf = win.requestAnimationFrame(loop);
   }
@@ -208,7 +281,12 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
 
   // Reduced motion: each frame shows whole, and they change in place.
   let still = 0;
-  function startStill() { win.clearInterval(still); draw(0); still = win.setInterval(() => { at = frames.length ? (at + 1) % frames.length : 0; draw(0); }, Math.max(2400, seconds * 1000)); }
+  function startStill() { win.clearInterval(still); draw(0); still = win.setInterval(() => {
+    if (frames[at]) shown.add(frames[at].text);
+    const n = nextFrame();
+    if (n < 0) { win.clearInterval(still); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); drawGrid(); return; }
+    at = n; draw(0);
+  }, Math.max(2400, seconds * 1000)); }
 
   measure(); build();
   const ro = new win.ResizeObserver(() => { const w = W, h = H; measure(); if (Math.abs(W - w) > 1 || Math.abs(H - h) > 1) { build(); if (reduce) draw(0); } });
@@ -226,6 +304,8 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
       const sig = next.map(sentenceCase).join('|');
       if (sig === items.join('|')) return;
       items = next.map(sentenceCase); build();
+      // Lines that haven't shown yet (the visitor number arrives late) get their turn, then it idles again.
+      if (idle) { const j = frames.findIndex((f) => !shown.has(f.text)); if (j >= 0) { idle = false; at = j; t0 = win.performance.now(); } }
       if (reduce) draw(0);
     },
     stop() { stopped = true; if (raf) win.cancelAnimationFrame(raf); win.clearInterval(still); ro.disconnect(); io?.disconnect(); doc.removeEventListener('visibilitychange', onVis); },

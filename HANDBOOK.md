@@ -107,6 +107,11 @@ against `wrangler dev`).
   Text is drawn at 4×4 sub-pixels per cell and each cell keeps its share of ink, so letter edges
   get smaller dots (smooth, not stair-stepped). Lines show in sentence case. The first time the
   board shows (once the display font is ready) a wave of dots runs across the empty grid.
+- **Dot board idle and size.** "After the last line": repeat the lines, or show each line once and
+  then play an idle animation (`IDLE` in dots.js: `wave`, `twinkle`; each is a level 0–1 per cell
+  over time, so adding one is a function plus an editor option). Lines that arrive later (the
+  visitor number) still get their turn, then it idles again. "Idle animation speed" scales its
+  time (0.5 = slow). "Text size" is the letter height as % of the strip.
 - **Hero switches.** "Progress line under the artwork" (`reelBar`) and "Click artwork to open it
   full screen" (`reelViewer`); the projects table has "Tap a piece to open it full screen"
   (`viewer`). Older content: all on.
