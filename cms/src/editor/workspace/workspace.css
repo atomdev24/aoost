@@ -3030,8 +3030,9 @@ button.ed-card {
   vertical-align: 1px;
 }
 .ed-variant-band {
+  /* Bottom centre, beside the zoom bar: never over the page being edited. */
   position: fixed;
-  top: 68px;
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 39;
@@ -3039,7 +3040,7 @@ button.ed-card {
   align-items: center;
   flex-wrap: wrap;
   gap: 8px 10px;
-  max-width: calc(100vw - 32px);
+  max-width: calc(100vw - 520px);
   padding: 7px 8px 7px 12px;
   font-size: 12.5px;
   color: #ececee;
@@ -3122,7 +3123,7 @@ button.ed-card {
 }
 @media (max-width: 767px) {
   .ed-variant-band {
-    top: auto;
+    max-width: calc(100vw - 24px);
     bottom: 76px;
     flex-wrap: nowrap;
     gap: 6px;
@@ -3219,4 +3220,96 @@ button.ed-card {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+}
+
+/* Compare: two pages side by side */
+.ed-compare {
+  position: fixed;
+  inset: 0;
+  /* Above the top bar, rail and sheets: it is a full-screen view of its own. */
+  z-index: 1000;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(14, 14, 16, 0.96);
+}
+.ed-compare-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ed-text);
+  font-size: 13px;
+}
+.ed-compare-spacer {
+  flex: 1;
+}
+.ed-compare-seg {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+}
+.ed-compare-seg-btn {
+  border: 0;
+  background: transparent;
+  color: var(--ed-text-dim, #8e8e93);
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ed-compare-seg-btn.is-on {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--ed-text);
+}
+.ed-compare-panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  min-height: 0;
+}
+.ed-compare-pane {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 6px;
+  margin: 0;
+  min-height: 0;
+}
+.ed-compare-pane figcaption {
+  font-size: 12px;
+  color: var(--ed-text-dim, #8e8e93);
+}
+.ed-compare-pane:last-child figcaption {
+  color: var(--ed-variant);
+}
+.ed-compare-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #fff;
+  min-height: 0;
+}
+.ed-compare-pane:last-child .ed-compare-stage {
+  box-shadow: 0 0 0 2px var(--ed-variant);
+}
+.ed-compare-stage iframe {
+  position: absolute;
+  top: 0;
+  border: 0;
+  transform-origin: 0 0;
+  background: #fff;
+}
+.ed-compare-changes {
+  max-height: 22vh;
+  overflow: auto;
+  font-size: 12.5px;
+  color: var(--ed-text);
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.ed-compare-changes p {
+  margin: 6px 0 0;
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ownerPage, renameVariant } from "../../model/variants";
 import { currentPage, setPage, update, useEditor } from "../store";
-import { electCurrentVariant, useStaging } from "./staging";
+import { compareCurrentVariant, electCurrentVariant, useStaging } from "./staging";
 
 /**
  * Under the top bar while a variant is on screen: what you're editing, that
@@ -41,10 +41,13 @@ export function VariantBand() {
         />{" "}
         <span className="ed-desk-only">
           {" "}
-          of <strong>{owner.title}</strong>. The live page isn't affected.
+          of <strong>{owner.title}</strong>. Live page unaffected.
         </span>
       </span>
       {error ? <span className="ed-variant-error">{error}</span> : null}
+      <button type="button" className="ed-btn ed-btn-sm ed-desk-only" title="Compare with the live page, side by side" onClick={() => void compareCurrentVariant()}>
+        Compare
+      </button>
       <button type="button" className="ed-btn ed-btn-sm" onClick={() => setPage(owner.id)}>
         Back<span className="ed-desk-only"> to {owner.title}</span>
       </button>

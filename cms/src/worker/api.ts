@@ -231,8 +231,22 @@ export async function historyPage(env: Env, url: URL): Promise<Response> {
   const prefix = `/preview/_version/${sha}`;
   const path = m[2].replace(/\/$/, "") || "/";
   if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: prefix + e.url })));
-  const page = site.pages.find((p) => p.slug === path && p.status !== "draft" && p.variantOf === undefined);
+  // Signed in, like /preview: draft pages show too (only variants never do).
+  const page = site.pages.find((p) => p.slug === path && p.variantOf === undefined);
   if (!page) return html("<!doctype html><meta charset=utf-8><title>Not in this version</title><p style='font:16px system-ui;padding:40px'>No page at this address in this version.</p>", 404);
   const tag = STAGING_TAG.replace("Staging preview", `Version ${sha.slice(0, 7)}`).replace("#8e44ff", "#444");
   return html(renderPage(site, page, { preview: { prefix }, assetVersion: sha.slice(0, 12) }).replace("</body>", `${tag}</body>`));
+}
+
+/** /preview/_live/<slug>: what is live now (the published content), for comparing. Behind the editor sign-in. */
+export async function livePage(env: Env, url: URL): Promise<Response> {
+  const parsed = validateSite(JSON.parse(await draftStub(env).getPublishedJson()));
+  if (!parsed.ok) return html("<!doctype html><meta charset=utf-8><title>Can't show the live site</title><p style='font:16px system-ui;padding:40px'>The live content couldn't be read.</p>", 502);
+  const site = parsed.site;
+  const prefix = "/preview/_live";
+  const path = url.pathname.slice(prefix.length).replace(/\/$/, "") || "/";
+  if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: prefix + e.url })));
+  const page = site.pages.find((p) => p.slug === path && p.variantOf === undefined);
+  if (!page) return html("<!doctype html><meta charset=utf-8><title>Not live</title><p style='font:16px system-ui;padding:40px'>This page isn't on the live site yet.</p>", 404);
+  return html(renderPage(site, page, { preview: { prefix }, assetVersion: "live" }));
 }
