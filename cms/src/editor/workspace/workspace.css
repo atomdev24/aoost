@@ -135,6 +135,13 @@
   position: relative;
   flex: none;
 }
+/* Each island is its own layer (will-change), so a menu can't rise above a later island on its
+   own: on a phone the tools row wraps under the page list and covered its first pages. The island
+   whose menu is open goes on top. */
+.ed-island:has(.ed-menu),
+.ed-island:has([aria-expanded="true"]) {
+  z-index: 5;
+}
 .ed-switcher-btn {
   height: 32px;
   padding: 0 10px;
@@ -2753,12 +2760,12 @@ button.ed-card {
   pointer-events: none;
   transition: opacity 300ms ease;
 }
+/* The page's last picture, shown as it is while the live page loads (it's a sharp copy of the
+   page, so the frame looks ready at once; the live page fades in over it). */
 .bd-cover img {
   display: block;
   width: 100%;
   height: auto;
-  opacity: 0.55;
-  filter: grayscale(0.35);
 }
 .bd-cover.is-done {
   opacity: 0;
@@ -2783,6 +2790,18 @@ button.ed-card {
   color: var(--ed-text);
   font: 500 12px var(--ed-font);
   pointer-events: none;
+  /* Only for waits long enough to notice: a chip that flashes for a moment reads as slow. */
+  animation: bd-chip-in 180ms ease 400ms both;
+}
+@keyframes bd-chip-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
 }
 .ed-start {
   position: absolute;

@@ -45,6 +45,21 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Stress test and polish pass (`.probe/audit.mjs`: every main flow in real Chrome, input-to-paint
+  times, long frames with source, errors, screenshots; desktop and phone):
+  - Still pictures cost far less: images copied at the size shown, Latin fonts only, no file
+    encoding (that step alone froze the editor 1.2 s), and no retake when nothing changed. Worst
+    capture freeze ~0.1 s (was 1.2 s). They also feed the loading pictures; the old capture is gone.
+  - First selection no longer freezes (~170 ms → ~20 ms): the panels' symbols are drawn once,
+    out of sight, in idle time after opening (the first lookup of fonts for them was the cost).
+  - Linked selection marks the selected block instead of rewriting a style sheet in every frame.
+  - Undo/redo from a field: ⌘Z in the inspector/panels is the editor's undo (a second ⌘Z used to
+    put the typing back), and redo reaches the canvas with the block still selected (it didn't).
+  - Phone: the page list opened under the wrapped tools row (Home and Work unreachable).
+  - Loading pictures show at full strength (sharp now); "Loading latest…" only after 0.4 s.
+  - Report box has room for a few lines.
+  - Test servers never publish (password sign-in or localhost answer 403): a stress-test run
+    published a test heading to the live homepage for ~14 minutes before it was restored (PR #32).
 - Still pictures on the board: frames you aren't editing, and every frame while zooming or
   panning, show a sharp picture of their page instead of the live page; the edited frame fades
   back to live when the board stops. Site animations are paused on the board. On Alex's M1 (all

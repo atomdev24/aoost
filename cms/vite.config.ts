@@ -27,7 +27,7 @@ function serviceWorker(): Plugin {
 export default defineConfig({
   base: "/admin/",
   plugins: [react(), serviceWorker()],
-  build: { outDir: "dist/admin", emptyOutDir: true },
+  build: { outDir: "dist/admin", emptyOutDir: true, sourcemap: process.env.SOURCEMAP === "1" },
   server: {
     proxy: {
       "/api": "http://localhost:8787",

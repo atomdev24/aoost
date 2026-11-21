@@ -28,8 +28,8 @@ test.describe("still pictures on the board", () => {
     // The picture is the page: same size as its frame.
     const fits = await page.evaluate(() => {
       const f = document.querySelector<HTMLElement>('.bd-frame[data-bp="mobile"]')!;
-      const img = f.querySelector<HTMLImageElement>(".bd-still img")!;
-      return Math.abs(img.naturalWidth - 390) <= 1 && img.complete;
+      const c = f.querySelector<HTMLCanvasElement>(".bd-still canvas")!;
+      return Math.abs(c.width - 390) <= 1;
     });
     expect(fits).toBe(true);
     const bd = (await page.locator(".bd").boundingBox())!;
@@ -64,9 +64,10 @@ test.describe("still pictures on the board", () => {
 
   test("an edit brings a fresh picture", async ({ page, request }) => {
     await expect.poll(() => state(page), { timeout: 20_000 }).toEqual({ "desktop*": "live", mobile: "still" });
-    const src = () => page.locator('.bd-frame[data-bp="mobile"] .bd-still img').getAttribute("src");
-    const before = await src();
+    // Mark the current picture; a fresh one is a different canvas.
+    await page.evaluate(() => ((document.querySelector('.bd-frame[data-bp="mobile"] .bd-still canvas') as HTMLCanvasElement & { old?: boolean }).old = true));
+    const fresh = () => page.evaluate(() => !(document.querySelector('.bd-frame[data-bp="mobile"] .bd-still canvas') as (HTMLCanvasElement & { old?: boolean }) | null)?.old);
     await mcpCall(request, password!, "add_section", { page: "sample", kind: "grid", name: "Fresh", index: 0, layout: { columns: 1 }, nodes: [{ type: "Text", content: { text: "A brand new line" } }] });
-    await expect.poll(src, { timeout: 15_000 }).not.toBe(before);
+    await expect.poll(fresh, { timeout: 15_000 }).toBe(true);
   });
 });

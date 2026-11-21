@@ -43,7 +43,12 @@ export function PuckSync() {
       const page = currentPage(getState());
       if (page === last) return;
       last = page;
-      if (page === fromPuck) return;
+      // The echo of a canvas edit: Puck shows it already. Used once: redo brings back that very
+      // page object later, and that one must reach the canvas (it was skipped, so redo didn't show).
+      if (page === fromPuck) {
+        fromPuck = null;
+        return;
+      }
       const puck = getPuck();
       const shown = puckToPage(puck.appState.data as unknown as PuckData, page);
       if (!deepEqual(shown.sections, page.sections)) {

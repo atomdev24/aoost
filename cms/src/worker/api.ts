@@ -12,6 +12,8 @@ import { buildStatus, publishToGitHub } from "./publish";
 const CONNECTOR_FRESH_MS = 15 * 60_000;
 
 /** /api/editor/*: every route here is already authenticated. */
+const isLocalHost = (host: string) => host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host.endsWith(".localhost");
+
 export async function editorApi(request: Request, env: Env, url: URL, who: Identity): Promise<Response> {
   if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
   const draft = draftStub(env);
@@ -33,6 +35,11 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       return result.ok ? json(result) : error(500, "The published content is invalid.", { issues: result.issues });
     }
     case "POST /publish": {
+      // A test server never publishes, whatever credentials it has: a test run once clicked
+      // Publish on one and changed the live homepage. Test servers sign in with the password
+      // (production uses Cloudflare Access), and wrangler dev reports the real domain, so the
+      // sign-in mode is the reliable sign. ALLOW_LOCAL_PUBLISH=1 lifts it deliberately.
+      if ((env.AUTH_MODE === "password" || isLocalHost(url.hostname)) && env.ALLOW_LOCAL_PUBLISH !== "1") return error(403, "Publishing is off on a local test server.");
       if (!env.GITHUB_TOKEN) return error(503, "Publishing needs GITHUB_TOKEN. See BLOCKERS.md.");
       const body = await readJson<{ message?: string }>(request);
       // Bring in any newer deploy first; publish only a draft that is based on what is live.
