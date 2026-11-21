@@ -1,4 +1,5 @@
-import type { CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { clearLayout } from "../runtime/table.js";
 import { z } from "zod";
 import { ResponsiveFrameFit, ResponsiveItemSize } from "../../../schema";
 import { defineComponent } from "../../types";
@@ -6,6 +7,66 @@ import { Block, Head, LineArt } from "../Block";
 import { shownSlots } from "../frames";
 import { aoostKit, matBand } from "../kit";
 import { css } from "./AoostProjects.styles";
+
+/** The editor's table: the pieces where the site puts them (same layout, same screen width), not draggable here. */
+function EditingTable({ shown }: { shown: { image?: string; title?: string; sticker?: boolean }[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const key = shown.map((p) => p.image).join("|");
+  useEffect(() => {
+    const table = ref.current;
+    const win = table?.ownerDocument.defaultView;
+    if (!table || !win) return;
+    let frame = 0;
+    const arrange = () => {
+      win.cancelAnimationFrame(frame);
+      frame = win.requestAnimationFrame(() => {
+        const pieces = [...table.querySelectorAll<HTMLElement>(":scope > .piece")];
+        if (!pieces.length || !table.clientWidth) return;
+        const aspects = pieces.map((p) => {
+          const img = p.querySelector("img");
+          return img && img.naturalWidth ? img.naturalHeight / img.naturalWidth : 1.25;
+        });
+        const scales = pieces.map((p) => {
+          const v = win.getComputedStyle(p).scale;
+          return v && v !== "none" ? Number(v.split(" ")[0]) || 1 : 1;
+        });
+        const L = clearLayout(table.clientWidth, aspects, scales);
+        table.classList.remove("ao-static");
+        table.style.height = `${L.H}px`;
+        pieces.forEach((p, i) => {
+          const it = L.items[i]!;
+          p.style.width = `${L.pw}px`;
+          p.style.transform = `translate(${it.x}px,${it.y}px) rotate(${it.rot}deg)`;
+          p.style.zIndex = String(i + 1);
+        });
+      });
+    };
+    arrange();
+    const imgs = [...table.querySelectorAll("img")];
+    imgs.forEach((i) => i.addEventListener("load", arrange));
+    const ro = new win.ResizeObserver(arrange);
+    ro.observe(table);
+    // A size set in the editor changes the pieces' scale: lay out again so they stay clear.
+    const mo = new win.MutationObserver(arrange);
+    mo.observe(table.ownerDocument.head, { childList: true, subtree: true, characterData: true });
+    return () => {
+      win.cancelAnimationFrame(frame);
+      imgs.forEach((i) => i.removeEventListener("load", arrange));
+      ro.disconnect();
+      mo.disconnect();
+    };
+  }, [key]);
+  return (
+    <div className="table ao-static" id="table" ref={ref}>
+      {shown.map((p, i) => (
+        <div key={i} className={p.sticker ? "piece stk" : "piece"}>
+          <span className="tape" />
+          <img src={p.image} alt={p.title ?? ""} draggable={false} />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export const AoostProject = z.object({
   /** The artwork. Any shape; about 1600px on the long edge. */
@@ -115,17 +176,13 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
           </Head>
           <div className="table-wrap">
             {content.note.show ? <div className="sticky table-note" aria-hidden="true" data-note="0" data-note-style={content.note.style === "plain" ? "plain" : undefined} /> : null}
-            {/* On the site the script lays the pieces out and makes them draggable. The editor shows them as a simple grid. */}
-            <div className={ctx.editing ? "table ao-static" : "table"} id="table">
-              {ctx.editing
-                ? shown.map((p, i) => (
-                    <div key={i} className={p.sticker ? "piece stk" : "piece"}>
-                      <span className="tape" />
-                      <img src={p.image} alt={p.title ?? ""} draggable={false} />
-                    </div>
-                  ))
-                : null}
-            </div>
+            {/* On the site the script lays the pieces out and makes them draggable. The editor lays them
+                out with the same code (runtime/table.js), so its frames show the table as the site does. */}
+            {ctx.editing ? (
+              <EditingTable shown={shown} />
+            ) : (
+              <div className="table" id="table" />
+            )}
             {(content.fixtures ?? [])
               .filter((f) => f.image && !f.hidden)
               .map((f, i) => (

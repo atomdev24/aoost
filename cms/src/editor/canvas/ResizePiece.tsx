@@ -84,15 +84,14 @@ function measure(t: PieceTarget): Geo | null {
   const piece = slot && block ? block.querySelector<HTMLElement>(slot.box!) : null;
   const parent = piece?.offsetParent as HTMLElement | null;
   if (!piece || !parent) return null;
-  const pr = parent.getBoundingClientRect();
-  const x = pr.left + parent.clientLeft + piece.offsetLeft;
-  const y = pr.top + parent.clientTop + piece.offsetTop;
+  // The centre of the piece as drawn: turning and scaling keep it, moving (a transform) doesn't.
+  const r = piece.getBoundingClientRect();
   const raw = piece.ownerDocument.defaultView!.getComputedStyle(piece).scale;
   const s = raw && raw !== "none" ? Number(raw.split(" ")[0]) || 1 : 1;
   const w = piece.offsetWidth * s;
   const h = piece.offsetHeight * s;
-  const cx = x + piece.offsetWidth / 2;
-  const cy = y + piece.offsetHeight / 2;
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
   const { view: v } = getBoard();
   const o = frameOrigin(getState().bp);
   return { x: (o.x + cx - w / 2) * v.zoom + v.x, y: (o.y + cy - h / 2) * v.zoom + v.y, w: w * v.zoom, h: h * v.zoom };

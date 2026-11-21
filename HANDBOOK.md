@@ -191,6 +191,14 @@ down), `profile.mjs` (CPU profile mapped to source; build with `SOURCEMAP=1`), `
   1644 → 1583 KB. The palette and shortcuts sheet stay in the start-up file (⌘K then typing at once
   lost letters when the palette loaded late).
 
+**Projects table** (homepage, `components/aoost/runtime/table.js`): the site's script and the
+editor's frames lay the pieces out with the same code, so the Desktop frame shows the table as the
+site does at that width (the editor used to show a plain grid there). Pieces never sit on each
+other: the first layout places them one at a time, each at its spot or the nearest clear one (the
+table grows taller when they can't all fit, as on narrow phones), and a piece put down on another
+stays where it was put while the ones in its way slide clear. "Clear" is judged on the paper with
+an 8 px gap, so shadows may still overlap. Resize handles find a piece by its drawn box.
+
 **Board layer hint**: `.bd-world` gets `will-change: transform` only while the board moves
 (`is-moving` / `is-interacting`). Left on, Chrome kept the pages at the detail they were first
 drawn at; after zooming in then out, four long pages overran the graphics memory and pieces of the
