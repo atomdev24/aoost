@@ -264,8 +264,14 @@
               {
                 "image": "/media/2026/aoost-copper-ring-transparent-wide-1-35rq.png",
                 "x": 98,
-                "y": 22,
-                "width": 91
+                "y": 16,
+                "width": 53
+              },
+              {
+                "image": "/media/2026/aoost-journal-transparent-wide-2vq7.png",
+                "x": 96,
+                "y": 37,
+                "width": 332
               }
             ],
             "viewer": false
