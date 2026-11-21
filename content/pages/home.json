@@ -76,7 +76,8 @@
             "dotGrid": true,
             "dotSeconds": 3.4,
             "reelBar": false,
-            "reelViewer": false
+            "reelViewer": false,
+            "artPan": "rtl"
           },
           "style": {
             "base": {},
