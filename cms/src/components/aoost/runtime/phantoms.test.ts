@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { _test } from "./phantoms.js";
 
-const { plan, reach, ease, RATES } = _test;
+const { plan, reach, ease, curve, at, RATES } = _test;
 
 describe("simulated visitors", () => {
   it("eases like a hand: starts and ends still, halfway at the middle", () => {
     expect(ease(0)).toBe(0);
     expect(ease(1)).toBe(1);
-    expect(ease(0.5)).toBeCloseTo(0.5, 5);
-    expect(ease(0.1)).toBeLessThan(0.1);
+    // brisk start, longer landing: past halfway by the middle
+    expect(ease(0.5)).toBeGreaterThan(0.5);
+    expect(ease(0.5)).toBeLessThan(0.75);
   });
 
   it("takes longer for longer reaches, but not in proportion", () => {
@@ -16,6 +17,23 @@ describe("simulated visitors", () => {
     const long = (reach(800) + reach(800) + reach(800)) / 3;
     expect(long).toBeGreaterThan(short);
     expect(long).toBeLessThan(short * 4);
+    // quick: a 300px reach well under a second
+    expect(reach(300)).toBeLessThan(0.75);
+  });
+
+  it("reaches take different shapes: some nearly straight, some arcing more or less, both ways", () => {
+    const bows = [];
+    for (let i = 0; i < 300; i++) {
+      const s = curve({ x: 0, y: 0 }, { x: 400, y: 0 }, 0.4, { pace: 1, arc: 0.15, side: 1 });
+      const mid = at(s, 0.5, 0);
+      expect(at(s, 0, 0).x).toBeCloseTo(0, 0);
+      expect(at(s, 1, 0).x).toBeCloseTo(400, 0);
+      bows.push(mid.y);
+    }
+    const straight = bows.filter((b) => Math.abs(b) < 8).length, deep = bows.filter((b) => Math.abs(b) > 30).length;
+    expect(straight).toBeGreaterThan(30);
+    expect(deep).toBeGreaterThan(30);
+    expect(bows.some((b) => b > 10) && bows.some((b) => b < -10)).toBe(true);
   });
 
   it("turns steps into timed moves and rests that end where they were sent", () => {
