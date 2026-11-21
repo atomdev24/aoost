@@ -141,7 +141,7 @@
   },
   "nav": {
     "style": "pill",
-    "logoText": "aoost",
+    "logoText": "",
     "showLogoMark": true,
     "hideOnScroll": true,
     "currentMarker": "pill",
