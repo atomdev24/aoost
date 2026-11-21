@@ -21,6 +21,21 @@ async function quiet(page: Page) {
 /** The second project that is shown on the table (hidden pieces aren't on it). */
 const secondShown = (projects: { hidden?: boolean }[]) => projects.filter((p) => !p.hidden)[1]!;
 
+/** The live content may have the viewer switched off (21 Nov); these tests turn it on in the draft and use the preview. */
+async function withViewer(page: Page, request: import("@playwright/test").APIRequestContext, change?: (projects: { hidden?: boolean }[]) => void) {
+  await resetDraft(request, password!);
+  const site = await draftSite(request, password!);
+  const home = site.pages.find((p: { id: string }) => p.id === "home");
+  for (const s of home.sections)
+    for (const n of s.children) {
+      if (n.type === "AoostProjects") { n.content.viewer = true; change?.(n.content.projects); }
+      if (n.type === "AoostHero") n.content.reelViewer = true;
+    }
+  const res = await request.post("/api/editor/ops", { headers: bearer(password!), data: { ops: [{ op: "putPage", page: home }] } });
+  expect(res.ok()).toBe(true);
+  await signIn(page, password!);
+}
+
 async function openPiece(page: Page, n: number) {
   const piece = page.locator(`.table>.piece:nth-child(${n})`);
   await expect(piece.locator("img")).toHaveJSProperty("complete", true);
@@ -32,9 +47,15 @@ async function openPiece(page: Page, n: number) {
 test.describe("artwork viewer: the dark room", () => {
   test.beforeEach(async ({ page }) => quiet(page));
 
-  test("opens a piece, → goes to the next, no plaque without plaque text, Esc closes", async ({ page }) => {
+  test.afterAll(async ({ request }) => {
+    if (password) await resetDraft(request, password);
+  });
+
+  test("opens a piece, → goes to the next, no plaque without plaque text, Esc closes", async ({ page, request }) => {
+    test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
+    await withViewer(page, request);
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/");
+    await page.goto("/preview/");
     const total = await page.locator(".table>.piece").count();
     expect(total).toBeGreaterThan(1);
     await openPiece(page, 1);
@@ -58,9 +79,11 @@ test.describe("artwork viewer: the dark room", () => {
     await expect(page.locator("#viewer")).toBeHidden();
   });
 
-  test("tapping a piece opens it too, and the arrows turn", async ({ page }) => {
+  test("tapping a piece opens it too, and the arrows turn", async ({ page, request }) => {
+    test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
+    await withViewer(page, request);
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto("/preview/");
     const piece = page.locator(".table>.piece:nth-child(3)");
     await piece.scrollIntoViewIfNeeded();
     await expect(piece.locator("img")).toHaveJSProperty("complete", true);
@@ -77,13 +100,7 @@ test.describe("artwork viewer: the dark room", () => {
     test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
 
     test.beforeEach(async ({ page, request }) => {
-      await resetDraft(request, password!);
-      const site = await draftSite(request, password!);
-      const home = site.pages.find((p: { id: string }) => p.id === "home");
-      for (const s of home.sections) for (const n of s.children) if (n.type === "AoostProjects") Object.assign(secondShown(n.content.projects), { title: "Blue monkey", medium: "Ink", year: "2025", note: "Drawn on the train home." });
-      const res = await request.post("/api/editor/ops", { headers: bearer(password!), data: { ops: [{ op: "putPage", page: home }] } });
-      expect(res.ok()).toBe(true);
-      await signIn(page, password!);
+      await withViewer(page, request, (projects) => Object.assign(secondShown(projects), { title: "Blue monkey", medium: "Ink", year: "2025", note: "Drawn on the train home." }));
     });
     test.afterAll(async ({ request }) => {
       await resetDraft(request, password!);

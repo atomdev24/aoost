@@ -108,7 +108,13 @@ test.describe("homepage in the editor", () => {
     await page.getByRole("button", { name: "Hide Skills on mobile" }).click();
     await expect(page.locator(".ed-savedot")).toHaveAttribute("data-state", "saved");
 
-    // The draft, rendered like the live site
+    // The draft, rendered like the live site (with the viewer on, which the live content may have off)
+    {
+      const site = await draftSite(request, password!);
+      const home = site.pages.find((p: { id: string }) => p.id === "home");
+      for (const sec of home.sections) for (const n of sec.children) if (n.type === "AoostProjects") n.content.viewer = true;
+      expect((await request.post("/api/editor/ops", { headers: bearer(password!), data: { ops: [{ op: "putPage", page: home }] } })).ok()).toBe(true);
+    }
     await page.goto("/preview/");
     await expect(page.locator("#table .piece")).toHaveCount(visibleProjects().length);
     expect(await page.locator(".ao-b").evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.ao)).then((a) => a.slice(0, 4))).toEqual(["hero", "projects", "tools", "journals"]);

@@ -62,6 +62,9 @@ test.describe("resizable project pieces", () => {
     const box = page.getByTestId("piece-box");
     await expect(box).toBeVisible();
     await expect(page.locator(".ed-piece-tag")).toContainText("100% · Mobile");
+    // The live content may already have its own phone-only changes; the drag adds one.
+    const scope = page.locator(".ed-scope");
+    const changesBefore = (await scope.count()) ? Number(/(\d+) change/.exec((await scope.first().textContent()) ?? "")?.[1] ?? 0) : 0;
     const before = (await box.boundingBox())!;
     const neighbour = (await editable(page).locator(".table>.piece:nth-child(3)").boundingBox())!;
 
@@ -91,7 +94,7 @@ test.describe("resizable project pieces", () => {
     const field = page.locator(".ed-sizefield.is-over:visible");
     await expect(field).toBeVisible();
     await expect(field.getByRole("textbox", { name: "Size" })).toHaveValue(String(Math.round(size.base.scale * 100)));
-    await expect(page.locator(".ed-scope")).toContainText("1 change");
+    await expect(page.locator(".ed-scope")).toContainText(`${changesBefore + 1} change`);
 
     // One undo step takes the whole drag back.
     await page.getByRole("button", { name: "Undo" }).click();

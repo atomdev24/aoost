@@ -114,7 +114,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     `.ao .hero-rect.no-bar .hr-bar{display:none}\n.ao .hero-rect.no-viewer .hr-slide{cursor:default}\n` +
     // Parallax: the artwork drifts inside its frame (effects.ts sets --drift), enlarged so no edge shows.
     // (on the track, since each image's own transform is its framing).
-    `.ao .hero-rect.drifting .hr-track{transform:translate3d(0,var(--drift,0px),0) scale(1.12);will-change:transform}\n`,
+    `.ao .hero-rect.drifting .hr-track{transform:translate3d(0,var(--drift,0px),0) scale(var(--drift-scale,1));transform-origin:var(--drift-origin,50% 50%);will-change:transform}\n`,
   Render: ({ content, ctx }) => {
     const showTicker = content.showTicker !== false;
     const lines = tickerLines(content);

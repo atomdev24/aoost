@@ -18,6 +18,8 @@ import { kitBaseCss } from "./kit.base.styles";
 const bridgeCss = `
 html:has(.ao.wrap){scroll-behavior:auto;scroll-padding-top:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 main.ao.wrap{overflow:visible}
+html:has(.ao.wrap){overflow-x:clip}
+body:has(.ao.wrap){overflow-x:clip}
 .ao{--display:"Lexend",ui-sans-serif,system-ui,sans-serif}
 .ao [hidden]{display:none!important}
 .ao svg,.ao video,.ao iframe,.ao canvas{max-width:none}

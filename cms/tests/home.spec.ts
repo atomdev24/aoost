@@ -76,12 +76,15 @@ test.describe("homepage: the original page, from aoost blocks", () => {
     await expect(page.locator("#lbList li").first().locator(".n")).toHaveText("01");
   });
 
-  test("tapping the reel or a project opens the viewer; dragging a piece moves it instead", async ({ page }) => {
+  test("tapping the reel or a project opens the viewer (when switched on); dragging a piece moves it instead", async ({ page }) => {
     await home(page);
-    await page.locator("#reel .hr-slide").first().click();
-    await expect(page.locator("#viewer")).toBeVisible();
-    await expect(page.locator("#vStage img")).toHaveAttribute("src", hero.reel[0].src);
-    await page.keyboard.press("Escape");
+    const reelViewer = hero.reelViewer !== false, pieceViewer = homeBlock("AoostProjects").viewer !== false; // switched off in the editor (21 Nov)
+    await page.locator("#reel .hr-slide").first().click({ force: true });
+    if (reelViewer) {
+      await expect(page.locator("#viewer")).toBeVisible();
+      await expect(page.locator("#vStage img")).toHaveAttribute("src", hero.reel[0].src);
+      await page.keyboard.press("Escape");
+    }
     await expect(page.locator("#viewer")).toBeHidden();
 
     const piece = page.locator("#table .piece").nth(1);
@@ -95,9 +98,14 @@ test.describe("homepage: the original page, from aoost blocks", () => {
     expect(await piece.evaluate((el) => el.style.transform)).not.toBe(before);
     await expect(page.locator("#viewer")).toBeHidden(); // a drag is not a tap
 
-    await page.locator("#table .piece").nth(2).click();
-    await expect(page.locator("#vStage img")).toHaveAttribute("src", visibleProjects()[2]!.image);
-    await page.locator("#vClose").click();
+    await page.locator("#table .piece").nth(2).click({ force: true });
+    if (pieceViewer) {
+      await expect(page.locator("#vStage img")).toHaveAttribute("src", visibleProjects()[2]!.image);
+      await page.locator("#vClose").click();
+    } else {
+      await page.waitForTimeout(400);
+      await expect(page.locator("#viewer")).toBeHidden();
+    }
     await expect(page.locator("#viewer")).toBeHidden();
   });
 
@@ -110,8 +118,10 @@ test.describe("homepage: the original page, from aoost blocks", () => {
       await page.locator("#keychain").dispatchEvent("click");
       await expect(page.locator("#keychain")).toHaveClass(/kick/);
     } else await expect(page.locator("#keychain")).toHaveCount(0); // switched off in the editor (21 Nov)
-    await expect(page.locator(".table-note")).toHaveAttribute("data-note-style", projects.note.style ?? "eye");
-    await expect(page.locator(".table-note canvas")).toHaveCount(projects.note.style === "plain" ? 0 : 1);
+    if (projects.note.show) {
+      await expect(page.locator(".table-note")).toHaveAttribute("data-note-style", projects.note.style ?? "eye");
+      await expect(page.locator(".table-note canvas")).toHaveCount(projects.note.style === "plain" ? 0 : 1);
+    } else await expect(page.locator(".table-note")).toHaveCount(0); // switched off in the editor (21 Nov)
     await expect(page.locator(".skills")).toBeVisible({ visible: !skillsHidden }); // hidden on the live site, kept for an About page later
   });
 
@@ -214,8 +224,7 @@ test.describe("homepage on a phone", () => {
 
   test("fits 390px, the game gets its thumb pad, and the sleeve sits above the tracklist and Spotify's player", async ({ page }) => {
     await home(page);
-    // A block sliding in (enter animation) pokes out for a moment; the body hides it, but measure once it has landed.
-    await page.waitForFunction(() => [...document.querySelectorAll("[data-enter].in")].every((e) => ["0px", "none", "0px 0px"].includes(getComputedStyle(e).translate)));
+    // A block sliding in (enter animation) must not widen the page, even mid-slide.
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     expect(await page.locator("#rodeo").evaluate((c) => c.getBoundingClientRect().height)).toBeGreaterThan(300); // includes the 112px thumb pad
     const [sleeve, list, player] = await Promise.all([".pl-rec:visible", ".pl-list:visible", ".pl-player"].map((s) => page.locator(s).boundingBox()));
