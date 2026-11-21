@@ -83,4 +83,23 @@ test.describe("pinch guard", () => {
     await cdp.send("Emulation.setPageScaleFactor", { pageScaleFactor: 1 });
     await expect(notice).toHaveCount(0);
   });
+
+  test("the board is only marked as moving while it moves, so Chrome redraws the pages at the right detail when it settles", async ({ page }) => {
+    await signIn(page, password!);
+    await page.goto("/admin/?page=home");
+    await page.waitForSelector(".bd-frame-active iframe");
+    const hint = () => page.locator(".bd-world").evaluate((e) => getComputedStyle(e).willChange);
+    expect(await hint()).toBe("auto");
+    const bd = (await page.locator(".bd").boundingBox())!;
+    await page.mouse.move(bd.x + bd.width / 2, bd.y + bd.height / 2);
+    await page.keyboard.down("Control");
+    const during: string[] = [];
+    for (let i = 0; i < 10; i++) {
+      await page.mouse.wheel(0, -10);
+      during.push(await hint());
+    }
+    await page.keyboard.up("Control");
+    expect(during).toContain("transform");
+    await expect.poll(hint, { timeout: 3000 }).toBe("auto");
+  });
 });

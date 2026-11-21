@@ -108,6 +108,12 @@ the screen flickered and the report dialog showed a smeared strip. So Chrome-bas
 start with solid panels (`editor/display.ts`); Safari keeps the glass; **Glass toolbars** in
 the "…" menu switches it either way, kept per browser.
 
+**Board layer hint**: `.bd-world` gets `will-change: transform` only while the board moves
+(`is-moving` / `is-interacting`). Left on, Chrome kept the pages at the detail they were first
+drawn at; after zooming in then out, four long pages overran the graphics memory and pieces of the
+previews dropped out even with the board still (`.probe/tiles.mjs`: 277 of 294 frames bad on
+Alex's M1, 0 after).
+
 **Pinch guard** (`editor/pinch-guard.ts`): a trackpad pinch reaches Chrome as ctrl + wheel and
 Safari as gesture events, and the browser zooms the whole page unless the page cancels them.
 The board only cancelled pinches on itself, so a pinch over the toolbars, rail, panels, zoom bar
