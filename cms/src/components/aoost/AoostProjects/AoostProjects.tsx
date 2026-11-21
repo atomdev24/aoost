@@ -106,6 +106,31 @@ export const AoostFixture = z.object({
   hidden: z.boolean().optional(),
 });
 
+/** Shadow presets: a shade layer (darkens, multiplied) and a sunlight layer (warms the lit patches). */
+export const SHADOWS = {
+  window: { shade: "/art/shadow-window-shade.webp", sun: "/art/shadow-window-sun.webp" },
+} as const;
+
+/**
+ * A shadow cast across the whole board, on top of everything (pieces, fixtures, keychain). It never takes clicks.
+ * Older content has none (off).
+ */
+export const AoostShadow = z.object({
+  show: z.boolean(),
+  style: z.enum(["window"]).optional(),
+  /** Your own shade image (transparent; dark where the shadow falls). Replaces the preset's shade. */
+  image: z.string().optional(),
+  /** How dark the shadow is, 0–100 (default 70). */
+  strength: z.number().min(0).max(100).optional(),
+  /** How warm the lit patches are, 0–100 (default 60). */
+  sun: z.number().min(0).max(100).optional(),
+  /** How big the shadow is, as a percentage of the board's width (default 110). */
+  scale: z.number().min(40).max(300).optional(),
+  /** Where it sits, as percentages across and down (default 50, 40). */
+  x: z.number().min(0).max(100).optional(),
+  y: z.number().min(0).max(100).optional(),
+});
+
 export const AoostProjectsContent = z.object({
   mat: z.enum(["none", "light", "dark"]),
   /** The line above the heading ("Alex · Cape Town"). */
@@ -125,6 +150,7 @@ export const AoostProjectsContent = z.object({
   fixtures: z.array(AoostFixture).optional(),
   /** Tapping a piece (without dragging it) opens it full screen in the viewer. Older content: on. */
   viewer: z.boolean().optional(),
+  shadow: AoostShadow.optional(),
 });
 export type AoostProjectsContent = z.infer<typeof AoostProjectsContent>;
 
@@ -138,7 +164,33 @@ const extraCss = `
 .ao .fixture{position:absolute;z-index:8;width:min(var(--fw,200px),36vw);height:auto;left:var(--fx,50%);top:var(--fy,50%);transform:translate(-50%,-50%) rotate(var(--fr,0deg)) scale(var(--fs,1));user-select:none;-webkit-user-select:none;-webkit-user-drag:none;touch-action:none;cursor:grab}
 .ao .fixture.lifted{--fs:1.06;cursor:grabbing;filter:drop-shadow(0 14px 12px rgba(20,21,22,.18))}
 .ao.editing .fixture,.ao .table.ao-static~.fixture{pointer-events:none}
+.ao .board-shadow{position:absolute;inset:0;z-index:70;pointer-events:none;overflow:hidden;border-radius:2px;container-type:size}
+.ao .board-shadow>i{position:absolute;inset:0;background-repeat:no-repeat;background-size:max(calc(var(--sh-s,110) * 1cqw),100cqh);background-position:var(--sh-x,50%) var(--sh-y,40%)}
+.ao .board-shadow .sh-shade{mix-blend-mode:multiply;opacity:var(--sh-k,.7)}
+.ao .board-shadow .sh-sun{mix-blend-mode:soft-light;opacity:var(--sh-w,.6)}
 `;
+
+function BoardShadow({ shadow }: { shadow?: z.infer<typeof AoostShadow> }) {
+  if (!shadow?.show) return null;
+  const preset = SHADOWS[shadow.style ?? "window"];
+  const shade = shadow.image || preset.shade;
+  const sun = shadow.image ? null : preset.sun;
+  const pct = (v: number | undefined, d: number) => `${Math.max(0, Math.min(100, v ?? d)) / 100}`;
+  const style = {
+    "--sh-k": pct(shadow.strength, 70),
+    "--sh-w": pct(shadow.sun, 60),
+    "--sh-s": `${shadow.scale ?? 110}`,
+    "--sh-x": `${shadow.x ?? 50}%`,
+    "--sh-y": `${shadow.y ?? 40}%`,
+  } as CSSProperties;
+  const url = (u: string) => `url('${u.replace(/'/g, "%27")}')`;
+  return (
+    <div className="board-shadow" aria-hidden="true" data-shadow={shadow.image ? "custom" : (shadow.style ?? "window")} style={style}>
+      <i className="sh-shade" style={{ backgroundImage: url(shade) }} />
+      {sun ? <i className="sh-sun" style={{ backgroundImage: url(sun) }} /> : null}
+    </div>
+  );
+}
 
 export const AoostProjects = defineComponent<AoostProjectsContent>({
   type: "AoostProjects",
@@ -213,6 +265,7 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
                 <img src={content.keychain.image} alt="" width="480" height="757" />
               </button>
             ) : null}
+            <BoardShadow shadow={content.shadow} />
           </div>
           <label className="btn add-art" htmlFor="addArt">
             Add artwork (preview only)
