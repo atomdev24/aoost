@@ -205,11 +205,11 @@ export function duplicatePage(site: Site, pageId: string): { site: Site; pageId:
 export function deletePage(site: Site, pageId: string): Site {
   const page = site.pages.find((p) => p.id === pageId);
   if (!page || page.isHome) return site;
-  const gone = site.pages.filter((p) => p.id === pageId || p.parentId === pageId);
+  const gone = site.pages.filter((p) => p.id === pageId || p.parentId === pageId || p.variantOf === pageId);
   const ids = new Set(gone.map((p) => p.id));
   const pages = site.pages.filter((p) => !ids.has(p.id));
   const items = mapNav(site.nav.items, (item) => (targetsPage(item, ids) ? null : item));
-  return { ...site, pages, nav: { ...site.nav, items }, redirects: withRedirects(site, pages, gone.map((p) => ({ from: p.slug, to: "/" }))) };
+  return { ...site, pages, nav: { ...site.nav, items }, redirects: withRedirects(site, pages, gone.filter((p) => p.variantOf === undefined).map((p) => ({ from: p.slug, to: "/" }))) };
 }
 
 /** Move a page up or down among its siblings in the pages list. */

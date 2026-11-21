@@ -11,7 +11,7 @@ export function outputPath(slug: string): string {
 }
 
 /** Pages that get built: published and unlisted. Drafts never leave the editor. */
-export const builtPages = (site: Site): Page[] => site.pages.filter((p) => p.status !== "draft");
+export const builtPages = (site: Site): Page[] => site.pages.filter((p) => p.status !== "draft" && p.variantOf === undefined);
 
 /** Search covers published pages, diary entries and artwork titles (SPEC §6). */
 export function searchIndex(site: Site): SearchEntry[] {
@@ -46,7 +46,7 @@ export function buildSite(site: Site, opts: RenderOptions = {}): Record<string, 
   files["404.html"] = renderNotFound(site, opts);
   files["_redirects"] = redirectsFile(site);
   files["search.json"] = JSON.stringify(searchIndex(site));
-  files["robots.txt"] = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\nDisallow: /preview\n${opts.siteUrl ? `Sitemap: ${opts.siteUrl.replace(/\/$/, "")}/sitemap.xml\n` : ""}`;
+  files["robots.txt"] = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\nDisallow: /preview\nDisallow: /staging\n${opts.siteUrl ? `Sitemap: ${opts.siteUrl.replace(/\/$/, "")}/sitemap.xml\n` : ""}`;
   if (opts.siteUrl) {
     const base = opts.siteUrl.replace(/\/$/, "");
     const urls = site.pages.filter((p) => p.status === "published").map((p) => `<url><loc>${base}${p.slug === "/" ? "/" : p.slug}</loc></url>`);

@@ -62,6 +62,25 @@ against `wrangler dev`).
   New deploys are merged into the draft so a stale draft can't undo them.
 - **Nothing outside a frame is on the site:** board references are stored per page in the
   DraftStore (`refs:<pageId>`), never in content, never published.
+- **Variants, staging and production** (`model/variants.ts`, `editor/workspace/staging.ts`):
+  - A variant is a copy of a page to try ideas on: a page with `variantOf` (its page's id),
+    `variantName` and `variantIds` (copied block id → the page's block id). It always stays a
+    draft, so it is never built, listed or linked on the site. Make one from the page switcher
+    ("New variant of …") or ⌘K. While one is on screen the frames turn purple and a band says
+    which variant of which page it is, with Back and **Elect to staging**.
+  - Electing puts the variant's content on its page (same id, address, title and nav place),
+    gives copied blocks their original ids back (so section links keep working and only real
+    edits count as changes) and removes the variant. Then the draft goes to staging.
+  - **Staging** is a frozen copy of the draft in the DraftStore (`stg:f:`, `stg:b:`, `stg:meta`)
+    with a share link, `/staging/<token>/…`, that anyone can open without signing in, rendered
+    exactly like the site with a small "Staging preview" tag (noindex, not in robots). The token
+    stays the same across updates; "Empty staging" turns the link off. The Publish sheet shows
+    it: Copy link, Open, Empty staging, **Push to production**, and Send to/Update staging.
+  - **Push to production** publishes exactly what is in staging (not the draft as it is now),
+    through the same GitHub commit and rebuild as Publish, and refuses if the live site changed
+    since it was staged (send it again first). Publish still publishes the draft directly.
+  - Not yet: roles (anyone signed in can elect and push), compare with live before electing,
+    version history and restore (ROADMAP).
 
 ## 5. How to work on it
 

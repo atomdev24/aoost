@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { summarizeChanges, type ChangeSummary } from "../../model/changes";
 import { useEditor } from "../store";
-import { closeSheet, publish, usePublish, type Step } from "./publish";
+import { closeSheet, publish, pushStaging, usePublish, type Step } from "./publish";
+import { copyStagingLink, emptyStaging, sendToStaging, useStaging } from "./staging";
 import { resolveConflict, useSync } from "./sync";
 
 /** The unpublished changes, recounted shortly after edits settle. */
@@ -39,6 +40,10 @@ export function PublishSheet() {
   const syncBusy = useSync((s) => s.busy);
   const syncError = useSync((s) => s.error);
   const list = useMemo(() => changes?.pages ?? [], [changes]);
+  const staged = useStaging((s) => s.info);
+  const stagingBusy = useStaging((s) => s.busy);
+  const stagingError = useStaging((s) => s.error);
+  const copied = useStaging((s) => s.copied);
   useEffect(() => {
     if (!open) return;
     const key = (e: KeyboardEvent) => {
@@ -125,7 +130,39 @@ export function PublishSheet() {
         </p>
       ) : null}
       {note ? <p className="ed-hint">{note}</p> : null}
+      <section className="ed-staging" aria-label="Staging">
+        <header className="ed-staging-head">
+          <strong>Staging</strong>
+          <span className="ed-hint">{staged ? `${staged.label} · ${ago(staged.at)}` : "Empty. Send the draft here to share a link before it goes live."}</span>
+        </header>
+        {staged ? (
+          <>
+            <div className="ed-staging-link">
+              <input className="ed-input" readOnly value={staged.url} aria-label="Staging link" onFocus={(e) => e.currentTarget.select()} />
+              <button type="button" className="ed-btn ed-btn-sm" onClick={() => void copyStagingLink()}>
+                {copied ? "Copied" : "Copy link"}
+              </button>
+              <a className="ed-btn ed-btn-sm" href={staged.url} target="_blank" rel="noreferrer">
+                Open
+              </a>
+            </div>
+            <p className="ed-hint">Anyone with the link can see it, without signing in. Nothing is live until you push.</p>
+            <div className="ed-staging-actions">
+              <button type="button" className="ed-btn ed-btn-sm" disabled={stagingBusy || busy} onClick={() => void emptyStaging()}>
+                Empty staging
+              </button>
+              <button type="button" className="ed-btn ed-btn-sm ed-btn-variant" disabled={stagingBusy || busy} onClick={() => void pushStaging()}>
+                Push to production
+              </button>
+            </div>
+          </>
+        ) : null}
+        {stagingError ? <p className="ed-sheet-error">{stagingError}</p> : null}
+      </section>
       <footer className="ed-sheet-foot">
+        <button type="button" className="ed-btn ed-btn-sm" disabled={stagingBusy || busy} onClick={() => void sendToStaging()}>
+          {stagingBusy ? "Sending…" : staged ? "Update staging" : "Send to staging"}
+        </button>
         {failed ? (
           <button type="button" className="ed-btn ed-btn-accent ed-btn-sm" onClick={() => void publish()}>
             Retry
@@ -138,4 +175,12 @@ export function PublishSheet() {
       </footer>
     </section>
   );
+}
+
+function ago(at: number): string {
+  const s = Math.max(0, Math.round((Date.now() - at) / 1000));
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.round(s / 60)} min ago`;
+  if (s < 86400) return `${Math.round(s / 3600)} h ago`;
+  return new Date(at).toLocaleDateString();
 }

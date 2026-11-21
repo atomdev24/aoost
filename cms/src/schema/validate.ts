@@ -53,6 +53,12 @@ export function validateSite(input: unknown): { ok: true; site: Site } | { ok: f
         issues.push({ path: `pages.${p.id}.slug`, message: "a sub-page URL must sit under its parent" });
     }
     if (p.isHome && p.slug !== "/") issues.push({ path: `pages.${p.id}.slug`, message: "the home page lives at /" });
+    if (p.variantOf !== undefined) {
+      const of = pageIds.get(p.variantOf);
+      if (!of) issues.push({ path: `pages.${p.id}.variantOf`, message: "the page this is a variant of does not exist" });
+      else if (of.variantOf !== undefined) issues.push({ path: `pages.${p.id}.variantOf`, message: "a variant can't have variants" });
+      if (p.status !== "draft" || p.isHome) issues.push({ path: `pages.${p.id}.status`, message: "a variant stays a draft until it is elected" });
+    }
   }
   const homes = site.pages.filter((p) => p.isHome);
   if (homes.length !== 1) issues.push({ path: "pages", message: `expected exactly one home page, found ${homes.length}` });

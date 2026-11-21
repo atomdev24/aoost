@@ -83,6 +83,25 @@ function finishLive(note: string | null) {
   setTimeout(() => getPublish().phase === "live" && set({ phase: "idle" }), LIVE_MS);
 }
 
+/** Push to production: publish exactly what is in staging (not the draft as it is now). */
+export async function pushStaging() {
+  if (state.phase === "github" || state.phase === "rebuilding") return;
+  set({ phase: "github", failed: null, error: null, note: null });
+  try {
+    const result = await api.pushStaging();
+    void loadPublished();
+    if (!result.commit) {
+      set({ phase: "idle", note: "Staging matched what is live: nothing new to push." });
+      return;
+    }
+    set({ phase: "rebuilding" });
+    void watchRebuild(result.commit);
+  } catch (e) {
+    set({ phase: "error", failed: "github", error: e instanceof ApiError || e instanceof Error ? e.message : "Pushing to production failed.", sheet: true });
+    noteProblem("publish", `Push to production failed: ${e instanceof Error ? e.message : "unknown"}`);
+  }
+}
+
 export async function publish() {
   if (state.phase === "github" || state.phase === "rebuilding") return;
   set({ phase: "github", failed: null, error: null, note: null });

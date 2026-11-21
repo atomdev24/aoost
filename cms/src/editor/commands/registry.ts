@@ -45,6 +45,10 @@ export const ACTION_IDS = [
   "publish.sheet",
   "publish.now",
   "page.preview",
+  "variant.new",
+  "variant.elect",
+  "staging.send",
+  "staging.push",
   "claude.ask",
 ] as const;
 export type ActionId = (typeof ACTION_IDS)[number];
@@ -113,6 +117,10 @@ export const ACTIONS: ActionMeta[] = [
   { id: "publish.sheet", title: "Open the publish sheet", group: "History and publishing", keywords: "changes review" },
   { id: "publish.now", title: "Publish", group: "History and publishing", keywords: "go live deploy release", common: true },
   { id: "page.preview", title: "Preview this page", group: "History and publishing", keywords: "open view", common: true },
+  { id: "variant.new", title: "New variant of this page", group: "History and publishing", keywords: "version copy try idea alternative a/b" },
+  { id: "variant.elect", title: "Elect this variant to staging", group: "History and publishing", keywords: "variant choose promote stage" },
+  { id: "staging.send", title: "Send the draft to staging", group: "History and publishing", keywords: "stage share link preview review" },
+  { id: "staging.push", title: "Push staging to production", group: "History and publishing", keywords: "go live publish staging" },
   { id: "claude.ask", title: "Ask Claude", group: "Palette and help", hidden: true },
 ];
 

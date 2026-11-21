@@ -9,7 +9,9 @@ import { deleteBlock, duplicateBlock, moveBlock, toggleBlockHidden } from "../ca
 import { adjustable, isAdjusting, startAdjust } from "../canvas/AdjustImage";
 import { openQuickInsert } from "../insert/QuickInsert";
 import { currentPage, flush, getState, megaItemId, redo, undo, updatePage } from "../store";
-import { openSheet, publish } from "../workspace/publish";
+import { openSheet, publish, pushStaging } from "../workspace/publish";
+import { newVariant } from "../workspace/PageSwitcher";
+import { electCurrentVariant, getStaging, sendToStaging } from "../workspace/staging";
 import { togglePanel } from "../workspace/rail-store";
 import { openPalette, toggleCheatSheet, togglePalette } from "./palette-store";
 import { isTouchOnly } from "../touch/device";
@@ -125,6 +127,10 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
   "publish.sheet": openSheet,
   "publish.now": () => void publish(),
   "page.preview": () => void previewPage(),
+  "variant.new": () => newVariant(),
+  "variant.elect": () => void electCurrentVariant(),
+  "staging.send": () => void sendToStaging().then((ok) => ok && openSheet()),
+  "staging.push": () => void (getStaging().info ? pushStaging() : sendToStaging().then((ok) => ok && openSheet())),
   "claude.ask": openPalette,
 };
 

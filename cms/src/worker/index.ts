@@ -1,5 +1,5 @@
 import { authenticate, login, logout } from "./auth";
-import { editorApi, preview } from "./api";
+import { editorApi, preview, staging } from "./api";
 import { draftStub, type Env } from "./env";
 import { error, html, json } from "./http";
 import { loginPage } from "./login-page";
@@ -19,7 +19,7 @@ export default {
       }
     }
     // Public pages and files go straight to the static site (no sign-in work on every visit).
-    if (!/^\/(admin|api|mcp|media|preview|_published\.json)(\/|$)/.test(new URL(request.url).pathname)) return env.ASSETS.fetch(request);
+    if (!/^\/(admin|api|mcp|media|preview|staging|_published\.json)(\/|$)/.test(new URL(request.url).pathname)) return env.ASSETS.fetch(request);
     const url = new URL(request.url);
     const path = url.pathname;
     try {
@@ -41,6 +41,8 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
   if (path === "/_published.json") return new Response("Not found", { status: 404 });
 
   if (path.startsWith("/media/")) return serveMedia(request, env, url);
+  // A staging share link: public on purpose (like a Framer staging link); the long random token is the key.
+  if (path === "/staging" || path.startsWith("/staging/")) return staging(env, url);
 
   const who = await authenticate(request, env);
 

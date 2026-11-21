@@ -2,7 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import "../components/registry";
 import { deepEqual, getAt, mergeFiles, pathLabel, serialize, setAt, type PathSeg } from "../model/merge";
 import { applyOps, diffSite, type Op } from "../model/ops";
-import type { ClientMessage, EditorContext, ServerMessage, SyncInfo } from "../model/protocol";
+import type { ClientMessage, EditorContext, ServerMessage, StagingMeta, SyncInfo } from "../model/protocol";
 import { filesToSite, siteToFiles, validateSite, type Breakpoint, type ContentFiles, type Issue, type Site } from "../schema";
 import type { Env } from "./env";
 import { cleanRefs, type RefItem } from "../model/refs";
@@ -41,6 +41,10 @@ const CONFLICTS = "conflicts";
 /** A newer deploy that couldn't be merged (the result was invalid), until Alex chooses what to do. */
 const BLOCKED = "syncBlocked";
 const SYNCED_AT = "syncedAt";
+/** Staging: a frozen copy of the draft to share and then push to production (files, the base they were built on, and meta). */
+const STG_FILE = "stg:f:";
+const STG_BASE = "stg:b:";
+const STG_META = "stg:meta";
 /** How often requests check for a newer deploy (publish always checks). */
 const SYNC_EVERY_MS = 5000;
 
@@ -339,9 +343,69 @@ export class DraftStore extends DurableObject<Env> {
     return JSON.stringify(filesToSite(await this.published()));
   }
 
-  /** Record that the current draft is now what is published. */
-  async markPublished() {
+  // ------------------------------------------------------------- staging
+
+  /** Freeze the draft as it is now into staging; keeps the share link if there is one. */
+  async stage(label: string, by: string): Promise<StagingMeta> {
     const files = siteToFiles(await this.load());
+    const base = await this.base();
+    const old = await this.ctx.storage.get<StagingMeta>(STG_META);
+    await this.clearStagingFiles();
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    const token = old?.token ?? btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    const meta: StagingMeta = { token, at: Date.now(), label: label.slice(0, 120), by, baseFp: (await this.ctx.storage.get<string>(BASE_FP)) ?? (await fingerprint(base)) };
+    const puts: Record<string, unknown> = { [STG_META]: meta };
+    for (const [path, body] of Object.entries(files)) puts[STG_FILE + path] = body;
+    for (const [path, body] of Object.entries(base)) puts[STG_BASE + path] = body;
+    // storage.put takes at most 128 keys at once.
+    const entries = Object.entries(puts);
+    for (let i = 0; i < entries.length; i += 100) await this.ctx.storage.put(Object.fromEntries(entries.slice(i, i + 100)));
+    this.broadcast({ type: "staging", meta });
+    return meta;
+  }
+
+  private async clearStagingFiles() {
+    const keys = [...(await this.ctx.storage.list({ prefix: STG_FILE })).keys(), ...(await this.ctx.storage.list({ prefix: STG_BASE })).keys()];
+    for (let i = 0; i < keys.length; i += 100) await this.ctx.storage.delete(keys.slice(i, i + 100));
+  }
+
+  async getStaging(): Promise<StagingMeta | null> {
+    return (await this.ctx.storage.get<StagingMeta>(STG_META)) ?? null;
+  }
+
+  /** The staged site as JSON text, for the share link (null when the token doesn't match). */
+  async getStagedSiteJson(token: string): Promise<string | null> {
+    const meta = await this.getStaging();
+    if (!meta?.at || meta.token !== token) return null;
+    return JSON.stringify(filesToSite(await this.stagedFiles(STG_FILE)));
+  }
+
+  private async stagedFiles(prefix: string): Promise<ContentFiles> {
+    const files: ContentFiles = {};
+    for (const [key, value] of await this.ctx.storage.list<string>({ prefix })) files[key.slice(prefix.length)] = value;
+    return files;
+  }
+
+  /** What Push to production publishes, and whether the live site moved on since it was staged. */
+  async getStagedForPush(): Promise<{ files: ContentFiles; base: ContentFiles; liveMoved: boolean } | null> {
+    const meta = await this.getStaging();
+    if (!meta?.at) return null;
+    const baseFp = (await this.ctx.storage.get<string>(BASE_FP)) ?? "";
+    return { files: await this.stagedFiles(STG_FILE), base: await this.stagedFiles(STG_BASE), liveMoved: baseFp !== meta.baseFp };
+  }
+
+  /** Empty staging. Keeps the share link's token unless `forget` (a new link next time). */
+  async clearStaging(forget = false) {
+    await this.clearStagingFiles();
+    const meta = await this.getStaging();
+    if (forget || !meta) await this.ctx.storage.delete(STG_META);
+    else await this.ctx.storage.put(STG_META, { ...meta, at: 0, label: "" });
+    this.broadcast({ type: "staging", meta: null });
+  }
+
+  /** Record that the current draft (or the given files, from staging) is now what is published. */
+  async markPublished(published?: ContentFiles) {
+    const files = published ?? siteToFiles(await this.load());
     const old = await this.ctx.storage.list<string>({ prefix: PUB });
     if (old.size) await this.ctx.storage.delete([...old.keys()]);
     await this.ctx.storage.put(Object.fromEntries(Object.entries(files).map(([path, body]) => [PUB + path, body])));
