@@ -47,6 +47,14 @@ export const fields: Fields<AoostHeroContent> = {
   },
   dotSeconds: { type: "number", label: "Dot board: seconds per line", min: 2.4, max: 30, step: 0.5 },
   dotGrid: onOff("Dot board: faint dot grid behind"),
+  dotLook: {
+    type: "radio",
+    label: "Dot board: look",
+    options: [
+      { label: "Flat", value: "flat" },
+      { label: "Glass", value: "glass" },
+    ],
+  },
   dotEffect: {
     type: "radio",
     label: "Dot board: how lines appear",

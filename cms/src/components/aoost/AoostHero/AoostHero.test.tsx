@@ -87,5 +87,8 @@ describe("AoostHero", () => {
     expect(html).toContain('data-idle-speed="0.3"');
     expect(html).toContain('data-text-size="55"');
     expect(renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotEffect: "resolve" })).toContain('data-effect="resolve"');
+    const glass = renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotLook: "glass" });
+    expect(glass).toContain('class="ticker dots glass"');
+    expect(glass).toContain('data-look="glass"');
   });
 });
