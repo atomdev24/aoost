@@ -108,6 +108,17 @@ the screen flickered and the report dialog showed a smeared strip. So Chrome-bas
 start with solid panels (`editor/display.ts`); Safari keeps the glass; **Glass toolbars** in
 the "…" menu switches it either way, kept per browser.
 
+**Still pictures on the board** (`board/stills.ts`, `board/FrameStill.tsx`): four live pages
+scaled on every zoom step were the root of the board's flicker (dropped pieces, a page lagging its
+frame by a step, thin lines shimmering). Each frame keeps a picture of its own live page (copied
+from the frame: pieces placed, current edits, fonts and images embedded, drawn through an SVG onto a
+canvas at design size). The board shows the picture for every frame while it moves and for frames
+you aren't editing; the edited frame fades back to live ~0.2 s after it stops. A click on a picture
+is forwarded to the page under it (same block gets picked). Pictures are retaken 1.2 s after edits,
+frame loads or height changes, never while the board moves (one capture blocks ~0.1 s). The site's
+own animations are paused in the board's frames (`stillMotion`); Preview and the site still move.
+`.probe/tiles.mjs` and `.probe/stills.mjs` measure it in real Chrome.
+
 **Board layer hint**: `.bd-world` gets `will-change: transform` only while the board moves
 (`is-moving` / `is-interacting`). Left on, Chrome kept the pages at the detail they were first
 drawn at; after zooming in then out, four long pages overran the graphics memory and pieces of the
@@ -126,7 +137,7 @@ recorder and report context log the browser's pinch zoom.
 **Start-up guard**: an inline script in `index.html` reloads once (and notes it) if a build file
 fails to load or nothing draws in 15 s, then offers a Reload button; `editor/load-guard.ts` does
 the same for on-demand parts and for an editor drawn without its toolbars. The service worker
-serves the editor page network-first (cache only when offline or after 4 s), so a refresh after
+serves the editor page network-first (cache only when offline, never just because the network is slow), so a refresh after
 a deploy always gets the new build; build files are kept across one deploy in
 `aoost-editor-assets`.
 

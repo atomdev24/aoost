@@ -9,6 +9,8 @@ import { currentPage, getState, useEditor } from "../store";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { activateBreakpoint } from "./bridge";
 import { LiveFrame } from "./LiveFrame";
+import { FrameStill } from "./FrameStill";
+import { startStills } from "./stills";
 import { countOverrides } from "./overrides";
 import { frameRects, getBoard, openPage, panBy, resetFramePositions, setFrameHidden, setFramePosition, setHeight, setInteracting, setSize, toggleFrameHidden, useBoard, visibleFrameRects } from "./store";
 import { FRAME_GAP, isVisible, shortLabels, slotRect } from "./viewport";
@@ -86,6 +88,7 @@ export function Board() {
   const ready = useBoard((s) => s.ready);
   const loading = hold || frames.some((f) => !ready[f.bp] && (f.bp === bp || !size.w || isVisible(view, f, size.w, size.h)));
   useEffect(() => watchSnapshots(), []);
+  useEffect(() => startStills(), []);
 
   useLayoutEffect(() => openPage(pageId), [pageId]);
 
@@ -216,6 +219,7 @@ export function Board() {
         {/* Puck's editable frame. It stays the same element (moving an iframe reloads it) and slides to the active slot. */}
         <div className="bd-frame bd-frame-active" data-bp={bp} style={{ left: active.x, top: active.y, width: active.w, height: active.h, display: hidden[bp] ? "none" : undefined }}>
           <Puck.Preview />
+          <FrameStill bp={bp} pageId={pageId} active />
           <LoadingCover bp={bp} pageId={pageId} slug={page.slug} ready={ready[bp] && !hold} />
         </div>
         {frames
@@ -224,6 +228,7 @@ export function Board() {
             <div key={f.bp} className="bd-frame" data-bp={f.bp} style={{ left: f.x, top: f.y, width: f.w, height: f.h }}>
               {/* A screen of margin, so a frame panned back into view is already drawn (it used to blank, then pop in). */}
               <LiveFrame bp={f.bp} visible={!size.w || isVisible(view, f, size.w, size.h, Math.max(size.w, size.h))} />
+              <FrameStill bp={f.bp} pageId={pageId} active={false} />
               <LoadingCover bp={f.bp} pageId={pageId} slug={page.slug} ready={ready[f.bp] && !hold} />
             </div>
           ))}

@@ -45,6 +45,11 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Still pictures on the board: frames you aren't editing, and every frame while zooming or
+  panning, show a sharp picture of their page instead of the live page; the edited frame fades
+  back to live when the board stops. Site animations are paused on the board. On Alex's M1 (all
+  four frames, 90% page zoom): no dropped pieces, same smoothness. Trade-off: edits reach the other
+  frames ~1–2 s later. The editor page is now only served from the offline cache when offline.
 - Blank and black blocks in the page previews (even with the board still): the board kept a
   "will move" hint all the time, so Chrome held the pages at full detail after zooming out and ran
   out of graphics memory. The hint is now only on while the board moves (probe: 277/294 bad
