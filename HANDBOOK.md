@@ -112,8 +112,11 @@ against `wrangler dev`).
   (`viewer`). Older content: all on.
 - **Parallax.** The drift is a `transform`, so it adds to an enter animation (which animates
   `translate`) instead of cancelling it. A block can name the part that drifts with
-  `data-parallax-inner`: the hero's artwork drifts inside its frame (track enlarged 12%, at most
-  5.5% of the frame's height either way) and starts still when it's on the first screen.
+  `data-parallax-inner`: the hero's artwork moves at the Parallax amount × the scroll speed
+  (positive lags, negative runs ahead) inside its frame. It's enlarged by 45% of the amount
+  (0.45 → 1.2×) from the side the drift won't uncover, and starts still on the first screen.
+- **No sideways overflow.** `html` and `body` clip horizontally (`overflow-x:clip`), so a block
+  sliding in from the side can't widen the page on phones.
 - **Frame stills and canvases.** `captureFrame` (board/stills.ts) turns canvases into pictures
   before pairing the copy's images with the page's; those pictures are marked
   `data-from-canvas` and left out of the pairing, or every image after a canvas shifts by one.
