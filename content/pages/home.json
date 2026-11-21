@@ -60,17 +60,23 @@
             "reelSeconds": 5.2,
             "ticker": [
               {
+                "text": "Welcome",
+                "mode": "both"
+              },
+              {
                 "text": "",
                 "mode": "both"
               }
             ],
-            "tickerTopScore": true,
+            "tickerTopScore": false,
             "tickerVisitors": true,
             "lateMode": false,
             "showTicker": true,
             "tickerStyle": "dots",
             "dotGrid": true,
-            "dotSeconds": 2.9
+            "dotSeconds": 2.9,
+            "reelBar": false,
+            "reelViewer": false
           },
           "style": {
             "base": {},
@@ -116,17 +122,27 @@
                 "image": "/art/storefront.png"
               },
               {
-                "image": "/art/hear-no-evil-3d.png"
+                "image": "/art/hear-no-evil-3d.png",
+                "sticker": false
               },
               {
                 "image": "/art/flower-skull.png"
               },
               {
-                "image": "/art/hear-no-evil-ring.png"
+                "image": "/art/hear-no-evil-ring.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.9
+                  }
+                },
+                "sticker": false
               }
             ],
             "note": {
-              "show": true,
+              "show": false,
               "style": "plain"
             },
             "keychain": {
@@ -162,7 +178,8 @@
                 "y": 100,
                 "width": 243
               }
-            ]
+            ],
+            "viewer": false
           },
           "style": {
             "base": {}
