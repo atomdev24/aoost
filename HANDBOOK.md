@@ -115,6 +115,11 @@ against `wrangler dev`).
   `data-parallax-inner`: the hero's artwork moves at the Parallax amount × the scroll speed
   (positive lags, negative runs ahead) inside its frame. It's enlarged by 45% of the amount
   (0.45 → 1.2×) from the side the drift won't uncover, and starts still on the first screen.
+- **Artwork pan (hero).** "Artwork pan": off / right to left / left to right, with seconds per
+  pass and distance (% of width). Pure CSS: each reel image is enlarged (`scale`) and glides
+  (`translate`, alternating), on top of its own framing transform. No scroll needed; it plays from
+  load. Marked `data-motion="keep"`, so it keeps playing in the editor's frames, where other site
+  motion is paused (frame-css.ts).
 - **No sideways overflow.** `html` and `body` clip horizontally (`overflow-x:clip`), so a block
   sliding in from the side can't widen the page on phones.
 - **Frame stills and canvases.** `captureFrame` (board/stills.ts) turns canvases into pictures

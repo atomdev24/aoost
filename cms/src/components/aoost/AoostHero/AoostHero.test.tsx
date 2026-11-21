@@ -73,4 +73,10 @@ describe("AoostHero", () => {
     const html = renderNode("AoostHero", { ...d, reelBar: false, reelViewer: false });
     expect(html).toContain('class="hero-rect focus-sec no-bar no-viewer"');
   });
+  it("pans the artwork across on its own when asked", () => {
+    const html = renderNode("AoostHero", { ...d, artPan: "rtl", artPanSeconds: 10, artPanDistance: 10 });
+    expect(html).toContain('class="hero-rect focus-sec pan" style="--pan-a:5%;--pan-b:-5%;--pan-s:1.11;--pan-t:10s"');
+    expect(html).toContain('data-motion="keep"');
+    expect(renderNode("AoostHero", d)).not.toContain(" pan\"");
+  });
 });
