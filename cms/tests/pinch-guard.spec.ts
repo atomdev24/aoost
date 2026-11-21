@@ -52,7 +52,7 @@ test.describe("pinch guard", () => {
     expect(result.prevented).toBeGreaterThan(50);
   });
 
-  test("if the browser's own zoom is on anyway, a notice says how to undo it, in view and at normal size", async ({ page }) => {
+  test("if the browser's own zoom is on anyway, a notice says how to undo it, and a pinch goes to the browser so pinching out works", async ({ page }) => {
     await signIn(page, password!);
     await page.goto("/admin/?page=home");
     await page.waitForSelector(".ed-island-right");
@@ -68,6 +68,18 @@ test.describe("pinch guard", () => {
       return r.top >= v.offsetTop - 1 && r.bottom <= v.offsetTop + v.height + 1 && r.left >= v.offsetLeft - 1 && r.right <= v.offsetLeft + v.width + 1;
     });
     expect(inView).toBe(true);
+    // While zoomed, a pinch belongs to the browser (so pinching out undoes it): not cancelled, board untouched.
+    const zoomText = await page.locator(".bd-zoombar").innerText();
+    const passed = await page.evaluate(() => {
+      const e = new WheelEvent("wheel", { ctrlKey: true, deltaY: 20, bubbles: true, cancelable: true });
+      document.querySelector(".ed-island-right")!.dispatchEvent(e);
+      const b = new WheelEvent("wheel", { ctrlKey: true, deltaY: 20, bubbles: true, cancelable: true, clientX: 600, clientY: 500 });
+      document.querySelector(".bd")!.dispatchEvent(b);
+      return !e.defaultPrevented && !b.defaultPrevented;
+    });
+    expect(passed).toBe(true);
+    await page.waitForTimeout(300);
+    expect(await page.locator(".bd-zoombar").innerText()).toBe(zoomText);
     await cdp.send("Emulation.setPageScaleFactor", { pageScaleFactor: 1 });
     await expect(notice).toHaveCount(0);
   });

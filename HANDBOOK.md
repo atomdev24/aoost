@@ -113,7 +113,8 @@ Safari as gesture events, and the browser zooms the whole page unless the page c
 The board only cancelled pinches on itself, so a pinch over the toolbars, rail, panels, zoom bar
 or a dialog zoomed the page and pushed the toolbars out of sight ("toolbars disappeared"). The
 guard cancels every pinch on the editor window and each frame (without stopping it, so the board
-still zooms). If the page is zoomed anyway, `BrowserZoomNotice` says to pinch out, and the
+still zooms), except while the browser's own zoom is already on: then a pinch goes to the
+browser, so pinching out undoes it. If the page is zoomed anyway, `BrowserZoomNotice` says to pinch out, and the
 recorder and report context log the browser's pinch zoom.
 
 **Start-up guard**: an inline script in `index.html` reloads once (and notes it) if a build file
