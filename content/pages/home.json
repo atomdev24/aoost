@@ -149,6 +149,14 @@
                     "panX": 0,
                     "panY": 0
                   }
+                },
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.55
+                  }
                 }
               },
               {
