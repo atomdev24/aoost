@@ -4,7 +4,7 @@ import { cacheable, cacheRule } from "./sw-rules";
  * The editor's service worker: lets the home-screen app open offline.
  * The shell (the page itself) always comes from the network first, so a
  * refresh after a deploy loads the new build; the cached copy is only used
- * when the network is down or very slow. Build files are cached for good
+ * when the network is down. Build files are cached for good
  * (their names change with each build) in one cache that outlives a deploy,
  * so a tab that is still running the old build can finish loading its parts.
  * Nothing else is touched: API, draft and publish requests always go
@@ -23,8 +23,7 @@ const CACHE = `aoost-editor-${__BUILD__}`;
 /** Build files from this and earlier deploys; trimmed to the newest MAX_ASSETS. */
 const ASSETS = "aoost-editor-assets";
 const MAX_ASSETS = 400;
-/** How long the shell may take from the network before the cached copy is used. */
-const SHELL_WAIT_MS = 4000;
+
 const SHELL = "/admin/";
 
 sw.addEventListener("install", (e) => {
@@ -63,36 +62,18 @@ async function fromNetwork(req: Request, key: Request | string, cache = CACHE): 
   return res;
 }
 
-/** Network first; the cached copy only if the network fails or takes longer than SHELL_WAIT_MS. */
-function networkFirst(req: Request, key: Request | string): Promise<Response> {
-  const fresh = fromNetwork(req, key);
-  return new Promise<Response>((resolve, reject) => {
-    let done = false;
-    const fallback = () =>
-      caches.match(key).then((hit) => {
-        if (done) return;
-        if (hit) {
-          done = true;
-          resolve(hit);
-        }
-      });
-    const timer = setTimeout(() => void fallback(), SHELL_WAIT_MS);
-    fresh.then(
-      (res) => {
-        clearTimeout(timer);
-        if (!done) {
-          done = true;
-          resolve(res);
-        }
-      },
-      () => {
-        clearTimeout(timer);
-        void fallback().then(() => {
-          if (!done) reject(new Error("offline and nothing cached"));
-        });
-      },
-    );
-  });
+/**
+ * Network first; the cached copy only when the network fails (offline). A slow network still
+ * waits for the live page: falling back on slowness could open an older build of the editor.
+ */
+async function networkFirst(req: Request, key: Request | string): Promise<Response> {
+  try {
+    return await fromNetwork(req, key);
+  } catch (err) {
+    const hit = await caches.match(key);
+    if (hit) return hit;
+    throw err;
+  }
 }
 
 sw.addEventListener("fetch", (e) => {

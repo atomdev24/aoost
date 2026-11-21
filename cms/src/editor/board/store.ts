@@ -68,6 +68,8 @@ const subscribe = (l: () => void) => {
   return () => void listeners.delete(l);
 };
 export const getBoard = () => state;
+/** Listen to every board change (outside React). */
+export const subscribeBoard = subscribe;
 export function useBoard<T>(selector: (s: BoardState) => T): T {
   return useSyncExternalStore(subscribe, () => selector(state));
 }

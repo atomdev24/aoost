@@ -7,7 +7,7 @@ import { BREAKPOINT_LABEL, type Breakpoint, type Page, type Site } from "../../s
 import { currentPage, megaItemId, useEditor } from "../store";
 import { activateBreakpoint } from "./bridge";
 import { pieceFromClick, selectPiece } from "../canvas/ResizePiece";
-import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT } from "./frame-css";
+import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT, stillMotion } from "./frame-css";
 import { attachKeys } from "./keys";
 import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
 import { onBoardWheel } from "./wheel";
@@ -112,6 +112,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     const detach = attachKeys(doc);
     const unwatch = watchWindow(doc.defaultView!, `${bp} frame`);
     const unguard = guardPinch(doc.defaultView);
+    const unstill = stillMotion(doc);
     const wheel = (e: WheelEvent) => {
       const { view } = getBoard();
       const o = frameOrigin(bp);
@@ -148,6 +149,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
       detach();
       unwatch();
       unguard();
+      unstill();
       detachTouch();
       doc.removeEventListener("wheel", wheel);
       doc.removeEventListener("click", click, true);
