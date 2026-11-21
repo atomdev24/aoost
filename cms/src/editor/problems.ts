@@ -32,7 +32,7 @@ export function editorContext(): Record<string, string | number | boolean | null
     selected: s.selection.length,
     browser: `${browser} ${version}`.trim(),
     os: /Mac OS X/.test(ua) ? "macOS" : /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iOS" : /Windows/.test(ua) ? "Windows" : "Other",
-    window: `${innerWidth}×${innerHeight}@${devicePixelRatio}`,
+    window: `${innerWidth}×${innerHeight}@${devicePixelRatio}${(window.visualViewport?.scale ?? 1) > 1.01 ? ` pinch ${Math.round(window.visualViewport!.scale * 100)}%` : ""}`,
     build: (document.querySelector<HTMLScriptElement>('script[type="module"][src*="/assets/"]')?.src.split("/").pop() ?? "").slice(0, 40),
   };
 }

@@ -9,6 +9,7 @@ import { onBoardWheel } from "./wheel";
 import { attachFrameGestures } from "../touch/gestures";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { watchWindow } from "../problems";
+import { guardPinch } from "../pinch-guard";
 
 /**
  * Runs inside Puck's editable frame (Puck's `iframe` override): loads the
@@ -36,6 +37,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     const detachDrops = attachCanvasDrops(doc);
     const detachPieces = attachPieceSelect(doc);
     const unwatch = watchWindow(doc.defaultView!, "editable frame");
+    const unguard = guardPinch(doc.defaultView);
     const wheel = (e: WheelEvent) => {
       const { view } = getBoard();
       const o = frameOrigin(getState().bp);
@@ -71,6 +73,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       detachDrops();
       detachPieces();
       unwatch();
+      unguard();
       detachTouch();
       doc.removeEventListener("wheel", wheel);
       doc.removeEventListener("pointerdown", closeUnpinnedFlyout, true);

@@ -108,6 +108,14 @@ the screen flickered and the report dialog showed a smeared strip. So Chrome-bas
 start with solid panels (`editor/display.ts`); Safari keeps the glass; **Glass toolbars** in
 the "…" menu switches it either way, kept per browser.
 
+**Pinch guard** (`editor/pinch-guard.ts`): a trackpad pinch reaches Chrome as ctrl + wheel and
+Safari as gesture events, and the browser zooms the whole page unless the page cancels them.
+The board only cancelled pinches on itself, so a pinch over the toolbars, rail, panels, zoom bar
+or a dialog zoomed the page and pushed the toolbars out of sight ("toolbars disappeared"). The
+guard cancels every pinch on the editor window and each frame (without stopping it, so the board
+still zooms). If the page is zoomed anyway, `BrowserZoomNotice` says to pinch out, and the
+recorder and report context log the browser's pinch zoom.
+
 **Start-up guard**: an inline script in `index.html` reloads once (and notes it) if a build file
 fails to load or nothing draws in 15 s, then offers a Reload button; `editor/load-guard.ts` does
 the same for on-demand parts and for an editor drawn without its toolbars. The service worker

@@ -142,6 +142,13 @@ export function startFlightRecorder(vanished?: (what: string) => void) {
     } else push(`window ${innerWidth}×${innerHeight}`);
   });
   document.addEventListener("visibilitychange", () => push(`tab ${document.visibilityState}`));
+  // The browser's own pinch zoom (it hides the toolbars by magnifying the whole page).
+  let pinch = Math.round((window.visualViewport?.scale ?? 1) * 100);
+  window.visualViewport?.addEventListener("resize", () => {
+    const now = Math.round((window.visualViewport?.scale ?? 1) * 100);
+    if (now !== pinch) push(`browser pinch zoom ${pinch}% → ${now}%`);
+    pinch = now;
+  });
 }
 
 let gpuName = "";
@@ -164,5 +171,5 @@ export function flightSnapshot(): string {
   const panels = Object.entries(PANELS)
     .map(([name, sel]) => `${name}: ${describe(document.querySelector(sel))}`)
     .join(", ");
-  return [`Last 60 s (${gpu()}, pixel ratio ${devicePixelRatio}, glass ${document.documentElement.classList.contains("ed-no-glass") ? "off" : "on"}):`, ...lines.slice(-220), `Now: ${panels}`].join("\n");
+  return [`Last 60 s (${gpu()}, pixel ratio ${devicePixelRatio}, browser pinch zoom ${Math.round((window.visualViewport?.scale ?? 1) * 100)}%, glass ${document.documentElement.classList.contains("ed-no-glass") ? "off" : "on"}):`, ...lines.slice(-220), `Now: ${panels}`].join("\n");
 }
