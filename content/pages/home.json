@@ -86,7 +86,7 @@
           },
           "effects": {
             "enter": "slide-left",
-            "parallax": -0.45
+            "parallax": 0.4
           }
         }
       ]
@@ -221,7 +221,7 @@
                 "width": 243
               },
               {
-                "image": "/media/2026/aoost-sticky-stack-transparent-wide-bw6k.png",
+                "image": "/media/2026/aoost-sticky-stack-transparent-wide-1-bd0p.png",
                 "x": 98,
                 "y": 6,
                 "width": 200
