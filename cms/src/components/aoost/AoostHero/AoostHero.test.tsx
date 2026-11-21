@@ -52,4 +52,21 @@ describe("AoostHero", () => {
     expect(html).toContain('id="reel"');
     expect(tickerLines({ ...d, showTicker: false })).toEqual([]);
   });
+
+  it("draws a dot board instead of the scrolling ticker when the strip style is dots", () => {
+    const html = renderNode("AoostHero", { ...d, tickerStyle: "dots", dotSeconds: 5, dotGrid: false });
+    expect(html).toContain('class="ticker dots"');
+    expect(html).toContain('data-seconds="5"');
+    expect(html).toContain('data-grid="off"');
+    expect(html).toContain('<canvas class="dm" aria-hidden="true"></canvas>');
+    expect(html).not.toContain("tk-track");
+    // The lines are still there for screen readers.
+    expect(html).toContain('aria-label="welcome. pick a playlist. beat the game, be the first on the board."');
+  });
+
+  it("keeps the scrolling ticker for content saved before the strip had a style", () => {
+    const html = renderNode("AoostHero", d);
+    expect(html).toContain("tk-track");
+    expect(html).not.toContain("ticker dots");
+  });
 });

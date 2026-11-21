@@ -45,6 +45,11 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Dot board: a second strip style for the hero. Each line appears as square dots that grow in
+  with a sweep, breathe while held and shrink away; long lines split into even frames. The
+  scrolling ticker stays the default; switch with Hero → Strip style. Also fixed the editor's
+  frame pictures pairing images wrongly after a canvas.
+
 - Projects table: the editor's frames lay the pieces out exactly as the site does (it showed a
   plain grid), and pieces never sit on top of each other: they are placed clear, and a piece put
   down on another pushes it out of the way.

@@ -171,6 +171,7 @@ export async function captureFrame(doc: Document): Promise<{ canvas: HTMLCanvasE
       const img = doc.createElement("img");
       img.src = canvases[i]!.toDataURL();
       img.className = c.className;
+      img.setAttribute("data-from-canvas", "");
       img.setAttribute("style", c.getAttribute("style") ?? "");
       c.replaceWith(img);
     } catch {
@@ -196,7 +197,8 @@ export async function captureFrame(doc: Document): Promise<{ canvas: HTMLCanvasE
   await Promise.all([...clone.querySelectorAll('[style*="url("]')].map(async (e) => e.setAttribute("style", await inlineUrls(e.getAttribute("style") ?? "", base))));
   const imgs = [...doc.querySelectorAll("img")];
   await Promise.all(
-    [...clone.querySelectorAll("img")].map(async (img, i) => {
+    // Pictures made from canvases above aren't in the page's own list, so they're left out of the pairing.
+    [...clone.querySelectorAll("img:not([data-from-canvas])")].map(async (img, i) => {
       const live = imgs[i];
       const src = live?.currentSrc || img.getAttribute("src");
       img.removeAttribute("srcset");
