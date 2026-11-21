@@ -52,6 +52,10 @@ export const AoostHeroContent = z.object({
   tickerTopScore: z.boolean(),
   /** Add "you're visitor #…", "last here…" and who is here now (counts visits in Supabase, shows ghost cursors). */
   tickerVisitors: z.boolean(),
+  /** Simulated visitors: now and then a cursor drifts through the page like someone browsing. Older content: off. */
+  phantoms: z.boolean().optional(),
+  /** How often simulated visitors turn up. */
+  phantomRate: z.enum(["rare", "sometimes", "often"]).optional(),
   /** After midnight in the clock's time zone the whole page goes dark. */
   lateMode: z.boolean(),
 });

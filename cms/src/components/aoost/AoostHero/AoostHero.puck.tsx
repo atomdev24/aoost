@@ -47,6 +47,16 @@ export const fields: Fields<AoostHeroContent> = {
   },
   dotSeconds: { type: "number", label: "Dot board: seconds per line", min: 2.4, max: 30, step: 0.5 },
   dotGrid: onOff("Dot board: faint dot grid behind"),
+  phantoms: onOff("Simulated visitors (the odd cursor drifting through)"),
+  phantomRate: {
+    type: "radio",
+    label: "Simulated visitors: how often",
+    options: [
+      { label: "Rare", value: "rare" },
+      { label: "Sometimes", value: "sometimes" },
+      { label: "Often", value: "often" },
+    ],
+  },
   dotLook: {
     type: "radio",
     label: "Dot board: look",
