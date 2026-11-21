@@ -45,6 +45,10 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Projects table: the editor's frames lay the pieces out exactly as the site does (it showed a
+  plain grid), and pieces never sit on top of each other: they are placed clear, and a piece put
+  down on another pushes it out of the way.
+
 - Faster opening, phases 0 and 1: opening marks and `open.mjs`; a size budget that fails the
   build; panels, sheets and dialogs load after the board (idle and hover prefetch, retry); the
   draft is fetched alongside the script. Locally: board usable cold 1010 → 816 ms, warm 423 → 319 ms.

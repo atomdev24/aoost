@@ -2,6 +2,7 @@
 import { blockData, doodle, fit, PH, placeholderCanvas, reduce, rng, wrap } from './shared.js';
 import { openViewer } from './viewer.js';
 import { centreRange, clamp, rubber, turnedHalf } from './bounds.js';
+import { clearLayout, separate } from './table.js';
 
 export function initProjects(){
   const D=blockData('projects');if(!D)return;
@@ -27,16 +28,17 @@ export function initProjects(){
     if(item.src){const img=new Image();img.alt='';img.draggable=false;img.decoding='async';img.src=item.src;img.onload=()=>{st.a=img.naturalHeight/img.naturalWidth||1.25;layout(false);};el.appendChild(img);}
     else{el.appendChild(placeholderCanvas(item.ph,240));}
     table.appendChild(el);els.push(st);bindDrag(st);return st;}
+  /* a piece's size on this screen (the editor's per-size "size" is a CSS scale) */
+  const scaleOf=el=>{const v=getComputedStyle(el).scale;return v&&v!=='none'?(+v.split(' ')[0]||1):1;};
+  /* the layout is shared with the editor's frames (table.js), so the editor shows the same table */
   function layout(animate){const W=table.clientWidth,n=els.length;if(!n)return;
-    const cols=W<560?(n<=2?1:n<=6?2:n<=12?3:4):(n<=4?n:n<=8?4:n<=15?5:6);
-    const cellW=W/cols, pw=Math.min(240,cellW*(n<=2?.7:.84)), rows=Math.ceil(n/cols);
-    const rowH=els.reduce((m,s)=>Math.max(m,pw*s.a+12),0)*0.86;
-    const H=Math.max(W<560?Math.min(640,W*1.2):600, rows*rowH+60); table.style.height=H+'px';
-    const r=rng(7+n);
-    els.forEach((st,i)=>{const col=i%cols,row=Math.floor(i/cols),ph=pw*st.a+12;st.el.style.width=pw+'px';
-      const cx=col*cellW+(cellW-pw)/2,cy=24+row*((H-48-ph)/Math.max(1,rows-1||1));
-      st.x=Math.max(6,Math.min(W-pw-6,cx+(r()-.5)*cellW*.18));st.y=Math.max(14,Math.min(H-ph-6,(rows===1?(H-ph)/2:cy)+(r()-.5)*28));st.rot=(r()-.5)*12;
-      settle(st,pw,ph);st.el.style.transition=animate&&!reduce?'transform .6s cubic-bezier(.2,.8,.2,1), box-shadow .2s':'box-shadow .2s';place(st);st.el.style.zIndex=i+1;});}
+    const L=clearLayout(W,els.map(s=>s.a),els.map(s=>scaleOf(s.el)));table.style.height=L.H+'px';
+    els.forEach((st,i)=>{const it=L.items[i];st.el.style.width=L.pw+'px';st.x=it.x;st.y=it.y;st.rot=it.rot;
+      st.el.style.transition=animate&&!reduce?'transform .6s cubic-bezier(.2,.8,.2,1), box-shadow .2s':'box-shadow .2s';place(st);st.el.style.zIndex=i+1;});}
+  /* put down on (or near) another piece: the others shift until every piece is clear */
+  function makeRoom(st){const i=els.indexOf(st),W=table.clientWidth,H=table.clientHeight;
+    const res=separate(els.map(s=>({x:s.x,y:s.y,rot:s.rot,w:s.el.offsetWidth,h:s.el.offsetHeight,s:scaleOf(s.el)})),W,H,{pinned:i});
+    res.forEach((b,k)=>{if(k===i||!b.moved)return;const o=els[k];o.x=b.x;o.y=b.y;o.el.style.transition=reduce?'none':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(o);});}
   /* the range a piece's centre may take so all of it (turned) stays on the table */
   function range(st,rot,w,h){w=w??st.el.offsetWidth;h=h??st.el.offsetHeight;const{hx,hy}=turnedHalf(w,h,rot);return{w,h,...centreRange(table.clientWidth,table.clientHeight,hx,hy)};}
   /* move a piece to the nearest spot where it's fully on the table; true if it had to move */
@@ -49,7 +51,7 @@ export function initProjects(){
       const r=range(st,st.rot);st.x=rubber(ox+dx+r.w/2,r.x0,r.x1)-r.w/2;st.y=rubber(oy+dy+r.h/2,r.y0,r.y1)-r.h/2;place(st);});
     const up=e=>{if(e.pointerId!==id)return;id=null;el.classList.remove('lifted');st.rot=(Math.random()-.5)*8;
       /* let go off the edge: it springs back to where it's fully on the table */
-      const back=settle(st);el.style.transition=reduce?'none':back?'transform .55s cubic-bezier(.34,1.45,.5,1), box-shadow .2s':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);if(!moved)open(st);};
+      const back=settle(st);el.style.transition=reduce?'none':back?'transform .55s cubic-bezier(.34,1.45,.5,1), box-shadow .2s':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);if(moved)makeRoom(st);else open(st);};
     el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{moved=true;up(e);});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open(st);}});}
   /* the whole table is the room's sequence, starting from the piece tapped */
   function open(st){openViewer(els.map(s=>s.item),els.indexOf(st),st.el);}
