@@ -102,7 +102,11 @@ every change to a toolbar (removed, hidden, faded, off screen), window and pixel
 and the GPU name. A report, a freeze note and an automatic "Toolbars vanished" note all carry
 it. Reading it: if a toolbar changes in the record, the page really changed (a code bug); if
 the record shows the toolbars steady while the person saw them flicker, the browser's drawing
-dropped them (graphics; try **Glass toolbars** off in the "…" menu, kept per browser).
+dropped them (graphics). That is what Chrome does with the blurred "glass" panels: a real
+report (Chrome 157, M1, 90% page zoom) held 60 fps with every toolbar steady in the page while
+the screen flickered and the report dialog showed a smeared strip. So Chrome-based browsers
+start with solid panels (`editor/display.ts`); Safari keeps the glass; **Glass toolbars** in
+the "…" menu switches it either way, kept per browser.
 
 **Start-up guard**: an inline script in `index.html` reloads once (and notes it) if a build file
 fails to load or nothing draws in 15 s, then offers a Reload button; `editor/load-guard.ts` does

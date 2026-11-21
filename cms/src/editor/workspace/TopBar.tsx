@@ -243,7 +243,7 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
               type="button"
               role="menuitemcheckbox"
               aria-checked={glass}
-              title="The blurred see-through toolbars. Turn off if the toolbars flicker."
+              title="The blurred see-through toolbars. Off by default in Chrome, where the blur can flicker while zooming."
               onClick={() => setGlass(!glass)}
             >
               {glass ? "✓ " : ""}Glass toolbars
