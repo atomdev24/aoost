@@ -2,6 +2,7 @@
 import { blockData, C, DRAFT_PREVIEW, fit, IN_CLAUDE, monkey, orangeField, overlays, PH, pinkField, placeholderCanvas, reduce, sbHeaders, SCOREBOARD, skyField, TK } from './shared.js';
 import { openViewer } from './viewer.js';
 import { startDotBoard } from './dots.js';
+import { startPhantoms } from './phantoms.js';
 
 export function initHero(){
   const D=blockData('hero');if(!D)return;
@@ -96,4 +97,8 @@ export function initHero(){
         ch.send({type:'broadcast',event:'c',payload:{id:me,x:+(e.clientX/innerWidth).toFixed(4),y:+(e.pageY/document.documentElement.scrollHeight).toFixed(4)}});};
       addEventListener('pointermove',send,{passive:true});addEventListener('pointerdown',send,{passive:true});
     }catch(e){}};document.head.appendChild(s);}
+  /* simulated visitors: the odd cursor drifting through, like people browsing (?ghosts=demo shows them quickly) */
+  const demo=/[?&]ghosts=demo/.test(location.search);
+  if((D.phantoms||demo)&&!IN_CLAUDE&&!reduce){const pl=document.createElement('div');pl.className='ghosts';pl.setAttribute('aria-hidden','true');overlays().appendChild(pl);
+    startPhantoms(pl,demo?'demo':D.phantomRate||'sometimes');}
 }
