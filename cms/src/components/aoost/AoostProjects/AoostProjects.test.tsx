@@ -37,6 +37,21 @@ describe("AoostProjects", () => {
     expect(html).toContain('class="doodle cactus"');
     expect(html).toContain('class="doodle skull"');
   });
+  it("casts the board shadow on top only when it is on", () => {
+    expect(renderNode("AoostProjects", d)).not.toContain("board-shadow");
+    const html = renderNode("AoostProjects", { ...d, shadow: { show: true, style: "window", strength: 50, x: 30 } });
+    expect(html).toContain('class="board-shadow" aria-hidden="true" data-shadow="window"');
+    expect(html).toContain("--sh-k:0.5");
+    expect(html).toContain("--sh-x:30%");
+    expect(html).toContain("/art/shadow-window-shade.webp");
+    expect(html).toContain("/art/shadow-window-sun.webp");
+    // A custom shade replaces the preset, without the sunlight.
+    const own = renderNode("AoostProjects", { ...d, shadow: { show: true, image: "/art/blinds.png" } });
+    expect(own).toContain('data-shadow="custom"');
+    expect(own).toContain("/art/blinds.png");
+    expect(own).not.toContain("sh-sun");
+    expect(AoostProjectsContent.safeParse({ ...d, shadow: { show: true, strength: 150 } }).success).toBe(false);
+  });
   it("puts fixtures above the table and skips hidden ones", () => {
     const content = { ...d, fixtures: [{ image: "/art/clover-metal.png", x: 22, y: 30, width: 210, rotate: -8 }, { image: "/art/x.png", x: 50, y: 50, width: 100, hidden: true }] };
     expect(AoostProjectsContent.safeParse(content).success).toBe(true);
