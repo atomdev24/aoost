@@ -82,7 +82,8 @@
             "reelBar": false,
             "reelViewer": false,
             "artPan": "rtl",
-            "dotAfter": "wave"
+            "dotAfter": "wave",
+            "dotEffect": "resolve"
           },
           "style": {
             "base": {},
