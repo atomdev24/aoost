@@ -62,14 +62,14 @@ export const fields: Fields<AoostProjectsContent> = {
   },
   shadow: {
     type: "object",
-    label: "Shadow over the board (sits on top of everything)",
+    label: "Shadow over the section (sits on top of everything)",
     objectFields: {
       show: onOff("Show"),
       style: { type: "select", label: "Shadow", options: [{ label: "Window and plant", value: "window" }] },
       image: mediaField("Your own shadow (transparent PNG/WebP, dark where the shadow falls); replaces the preset", "image"),
       strength: { type: "number", label: "Darkness (0–100, default 70)", min: 0, max: 100 },
       sun: { type: "number", label: "Warm light in the window (0–100, default 60)", min: 0, max: 100 },
-      scale: { type: "number", label: "Size (% of the board's width, default 110)", min: 40, max: 300 },
+      scale: { type: "number", label: "Size (% of the screen's width, default 110)", min: 40, max: 300 },
       x: { type: "number", label: "Across (%, default 50)", min: 0, max: 100 },
       y: { type: "number", label: "Down (%, default 40)", min: 0, max: 100 },
     },
