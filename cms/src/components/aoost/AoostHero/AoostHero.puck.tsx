@@ -24,6 +24,16 @@ export const fields: Fields<AoostHeroContent> = {
   clockLabel: { type: "text", label: "Clock label (before the time)" },
   timeZone: { type: "text", label: "Clock time zone (e.g. Africa/Johannesburg)" },
   showTicker: onOff("Ticker strip"),
+  tickerStyle: {
+    type: "radio",
+    label: "Strip style",
+    options: [
+      { label: "Scrolling ticker", value: "scroll" },
+      { label: "Dot board", value: "dots" },
+    ],
+  },
+  dotSeconds: { type: "number", label: "Dot board: seconds per line", min: 2.4, max: 30, step: 0.5 },
+  dotGrid: onOff("Dot board: faint dot grid behind"),
   ticker: {
     type: "array",
     label: "Ticker lines",

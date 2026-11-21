@@ -1,6 +1,7 @@
 /* hero: the artwork reel, the clock, and the ticker with late mode, visitor number and ghost cursors */
 import { blockData, C, DRAFT_PREVIEW, fit, IN_CLAUDE, monkey, orangeField, overlays, PH, pinkField, placeholderCanvas, reduce, sbHeaders, SCOREBOARD, skyField, TK } from './shared.js';
 import { openViewer } from './viewer.js';
+import { startDotBoard } from './dots.js';
 
 export function initHero(){
   const D=blockData('hero');if(!D)return;
@@ -38,6 +39,9 @@ export function initHero(){
   const tk=document.getElementById('ticker');
   const CLOVER_SVG=(document.querySelector('.ao .tk-c')||{}).innerHTML||'';
   let tkSig='';
+  /* the dot board (the strip's other style): the same lines, breathing in one at a time */
+  const dm=tk&&tk.classList.contains('dots')?tk.querySelector('canvas.dm'):null;
+  const board=dm?startDotBoard(dm,{seconds:+tk.dataset.seconds||4,grid:tk.dataset.grid!=='off'}):null;
   function ago(t){const m=Math.floor((Date.now()-t)/60000);if(m<1)return'just now';if(m<60)return m+' min ago';const h=Math.floor(m/60);if(h<24)return h+(h===1?' hour':' hours')+' ago';const d=Math.floor(h/24);return d+(d===1?' day':' days')+' ago';}
   function tickerBuild(){
     if(!tk)return;
@@ -47,6 +51,7 @@ export function initHero(){
     const pres=[];if(TK.last)pres.push('last here '+ago(TK.last));if(TK.here)pres.push(TK.here>1?TK.here+' here now':'just you here');
     if(pres.length&&D.tickerVisitors!==false)items.push(pres.join(' · '));
     const sig=items.join('|');if(sig===tkSig)return;tkSig=sig;
+    if(board){board.setLines(items);if(items.length)tk.setAttribute('aria-label',items.join('. ')+'.');return;}
     const one=items.map(w=>{const sp=document.createElement('span');sp.className='tk-w';sp.textContent=w;return sp.outerHTML+'<span class="tk-c">'+CLOVER_SVG+'</span>';}).join('');
     const rep=items.length?Math.ceil(9/items.length):0,html=one.repeat(rep);
     document.querySelectorAll('#ticker .tk-half').forEach(h=>h.innerHTML=html);

@@ -1,0 +1,30 @@
+import { describe, expect, it } from "vitest";
+import { balanceLine, EFFECTS, wrapLine } from "./dots.js";
+
+describe("dot board", () => {
+  it("splits a long line at word breaks into frames that fit", () => {
+    const fits = (s: string) => s.length <= 12;
+    expect(wrapLine("beat the game, be the first on the board".split(" "), fits)).toEqual(["beat the", "game, be the", "first on the", "board"]);
+    expect(wrapLine(["welcome"], fits)).toEqual(["welcome"]);
+    // A single word longer than a frame still gets its own frame (drawn a little smaller).
+    expect(wrapLine(["extraordinarily", "so"], fits)).toEqual(["extraordinarily", "so"]);
+  });
+
+  it("shares the words of a long line out evenly between its frames", () => {
+    const words = "beat the game, top score 9749 by J WARELEY".split(" ");
+    const frames = balanceLine(words, (s: string) => s.length, 34);
+    expect(frames).toHaveLength(2);
+    expect(Math.abs(frames[0]!.length - frames[1]!.length)).toBeLessThanOrEqual(6);
+  });
+
+  it("breathe: dots grow in, hold, and shrink away", () => {
+    const fx = EFFECTS.breathe as { size: (c: { x: number; din: number; dout: number }, t: number, T: { total: number; inEnd: number; outStart: number }) => number };
+    const T = { total: 4, inEnd: 1.2, outStart: 3.15 };
+    const cell = { x: 10, din: 0.2, dout: 0.1 };
+    expect(fx.size(cell, 0.1, T)).toBe(0);
+    expect(fx.size(cell, 0.45, T)).toBeGreaterThan(0.5);
+    expect(Math.abs(fx.size(cell, 2, T) - 1)).toBeLessThan(0.05);
+    expect(fx.size(cell, 3.2, T)).toBe(1);
+    expect(fx.size(cell, 3.9, T)).toBe(0);
+  });
+});

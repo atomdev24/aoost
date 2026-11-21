@@ -97,6 +97,17 @@ against `wrangler dev`).
   - The variant band sits bottom centre, beside the zoom bar, so it never covers the page.
   - Not yet: roles (anyone signed in can elect, restore and push).
 
+- **Strip style (hero).** The strip under the hero is either the scrolling ticker or a dot board
+  (`tickerStyle: "scroll" | "dots"`, Hero block → "Strip style"). The dot board
+  (`runtime/dots.js`) draws each line on a canvas as a grid of square dots that grow in with a
+  sweep, breathe while held, then shrink away before the next line; long lines are split into
+  even frames. Same lines as the ticker (day/late/both, top score, visitors). Options: seconds
+  per line, faint grid on or off. Animations live in the `EFFECTS` map (only `breathe` for now);
+  adding one there and to the field's options is all a new animation needs.
+- **Frame stills and canvases.** `captureFrame` (board/stills.ts) turns canvases into pictures
+  before pairing the copy's images with the page's; those pictures are marked
+  `data-from-canvas` and left out of the pairing, or every image after a canvas shifts by one.
+
 ## 5. How to work on it
 
 ```

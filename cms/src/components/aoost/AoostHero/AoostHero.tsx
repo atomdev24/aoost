@@ -1,4 +1,5 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef } from "react";
+import { startDotBoard } from "../runtime/dots.js";
 import { z } from "zod";
 import { ResponsiveFrameFit } from "../../../schema";
 import { defineComponent } from "../../types";
@@ -20,6 +21,12 @@ export const AoostHeroContent = z.object({
   reelSeconds: z.number().min(1).max(60),
   /** Show the ticker strip under the artwork. Off renders no strip at all. Older content has no value: shown. */
   showTicker: z.boolean().optional(),
+  /** How the strip shows its lines: scrolling (the ticker) or a dot board (lines breathe in, hold, fade). Older content: scrolling. */
+  tickerStyle: z.enum(["scroll", "dots"]).optional(),
+  /** Dot board: seconds each line (or part of a long line) stays up. */
+  dotSeconds: z.number().min(2.4).max(30).optional(),
+  /** Dot board: the faint dot grid behind the lit dots. Older content: on. */
+  dotGrid: z.boolean().optional(),
   /** Ticker lines. "day" and "late" lines show by day or after midnight; "both" always. */
   ticker: z.array(z.object({ text: z.string(), mode: z.enum(["day", "late", "both"]) })),
   /** Add the rodeo's top score to the ticker. */
@@ -53,6 +60,19 @@ export function tickerLines(content: AoostHeroContent): string[] {
   return own.concat(content.tickerTopScore ? ["beat the game, be the first on the board"] : []);
 }
 
+/** The dot board in the editor's frames: the same animation as the site, with the lines as saved. */
+function EditingDots({ lines, seconds, grid }: { lines: string[]; seconds: number; grid: boolean }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const key = lines.join("|");
+  useEffect(() => {
+    if (!ref.current) return;
+    const board = startDotBoard(ref.current, { lines, seconds, grid });
+    return () => board.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, seconds, grid]);
+  return <canvas className="dm" ref={ref} aria-hidden="true" />;
+}
+
 export const AoostHero = defineComponent<AoostHeroContent>({
   type: "AoostHero",
   label: "Hero: artwork reel, clock and ticker",
@@ -81,8 +101,12 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     },
   },
   // The ticker follows the reel directly inside this block, so it doesn't need the original's pull-up margin.
-  css: css + `\n.ao .ao-b[data-ao="hero"] .ticker{margin-top:0}\n`,
-  Render: ({ content }) => {
+  css:
+    css +
+    `\n.ao .ao-b[data-ao="hero"] .ticker{margin-top:0}\n` +
+    // The dot board: the strip's dark band, a canvas the height of the ticker's line.
+    `.ao .ticker.dots{height:clamp(78px,8.6vw,124px)}\n.ao .ticker.dots .dm{display:block;width:100%;height:100%}\n`,
+  Render: ({ content, ctx }) => {
     const showTicker = content.showTicker !== false;
     const lines = tickerLines(content);
     // With no lines yet the strip stays empty; the script may still add live lines (visitor number).
@@ -117,7 +141,18 @@ export const AoostHero = defineComponent<AoostHeroContent>({
             <i id="hrBar" />
           </div>
         </header>
-        {showTicker ? (
+        {showTicker && content.tickerStyle === "dots" ? (
+          <div
+            className="ticker dots"
+            id="ticker"
+            role="img"
+            aria-label={lines.length ? `${lines.join(". ")}.` : "Dot board"}
+            data-seconds={content.dotSeconds ?? 4}
+            data-grid={content.dotGrid === false ? "off" : "on"}
+          >
+            {ctx.editing ? <EditingDots lines={lines} seconds={content.dotSeconds ?? 4} grid={content.dotGrid !== false} /> : <canvas className="dm" aria-hidden="true" />}
+          </div>
+        ) : showTicker ? (
           <div className="ticker" id="ticker" aria-label={lines.length ? `${lines.join(". ")}.` : undefined}>
             <div className="tk-track" aria-hidden="true">
               <div className="tk-half">{half}</div>
