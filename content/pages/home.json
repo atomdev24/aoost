@@ -84,7 +84,8 @@
             "artPan": "rtl",
             "dotAfter": "wave",
             "dotEffect": "resolve",
-            "dotTextSize": 40
+            "dotTextSize": 40,
+            "dotLook": "glass"
           },
           "style": {
             "base": {},
