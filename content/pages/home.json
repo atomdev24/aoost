@@ -78,13 +78,13 @@
             "showTicker": true,
             "tickerStyle": "dots",
             "dotGrid": true,
-            "dotSeconds": 3.4,
+            "dotSeconds": 4.9,
             "reelBar": false,
             "reelViewer": false,
             "artPan": "rtl",
             "dotAfter": "wave",
             "dotEffect": "resolve",
-            "dotTextSize": 30
+            "dotTextSize": 40
           },
           "style": {
             "base": {},
