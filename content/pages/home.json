@@ -121,7 +121,7 @@
               "style": "plain"
             },
             "keychain": {
-              "show": true,
+              "show": false,
               "image": "/art/keychain.png",
               "label": "Monkey keychain, give it a swing"
             },
@@ -134,6 +134,12 @@
                 "y": 26,
                 "width": 210,
                 "rotate": -8
+              },
+              {
+                "image": "/media/2026/aoost-skull-resin-transparent-wide-1-bjma.png",
+                "x": 81,
+                "y": 91,
+                "width": 200
               }
             ]
           },
