@@ -65,8 +65,9 @@ against `wrangler dev`).
 - **Variants, staging and production** (`model/variants.ts`, `editor/workspace/staging.ts`):
   - A variant is a copy of a page to try ideas on: a page with `variantOf` (its page's id),
     `variantName` and `variantIds` (copied block id → the page's block id). It always stays a
-    draft, so it is never built, listed or linked on the site. Make one from the page switcher
-    ("New variant of …") or ⌘K. While one is on screen the frames turn purple and a band says
+    draft, so it is never built, listed or linked on the site. Make one from the Pages panel (the
+    copy icon on a page's row, shown on hover), the page switcher ("New variant of …") or ⌘K.
+    Variants are listed under their page in both, with × to delete one. While one is on screen the frames turn purple and a band says
     which variant of which page it is, with Back and **Elect to staging**.
   - Electing puts the variant's content on its page (same id, address, title and nav place),
     gives copied blocks their original ids back (so section links keep working and only real

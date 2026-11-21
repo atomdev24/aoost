@@ -3136,3 +3136,39 @@ button.ed-card {
     white-space: nowrap;
   }
 }
+
+/* Pages panel: variants under their page */
+.ed-page-row.ed-page-variant {
+  padding-left: 18px;
+}
+.ed-variant-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ed-variant-mark::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ed-variant);
+}
+.ed-page-variant .ed-page-slug {
+  color: var(--ed-variant);
+}
+.ed-page-variant-btn:hover {
+  color: var(--ed-variant);
+}
+.ed-panel-note svg {
+  vertical-align: -2px;
+}
+@media (hover: hover) {
+  .ed-page-row .ed-page-variant-btn {
+    display: none;
+  }
+  .ed-page-row:hover .ed-page-variant-btn,
+  .ed-page-row.is-selected .ed-page-variant-btn,
+  .ed-page-row:focus-within .ed-page-variant-btn {
+    display: inline-flex;
+  }
+}
