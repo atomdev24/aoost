@@ -22,6 +22,13 @@
   width: 0;
   height: 0;
   transform-origin: 0 0;
+}
+/* Only while the board moves. Kept on all the time, Chrome holds the pages at the detail they
+   were first drawn at: zoom in, then out, and four long pages at full detail overrun the graphics
+   memory, so pieces of the previews drop out (blank or black blocks) even with the board still.
+   Dropped when it settles, Chrome redraws them at the detail the zoom needs (and text is sharp). */
+.ed-shell.is-moving .bd-world,
+.ed-shell.is-interacting .bd-world {
   will-change: transform;
 }
 .bd-frame {

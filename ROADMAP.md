@@ -45,6 +45,10 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Blank and black blocks in the page previews (even with the board still): the board kept a
+  "will move" hint all the time, so Chrome held the pages at full detail after zooming out and ran
+  out of graphics memory. The hint is now only on while the board moves (probe: 277/294 bad
+  frames before, 0 after, same smoothness).
 - Chrome flicker: a flight-recorder report showed 60 fps and every toolbar steady in the page
   while the screen flickered, so the cause is Chrome drawing the blurred glass panels. Chrome,
   Edge, Brave and Arc now start with solid panels; Safari keeps the glass; the "…" menu
