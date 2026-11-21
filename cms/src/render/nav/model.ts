@@ -23,7 +23,11 @@ export type ResolvedItem = {
   divider?: boolean;
 };
 
-const live = (p: Page | undefined, editing: boolean): p is Page => !!p && (editing || p.status === "published");
+/**
+ * A page the nav links to only once it's published. The editor's frames follow the same rule (they
+ * used to list draft pages too), so the nav looks while editing exactly as it will on the site.
+ */
+const live = (p: Page | undefined, _editing: boolean): p is Page => !!p && p.status === "published";
 
 /** A badge with an expiry date disappears after that day (also enforced client-side). */
 export function badgeFor(item: NavItem, today: string): ResolvedItem["badge"] {
@@ -94,7 +98,7 @@ export function resolveItem(item: NavItem, ctx: RenderCtx, today: string): Resol
         base.children = subPages(site, targetPage.id, ctx.editing).map((p) => pageItem(p, ctx, `${item.id}-${p.id}`));
       }
       base.current = base.children.some((c) => c.current) || (!!targetPage && ctx.page?.id === targetPage.id);
-      return base.children.length || ctx.editing ? base : null;
+      return base.children.length ? base : null;
     }
     case "external":
     case "button":

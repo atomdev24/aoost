@@ -218,10 +218,17 @@ function SheetItem({ item, ctx }: { item: ResolvedItem; ctx: RenderCtx }): React
 
 function Logo({ ctx }: { ctx: RenderCtx }): ReactElement {
   const home = ctx.site.pages.find((p) => p.isHome);
+  const text = ctx.site.nav.logoText.trim();
   return (
-    <a className="pill-logo" href={ctx.editing ? undefined : ctx.href({ kind: "page", pageId: home?.id ?? "home" })} aria-label={`${ctx.site.nav.logoText} home`} aria-current={ctx.page?.isHome ? "page" : undefined}>
-      {ctx.site.nav.showLogoMark ? <Icon name="sun" size={20} /> : null}
-      <span>{ctx.site.nav.logoText}</span>
+    <a
+      className={`pill-logo${text ? "" : " mark-only"}`}
+      href={ctx.editing ? undefined : ctx.href({ kind: "page", pageId: home?.id ?? "home" })}
+      aria-label={text ? `${text} home` : "Home"}
+      aria-current={ctx.page?.isHome ? "page" : undefined}
+    >
+      {/* With no logo text the symbol is the whole logo, so it always shows then. */}
+      {ctx.site.nav.showLogoMark || !text ? <Icon name="sun" size={20} /> : null}
+      {text ? <span>{text}</span> : null}
     </a>
   );
 }

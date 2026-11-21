@@ -142,10 +142,20 @@ describe("nav with nothing published yet", () => {
     expect(html).toContain('<button type="button" class="pill-menu" aria-expanded="false" aria-controls="nav-sheet">Menu</button>');
     expect(html).toContain('id="nav-sheet"');
   });
-  it("keeps the Menu in the editor, where draft pages show", () => {
+  it("shows the editor the same nav as the site: no links to draft pages, no Menu", () => {
     const s = withSocial(drafts(site));
     const Nav = navRenderer(s.nav.style).Render;
     const html = renderToStaticMarkup(<Nav ctx={makeCtx(s, s.pages.find((p) => p.isHome)!, { editing: true })} />);
-    expect(html).toContain("pill-menu");
+    expect(html).not.toContain("pill-menu");
+    expect(html).not.toContain('class="pill-link ');
+  });
+  it("with no logo text, the logo is just the symbol (even with the symbol switched off)", () => {
+    const s = { ...drafts(site), nav: { ...site.nav, logoText: "", showLogoMark: false } };
+    const Nav = navRenderer(s.nav.style).Render;
+    const html = renderToStaticMarkup(<Nav ctx={makeCtx(s, s.pages.find((p) => p.isHome)!)} />);
+    expect(html).toContain('class="pill-logo mark-only"');
+    expect(html).toContain('aria-label="Home"');
+    expect(html).toContain("<svg");
+    expect(html).not.toMatch(/pill-logo[^>]*>[^]*?<span>/);
   });
 });

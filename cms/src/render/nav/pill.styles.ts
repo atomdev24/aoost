@@ -5,6 +5,9 @@ export const css = `
 .pill{pointer-events:auto;display:flex;align-items:center;gap:6px;max-width:calc(100vw - 24px);padding:6px 6px 6px 18px;border-radius:999px;background:#141414;color:#F3EFE6;white-space:nowrap;box-shadow:0 10px 30px rgba(20,20,20,0);transition:box-shadow .3s}
 .nav.is-scrolled .pill{box-shadow:0 10px 30px rgba(20,20,20,.28)}
 .pill-logo{display:flex;align-items:center;gap:8px;min-height:44px;margin-right:8px;color:inherit;text-decoration:none;font:700 16px var(--font-display);letter-spacing:-.02em}
+.pill-logo.mark-only{justify-content:center;min-width:32px;margin-right:0}
+/* just the symbol: an even little pill around it */
+.pill:has(.pill-logo.mark-only):not(:has(.pill-link,.pill-menu,.pill-icon)){padding:6px 12px}
 .pill-links{display:none;align-items:center;gap:2px}
 .pill-link,.pill-caret{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:inherit;font:500 13px var(--font-body);text-decoration:none;cursor:pointer;transition:transform .15s ease,background-color .2s,color .2s}
 .pill-link:active,.pill-caret:active,.pill-menu:active,.pill-cta:active,.pill-icon:active{transform:scale(.95)}

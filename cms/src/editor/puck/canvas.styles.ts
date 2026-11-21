@@ -3,6 +3,8 @@ export const canvasCss = `
 html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!important}
 .ed-nav-preview .nav{position:absolute}
 .ed-nav-preview .sheet,.ed-nav-preview .search{display:none}
+.ed-nav-preview .pill{cursor:pointer}
+.ed-nav-preview .pill:hover{outline:1.5px solid #2F6BFF;outline-offset:3px}
 .s{min-height:48px}
 /* Puck puts position:relative inline on draggable items; canvas layers must stay absolute. */
 .s[data-kind="canvas"]>.si>.n{position:absolute!important}
