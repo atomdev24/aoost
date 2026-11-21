@@ -2959,3 +2959,19 @@ button.ed-card {
     transform: none;
   }
 }
+
+/* The browser's own pinch zoom is on: positioned in the visible part of the page (BrowserZoomNotice). */
+.ed-zoom-notice {
+  position: absolute;
+  z-index: 2000;
+  transform-origin: top center;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: #2a2a2e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  color: var(--ed-text);
+  font: 13px/1.4 var(--ed-font);
+  white-space: nowrap;
+  pointer-events: none;
+}

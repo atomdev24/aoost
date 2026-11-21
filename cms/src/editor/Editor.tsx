@@ -23,6 +23,7 @@ import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { TopBar } from "./workspace/TopBar";
+import { BrowserZoomNotice } from "./workspace/BrowserZoomNotice";
 import "./workspace/workspace.css";
 import "./workspace/phone.css";
 
@@ -101,6 +102,7 @@ export function Editor() {
           <Inspector />
           <QuickInsert />
           <PaletteHost />
+          <BrowserZoomNotice />
         </div>
       </Puck>
     </>

@@ -15,6 +15,7 @@ import { attachFrameGestures } from "../touch/gestures";
 import { ZoomVar } from "./PuckFrame";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { watchWindow } from "../problems";
+import { guardPinch } from "../pinch-guard";
 
 /** Editor-only rules for a passive frame: still motion, no live media, nav drawn in place. */
 const passiveCss = `
@@ -110,6 +111,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     if (!doc) return;
     const detach = attachKeys(doc);
     const unwatch = watchWindow(doc.defaultView!, `${bp} frame`);
+    const unguard = guardPinch(doc.defaultView);
     const wheel = (e: WheelEvent) => {
       const { view } = getBoard();
       const o = frameOrigin(bp);
@@ -145,6 +147,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     return () => {
       detach();
       unwatch();
+      unguard();
       detachTouch();
       doc.removeEventListener("wheel", wheel);
       doc.removeEventListener("click", click, true);

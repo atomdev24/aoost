@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { startLoadGuard } from "./load-guard";
 import { startDisplay } from "./display";
+import { guardPinch } from "./pinch-guard";
 import "./editor.css";
 import "./workspace/workspace.css";
 
@@ -12,6 +13,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
 }
 
 startDisplay();
+guardPinch(window);
 if (import.meta.env.PROD) startLoadGuard();
 
 createRoot(document.getElementById("root")!).render(

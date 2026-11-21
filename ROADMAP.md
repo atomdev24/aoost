@@ -49,6 +49,9 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
   while the screen flickered, so the cause is Chrome drawing the blurred glass panels. Chrome,
   Edge, Brave and Arc now start with solid panels; Safari keeps the glass; the "…" menu
   switches it.
+- Toolbars disappearing: a pinch over a toolbar, the rail, a panel, the zoom bar or a dialog
+  zoomed Chrome's whole page (found at 173% in Alex's tab) instead of the board. Every pinch now
+  zooms the board; if the page is zoomed anyway, a notice says to pinch out.
 
 ## Done (20 Nov 2026)
 
