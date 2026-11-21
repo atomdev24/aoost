@@ -113,6 +113,12 @@ against `wrangler dev`).
   overlaps cut lens shapes) and settle into the solid letters as the ghost falls away. An effect in
   `EFFECTS` can draw for itself (`draw`), ask for the ghost cells (`ghost: radius`) and set its own
   timing; Resolve needs at least 3.6 s per line.
+- **Dot board look: Glass.** "Look": Flat or Glass. Glass draws the board onto a light layer,
+  then lights the canvas from it (`present`): two downscaled, blue-tinted copies added for bloom,
+  the cells with a faint cool cast, and a little grain, on a black strip. Each cell's brightness
+  comes from how deep it sits in its stroke (`shade`: a distance transform), plus a two-cell halo
+  of dim blocks timed like the nearest lit cell. Works with every effect and idle. The editor
+  loads dots.js on demand (vite `LATER`), keeping its first download under budget.
 - **Dot board idle and size.** "After the last line": repeat the lines, or show each line once and
   then play an idle animation (`IDLE` in dots.js: `wave`, `twinkle`; each is a level 0–1 per cell
   over time, so adding one is a function plus an editor option). Lines that arrive later (the

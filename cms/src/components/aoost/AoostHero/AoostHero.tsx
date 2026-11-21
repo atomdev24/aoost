@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useRef, type CSSProperties } from "react";
-import { startDotBoard } from "../runtime/dots.js";
 import { z } from "zod";
 import { ResponsiveFrameFit } from "../../../schema";
 import { defineComponent } from "../../types";
@@ -41,6 +40,8 @@ export const AoostHeroContent = z.object({
   dotAfter: z.enum(["loop", "wave", "twinkle"]).optional(),
   /** Dot board: how each line appears. "breathe" (older content) or "resolve" (a ghost of the shape, then a wave settles it). */
   dotEffect: z.enum(["breathe", "resolve"]).optional(),
+  /** Dot board: "flat" (older content) or "glass" (black, lit from the middle of each stroke, with a halo and bloom). */
+  dotLook: z.enum(["flat", "glass"]).optional(),
   /** Dot board: idle animation speed (1 = brisk, 0.5 = slow). */
   dotIdleSpeed: z.number().min(0.1).max(3).optional(),
   /** Dot board: letter height, as % of the strip's height. */
@@ -79,18 +80,22 @@ export function tickerLines(content: AoostHeroContent): string[] {
 }
 
 /** The dot board in the editor's frames: the same animation as the site, with the lines as saved. */
-type DotOpts = { seconds: number; grid: boolean; after: string; idleSpeed: number; textSize: number; effect: string };
-const dotOpts = (c: AoostHeroContent): DotOpts => ({ seconds: c.dotSeconds ?? 4, grid: c.dotGrid !== false, after: c.dotAfter ?? "loop", idleSpeed: c.dotIdleSpeed ?? 0.5, textSize: c.dotTextSize ?? 70, effect: c.dotEffect ?? "breathe" });
+type DotOpts = { seconds: number; grid: boolean; after: string; idleSpeed: number; textSize: number; effect: string; look: string };
+const dotOpts = (c: AoostHeroContent): DotOpts => ({ seconds: c.dotSeconds ?? 4, grid: c.dotGrid !== false, after: c.dotAfter ?? "loop", idleSpeed: c.dotIdleSpeed ?? 0.5, textSize: c.dotTextSize ?? 70, effect: c.dotEffect ?? "breathe", look: c.dotLook ?? "flat" });
 
 function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const key = lines.join("|");
   useEffect(() => {
     if (!ref.current) return;
-    const board = startDotBoard(ref.current, { lines, ...opts });
-    return () => board.stop();
+    // Loaded when a board is on screen, so the editor's first download stays small.
+    let board: { stop(): void } | null = null, gone = false;
+    void import("../runtime/dots.js").then(({ startDotBoard }) => {
+      if (!gone && ref.current) board = startDotBoard(ref.current, { lines, ...opts });
+    });
+    return () => { gone = true; board?.stop(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize, opts.effect]);
+  }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize, opts.effect, opts.look]);
   return <canvas className="dm" ref={ref} aria-hidden="true" />;
 }
 
@@ -126,6 +131,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     css +
     `\n.ao .ao-b[data-ao="hero"] .ticker{margin-top:0}\n` +
     // The dot board: the strip's dark band, a canvas the height of the ticker's line.
+    `.ao .ticker.dots.glass,html.late .ao .ticker.dots.glass{background:#000}\n` +
     `.ao .ticker.dots{height:clamp(78px,8.6vw,124px)}\n.ao .ticker.dots .dm{display:block;width:100%;height:100%}\n` +
     // Progress line hidden; artwork that doesn't open the viewer.
     `.ao .hero-rect.no-bar .hr-bar{display:none}\n.ao .hero-rect.no-viewer .hr-slide{cursor:default}\n` +
@@ -188,7 +194,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
         </header>
         {showTicker && content.tickerStyle === "dots" ? (
           <div
-            className="ticker dots"
+            className={`ticker dots${content.dotLook === "glass" ? " glass" : ""}`}
             id="ticker"
             role="img"
             aria-label={lines.length ? `${lines.join(". ")}.` : "Dot board"}
@@ -198,6 +204,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
             data-idle-speed={content.dotIdleSpeed ?? 0.5}
             data-text-size={content.dotTextSize ?? 70}
             data-effect={content.dotEffect ?? "breathe"}
+            data-look={content.dotLook ?? "flat"}
           >
             {ctx.editing ? <EditingDots lines={lines} opts={dotOpts(content)} /> : <canvas className="dm" aria-hidden="true" />}
           </div>

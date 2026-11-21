@@ -74,7 +74,9 @@ export const EFFECTS = {
         if (t >= T.outStart) {
           if (!text) return;
           const k = (t - T.outStart - c.dout) / 0.4, s = full * (c.w ?? 1) * (k <= 0 ? 1 : k >= 1 ? 0 : 1 - k * k);
+          ctx.globalAlpha = g.b(c);
           if (s > 0.3) ctx.fillRect(cx - s / 2, cy - s / 2, s, s);
+          ctx.globalAlpha = 1;
           return;
         }
         if (t < 0.7 * c.j) return; // the ghost assembles
@@ -88,11 +90,13 @@ export const EFFECTS = {
           ctx.globalAlpha = 1;
         } else if (p < 1) {
           const swell = Math.sin(Math.PI * p);
-          if (text) circle(cx, cy, p < 0.5 ? shape + (big - shape) * swell : full + (big - full) * swell);
+          if (text) { ctx.globalAlpha = g.b(c); circle(cx, cy, p < 0.5 ? shape + (big - shape) * swell : full + (big - full) * swell); ctx.globalAlpha = 1; }
           else if (p < 0.6) circle(cx, cy, small + (pitch * 1.25 - small) * swell * (1 - p / 0.6));
         } else if (text) {
           const s = full * (c.w ?? 1);
+          ctx.globalAlpha = g.b(c);
           ctx.fillRect(cx - s / 2, cy - s / 2, s, s);
+          ctx.globalAlpha = 1;
         }
       };
       for (const c of f.ghost) one(c, false);
@@ -147,7 +151,10 @@ export const IDLE = {
  * Start a dot board on a canvas that fills its strip. Options: lines (strings), seconds per frame,
  * grid (the faint dot grid behind), effect (a key of EFFECTS). Returns { setLines, stop }.
  */
-export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe', after = 'loop', idleSpeed = 0.5, textSize = 70 } = {}) {
+export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe', after = 'loop', idleSpeed = 0.5, textSize = 70, look = 'flat' } = {}) {
+  // Glass: black board, letters brightest along the middle of each stroke, a halo of dim blocks
+  // around them, and a cool bloom over it all, like light coming through frosted glass.
+  const glass = look === 'glass';
   const idleFx = after !== 'loop' ? IDLE[after] || IDLE.wave : null;
   const glyphOf = (rows) => Math.max(7, Math.round(rows * Math.min(0.95, Math.max(0.3, textSize / 100))));
   // With an idle animation, each frame shows once; then the board idles (new lines still get their turn).
@@ -156,7 +163,14 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   const doc = canvas.ownerDocument, win = doc.defaultView;
   const reduce = win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fx = EFFECTS[effect] || EFFECTS.breathe;
-  const ctx = canvas.getContext('2d');
+  const main = canvas.getContext('2d');
+  let ctx = main;
+  // Glass draws the board as usual onto a light layer, then lights the canvas from it (see present).
+  const layer = () => { const c = doc.createElement('canvas'); return [c, c.getContext('2d')]; };
+  const [light, lightCtx] = glass ? layer() : [null, null];
+  const [glowA, glowACtx] = glass ? layer() : [null, null];
+  const [glowB, glowBCtx] = glass ? layer() : [null, null];
+  let grain = null;
   const scratch = doc.createElement('canvas').getContext('2d', { willReadFrequently: true });
   let W = 0, H = 0, dpr = 1, pitch = 4, cols = 0, rows = 0, gridLayer = null;
   // The intro waits for the display font, so the board stays black until it can play through.
@@ -172,6 +186,12 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     cols = Math.floor(W / pitch); rows = Math.floor(H / pitch);
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     gridLayer = null;
+    if (glass) {
+      light.width = canvas.width; light.height = canvas.height;
+      glowA.width = Math.max(1, Math.round(canvas.width / 5)); glowA.height = Math.max(1, Math.round(canvas.height / 5));
+      glowB.width = Math.max(1, Math.round(canvas.width / 14)); glowB.height = Math.max(1, Math.round(canvas.height / 14));
+      grain = null;
+    }
   }
 
   /**
@@ -200,6 +220,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
       if (cov > 0.14) cells.push({ x, y, w: Math.min(1, 0.45 + (cov - 0.14) * 1.4) });
     }
     const r = rng(seed), out = fx.delays(cells, cols, r);
+    if (glass) shade(out, r);
     if (fx.ghost) {
       // The rough shape around the letters: every cell within a couple of cells of ink.
       const ink = new Uint8Array(cols * rows), near = new Uint8Array(cols * rows), G = fx.ghost;
@@ -215,13 +236,46 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     return out;
   }
 
+  /**
+   * Glass shading: each lit cell gets a brightness from how deep it sits inside its stroke (b), and
+   * cells just outside the letters become a dim halo (frame.halo), timed like their nearest lit cell.
+   */
+  function shade(cells, r) {
+    const N = cols * rows, idx = new Int32Array(N).fill(-1), dist = new Int16Array(N).fill(-1);
+    cells.forEach((c, i) => { idx[c.y * cols + c.x] = i; });
+    const q = [], nb = [1, -1, cols, -cols];
+    const okStep = (i, j) => j >= 0 && j < N && !(Math.abs((j % cols) - (i % cols)) > 1);
+    // inside: distance to the edge of the stroke
+    for (const c of cells) { const i = c.y * cols + c.x; if (nb.some((d) => !okStep(i, i + d) || idx[i + d] < 0)) { dist[i] = 1; q.push(i); } }
+    for (let h = 0; h < q.length; h++) { const i = q[h]; for (const d of nb) { const j = i + d; if (okStep(i, j) && idx[j] >= 0 && dist[j] < 0) { dist[j] = dist[i] + 1; q.push(j); } } }
+    let dmax = 1; for (const c of cells) dmax = Math.max(dmax, dist[c.y * cols + c.x]);
+    const span = Math.max(1, (dmax - 1) * 0.75);
+    for (const c of cells) c.b = 0.36 + 0.64 * Math.min(1, (dist[c.y * cols + c.x] - 1) / span);
+    // outside: two cells of halo, fading out
+    const owner = new Int32Array(N).fill(-1), out = new Int16Array(N).fill(0), ring = [];
+    for (const c of cells) { const i = c.y * cols + c.x; owner[i] = idx[i]; ring.push(i); }
+    const halo = [];
+    for (let step = 1; step <= 2; step++) {
+      const next = [];
+      for (const i of ring) for (const d of [...nb, cols + 1, cols - 1, -cols + 1, -cols - 1]) {
+        const j = i + d;
+        if (j < 0 || j >= N || Math.abs((j % cols) - (i % cols)) > 1 || owner[j] >= 0) continue;
+        owner[j] = owner[i]; out[j] = step; next.push(j);
+        const src = cells[owner[i]];
+        halo.push({ x: j % cols, y: Math.floor(j / cols), h: [0.2, 0.08][step - 1] * (0.8 + 0.4 * r()), din: src.din, dout: src.dout, j: src.j });
+      }
+      ring.length = 0; ring.push(...next);
+    }
+    cells.halo = halo;
+  }
+
   function build() {
     if (!cols || !rows) return;
     scratch.setTransform(1, 0, 0, 1, 0, 0);
     scratch.font = fontAt(glyphOf(rows));
     const room = cols * 0.88;
     frames = items.flatMap((line) => balanceLine(String(line).split(/\s+/).filter(Boolean), (s) => scratch.measureText(s).width, room))
-      .map((text) => { const cells = rasterize(text, hash(text)); return { text, cells, ghost: cells.ghost || [] }; });
+      .map((text) => { const cells = rasterize(text, hash(text)); return { text, cells, ghost: cells.ghost || [], halo: cells.halo || [] }; });
     if (at >= frames.length) at = 0;
   }
 
@@ -236,7 +290,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
       gridLayer = doc.createElement('canvas');
       gridLayer.width = canvas.width; gridLayer.height = canvas.height;
       const g = gridLayer.getContext('2d');
-      g.scale(dpr, dpr); g.fillStyle = INK; g.globalAlpha = 0.14;
+      g.scale(dpr, dpr); g.fillStyle = INK; g.globalAlpha = glass ? 0.06 : 0.14;
       const d = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
       for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) g.fillRect(ox + x * pitch + pitch / 2 - d / 2, oy + y * pitch + pitch / 2 - d / 2, d, d);
     }
@@ -244,7 +298,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   }
 
   /** The opening: the grid fades up behind a soft diagonal wave of brighter dots. */
-  function drawIntro(t) {
+  function drawIntroFrame(t) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (grid) { ctx.globalAlpha = Math.min(1, t / (INTRO * 0.6)); drawGrid(); ctx.globalAlpha = 1; }
@@ -264,7 +318,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     ctx.globalAlpha = 1;
   }
 
-  function draw(t) {
+  function drawFrame(t) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGrid();
@@ -278,7 +332,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      fx.draw({ ctx, pitch, cols, rows, dot, full, at: (c) => [ox + c.x * pitch + pitch / 2, oy + c.y * pitch + pitch / 2] }, f, t, T);
+      fx.draw({ ctx, pitch, cols, rows, dot, full, b: (c) => (glass ? c.b ?? 1 : 1), at: (c) => [ox + c.x * pitch + pitch / 2, oy + c.y * pitch + pitch / 2] }, f, t, T);
       if (grid && gridLayer) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'destination-over'; ctx.drawImage(gridLayer, 0, 0); ctx.globalCompositeOperation = 'source-over'; }
       return;
     }
@@ -286,14 +340,21 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
       const k = reduce ? 1 : fx.size(c, t, T);
       if (k <= 0.01) continue;
       const s = dot + (full - dot) * Math.min(1.12, k) * (c.w ?? 1);
-      ctx.globalAlpha = Math.min(1, 0.16 + 0.84 * Math.min(1, k));
-      ctx.fillRect(ox + c.x * pitch + pitch / 2 - s / 2, oy + c.y * pitch + pitch / 2 - s / 2, s, s);
+      ctx.globalAlpha = Math.min(1, 0.16 + 0.84 * Math.min(1, k)) * (glass ? c.b ?? 1 : 1);
+      cell(ox + c.x * pitch + pitch / 2, oy + c.y * pitch + pitch / 2, s);
+    }
+    if (glass) for (const c of f.halo) {
+      const k = reduce ? 1 : fx.size ? fx.size(c, t, T) : 1;
+      if (k <= 0.05) continue;
+      const s = full * Math.min(1, k);
+      ctx.globalAlpha = c.h * Math.min(1, k);
+      cell(ox + c.x * pitch + pitch / 2, oy + c.y * pitch + pitch / 2, s);
     }
     ctx.globalAlpha = 1;
   }
 
   /** The idle animation, fading up over a second. */
-  function drawIdle(t) {
+  function drawIdleFrame(t) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGrid();
@@ -310,6 +371,51 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     }
     ctx.globalAlpha = 1;
   }
+
+  /** A lit cell: a square, with softened corners on the glass look. */
+  function cell(cx, cy, s) {
+    if (glass && s > 2.2 && ctx.roundRect) { ctx.beginPath(); ctx.roundRect(cx - s / 2, cy - s / 2, s, s, s * 0.22); ctx.fill(); }
+    else ctx.fillRect(cx - s / 2, cy - s / 2, s, s);
+  }
+
+  /** Light the canvas from the light layer: a wide cool bloom, a tighter glow, the cells, and grain. */
+  function present() {
+    const w = canvas.width, h = canvas.height;
+    lightCtx.setTransform(1, 0, 0, 1, 0, 0);
+    // a faint cool cast on the cells themselves (the brightest stay near white)
+    lightCtx.globalCompositeOperation = 'source-atop'; lightCtx.globalAlpha = 0.28; lightCtx.fillStyle = '#9DB8FF'; lightCtx.fillRect(0, 0, w, h);
+    lightCtx.globalCompositeOperation = 'source-over'; lightCtx.globalAlpha = 1;
+    for (const [c, g] of [[glowA, glowACtx], [glowB, glowBCtx]]) {
+      g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+      g.imageSmoothingEnabled = true; g.drawImage(light, 0, 0, c.width, c.height);
+      g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 0.65; g.fillStyle = '#4F7DFF'; g.fillRect(0, 0, c.width, c.height);
+      g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+    }
+    main.setTransform(1, 0, 0, 1, 0, 0);
+    main.clearRect(0, 0, w, h);
+    main.imageSmoothingEnabled = true;
+    main.globalCompositeOperation = 'lighter';
+    main.globalAlpha = 0.85; main.drawImage(glowB, 0, 0, w, h);
+    main.globalAlpha = 0.7; main.drawImage(glowA, 0, 0, w, h);
+    main.globalAlpha = 1; main.drawImage(light, 0, 0);
+    if (!grain) {
+      grain = doc.createElement('canvas'); grain.width = Math.max(1, Math.round(w / 2)); grain.height = Math.max(1, Math.round(h / 2));
+      const g = grain.getContext('2d'), img = g.createImageData(grain.width, grain.height), rr = rng(7);
+      for (let i = 0; i < img.data.length; i += 4) { const v = rr() * 255; img.data[i] = v * 0.8; img.data[i + 1] = v * 0.88; img.data[i + 2] = v; img.data[i + 3] = 255; }
+      g.putImageData(img, 0, 0);
+    }
+    main.globalAlpha = 0.045; main.drawImage(grain, 0, 0, w, h);
+    main.globalAlpha = 1; main.globalCompositeOperation = 'source-over';
+  }
+
+  /** Every drawing goes through here: straight onto the canvas, or onto the light layer for glass. */
+  function paint(fn) {
+    if (!glass) return fn();
+    ctx = lightCtx; fn(); ctx = main; present();
+  }
+  const draw = (t) => paint(() => drawFrame(t));
+  const drawIntro = (t) => paint(() => drawIntroFrame(t));
+  const drawIdle = (t) => paint(() => drawIdleFrame(t));
 
   /** The next frame to show, or -1 to idle. */
   function nextFrame() {
@@ -353,7 +459,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   function startStill() { win.clearInterval(still); draw(0); still = win.setInterval(() => {
     if (frames[at]) shown.add(frames[at].text);
     const n = nextFrame();
-    if (n < 0) { win.clearInterval(still); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); drawGrid(); return; }
+    if (n < 0) { win.clearInterval(still); paint(() => { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); drawGrid(); }); return; }
     at = n; draw(0);
   }, Math.max(2400, seconds * 1000)); }
 
