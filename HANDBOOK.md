@@ -150,6 +150,11 @@ against `wrangler dev`).
   motion is paused (frame-css.ts).
 - **No sideways overflow.** `html` and `body` clip horizontally (`overflow-x:clip`), so a block
   sliding in from the side can't widen the page on phones.
+- **Resized pieces and their position.** A piece's per-size "size" is a CSS `scale`, which also
+  scales the piece's `translate` (CSS applies the scale property around the element's origin, after
+  the transform). `pieceTransform` (table.js) divides it out, so the site and the editor's frames put
+  a resized piece's centre exactly where the layout says, drags follow the pointer 1:1, and the
+  drag limits use the scaled size. Positions are not saved: the table is laid out automatically.
 - **Frame stills and canvases.** `captureFrame` (board/stills.ts) turns canvases into pictures
   before pairing the copy's images with the page's; those pictures are marked
   `data-from-canvas` and left out of the pairing, or every image after a canvas shifts by one.

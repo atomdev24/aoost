@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from "react";
-import { clearLayout } from "../runtime/table.js";
+import { clearLayout, pieceTransform } from "../runtime/table.js";
 import { z } from "zod";
 import { ResponsiveFrameFit, ResponsiveItemSize } from "../../../schema";
 import { defineComponent } from "../../types";
@@ -36,7 +36,7 @@ function EditingTable({ shown }: { shown: { image?: string; title?: string; stic
         pieces.forEach((p, i) => {
           const it = L.items[i]!;
           p.style.width = `${L.pw}px`;
-          p.style.transform = `translate(${it.x}px,${it.y}px) rotate(${it.rot}deg)`;
+          p.style.transform = pieceTransform(it.x, it.y, it.rot, scales[i]);
           p.style.zIndex = String(i + 1);
         });
       });

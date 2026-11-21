@@ -51,7 +51,8 @@ test.describe("resizable project pieces", () => {
   });
 
   test("dragging a corner in the Mobile frame resizes that piece on mobile only; undo puts it back", async ({ page, request }) => {
-    expect(await pieceSize(request)).toBeUndefined();
+    // The live content may already size this piece (21 Nov: every piece has a desktop size); the drag changes Mobile only.
+    const sizeBefore = await pieceSize(request);
     await page.getByRole("button", { name: "Edit the Mobile frame" }).click();
     await expect(page.getByRole("button", { name: "Edit the Mobile frame" })).toHaveAttribute("aria-pressed", "true");
     const piece = editable(page).locator(PIECE);
@@ -62,7 +63,7 @@ test.describe("resizable project pieces", () => {
     const box = page.getByTestId("piece-box");
     await expect(box).toBeVisible();
     await expect(page.locator(".ed-piece-tag")).toContainText("100% · Mobile");
-    // The live content may already have its own phone-only changes; the drag adds one.
+    // The live content may already have its own phone-only changes; the drag adds one (none if the piece already had a size).
     const scope = page.locator(".ed-scope");
     const changesBefore = (await scope.count()) ? Number(/(\d+) change/.exec((await scope.first().textContent()) ?? "")?.[1] ?? 0) : 0;
     const before = (await box.boundingBox())!;
@@ -75,10 +76,10 @@ test.describe("resizable project pieces", () => {
     await page.mouse.move(h.x + 40, h.y + 50, { steps: 10 });
     await page.mouse.up();
 
-    await expect.poll(async () => (await pieceSize(request))?.base.scale ?? 1).toBeGreaterThan(1.2);
+    await expect.poll(async () => (await pieceSize(request))?.base.scale ?? 1).toBeGreaterThan((sizeBefore?.base.scale ?? 1) + 0.2);
     const size = (await pieceSize(request))!;
     // Desktop keeps the size it had.
-    expect(size.desktop).toEqual({ scale: 1 });
+    expect(size.desktop).toEqual(sizeBefore?.desktop ?? { scale: 1 });
     const after = (await box.boundingBox())!;
     expect(after.width / before.width).toBeCloseTo(after.height / before.height, 1);
     expect(after.width).toBeGreaterThan(before.width * 1.2);
@@ -87,19 +88,21 @@ test.describe("resizable project pieces", () => {
     expect(Math.abs(still.x - neighbour.x) + Math.abs(still.y - neighbour.y)).toBeLessThan(1);
     // The piece is scaled in the Mobile frame and not in the Desktop frame.
     await expect.poll(() => piece.evaluate((el) => getComputedStyle(el).scale)).not.toBe("none");
-    await expect.poll(() => desktopFrame(page).locator(PIECE).evaluate((el) => getComputedStyle(el).scale)).toBe("none");
+    // the desktop frame keeps the size it had (none, or the live content's own desktop size)
+    const desktopScale = sizeBefore?.desktop && sizeBefore.desktop.scale !== 1 ? String(sizeBefore.desktop.scale) : "none";
+    await expect.poll(() => desktopFrame(page).locator(PIECE).evaluate((el) => getComputedStyle(el).scale)).toBe(desktopScale);
 
     // The inspector row shows the size, tinted on this size, and the scope bar counts it.
     await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: await pieceFile(request) }).first().click();
     const field = page.locator(".ed-sizefield.is-over:visible");
     await expect(field).toBeVisible();
     await expect(field.getByRole("textbox", { name: "Size" })).toHaveValue(String(Math.round(size.base.scale * 100)));
-    await expect(page.locator(".ed-scope")).toContainText(`${changesBefore + 1} change`);
+    await expect(page.locator(".ed-scope")).toContainText(`${sizeBefore ? changesBefore : changesBefore + 1} change`);
 
     // One undo step takes the whole drag back.
     await page.getByRole("button", { name: "Undo" }).click();
-    await expect.poll(() => pieceSize(request)).toBeUndefined();
-    await expect.poll(() => piece.evaluate((el) => getComputedStyle(el).scale)).toBe("none");
+    await expect.poll(() => pieceSize(request)).toEqual(sizeBefore);
+    await expect.poll(() => piece.evaluate((el) => getComputedStyle(el).scale)).toBe(sizeBefore?.base && sizeBefore.base.scale !== 1 ? String(sizeBefore.base.scale) : "none");
   });
 });
 
