@@ -7,6 +7,7 @@ import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
 import { currentPage, flush, megaItemId, redo, setPage, undo, useEditor } from "../store";
 import { ClaudePill } from "./ClaudePill";
 import { loadPublished, openSheet, publish, usePublish } from "./publish";
+import { loadStaging, useStaging } from "./staging";
 import { PublishSheet, useChanges } from "./PublishSheet";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
@@ -64,6 +65,8 @@ export function TopBar() {
   const phase = usePublish((p) => p.phase);
   const changes = useChanges();
   useEffect(() => void loadPublished(), []);
+  useEffect(() => void loadStaging(), []);
+  const staged = useStaging((st) => !!st.info);
   // Once a publish lands (here, or in another window), what is live changes.
   useEffect(() => {
     if (!unpublished) void loadPublished();
@@ -158,6 +161,11 @@ export function TopBar() {
         <button type="button" className="ed-btn ed-desk-only" onClick={preview}>
           Preview
         </button>
+        {staged ? (
+          <button type="button" className="ed-btn ed-staging-chip ed-desk-only" title="Something is in staging: share it or push it to production" onClick={openSheet}>
+            Staging
+          </button>
+        ) : null}
         <PublishButton phase={phase} count={count} disabled={!unpublished && save !== "error" && phase === "idle"} />
         <MoreMenu canDiscard={unpublished} onDiscard={discard} onPreview={() => void preview()} />
         <PublishSheet />

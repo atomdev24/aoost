@@ -45,6 +45,14 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Variants, staging and Push to production (for Monday's demo; plan in the "aoost editor: faster
+  opening plan and Figma gap list" doc, Roadmap tab): make a variant of any page from the page
+  switcher, edit it while the page stays as it was (purple frames, a band with Back and Elect),
+  elect it into staging, share the staging link (opens without signing in, "Staging preview"
+  tag), then Push to production publishes exactly what was staged. Decided with Alex: electing
+  goes to staging, never straight live; Owners and Managers will elect once roles exist; access
+  (Google sign-in) and the Aerobotics split come after the editor's functionality.
+
 - Stress test and polish pass (`.probe/audit.mjs`: every main flow in real Chrome, input-to-paint
   times, long frames with source, errors, screenshots; desktop and phone):
   - Still pictures cost far less: images copied at the size shown, Latin fonts only, no file

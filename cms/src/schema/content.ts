@@ -122,6 +122,12 @@ export const Page = z.object({
   hideNav: z.boolean().optional(),
   sections: z.array(Section),
   overlays: z.array(Overlay).default([]),
+  /** A variant: a copy of the page with this id to try ideas on. Never built into the site (always status "draft"). */
+  variantOf: Id.optional(),
+  /** The variant's name ("Variant 1", "Spring hero"). */
+  variantName: z.string().min(1).max(60).optional(),
+  /** Variant block id → the page's block id it was copied from, so electing gives blocks back their ids. */
+  variantIds: z.record(z.string(), z.string()).optional(),
 });
 export type Page = z.infer<typeof Page>;
 

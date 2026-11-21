@@ -20,7 +20,12 @@ export type ServerMessage =
   /** A newer deploy was merged into the draft (the changes themselves arrive as "ops"). */
   | { type: "synced"; at: number; conflicts: number }
   /** A newer deploy couldn't be merged into the draft; the editor offers a way out. */
-  | { type: "sync-blocked"; reason: string };
+  | { type: "sync-blocked"; reason: string }
+  /** Something was sent to staging (or staging was emptied: null). */
+  | { type: "staging"; meta: StagingMeta | null };
+
+/** What is in staging: the share link's token, when and by whom it was staged, and the live base it was built on. */
+export type StagingMeta = { token: string; at: number; label: string; by: string; baseFp: string };
 
 /** A value both the draft and the live site changed differently since the draft's base. The draft kept its own. */
 export type SyncConflict = { id: string; label: string; draft: string; live: string };

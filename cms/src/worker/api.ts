@@ -1,5 +1,7 @@
 import type { Op } from "../model/ops";
+import type { StagingMeta } from "../model/protocol";
 import { renderPage } from "../render/document";
+import { validateSite } from "../schema";
 import { searchIndex } from "../render/build";
 import type { Identity } from "./auth";
 import { draftStub, readDraft, type Env } from "./env";
@@ -13,6 +15,21 @@ const CONNECTOR_FRESH_MS = 15 * 60_000;
 
 /** /api/editor/*: every route here is already authenticated. */
 const isLocalHost = (host: string) => host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host.endsWith(".localhost");
+
+/**
+ * A test server never publishes, whatever credentials it has: a test run once clicked
+ * Publish on one and changed the live homepage. Test servers sign in with the password
+ * (production uses Cloudflare Access), and wrangler dev reports the real domain, so the
+ * sign-in mode is the reliable sign. ALLOW_LOCAL_PUBLISH=1 lifts it deliberately.
+ */
+function publishLocked(env: Env, url: URL): Response | null {
+  if ((env.AUTH_MODE === "password" || isLocalHost(url.hostname)) && env.ALLOW_LOCAL_PUBLISH !== "1") return error(403, "Publishing is off on a local test server.");
+  if (!env.GITHUB_TOKEN) return error(503, "Publishing needs GITHUB_TOKEN. See BLOCKERS.md.");
+  return null;
+}
+
+/** The link is a path: the editor adds its own address (wrangler dev reports the real domain as the origin). */
+const stagingInfo = (meta: StagingMeta) => ({ at: meta.at, label: meta.label, by: meta.by, path: `/staging/${meta.token}/` });
 
 export async function editorApi(request: Request, env: Env, url: URL, who: Identity): Promise<Response> {
   if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
@@ -35,20 +52,43 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       return result.ok ? json(result) : error(500, "The published content is invalid.", { issues: result.issues });
     }
     case "POST /publish": {
-      // A test server never publishes, whatever credentials it has: a test run once clicked
-      // Publish on one and changed the live homepage. Test servers sign in with the password
-      // (production uses Cloudflare Access), and wrangler dev reports the real domain, so the
-      // sign-in mode is the reliable sign. ALLOW_LOCAL_PUBLISH=1 lifts it deliberately.
-      if ((env.AUTH_MODE === "password" || isLocalHost(url.hostname)) && env.ALLOW_LOCAL_PUBLISH !== "1") return error(403, "Publishing is off on a local test server.");
-      if (!env.GITHUB_TOKEN) return error(503, "Publishing needs GITHUB_TOKEN. See BLOCKERS.md.");
+      const locked = publishLocked(env, url);
+      if (locked) return locked;
       const body = await readJson<{ message?: string }>(request);
       // Bring in any newer deploy first; publish only a draft that is based on what is live.
       const { blocked } = await draft.sync(true);
       if (blocked) return error(409, blocked + " Choose “Start the draft from the live site” or “Keep my draft” first.");
       const { files, base } = await draft.getPublishFiles();
-      const result = await publishToGitHub(files, { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN, message: body?.message, base });
+      const result = await publishToGitHub(files, { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN!, message: body?.message, base });
       if (!result.ok) return error(result.status === 401 || result.status === 403 ? 502 : result.status === 422 || result.status === 409 ? 409 : 502, result.error);
       await draft.markPublished();
+      return json({ ok: true, commit: result.commit, url: result.url, changed: result.changed });
+    }
+    case "GET /staging": {
+      const meta = await draft.getStaging();
+      return json({ ok: true, staging: meta?.at ? stagingInfo(meta) : null });
+    }
+    case "POST /staging": {
+      const body = await readJson<{ label?: string }>(request);
+      const meta = await draft.stage(body?.label?.trim() || "Draft", who.who);
+      return json({ ok: true, staging: stagingInfo(meta) });
+    }
+    case "DELETE /staging":
+      await draft.clearStaging(url.searchParams.get("forget") === "1");
+      return json({ ok: true });
+    case "POST /staging/push": {
+      const locked = publishLocked(env, url);
+      if (locked) return locked;
+      const { blocked } = await draft.sync(true);
+      if (blocked) return error(409, blocked + " Sort that out first, then send to staging again.");
+      const staged = await draft.getStagedForPush();
+      if (!staged) return error(409, "Nothing is in staging.");
+      if (staged.liveMoved) return error(409, "The live site changed after this was sent to staging. Send it to staging again, check the link, then push.");
+      const body = await readJson<{ message?: string }>(request);
+      const result = await publishToGitHub(staged.files, { repo: env.GITHUB_REPO, branch: env.PUBLISH_BRANCH, token: env.GITHUB_TOKEN!, message: body?.message, base: staged.base });
+      if (!result.ok) return error(result.status === 401 || result.status === 403 ? 502 : result.status === 422 || result.status === 409 ? 409 : 502, result.error);
+      await draft.markPublished(staged.files);
+      await draft.clearStaging();
       return json({ ok: true, commit: result.commit, url: result.url, changed: result.changed });
     }
     case "POST /conflict": {
@@ -118,4 +158,30 @@ export async function preview(env: Env, url: URL): Promise<Response> {
   const page = site.pages.find((p) => p.slug === slug);
   if (!page) return html("<!doctype html><meta charset=utf-8><title>Not in the draft</title><p style='font:16px system-ui;padding:40px'>No page at this URL in the draft.</p>", 404);
   return html(renderPage(site, page, { preview: { prefix: "/preview" }, assetVersion: String(version) }));
+}
+
+const STAGING_TAG = `<div style="position:fixed;left:12px;bottom:12px;z-index:2147483647;font:600 11px/1 system-ui,sans-serif;letter-spacing:.02em;color:#fff;background:#8e44ff;padding:7px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:none" aria-hidden="true">Staging preview</div>`;
+
+/** /staging/<token>/<slug>: what staging holds, rendered exactly like the public site. Public: the token is the key. */
+export async function staging(env: Env, url: URL): Promise<Response> {
+  const m = /^\/staging\/([\w-]{16,64})(\/.*)?$/.exec(url.pathname);
+  const notFound = () => html("<!doctype html><meta charset=utf-8><meta name=robots content=noindex><title>Not found</title><p style='font:16px system-ui;padding:40px'>This staging link isn't active. Ask for a new one.</p>", 404);
+  if (!m) return notFound();
+  const token = m[1]!;
+  if (!m[2]) return Response.redirect(new URL(`/staging/${token}/`, url).toString(), 301);
+  const text = await draftStub(env).getStagedSiteJson(token);
+  if (!text) return notFound();
+  const parsed = validateSite(JSON.parse(text));
+  if (!parsed.ok) return notFound();
+  const site = parsed.site;
+  const prefix = `/staging/${token}`;
+  const path = m[2].replace(/\/$/, "") || "/";
+  if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: prefix + e.url })));
+  const page = site.pages.find((p) => p.slug === path && p.status !== "draft" && p.variantOf === undefined);
+  if (!page) return html("<!doctype html><meta charset=utf-8><meta name=robots content=noindex><title>Not in staging</title><p style='font:16px system-ui;padding:40px'>No page at this address in staging.</p>", 404);
+  const body = renderPage(site, page, { preview: { prefix }, assetVersion: "staging" }).replace("</body>", `${STAGING_TAG}</body>`);
+  const res = html(body);
+  res.headers.set("X-Robots-Tag", "noindex");
+  res.headers.set("Cache-Control", "no-store");
+  return res;
 }

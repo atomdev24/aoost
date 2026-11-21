@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { currentPage, setPage, useEditor } from "../store";
+import { createVariant, ownerPage } from "../../model/variants";
+import { currentPage, getState, setPage, update, useEditor } from "../store";
+
+/** Make a variant of the page on screen (or of its page, on a variant) and open it. */
+export function newVariant() {
+  const s = getState();
+  const made = createVariant(s.site, s.pageId);
+  if (!made) return;
+  update(() => made.site, "New variant");
+  setPage(made.pageId);
+}
 
 /** "Home ▾": jump to another page without leaving the canvas. */
 export function PageSwitcher() {
@@ -7,7 +17,9 @@ export function PageSwitcher() {
   const pages = useEditor((s) => s.site.pages);
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
-  const ordered = pages.filter((p) => !p.parentId).flatMap((p) => [p, ...pages.filter((c) => c.parentId === p.id)]);
+  const site = useEditor((s) => s.site);
+  const withVariants = (p: (typeof pages)[number]) => [p, ...pages.filter((v) => v.variantOf === p.id)];
+  const ordered = pages.filter((p) => !p.parentId && !p.variantOf).flatMap((p) => [...withVariants(p), ...pages.filter((c) => c.parentId === p.id && !c.variantOf).flatMap(withVariants)]);
 
   useEffect(() => {
     if (!open) return;
@@ -26,6 +38,7 @@ export function PageSwitcher() {
     <div className="ed-switcher" ref={box}>
       <button type="button" className="ed-switcher-btn" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
         {page.title}
+        {page.variantOf ? <span className="ed-switcher-variant">{page.variantName}</span> : null}
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
           <path d="M2.500 4l2.500 2.500L7.500 4" />
         </svg>
@@ -38,17 +51,31 @@ export function PageSwitcher() {
                 type="button"
                 role="menuitemradio"
                 aria-checked={p.id === page.id}
-                className={p.parentId ? "is-child" : undefined}
+                className={[p.parentId ? "is-child" : "", p.variantOf ? "is-variant" : ""].filter(Boolean).join(" ") || undefined}
                 onClick={() => {
                   setPage(p.id);
                   setOpen(false);
                 }}
               >
-                <span>{p.title}</span>
-                <small>{p.status === "published" ? p.slug : `${p.slug} · ${p.status === "draft" ? "draft" : "unlisted"}`}</small>
+                <span>{p.variantOf ? p.variantName : p.title}</span>
+                <small>{p.variantOf ? `Variant of ${p.title}` : p.status === "published" ? p.slug : `${p.slug} · ${p.status === "draft" ? "draft" : "unlisted"}`}</small>
               </button>
             </li>
           ))}
+          <li role="none" className="ed-menu-sep" aria-hidden="true" />
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                newVariant();
+                setOpen(false);
+              }}
+            >
+              <span>New variant of {ownerPage(site, page).title}</span>
+              <small>Try ideas without touching the live page</small>
+            </button>
+          </li>
         </ul>
       ) : null}
     </div>

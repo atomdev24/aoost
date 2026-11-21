@@ -99,14 +99,15 @@ test.describe("homepage: the original page, from aoost blocks", () => {
     await expect(page.locator("#viewer")).toBeHidden();
   });
 
-  test("the keychain swings, the note is plain, and the skills section is hidden", async ({ page }) => {
+  test("the keychain swings (when shown), the note is plain, and the skills section is hidden", async ({ page }) => {
     const projects = homeBlock("AoostProjects");
     await home(page);
-    // it sways all the time, so it never "holds still" for Playwright's own scroll and click
-    await page.locator("#keychain").evaluate((el) => el.scrollIntoView({ block: "center" }));
-    await page.locator("#keychain").dispatchEvent("click");
-    await expect(page.locator("#keychain")).toHaveClass(/kick/);
-    expect(projects.keychain.show).toBe(true);
+    if (projects.keychain.show) {
+      // it sways all the time, so it never "holds still" for Playwright's own scroll and click
+      await page.locator("#keychain").evaluate((el) => el.scrollIntoView({ block: "center" }));
+      await page.locator("#keychain").dispatchEvent("click");
+      await expect(page.locator("#keychain")).toHaveClass(/kick/);
+    } else await expect(page.locator("#keychain")).toHaveCount(0); // switched off in the editor (21 Nov)
     await expect(page.locator(".table-note")).toHaveAttribute("data-note-style", projects.note.style ?? "eye");
     await expect(page.locator(".table-note canvas")).toHaveCount(projects.note.style === "plain" ? 0 : 1);
     await expect(page.locator(".skills")).toBeVisible({ visible: !skillsHidden }); // hidden on the live site, kept for an About page later

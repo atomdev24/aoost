@@ -2740,6 +2740,7 @@ button.ed-card {
 .ed-sheet-foot {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
 }
 .ed-visually-hidden {
   position: absolute;
@@ -2993,4 +2994,145 @@ button.ed-card {
   font: 13px/1.4 var(--ed-font);
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* ------------------------------------------------- variants and staging */
+:root {
+  --ed-variant: #bf5af2;
+  --ed-variant-soft: rgba(191, 90, 242, 0.18);
+}
+.ed-shell.is-variant .bd-frame {
+  box-shadow: 0 0 0 2px var(--ed-variant), 0 16px 48px rgba(0, 0, 0, 0.55);
+}
+.ed-shell.is-variant .ed-switcher-btn {
+  box-shadow: inset 0 0 0 1px var(--ed-variant);
+}
+.ed-switcher-variant {
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ed-variant);
+}
+.ed-menu button.is-variant {
+  padding-left: 28px;
+}
+.ed-menu button.is-variant > span::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--ed-variant);
+  vertical-align: 1px;
+}
+.ed-variant-band {
+  position: fixed;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 39;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  max-width: calc(100vw - 32px);
+  padding: 7px 8px 7px 12px;
+  font-size: 12.5px;
+  color: #ececee;
+  background: rgba(36, 30, 44, 0.94);
+  border: 1px solid var(--ed-variant);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.ed-variant-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ed-variant);
+  flex: none;
+}
+.ed-variant-name {
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ed-variant-soft);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 2px 6px;
+  max-width: 200px;
+}
+.ed-variant-name:hover,
+.ed-variant-name:focus {
+  border-color: var(--ed-variant);
+  outline: none;
+}
+.ed-variant-error {
+  color: #ff8a80;
+}
+.ed-btn.ed-btn-variant {
+  color: #fff;
+  background: var(--ed-variant);
+  border-color: var(--ed-variant);
+}
+.ed-btn.ed-btn-variant:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.ed-staging-chip {
+  color: #fff;
+  border-color: var(--ed-variant);
+  background: var(--ed-variant-soft);
+}
+.ed-staging {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 10px;
+  padding: 10px;
+  border: 1px solid var(--ed-variant-soft);
+  border-radius: 10px;
+}
+.ed-staging-head {
+  display: grid;
+  gap: 2px;
+}
+.ed-staging .ed-hint {
+  margin: 0;
+}
+.ed-staging-link {
+  display: flex;
+  gap: 6px;
+}
+.ed-staging-link .ed-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+}
+.ed-staging-link a.ed-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+.ed-staging-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+@media (max-width: 767px) {
+  .ed-variant-band {
+    top: auto;
+    bottom: 76px;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 5px 6px 5px 10px;
+    font-size: 12px;
+  }
+  .ed-variant-band .ed-variant-name {
+    max-width: 120px;
+  }
+  .ed-variant-text {
+    white-space: nowrap;
+  }
 }

@@ -22,6 +22,7 @@ import { FieldLabel } from "./workspace/FieldLabel";
 import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
+import { VariantBand } from "./workspace/VariantBand";
 import { TopBar } from "./workspace/TopBar";
 import { BrowserZoomNotice } from "./workspace/BrowserZoomNotice";
 import { warmUp } from "./warmup";
@@ -60,6 +61,7 @@ export function Editor() {
   const bp = useEditor((s) => s.bp);
   const interacting = useBoard((s) => s.interacting);
   const moving = useBoard((s) => s.moving);
+  const onVariant = useEditor((s) => !!currentPage(s).variantOf);
   useEffect(() => attachKeys(document), []);
   useEffect(() => warmUp(), []);
 
@@ -96,9 +98,10 @@ export function Editor() {
         }}
       >
         <PuckBridge />
-        <div className={`ed-shell${interacting ? " is-interacting" : ""}${moving ? " is-moving" : ""}`}>
+        <div className={`ed-shell${interacting ? " is-interacting" : ""}${moving ? " is-moving" : ""}${onVariant ? " is-variant" : ""}`}>
           <TopBar />
           <SyncNotice />
+          <VariantBand />
           <LeftPanel />
           <Board />
           <Inspector />
