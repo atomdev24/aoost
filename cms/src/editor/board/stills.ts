@@ -55,7 +55,39 @@ function clearStills() {
 
 // ------------------------------------------------------------------ capturing one frame
 
+const blobToData = (blob: Blob) =>
+  new Promise<string | null>((resolve) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result as string);
+    r.onerror = () => resolve(null);
+    r.readAsDataURL(blob);
+  });
+
+/** Pictures with see-through parts keep them (WebP); photos go to JPEG. */
+const pictureType = (src: string, blobType = "") => (/jpe?g/i.test(blobType) || /\.jpe?g($|\?)/i.test(src) ? "image/jpeg" : "image/webp");
+
+/**
+ * An image redrawn no wider than `maxW`, as a data URL. Decoding, resizing and compressing happen
+ * off the main thread (createImageBitmap, OffscreenCanvas.convertToBlob): done in one go on the
+ * main thread, the homepage's big background froze the editor for ~0.4 s.
+ */
+async function smaller(source: Blob | HTMLImageElement, maxW: number, maxH: number, type: string): Promise<string | null> {
+  try {
+    const full = await createImageBitmap(source);
+    const scale = Math.min(1, maxW / full.width, maxH / full.height);
+    const w = Math.max(1, Math.round(full.width * scale));
+    const h = Math.max(1, Math.round(full.height * scale));
+    const canvas = new OffscreenCanvas(w, h);
+    canvas.getContext("2d")!.drawImage(full, 0, 0, w, h);
+    full.close();
+    return await blobToData(await canvas.convertToBlob({ type, quality: 0.85 }));
+  } catch {
+    return null;
+  }
+}
+
 const dataCache = new Map<string, Promise<string | null>>();
+/** A file as a data URL; big pictures (a CSS background, an image the page didn't draw) are shrunk first. */
 function toData(url: string): Promise<string | null> {
   let p = dataCache.get(url);
   if (!p) {
@@ -64,12 +96,8 @@ function toData(url: string): Promise<string | null> {
         const res = await fetch(url, url.startsWith(location.origin) ? { credentials: "same-origin" } : {});
         if (!res.ok) return null;
         const blob = await res.blob();
-        return await new Promise<string | null>((resolve) => {
-          const r = new FileReader();
-          r.onload = () => resolve(r.result as string);
-          r.onerror = () => resolve(null);
-          r.readAsDataURL(blob);
-        });
+        if (/^image\//.test(blob.type) && !/svg/.test(blob.type) && blob.size > 150_000) return (await smaller(blob, 1920, 1920, pictureType(url, blob.type))) ?? (await blobToData(blob));
+        return await blobToData(blob);
       } catch {
         return null;
       }
@@ -79,28 +107,20 @@ function toData(url: string): Promise<string | null> {
   return p;
 }
 
-const shownCache = new Map<string, string>();
-/** A decoded <img> redrawn at twice the size it's shown (capped by its own size), as a small data URL. */
-function shownCopy(img: HTMLImageElement): string | null {
-  if (!img.complete || !img.naturalWidth) return null;
+const shownCache = new Map<string, Promise<string | null>>();
+/** A decoded <img> redrawn at twice the size it's shown (capped by its own size), off the main thread. */
+function shownCopy(img: HTMLImageElement): Promise<string | null> {
+  if (!img.complete || !img.naturalWidth) return Promise.resolve(null);
   const r = img.getBoundingClientRect();
-  const scale = Math.min(1, (2 * Math.max(r.width, 1)) / img.naturalWidth, (2 * Math.max(r.height, 1)) / img.naturalHeight);
-  const w = Math.max(1, Math.round(img.naturalWidth * scale));
-  const h = Math.max(1, Math.round(img.naturalHeight * scale));
-  const key = `${img.currentSrc}|${w}x${h}`;
-  const hit = shownCache.get(key);
-  if (hit) return hit;
-  try {
-    const c = document.createElement("canvas");
-    c.width = w;
-    c.height = h;
-    c.getContext("2d")!.drawImage(img, 0, 0, w, h);
-    const url = c.toDataURL(/\.jpe?g($|\?)/i.test(img.currentSrc) ? "image/jpeg" : "image/png", 0.9);
-    shownCache.set(key, url);
-    return url;
-  } catch {
-    return null;
+  const maxW = Math.max(1, Math.round(2 * Math.max(r.width, 1)));
+  const maxH = Math.max(1, Math.round(2 * Math.max(r.height, 1)));
+  const key = `${img.currentSrc}|${maxW}x${maxH}`;
+  let p = shownCache.get(key);
+  if (!p) {
+    p = smaller(img, maxW, maxH, pictureType(img.currentSrc));
+    shownCache.set(key, p);
   }
+  return p;
 }
 
 const URL_RE = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
@@ -184,7 +204,7 @@ export async function captureFrame(doc: Document): Promise<{ canvas: HTMLCanvasE
       img.removeAttribute("loading");
       if (!src || src.startsWith("data:")) return;
       // The frame already has this picture decoded: copy it at the size it's shown (not the original file).
-      const data = (live && shownCopy(live)) || (await toData(new URL(src, base).href));
+      const data = (live && (await shownCopy(live))) || (await toData(new URL(src, base).href));
       if (data) img.setAttribute("src", data);
       else img.removeAttribute("src");
     }),
