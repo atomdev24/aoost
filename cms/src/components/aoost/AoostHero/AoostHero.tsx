@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef, type CSSProperties } from "react";
 import { startDotBoard } from "../runtime/dots.js";
 import { z } from "zod";
 import { ResponsiveFrameFit } from "../../../schema";
@@ -23,6 +23,12 @@ export const AoostHeroContent = z.object({
   reelBar: z.boolean().optional(),
   /** Clicking an artwork opens it full screen in the viewer. Older content: on. */
   reelViewer: z.boolean().optional(),
+  /** Artwork pan: the image glides slowly across inside its frame, on its own, from load. Older content: off. */
+  artPan: z.enum(["off", "rtl", "ltr"]).optional(),
+  /** Seconds for one pass across (it then glides back). */
+  artPanSeconds: z.number().min(3).max(60).optional(),
+  /** How far it travels, as % of the frame's width (the artwork is enlarged to match). */
+  artPanDistance: z.number().min(2).max(20).optional(),
   /** Show the ticker strip under the artwork. Off renders no strip at all. Older content has no value: shown. */
   showTicker: z.boolean().optional(),
   /** How the strip shows its lines: scrolling (the ticker) or a dot board (lines breathe in, hold, fade). Older content: scrolling. */
@@ -112,11 +118,24 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     `.ao .ticker.dots{height:clamp(78px,8.6vw,124px)}\n.ao .ticker.dots .dm{display:block;width:100%;height:100%}\n` +
     // Progress line hidden; artwork that doesn't open the viewer.
     `.ao .hero-rect.no-bar .hr-bar{display:none}\n.ao .hero-rect.no-viewer .hr-slide{cursor:default}\n` +
+    // Artwork pan: each image is enlarged (scale) and glides side to side (translate); both add to its own framing transform.
+    `.ao .hero-rect.pan .hr-slide{overflow:hidden}\n` +
+    `.ao .hero-rect.pan .hr-slide img,.ao .hero-rect.pan .hr-slide canvas{scale:var(--pan-s);animation:ao-pan var(--pan-t) ease-in-out infinite alternate;will-change:translate}\n` +
+    `@keyframes ao-pan{from{translate:var(--pan-a) 0}to{translate:var(--pan-b) 0}}\n` +
+    `@media (prefers-reduced-motion:reduce){.ao .hero-rect.pan .hr-slide img,.ao .hero-rect.pan .hr-slide canvas{animation:none;translate:0 0}}\n` +
     // Parallax: the artwork drifts inside its frame (effects.ts sets --drift), enlarged so no edge shows.
     // (on the track, since each image's own transform is its framing).
     `.ao .hero-rect.drifting .hr-track{transform:translate3d(0,var(--drift,0px),0) scale(var(--drift-scale,1));transform-origin:var(--drift-origin,50% 50%);will-change:transform}\n`,
   Render: ({ content, ctx }) => {
     const showTicker = content.showTicker !== false;
+    // Artwork pan: travel d% of the width each way from centre's other side; enlarged just enough to never show an edge.
+    const pan = content.artPan === "rtl" || content.artPan === "ltr"
+      ? (() => {
+          const d = (content.artPanDistance ?? 8) / 2;
+          const [a, b] = content.artPan === "rtl" ? [d, -d] : [-d, d];
+          return { "--pan-a": `${a}%`, "--pan-b": `${b}%`, "--pan-s": String(Math.round((1 + (2 * d) / 100 + 0.01) * 1000) / 1000), "--pan-t": `${content.artPanSeconds ?? 14}s` } as CSSProperties;
+        })()
+      : undefined;
     const lines = tickerLines(content);
     // With no lines yet the strip stays empty; the script may still add live lines (visitor number).
     const repeat = lines.length ? Math.ceil(9 / lines.length) : 0;
@@ -131,7 +150,9 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     return (
       <Block name="hero" mat="none" data={content}>
         <header
-          className={`hero-rect focus-sec${content.reelBar === false ? " no-bar" : ""}${content.reelViewer === false ? " no-viewer" : ""}`}
+          className={`hero-rect focus-sec${content.reelBar === false ? " no-bar" : ""}${content.reelViewer === false ? " no-viewer" : ""}${pan ? " pan" : ""}`}
+          style={pan}
+          data-motion={pan ? "keep" : undefined}
           aria-label="Artwork"
           data-parallax-inner=""
         >

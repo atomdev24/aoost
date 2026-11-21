@@ -23,8 +23,10 @@ export const frameBaseCss = `html,body,#frame-root{height:auto!important;min-hei
 export function stillMotion(doc: Document): () => void {
   const style = doc.createElement("style");
   style.id = "ed-still-motion";
-  // The editor's own flash (a block Claude just changed) keeps playing.
-  style.textContent = "*,*::before,*::after{animation-play-state:paused!important;transition:none!important}.ed-flash,[data-ed-flash]{animation-play-state:running!important}";
+  // The editor's own flash (a block Claude just changed) keeps playing, and so does motion a block
+  // marks as part of its look ([data-motion="keep"], e.g. the hero's artwork pan), so it can be judged here.
+  style.textContent =
+    "*,*::before,*::after{animation-play-state:paused!important;transition:none!important}.ed-flash,[data-ed-flash],[data-motion=keep] *{animation-play-state:running!important}";
   doc.head.appendChild(style);
   return () => style.remove();
 }

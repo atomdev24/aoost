@@ -23,6 +23,17 @@ export const fields: Fields<AoostHeroContent> = {
   reelSeconds: { type: "number", label: "Seconds per artwork", min: 1, max: 60 },
   reelBar: onOff("Progress line under the artwork"),
   reelViewer: onOff("Click artwork to open it full screen"),
+  artPan: {
+    type: "radio",
+    label: "Artwork pan (glides across on its own)",
+    options: [
+      { label: "Off", value: "off" },
+      { label: "Right to left", value: "rtl" },
+      { label: "Left to right", value: "ltr" },
+    ],
+  },
+  artPanSeconds: { type: "number", label: "Artwork pan: seconds per pass", min: 3, max: 60, step: 1 },
+  artPanDistance: { type: "number", label: "Artwork pan: distance (% of width)", min: 2, max: 20, step: 1 },
   clockLabel: { type: "text", label: "Clock label (before the time)" },
   timeZone: { type: "text", label: "Clock time zone (e.g. Africa/Johannesburg)" },
   showTicker: onOff("Ticker strip"),
