@@ -86,5 +86,6 @@ describe("AoostHero", () => {
     expect(html).toContain('data-after="twinkle"');
     expect(html).toContain('data-idle-speed="0.3"');
     expect(html).toContain('data-text-size="55"');
+    expect(renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotEffect: "resolve" })).toContain('data-effect="resolve"');
   });
 });

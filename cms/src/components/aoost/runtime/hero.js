@@ -42,7 +42,7 @@ export function initHero(){
   let tkSig='';
   /* the dot board (the strip's other style): the same lines, breathing in one at a time */
   const dm=tk&&tk.classList.contains('dots')?tk.querySelector('canvas.dm'):null;
-  const board=dm?startDotBoard(dm,{seconds:+tk.dataset.seconds||4,grid:tk.dataset.grid!=='off',after:tk.dataset.after||'loop',idleSpeed:+tk.dataset.idleSpeed||0.5,textSize:+tk.dataset.textSize||70}):null;
+  const board=dm?startDotBoard(dm,{seconds:+tk.dataset.seconds||4,grid:tk.dataset.grid!=='off',after:tk.dataset.after||'loop',idleSpeed:+tk.dataset.idleSpeed||0.5,textSize:+tk.dataset.textSize||70,effect:tk.dataset.effect||'breathe'}):null;
   function ago(t){const m=Math.floor((Date.now()-t)/60000);if(m<1)return'just now';if(m<60)return m+' min ago';const h=Math.floor(m/60);if(h<24)return h+(h===1?' hour':' hours')+' ago';const d=Math.floor(h/24);return d+(d===1?' day':' days')+' ago';}
   function tickerBuild(){
     if(!tk)return;
