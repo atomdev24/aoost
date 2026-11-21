@@ -33,7 +33,7 @@ export function BrowserZoomNotice() {
       role="status"
       style={{ top: vv.top + 12 / vv.scale, left: vv.left + vv.width / 2, transform: `translateX(-50%) scale(${1 / vv.scale})` }}
     >
-      The browser has zoomed the whole page ({Math.round(vv.scale * 100)}%). Pinch out to see the toolbars again.
+      The browser has zoomed the whole page ({Math.round(vv.scale * 100)}%). Pinch out (or open the editor in a new tab) to see the toolbars again.
     </div>
   );
 }
