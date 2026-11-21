@@ -14,10 +14,19 @@ export class ApiError extends Error {
   }
 }
 
+/** Requests index.html started before the script arrived (the draft): used once, by the first matching GET. */
+function early(path: string, init?: RequestInit): Promise<Response> | null {
+  const pre = (window as { __aoostPre?: Record<string, Promise<Response>> }).__aoostPre;
+  if (init || !pre?.[path]) return null;
+  const res = pre[path]!;
+  delete pre[path];
+  return res;
+}
+
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(path, { credentials: "same-origin", ...init, headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...init?.headers } });
+    res = (await early(path, init)) ?? await fetch(path, { credentials: "same-origin", ...init, headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...init?.headers } });
   } catch (e) {
     noteProblem("request", `${init?.method ?? "GET"} ${path.split("?")[0]} didn't reach the server`, e instanceof Error ? e.message : undefined);
     throw e;

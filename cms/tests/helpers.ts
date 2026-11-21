@@ -33,7 +33,10 @@ export async function draftSite(request: APIRequestContext, password: string) {
 export async function draftWithAllPagesLive(request: APIRequestContext, password: string) {
   await resetDraft(request, password);
   const site = await draftSite(request, password);
-  const ops = site.pages.filter((p: { status: string }) => p.status !== "published").map((p: object) => ({ op: "putPage", page: { ...p, status: "published" } }));
+  // Variants stay drafts (they are never live), even when the content has some.
+  const ops = site.pages
+    .filter((p: { status: string; variantOf?: string }) => p.status !== "published" && !p.variantOf)
+    .map((p: object) => ({ op: "putPage", page: { ...p, status: "published" } }));
   const res = await request.post("/api/editor/ops", { headers: bearer(password), data: { ops } });
   if (!res.ok()) throw new Error(`could not set the draft pages live: ${res.status()}`);
 }

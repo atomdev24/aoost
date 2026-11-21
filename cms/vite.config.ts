@@ -23,11 +23,31 @@ function serviceWorker(): Plugin {
   };
 }
 
+/** The modules of the parts that load after the board (src/editor/parts.ts). */
+const LATER = /\/src\/editor\/(ui\/(PagesPanel|PageSettings|HistoryPanel|MediaLibrary|NavPanel|ThemePanel|FontsPanel|LibraryPanel)|insert\/InsertPanel|workspace\/(PublishSheet|CompareView)|commands\/ProblemsDialog)\.tsx$/;
+
 // The admin (editor) SPA. The public site is pre-rendered by scripts/build-site.ts.
 export default defineConfig({
   base: "/admin/",
   plugins: [react(), serviceWorker()],
-  build: { outDir: "dist/admin", emptyOutDir: true, sourcemap: process.env.SOURCEMAP === "1" },
+  build: {
+    outDir: "dist/admin",
+    emptyOutDir: true,
+    sourcemap: process.env.SOURCEMAP === "1",
+    // The editor's own start-up code goes in one file ("editor"); the parts in src/editor/parts.ts
+    // stay in their own files and load after the board. Without this group the code shared by both
+    // was cut into ~20 small files that all loaded at the start anyway. (A single group for all of
+    // node_modules would also pull in Puck's own load-later pieces, so libraries split as before.)
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: "editor", test: (id: string) => /\/src\//.test(id) && !LATER.test(id), priority: 1 },
+          ],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       "/api": "http://localhost:8787",

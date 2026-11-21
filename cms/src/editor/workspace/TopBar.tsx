@@ -8,7 +8,8 @@ import { currentPage, flush, megaItemId, redo, setPage, undo, useEditor } from "
 import { ClaudePill } from "./ClaudePill";
 import { loadPublished, openSheet, publish, usePublish } from "./publish";
 import { loadStaging, useStaging } from "./staging";
-import { PublishSheet, useChanges } from "./PublishSheet";
+import { useChanges } from "./changes-count";
+import { PublishSheet } from "../parts";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
 import { openPalette } from "../commands/palette-store";
@@ -67,6 +68,7 @@ export function TopBar() {
   useEffect(() => void loadPublished(), []);
   useEffect(() => void loadStaging(), []);
   const staged = useStaging((st) => !!st.info);
+  const sheetOpen = usePublish((st) => st.sheet);
   // Once a publish lands (here, or in another window), what is live changes.
   useEffect(() => {
     if (!unpublished) void loadPublished();
@@ -168,7 +170,7 @@ export function TopBar() {
         ) : null}
         <PublishButton phase={phase} count={count} disabled={!unpublished && save !== "error" && phase === "idle"} />
         <MoreMenu canDiscard={unpublished} onDiscard={discard} onPreview={() => void preview()} />
-        <PublishSheet />
+        {sheetOpen ? <PublishSheet /> : null}
       </div>
     </header>
   );
@@ -183,7 +185,7 @@ function PublishButton({ phase, count, disabled }: { phase: string; count: numbe
   const busy = phase === "github" || phase === "rebuilding";
   const label = phase === "github" ? "Saving…" : phase === "rebuilding" ? "Rebuilding…" : phase === "live" ? "Live" : "Publish";
   return (
-    <span className={`ed-publish is-${phase}`}>
+    <span className={`ed-publish is-${phase}`} onPointerEnter={() => void PublishSheet.prefetch()}>
       <button type="button" className="ed-btn ed-btn-accent ed-pill ed-publish-btn" onClick={() => void publish()} disabled={busy || (disabled && phase !== "error")} aria-live="polite">
         {busy ? <span className="ed-spinner" aria-hidden="true" /> : phase === "live" ? <span aria-hidden="true">✓</span> : null}
         {label}

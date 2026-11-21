@@ -5,6 +5,7 @@ import { AdjustImage } from "../canvas/AdjustImage";
 import { ResizePiece } from "../canvas/ResizePiece";
 import { EmptyPage } from "../insert/EmptyPage";
 import { useSnapshot } from "./snapshots";
+import { prefetchParts } from "../lazy";
 import { currentPage, getState, useEditor } from "../store";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { activateBreakpoint } from "./bridge";
@@ -40,6 +41,11 @@ function LoadingCover({ bp, pageId, slug, ready }: { bp: Breakpoint; pageId: str
   useEffect(() => setGone(false), [pageId]);
   useEffect(() => {
     if (!ready) return;
+    // The first frame that has drawn its page: the board is usable (opening timings).
+    if (!performance.getEntriesByName("aoost:board").length) {
+      performance.mark("aoost:board");
+      prefetchParts();
+    }
     const t = setTimeout(() => setGone(true), 320);
     return () => clearTimeout(t);
   }, [ready, snap, pageId, slug]);

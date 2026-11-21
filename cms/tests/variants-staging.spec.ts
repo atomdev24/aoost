@@ -72,7 +72,7 @@ test.describe("variants and staging", () => {
     await expect
       .poll(async () => {
         const site = await draftSite(request, password!);
-        return [site.pages.some((p: { variantOf?: string }) => p.variantOf), JSON.stringify(site.pages.find((p: { id: string }) => p.id === "sample").sections).includes("from staging")];
+        return [site.pages.some((p: { variantOf?: string }) => p.variantOf === "sample"), JSON.stringify(site.pages.find((p: { id: string }) => p.id === "sample").sections).includes("from staging")];
       })
       .toEqual([false, true]);
 
@@ -108,7 +108,8 @@ test.describe("variants and staging", () => {
     await page.locator(".ed-page-row", { hasText: "/sample" }).hover();
     await page.getByRole("button", { name: "New variant of Sample" }).click();
     await expect(page.getByRole("region", { name: "Variant" })).toBeVisible();
-    const row = page.locator(".ed-page-variant");
+    // Only Sample's variants (the content can hold variants of other pages).
+    const row = page.locator(".ed-page-variant", { hasText: "Variant of Sample" });
     await expect(row).toHaveCount(1);
     await expect(row).toContainText("Variant 1");
     await expect(row).toContainText("Variant of Sample");

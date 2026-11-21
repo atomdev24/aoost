@@ -1,22 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { summarizeChanges, type ChangeSummary } from "../../model/changes";
-import { useEditor } from "../store";
+import { useEffect, useMemo } from "react";
+import { useChanges } from "./changes-count";
 import { closeSheet, publish, pushStaging, usePublish, type Step } from "./publish";
 import { copyStagingLink, emptyStaging, sendToStaging, useStaging } from "./staging";
 import { resolveConflict, useSync } from "./sync";
-
-/** The unpublished changes, recounted shortly after edits settle. */
-export function useChanges(): ChangeSummary | null {
-  const site = useEditor((s) => s.site);
-  const published = usePublish((s) => s.published);
-  const [summary, setSummary] = useState<ChangeSummary | null>(null);
-  useEffect(() => {
-    if (!published) return;
-    const t = setTimeout(() => setSummary(summarizeChanges(published, site)), 250);
-    return () => clearTimeout(t);
-  }, [site, published]);
-  return published ? summary : null;
-}
 
 const STEPS: { id: Step; label: string }[] = [
   { id: "github", label: "Saving to GitHub" },

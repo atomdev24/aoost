@@ -17,6 +17,8 @@ node scripts/probes/audit.mjs 8799 my-run                 # every main flow (des
 - `stills.mjs` – still pictures: appear, cover every frame while zooming, hand back to live, match.
 - `zoom.mjs` – pinch-zoom smoothness and toolbar dropouts (`DSF=1.8` for a 90% page zoom).
 - `undo.mjs` – type in the inspector, undo/redo, read the text everywhere it lives.
+- `open.mjs <port> <label> [runs]` – how fast the editor opens, cold and warm: the editor's own
+  marks (modules, draft, shell, board), the longest frames while opening, script size.
 
 Output goes to `cms/.probe-out/` (ignored). The probes read `EDITOR_PASSWORD` from `cms/.dev.vars`.
 Don't run them while the e2e suite uses the same server: they share one draft.

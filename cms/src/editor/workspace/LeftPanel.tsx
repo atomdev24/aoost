@@ -4,15 +4,9 @@ import { addSection, createSection, locate } from "../../model/page-ops";
 import type { Section } from "../../schema";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage, useEditor } from "../store";
-import { InsertPanel } from "../insert/InsertPanel";
-import { LibraryPanel } from "../ui/LibraryPanel";
-import { FontsPanel } from "../ui/FontsPanel";
 import { LayersPanel } from "../ui/LayersPanel";
-import { MediaLibrary } from "../ui/MediaLibrary";
-import { NavPanel } from "../ui/NavPanel";
-import { PagesPanel } from "../ui/PagesPanel";
-import { HistoryPanel } from "../ui/HistoryPanel";
-import { ThemePanel } from "../ui/ThemePanel";
+import { FontsPanel, HistoryPanel, InsertPanel, LibraryPanel, MediaLibrary, NavPanel, PagesPanel, ThemePanel } from "../parts";
+import type { Part } from "../lazy";
 import {
   closeFlyout,
   getRailState,
@@ -174,6 +168,18 @@ const CloseIcon = () => (
   </svg>
 );
 
+/** The panels that load after the board: hovering a rail button starts loading its panel. */
+const PANEL_PARTS: Partial<Record<PanelId, Part<never>>> = {
+  pages: PagesPanel as Part<never>,
+  history: HistoryPanel as Part<never>,
+  insert: InsertPanel as Part<never>,
+  media: MediaLibrary as Part<never>,
+  nav: NavPanel as Part<never>,
+  theme: ThemePanel as Part<never>,
+  fonts: FontsPanel as Part<never>,
+  global: LibraryPanel as Part<never>,
+};
+
 const TOP_PANELS: PanelId[] = ["layers", "pages", "insert", "media", "history"];
 const BOTTOM_PANELS: PanelId[] = ["nav", "theme", "fonts", "global"];
 
@@ -255,6 +261,7 @@ export function LeftPanel() {
         aria-pressed={isSelected}
         title={title}
         onClick={() => togglePanel(id)}
+        onPointerEnter={() => void PANEL_PARTS[id]?.prefetch()}
       >
         <RailIcon id={id} />
       </button>

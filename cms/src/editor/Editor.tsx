@@ -23,7 +23,8 @@ import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { VariantBand } from "./workspace/VariantBand";
-import { CompareView } from "./workspace/CompareView";
+import { CompareView } from "./parts";
+import { useCompare } from "./workspace/compare";
 import { TopBar } from "./workspace/TopBar";
 import { BrowserZoomNotice } from "./workspace/BrowserZoomNotice";
 import { warmUp } from "./warmup";
@@ -63,8 +64,10 @@ export function Editor() {
   const interacting = useBoard((s) => s.interacting);
   const moving = useBoard((s) => s.moving);
   const onVariant = useEditor((s) => !!currentPage(s).variantOf);
+  const comparing = !!useCompare();
   useEffect(() => attachKeys(document), []);
   useEffect(() => warmUp(), []);
+  useEffect(() => void performance.mark("aoost:shell"), []);
 
   // Initial data per page; later store changes reach Puck through <PuckSync>.
   const initial = useMemo(() => pageToPuck(currentPage(getState())), [pageId]);
@@ -103,7 +106,7 @@ export function Editor() {
           <TopBar />
           <SyncNotice />
           <VariantBand />
-          <CompareView />
+          {comparing ? <CompareView /> : null}
           <LeftPanel />
           <Board />
           <Inspector />
