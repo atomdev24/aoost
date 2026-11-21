@@ -2,7 +2,7 @@
 import { blockData, doodle, fit, PH, placeholderCanvas, reduce, rng, wrap } from './shared.js';
 import { openViewer } from './viewer.js';
 import { centreRange, clamp, rubber, turnedHalf } from './bounds.js';
-import { clearLayout, separate } from './table.js';
+import { clearLayout, pieceTransform, separate } from './table.js';
 
 export function initProjects(){
   const D=blockData('projects');if(!D)return;
@@ -40,10 +40,13 @@ export function initProjects(){
     const res=separate(els.map(s=>({x:s.x,y:s.y,rot:s.rot,w:s.el.offsetWidth,h:s.el.offsetHeight,s:scaleOf(s.el)})),W,H,{pinned:i});
     res.forEach((b,k)=>{if(k===i||!b.moved)return;const o=els[k];o.x=b.x;o.y=b.y;o.el.style.transition=reduce?'none':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(o);});}
   /* the range a piece's centre may take so all of it (turned) stays on the table */
-  function range(st,rot,w,h){w=w??st.el.offsetWidth;h=h??st.el.offsetHeight;const{hx,hy}=turnedHalf(w,h,rot);return{w,h,...centreRange(table.clientWidth,table.clientHeight,hx,hy)};}
+  function range(st,rot,w,h){w=w??st.el.offsetWidth;h=h??st.el.offsetHeight;const s=scaleOf(st.el),{hx,hy}=turnedHalf(w*s,h*s,rot);return{w,h,...centreRange(table.clientWidth,table.clientHeight,hx,hy)};}
   /* move a piece to the nearest spot where it's fully on the table; true if it had to move */
   function settle(st,w,h){const r=range(st,st.rot,w,h),cx=st.x+r.w/2,cy=st.y+r.h/2,nx=clamp(cx,r.x0,r.x1),ny=clamp(cy,r.y0,r.y1);st.x=nx-r.w/2;st.y=ny-r.h/2;return Math.hypot(nx-cx,ny-cy)>1;}
-  function place(st){st.el.style.transform=`translate(${st.x}px,${st.y}px) rotate(${st.rot}deg)`+(st.el.classList.contains('lifted')?' scale(1.04)':'');}
+  /* A piece's size is a CSS scale, which would scale its translate too (pulling resized pieces toward
+     the table's corner and making them trail the pointer); dividing by it keeps the piece's centre
+     exactly where it's put. pieceTransform is shared with the editor. */
+  function place(st){st.el.style.transform=pieceTransform(st.x,st.y,st.rot,scaleOf(st.el))+(st.el.classList.contains('lifted')?' scale(1.04)':'');}
   function bindDrag(st){const el=st.el;let sx,sy,ox,oy,moved=false,id=null;
     el.addEventListener('pointerdown',e=>{id=e.pointerId;el.setPointerCapture(id);sx=e.clientX;sy=e.clientY;ox=st.x;oy=st.y;moved=false;el.style.zIndex=++z+10;el.style.transition='box-shadow .2s';el.classList.add('lifted');st.rot*=.4;place(st);});
     el.addEventListener('pointermove',e=>{if(e.pointerId!==id)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.hypot(dx,dy)>6)moved=true;st.rot=Math.max(-10,Math.min(10,dx*.04));

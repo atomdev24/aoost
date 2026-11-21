@@ -34,6 +34,16 @@ export function layoutTable(W, aspects) {
 }
 
 /**
+ * The CSS transform that puts a piece's (unscaled) top-left at x, y, tilted, when its size is a CSS
+ * `scale` of s around its centre. The scale property also scales the translate, so it's divided out.
+ */
+export function pieceTransform(x, y, rot, s = 1) {
+  const k = s > 0 ? s : 1;
+  const r = (v) => Math.round(v * 100) / 100;
+  return `translate(${r(x / k)}px,${r(y / k)}px) rotate(${rot}deg)`;
+}
+
+/**
  * Keep pieces clear of each other (by `gap` px, judged on the paper, so shadows may still overlap)
  * and on the table. Pieces are placed one at a time: each stays where it is if that spot is clear,
  * or moves to the nearest clear spot. A `pinned` piece (the one just put down) is placed first, so

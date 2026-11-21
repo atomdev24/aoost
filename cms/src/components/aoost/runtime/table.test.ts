@@ -1,10 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { clearLayout, layoutTable, overlapping, separate } from "./table.js";
+import { clearLayout, pieceTransform, layoutTable, overlapping, separate } from "./table.js";
 
 const onTable = (p: { x: number; y: number; w: number; h: number }, W: number, H: number) => p.x + p.w / 2 > 0 && p.x + p.w / 2 < W && p.y + p.h / 2 > 0 && p.y + p.h / 2 < H;
 const anyOverlap = (items: Parameters<typeof overlapping>[0][]) => items.some((a, i) => items.some((b, j) => j > i && overlapping(a, b, 2)));
 
 describe("projects table", () => {
+  it("divides a piece's scale out of its translate, so a resized piece sits (and drags) exactly where it's put", () => {
+    expect(pieceTransform(100, 50, 3)).toBe("translate(100px,50px) rotate(3deg)");
+    expect(pieceTransform(110, 55, -2, 0.55)).toBe("translate(200px,100px) rotate(-2deg)");
+    // centre on screen = origin + scale × translate, so it lands on x for any scale
+    for (const s of [0.4, 0.66, 1, 1.8]) {
+      const tx = Number(/translate\(([-\d.]+)px/.exec(pieceTransform(300, 0, 0, s))![1]);
+      expect(s * tx).toBeCloseTo(300, 1);
+    }
+  });
+
   it("lays pieces out the same way every time for the same width", () => {
     const a = layoutTable(1040, [1.25, 0.8, 1.4, 1, 1.3]);
     const b = layoutTable(1040, [1.25, 0.8, 1.4, 1, 1.3]);
