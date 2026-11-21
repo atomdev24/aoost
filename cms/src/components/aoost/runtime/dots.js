@@ -53,6 +53,53 @@ const easeIn = (x) => x * x;
  * t (seconds into the frame), given the frame's timing. "breathe" is the first; add more here.
  */
 export const EFFECTS = {
+  /**
+   * Resolve: the board works the line out. A rough ghost of its shape flickers up in small dots,
+   * then a wave sweeps across: dots swell into big overlapping circles (they cut each other where
+   * they overlap) and settle into the solid letters, while the ghost around them falls away.
+   */
+  resolve: {
+    ghost: 2,
+    timing(total) { return { inEnd: 2.75, outStart: Math.max(2.85, total - 0.85) }; },
+    delays(cells, cols, r) { return cells.map((c) => ({ ...c, j: r(), dout: 0.25 * (c.x / cols) + 0.3 * r() })); },
+    draw(g, f, t, T) {
+      const { ctx, pitch, cols, dot, full, at } = g;
+      const WS = 0.95, WD = 1.6, band = 0.22;
+      const front = ((t - WS) / WD) * (1 + band * 2) - band;
+      const small = Math.max(dot * 1.1, pitch * 0.28), shape = pitch * 0.5, big = pitch * 2.1;
+      const circle = (x, y, d) => { ctx.beginPath(); ctx.arc(x, y, d / 2, 0, Math.PI * 2); ctx.fill(); };
+      ctx.globalCompositeOperation = 'xor';
+      const one = (c, text) => {
+        const [cx, cy] = at(c);
+        if (t >= T.outStart) {
+          if (!text) return;
+          const k = (t - T.outStart - c.dout) / 0.4, s = full * (c.w ?? 1) * (k <= 0 ? 1 : k >= 1 ? 0 : 1 - k * k);
+          if (s > 0.3) ctx.fillRect(cx - s / 2, cy - s / 2, s, s);
+          return;
+        }
+        if (t < 0.7 * c.j) return; // the ghost assembles
+        const p = (front - c.x / cols) / band;
+        if (p < 0) {
+          // working it out: small dots that flicker
+          if (Math.sin(t * 8 + c.j * 50) < -0.55) return;
+          // the letters show through the ghost as slightly bigger dots
+          ctx.globalAlpha = text ? 0.8 : 0.4 + 0.25 * c.j;
+          circle(cx, cy, text ? shape : small);
+          ctx.globalAlpha = 1;
+        } else if (p < 1) {
+          const swell = Math.sin(Math.PI * p);
+          if (text) circle(cx, cy, p < 0.5 ? shape + (big - shape) * swell : full + (big - full) * swell);
+          else if (p < 0.6) circle(cx, cy, small + (pitch * 1.25 - small) * swell * (1 - p / 0.6));
+        } else if (text) {
+          const s = full * (c.w ?? 1);
+          ctx.fillRect(cx - s / 2, cy - s / 2, s, s);
+        }
+      };
+      for (const c of f.ghost) one(c, false);
+      for (const c of f.cells) one(c, true);
+      ctx.globalCompositeOperation = 'source-over';
+    },
+  },
   breathe: {
     /** when each dot starts: a left-to-right sweep with some scatter */
     delays(cells, cols, r) { return cells.map((c) => ({ ...c, din: 0.55 * (c.x / cols) + 0.35 * r(), dout: 0.25 * (c.x / cols) + 0.3 * r() })); },
@@ -152,7 +199,20 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
       const cov = sum / n;
       if (cov > 0.14) cells.push({ x, y, w: Math.min(1, 0.45 + (cov - 0.14) * 1.4) });
     }
-    return fx.delays(cells, cols, rng(seed));
+    const r = rng(seed), out = fx.delays(cells, cols, r);
+    if (fx.ghost) {
+      // The rough shape around the letters: every cell within a couple of cells of ink.
+      const ink = new Uint8Array(cols * rows), near = new Uint8Array(cols * rows), G = fx.ghost;
+      for (const c of cells) ink[c.y * cols + c.x] = 1;
+      for (const c of cells) for (let dy = -G; dy <= G; dy++) for (let dx = -G; dx <= G; dx++) {
+        const x = c.x + dx, y = c.y + dy;
+        if (x >= 0 && y >= 0 && x < cols && y < rows && !ink[y * cols + x]) near[y * cols + x] = 1;
+      }
+      const ghost = [];
+      for (let i = 0; i < near.length; i++) if (near[i] && r() < 0.7) ghost.push({ x: i % cols, y: Math.floor(i / cols) });
+      out.ghost = fx.delays(ghost, cols, r);
+    }
+    return out;
   }
 
   function build() {
@@ -161,13 +221,13 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     scratch.font = fontAt(glyphOf(rows));
     const room = cols * 0.88;
     frames = items.flatMap((line) => balanceLine(String(line).split(/\s+/).filter(Boolean), (s) => scratch.measureText(s).width, room))
-      .map((text) => ({ text, cells: rasterize(text, hash(text)) }));
+      .map((text) => { const cells = rasterize(text, hash(text)); return { text, cells, ghost: cells.ghost || [] }; });
     if (at >= frames.length) at = 0;
   }
 
   function timing() {
-    const total = Math.max(2.4, seconds);
-    return { total, inEnd: 1.2, outStart: total - 0.85 };
+    const total = Math.max(fx.timing ? 3.6 : 2.4, seconds);
+    return fx.timing ? { total, ...fx.timing(total) } : { total, inEnd: 1.2, outStart: total - 0.85 };
   }
 
   function drawGrid() {
@@ -213,6 +273,15 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = INK;
     const T = timing(), full = pitch * 0.8, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
+    if (fx.draw && !reduce) {
+      // Effects that draw for themselves go over a clear canvas, with the grid put behind afterwards.
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      fx.draw({ ctx, pitch, cols, rows, dot, full, at: (c) => [ox + c.x * pitch + pitch / 2, oy + c.y * pitch + pitch / 2] }, f, t, T);
+      if (grid && gridLayer) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'destination-over'; ctx.drawImage(gridLayer, 0, 0); ctx.globalCompositeOperation = 'source-over'; }
+      return;
+    }
     for (const c of f.cells) {
       const k = reduce ? 1 : fx.size(c, t, T);
       if (k <= 0.01) continue;

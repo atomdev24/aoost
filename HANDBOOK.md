@@ -107,6 +107,12 @@ against `wrangler dev`).
   Text is drawn at 4×4 sub-pixels per cell and each cell keeps its share of ink, so letter edges
   get smaller dots (smooth, not stair-stepped). Lines show in sentence case. The first time the
   board shows (once the display font is ready) a wave of dots runs across the empty grid.
+- **Dot board: how lines appear.** "Breathe" (dots grow in with a sweep) or "Resolve": a rough
+  ghost of the line flickers up in small dots (the letters slightly bigger, the area around them
+  smaller), then a wave sweeps across where dots swell into big circles drawn with `xor` (so
+  overlaps cut lens shapes) and settle into the solid letters as the ghost falls away. An effect in
+  `EFFECTS` can draw for itself (`draw`), ask for the ghost cells (`ghost: radius`) and set its own
+  timing; Resolve needs at least 3.6 s per line.
 - **Dot board idle and size.** "After the last line": repeat the lines, or show each line once and
   then play an idle animation (`IDLE` in dots.js: `wave`, `twinkle`; each is a level 0–1 per cell
   over time, so adding one is a function plus an editor option). Lines that arrive later (the

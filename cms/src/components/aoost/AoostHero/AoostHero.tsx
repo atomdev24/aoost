@@ -39,6 +39,8 @@ export const AoostHeroContent = z.object({
   dotGrid: z.boolean().optional(),
   /** Dot board: once every line has shown, repeat them ("loop") or play an idle animation instead. Older content: loop. */
   dotAfter: z.enum(["loop", "wave", "twinkle"]).optional(),
+  /** Dot board: how each line appears. "breathe" (older content) or "resolve" (a ghost of the shape, then a wave settles it). */
+  dotEffect: z.enum(["breathe", "resolve"]).optional(),
   /** Dot board: idle animation speed (1 = brisk, 0.5 = slow). */
   dotIdleSpeed: z.number().min(0.1).max(3).optional(),
   /** Dot board: letter height, as % of the strip's height. */
@@ -77,8 +79,8 @@ export function tickerLines(content: AoostHeroContent): string[] {
 }
 
 /** The dot board in the editor's frames: the same animation as the site, with the lines as saved. */
-type DotOpts = { seconds: number; grid: boolean; after: string; idleSpeed: number; textSize: number };
-const dotOpts = (c: AoostHeroContent): DotOpts => ({ seconds: c.dotSeconds ?? 4, grid: c.dotGrid !== false, after: c.dotAfter ?? "loop", idleSpeed: c.dotIdleSpeed ?? 0.5, textSize: c.dotTextSize ?? 70 });
+type DotOpts = { seconds: number; grid: boolean; after: string; idleSpeed: number; textSize: number; effect: string };
+const dotOpts = (c: AoostHeroContent): DotOpts => ({ seconds: c.dotSeconds ?? 4, grid: c.dotGrid !== false, after: c.dotAfter ?? "loop", idleSpeed: c.dotIdleSpeed ?? 0.5, textSize: c.dotTextSize ?? 70, effect: c.dotEffect ?? "breathe" });
 
 function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -88,7 +90,7 @@ function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
     const board = startDotBoard(ref.current, { lines, ...opts });
     return () => board.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize]);
+  }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize, opts.effect]);
   return <canvas className="dm" ref={ref} aria-hidden="true" />;
 }
 
@@ -195,6 +197,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
             data-after={content.dotAfter ?? "loop"}
             data-idle-speed={content.dotIdleSpeed ?? 0.5}
             data-text-size={content.dotTextSize ?? 70}
+            data-effect={content.dotEffect ?? "breathe"}
           >
             {ctx.editing ? <EditingDots lines={lines} opts={dotOpts(content)} /> : <canvas className="dm" aria-hidden="true" />}
           </div>
