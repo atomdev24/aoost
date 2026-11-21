@@ -37,6 +37,12 @@ export const AoostHeroContent = z.object({
   dotSeconds: z.number().min(2.4).max(30).optional(),
   /** Dot board: the faint dot grid behind the lit dots. Older content: on. */
   dotGrid: z.boolean().optional(),
+  /** Dot board: once every line has shown, repeat them ("loop") or play an idle animation instead. Older content: loop. */
+  dotAfter: z.enum(["loop", "wave", "twinkle"]).optional(),
+  /** Dot board: idle animation speed (1 = brisk, 0.5 = slow). */
+  dotIdleSpeed: z.number().min(0.1).max(3).optional(),
+  /** Dot board: letter height, as % of the strip's height. */
+  dotTextSize: z.number().min(30).max(95).optional(),
   /** Ticker lines. "day" and "late" lines show by day or after midnight; "both" always. */
   ticker: z.array(z.object({ text: z.string(), mode: z.enum(["day", "late", "both"]) })),
   /** Add the rodeo's top score to the ticker. */
@@ -71,15 +77,18 @@ export function tickerLines(content: AoostHeroContent): string[] {
 }
 
 /** The dot board in the editor's frames: the same animation as the site, with the lines as saved. */
-function EditingDots({ lines, seconds, grid }: { lines: string[]; seconds: number; grid: boolean }) {
+type DotOpts = { seconds: number; grid: boolean; after: string; idleSpeed: number; textSize: number };
+const dotOpts = (c: AoostHeroContent): DotOpts => ({ seconds: c.dotSeconds ?? 4, grid: c.dotGrid !== false, after: c.dotAfter ?? "loop", idleSpeed: c.dotIdleSpeed ?? 0.5, textSize: c.dotTextSize ?? 70 });
+
+function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const key = lines.join("|");
   useEffect(() => {
     if (!ref.current) return;
-    const board = startDotBoard(ref.current, { lines, seconds, grid });
+    const board = startDotBoard(ref.current, { lines, ...opts });
     return () => board.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, seconds, grid]);
+  }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize]);
   return <canvas className="dm" ref={ref} aria-hidden="true" />;
 }
 
@@ -183,8 +192,11 @@ export const AoostHero = defineComponent<AoostHeroContent>({
             aria-label={lines.length ? `${lines.join(". ")}.` : "Dot board"}
             data-seconds={content.dotSeconds ?? 4}
             data-grid={content.dotGrid === false ? "off" : "on"}
+            data-after={content.dotAfter ?? "loop"}
+            data-idle-speed={content.dotIdleSpeed ?? 0.5}
+            data-text-size={content.dotTextSize ?? 70}
           >
-            {ctx.editing ? <EditingDots lines={lines} seconds={content.dotSeconds ?? 4} grid={content.dotGrid !== false} /> : <canvas className="dm" aria-hidden="true" />}
+            {ctx.editing ? <EditingDots lines={lines} opts={dotOpts(content)} /> : <canvas className="dm" aria-hidden="true" />}
           </div>
         ) : showTicker ? (
           <div className="ticker" id="ticker" aria-label={lines.length ? `${lines.join(". ")}.` : undefined}>

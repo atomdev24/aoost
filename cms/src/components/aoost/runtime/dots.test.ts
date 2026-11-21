@@ -1,7 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { balanceLine, EFFECTS, sentenceCase, wrapLine } from "./dots.js";
+import { balanceLine, EFFECTS, IDLE, sentenceCase, wrapLine } from "./dots.js";
 
 describe("dot board", () => {
+  it("idle animations stay between a grid dot and a full square, and move over time", () => {
+    for (const [name, fx] of Object.entries(IDLE)) {
+      let lit = 0, changed = 0;
+      for (let y = 0; y < 30; y++) for (let x = 0; x < 200; x++) {
+        const a = fx.level(x, y, 1, 200, 30), b = fx.level(x, y, 3.7, 200, 30);
+        expect(a, name).toBeGreaterThanOrEqual(0);
+        expect(a, name).toBeLessThanOrEqual(1);
+        if (a > 0.1) lit++;
+        if (Math.abs(a - b) > 0.05) changed++;
+      }
+      expect(lit, name).toBeGreaterThan(100);
+      expect(changed, name).toBeGreaterThan(500);
+    }
+  });
+
   it("shows lines in sentence case, leaving the rest as written", () => {
     expect(sentenceCase("welcome")).toBe("Welcome");
     expect(sentenceCase("beat the game, top score 9749 by J WARELEY")).toBe("Beat the game, top score 9749 by J WARELEY");

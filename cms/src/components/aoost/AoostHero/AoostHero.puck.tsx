@@ -47,6 +47,17 @@ export const fields: Fields<AoostHeroContent> = {
   },
   dotSeconds: { type: "number", label: "Dot board: seconds per line", min: 2.4, max: 30, step: 0.5 },
   dotGrid: onOff("Dot board: faint dot grid behind"),
+  dotTextSize: { type: "number", label: "Dot board: text size (% of strip height)", min: 30, max: 95, step: 5 },
+  dotAfter: {
+    type: "radio",
+    label: "Dot board: after the last line",
+    options: [
+      { label: "Repeat the lines", value: "loop" },
+      { label: "Wave", value: "wave" },
+      { label: "Twinkle", value: "twinkle" },
+    ],
+  },
+  dotIdleSpeed: { type: "number", label: "Dot board: idle animation speed (0.1 slow – 3 fast)", min: 0.1, max: 3, step: 0.1 },
   ticker: {
     type: "array",
     label: "Ticker lines",

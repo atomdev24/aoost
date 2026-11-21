@@ -57,6 +57,8 @@ describe("AoostHero", () => {
     const html = renderNode("AoostHero", { ...d, tickerStyle: "dots", dotSeconds: 5, dotGrid: false });
     expect(html).toContain('class="ticker dots"');
     expect(html).toContain('data-seconds="5"');
+    expect(html).toContain('data-after="loop"');
+    expect(html).toContain('data-text-size="70"');
     expect(html).toContain('data-grid="off"');
     expect(html).toContain('<canvas class="dm" aria-hidden="true"></canvas>');
     expect(html).not.toContain("tk-track");
@@ -78,5 +80,11 @@ describe("AoostHero", () => {
     expect(html).toContain('class="hero-rect focus-sec pan" style="--pan-a:5%;--pan-b:-5%;--pan-s:1.11;--pan-t:10s"');
     expect(html).toContain('data-motion="keep"');
     expect(renderNode("AoostHero", d)).not.toContain(" pan\"");
+  });
+  it("passes the dot board's idle animation, its speed and the text size to the page", () => {
+    const html = renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotAfter: "twinkle", dotIdleSpeed: 0.3, dotTextSize: 55 });
+    expect(html).toContain('data-after="twinkle"');
+    expect(html).toContain('data-idle-speed="0.3"');
+    expect(html).toContain('data-text-size="55"');
   });
 });
