@@ -85,4 +85,24 @@ test.describe("variants and staging", () => {
     expect((await v.goto(url))?.status()).toBe(404);
     await visitor.close();
   });
+
+  test("the Pages panel makes, lists and deletes variants", async ({ page, request }) => {
+    await draftWithAllPagesLive(request, password!);
+    await signIn(page, password!);
+    await page.goto("/admin/?page=home");
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.getByRole("button", { name: "Pages", exact: true }).click();
+    // The variant button shows on hover (or on the selected row).
+    await page.locator(".ed-page-row", { hasText: "/sample" }).hover();
+    await page.getByRole("button", { name: "New variant of Sample" }).click();
+    await expect(page.getByRole("region", { name: "Variant" })).toBeVisible();
+    const row = page.locator(".ed-page-variant");
+    await expect(row).toHaveCount(1);
+    await expect(row).toContainText("Variant 1");
+    await expect(row).toContainText("Variant of Sample");
+    page.once("dialog", (d) => void d.accept());
+    await page.getByRole("button", { name: "Delete Variant 1 of Sample" }).click();
+    await expect(row).toHaveCount(0);
+  });
 });

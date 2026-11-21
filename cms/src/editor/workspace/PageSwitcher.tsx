@@ -3,9 +3,9 @@ import { createVariant, ownerPage } from "../../model/variants";
 import { currentPage, getState, setPage, update, useEditor } from "../store";
 
 /** Make a variant of the page on screen (or of its page, on a variant) and open it. */
-export function newVariant() {
+export function newVariant(pageId?: string) {
   const s = getState();
-  const made = createVariant(s.site, s.pageId);
+  const made = createVariant(s.site, pageId ?? s.pageId);
   if (!made) return;
   update(() => made.site, "New variant");
   setPage(made.pageId);
@@ -68,7 +68,7 @@ export function PageSwitcher() {
               type="button"
               role="menuitem"
               onClick={() => {
-                newVariant();
+                newVariant(page.id);
                 setOpen(false);
               }}
             >
