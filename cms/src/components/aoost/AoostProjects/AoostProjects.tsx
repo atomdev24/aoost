@@ -112,7 +112,7 @@ export const SHADOWS = {
 } as const;
 
 /**
- * A shadow cast across the whole board, on top of everything (pieces, fixtures, keychain). It never takes clicks.
+ * A shadow cast across the whole section, edge to edge, on top of everything (heading, pieces, fixtures, keychain). It never takes clicks.
  * Older content has none (off).
  */
 export const AoostShadow = z.object({
@@ -164,7 +164,8 @@ const extraCss = `
 .ao .fixture{position:absolute;z-index:8;width:min(var(--fw,200px),36vw);height:auto;left:var(--fx,50%);top:var(--fy,50%);transform:translate(-50%,-50%) rotate(var(--fr,0deg)) scale(var(--fs,1));user-select:none;-webkit-user-select:none;-webkit-user-drag:none;touch-action:none;cursor:grab}
 .ao .fixture.lifted{--fs:1.06;cursor:grabbing;filter:drop-shadow(0 14px 12px rgba(20,21,22,.18))}
 .ao.editing .fixture,.ao .table.ao-static~.fixture{pointer-events:none}
-.ao .board-shadow{position:absolute;inset:0;z-index:70;pointer-events:none;overflow:hidden;border-radius:2px;container-type:size}
+/* The whole section, edge to edge: out to the screen's sides and over the band's padding (the band clips it). */
+.ao .board-shadow{position:absolute;z-index:70;pointer-events:none;overflow:hidden;container-type:size;left:calc(50% - 50vw);width:100vw;top:calc(-1 * var(--s8));bottom:calc(-1 * var(--s8));-webkit-mask-image:linear-gradient(#000 calc(100% - 140px),transparent);mask-image:linear-gradient(#000 calc(100% - 140px),transparent)}
 .ao .board-shadow>i{position:absolute;inset:0;background-repeat:no-repeat;background-size:max(calc(var(--sh-s,110) * 1cqw),100cqh);background-position:var(--sh-x,50%) var(--sh-y,40%)}
 .ao .board-shadow .sh-shade{mix-blend-mode:multiply;opacity:var(--sh-k,.7)}
 .ao .board-shadow .sh-sun{mix-blend-mode:soft-light;opacity:var(--sh-w,.6)}
@@ -265,13 +266,13 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
                 <img src={content.keychain.image} alt="" width="480" height="757" />
               </button>
             ) : null}
-            <BoardShadow shadow={content.shadow} />
           </div>
           <label className="btn add-art" htmlFor="addArt">
             Add artwork (preview only)
             <input id="addArt" type="file" accept="image/*" multiple hidden />
           </label>
         </section>
+        <BoardShadow shadow={content.shadow} />
       </Block>
     );
   },
