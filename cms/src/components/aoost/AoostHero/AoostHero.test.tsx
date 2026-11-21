@@ -91,4 +91,11 @@ describe("AoostHero", () => {
     expect(glass).toContain('class="ticker dots glass"');
     expect(glass).toContain('data-look="glass"');
   });
+  it("passes the glass block / liquid glass settings to the page, with the studies' defaults", () => {
+    const html = renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotLook: "liquid", dotGlass: { cell: 24 } });
+    expect(html).toContain('data-look="liquid"');
+    expect(html).toContain('class="ticker dots glass"');
+    expect(html).toContain("data-lens=\"{&quot;clarity&quot;:0.65,&quot;cell&quot;:24,&quot;refract&quot;:0.3,&quot;shimmer&quot;:0.7,&quot;wobble&quot;:1.5}\"");
+    expect(renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotLook: "flat" })).not.toContain("data-lens");
+  });
 });
