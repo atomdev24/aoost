@@ -19,6 +19,10 @@ export const AoostHeroContent = z.object({
   reel: z.array(z.object({ src: z.string(), alt: z.string().optional(), /** Framing of the artwork, per screen size. */ frame: ResponsiveFrameFit.optional() })),
   /** Seconds each artwork stays before the strip moves on. */
   reelSeconds: z.number().min(1).max(60),
+  /** The thin progress line along the bottom of the artwork. Older content: shown. */
+  reelBar: z.boolean().optional(),
+  /** Clicking an artwork opens it full screen in the viewer. Older content: on. */
+  reelViewer: z.boolean().optional(),
   /** Show the ticker strip under the artwork. Off renders no strip at all. Older content has no value: shown. */
   showTicker: z.boolean().optional(),
   /** How the strip shows its lines: scrolling (the ticker) or a dot board (lines breathe in, hold, fade). Older content: scrolling. */
@@ -105,7 +109,12 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     css +
     `\n.ao .ao-b[data-ao="hero"] .ticker{margin-top:0}\n` +
     // The dot board: the strip's dark band, a canvas the height of the ticker's line.
-    `.ao .ticker.dots{height:clamp(78px,8.6vw,124px)}\n.ao .ticker.dots .dm{display:block;width:100%;height:100%}\n`,
+    `.ao .ticker.dots{height:clamp(78px,8.6vw,124px)}\n.ao .ticker.dots .dm{display:block;width:100%;height:100%}\n` +
+    // Progress line hidden; artwork that doesn't open the viewer.
+    `.ao .hero-rect.no-bar .hr-bar{display:none}\n.ao .hero-rect.no-viewer .hr-slide{cursor:default}\n` +
+    // Parallax: the artwork drifts inside its frame (effects.ts sets --drift), enlarged so no edge shows.
+    // (on the track, since each image's own transform is its framing).
+    `.ao .hero-rect.drifting .hr-track{transform:translate3d(0,var(--drift,0px),0) scale(1.12);will-change:transform}\n`,
   Render: ({ content, ctx }) => {
     const showTicker = content.showTicker !== false;
     const lines = tickerLines(content);
@@ -121,7 +130,11 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     );
     return (
       <Block name="hero" mat="none" data={content}>
-        <header className="hero-rect focus-sec" aria-label="Artwork">
+        <header
+          className={`hero-rect focus-sec${content.reelBar === false ? " no-bar" : ""}${content.reelViewer === false ? " no-viewer" : ""}`}
+          aria-label="Artwork"
+          data-parallax-inner=""
+        >
           <div className="hr-track" id="reel">
             {content.reel
               .filter((r) => r.src)

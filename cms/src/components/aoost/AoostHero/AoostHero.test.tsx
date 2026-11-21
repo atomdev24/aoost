@@ -7,7 +7,7 @@ const d = AoostHero.defaults.content;
 describe("AoostHero", () => {
   it("keeps the original markup: reel, strip labels, progress bar, ticker", () => {
     const html = renderNode("AoostHero", d);
-    expect(html).toContain('<header class="hero-rect focus-sec" aria-label="Artwork">');
+    expect(html).toContain('<header class="hero-rect focus-sec" aria-label="Artwork" data-parallax-inner="">');
     expect(html).toContain('<div class="hr-track" id="reel">');
     expect(html).toContain('<span class="label">aoost / portfolio</span>');
     expect(html).toContain('id="clock">CPT --:--</span>');
@@ -68,5 +68,9 @@ describe("AoostHero", () => {
     const html = renderNode("AoostHero", d);
     expect(html).toContain("tk-track");
     expect(html).not.toContain("ticker dots");
+  });
+  it("can hide the progress line and stop the artwork opening full screen", () => {
+    const html = renderNode("AoostHero", { ...d, reelBar: false, reelViewer: false });
+    expect(html).toContain('class="hero-rect focus-sec no-bar no-viewer"');
   });
 });

@@ -22,7 +22,7 @@ export function initProjects(){
   const table=document.getElementById('table');if(!table)return;
   table.innerHTML='';table.classList.remove('ao-static');
   let z=1,els=[];
-  function addPiece(item){const el=document.createElement('div');el.className='piece'+(item.src&&STICKER_ART.has(item.src)?' stk':'');el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label',item.alt?'Open artwork: '+item.alt:'Open artwork');
+  function addPiece(item){const el=document.createElement('div');el.className='piece'+(item.src&&STICKER_ART.has(item.src)?' stk':'');if(D.viewer===false){el.setAttribute('role','img');el.setAttribute('aria-label',item.alt||'Artwork');}else{el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label',item.alt?'Open artwork: '+item.alt:'Open artwork');}
     const tape=document.createElement('span');tape.className='tape';el.appendChild(tape);
     const st={el,item,x:0,y:0,rot:0,a:1.25};
     if(item.src){const img=new Image();img.alt='';img.draggable=false;img.decoding='async';img.src=item.src;img.onload=()=>{st.a=img.naturalHeight/img.naturalWidth||1.25;layout(false);};el.appendChild(img);}
@@ -54,7 +54,7 @@ export function initProjects(){
       const back=settle(st);el.style.transition=reduce?'none':back?'transform .55s cubic-bezier(.34,1.45,.5,1), box-shadow .2s':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);if(moved)makeRoom(st);else open(st);};
     el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{moved=true;up(e);});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open(st);}});}
   /* the whole table is the room's sequence, starting from the piece tapped */
-  function open(st){openViewer(els.map(s=>s.item),els.indexOf(st),st.el);}
+  function open(st){if(D.viewer===false)return;openViewer(els.map(s=>s.item),els.indexOf(st),st.el);}
   /* a piece carries its project's plaque (title, medium, year, note, link); the viewer shows it only if there's text */
   const itemOf=src=>{const p=META.get(src)||{};return {src,alt:p.title||'',plaque:{title:p.title,medium:p.medium,year:p.year,note:p.note,link:p.link}};};
   (ARTWORK.length?ARTWORK.map(itemOf):PH.map(ph=>({ph}))).forEach(addPiece);

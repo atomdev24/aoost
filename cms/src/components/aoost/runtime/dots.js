@@ -5,6 +5,13 @@
    so it only touches the canvas's own document and window. More animations plug into EFFECTS. */
 
 const INK = '#F2F1EA';
+/** Sub-pixels per cell side when text is drawn: a cell's share of ink sets how big its dot is, so edges come out smooth. */
+const SS = 4;
+/** The first time a board shows, a wave of dots runs across the empty grid before the first line. */
+const INTRO = 1.5;
+
+/** "welcome to the site" → "Welcome to the site" (the rest is left as written). */
+export const sentenceCase = (s) => String(s).replace(/^(\s*)(\S)/, (_, sp, c) => sp + c.toUpperCase());
 
 /** Split a line into frames that fit, at word breaks (greedy). */
 export function wrapLine(words, fits) {
@@ -69,40 +76,54 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   const fx = EFFECTS[effect] || EFFECTS.breathe;
   const ctx = canvas.getContext('2d');
   const scratch = doc.createElement('canvas').getContext('2d', { willReadFrequently: true });
-  let W = 0, H = 0, dpr = 1, pitch = 6, cols = 0, rows = 0, gridLayer = null;
-  let items = lines.slice(), frames = [], at = 0, t0 = 0, raf = 0, visible = true, stopped = false;
+  let W = 0, H = 0, dpr = 1, pitch = 4, cols = 0, rows = 0, gridLayer = null;
+  // The intro waits for the display font, so the board stays black until it can play through.
+  let intro = !reduce, introT0 = -1, fontReady = !doc.fonts;
+  let items = lines.map(sentenceCase), frames = [], at = 0, t0 = 0, raf = 0, visible = true, stopped = false;
   const family = () => (win.getComputedStyle(canvas).getPropertyValue('--display') || '').trim() || 'ui-sans-serif, system-ui, sans-serif';
   const fontAt = (fs) => `600 ${fs}px ${family()}`;
 
   function measure() {
     const r = canvas.getBoundingClientRect();
     W = Math.max(1, r.width); H = Math.max(1, r.height); dpr = Math.min(2, win.devicePixelRatio || 1);
-    pitch = W < 600 ? 4.5 : W < 1100 ? 5.5 : 6;
+    pitch = W < 600 ? 3 : W < 1100 ? 3.4 : 3.8;
     cols = Math.floor(W / pitch); rows = Math.floor(H / pitch);
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     gridLayer = null;
   }
 
-  /** One frame of text as lit cells: drawn at one pixel per cell, then read back. */
+  /**
+   * One frame of text as lit cells. The text is drawn at SS×SS sub-pixels per cell and each cell
+   * keeps its share of ink (w): full inside the letters, smaller dots along their edges.
+   */
   function rasterize(text, seed) {
-    const glyph = Math.max(7, Math.round(rows * 0.72));
-    scratch.canvas.width = cols; scratch.canvas.height = rows;
+    const glyph = Math.max(7, Math.round(rows * 0.7));
+    const cw = cols * SS, ch = rows * SS;
+    scratch.canvas.width = cw; scratch.canvas.height = ch;
     let fs = glyph;
     scratch.font = fontAt(fs);
     const room = cols * 0.88;
-    while (fs > Math.max(6, glyph * 0.6) && scratch.measureText(text).width > room) { fs -= 1; scratch.font = fontAt(fs); }
+    while (fs > Math.max(6, glyph * 0.6) && scratch.measureText(text).width > room) { fs -= 0.5; scratch.font = fontAt(fs); }
+    scratch.setTransform(SS, 0, 0, SS, 0, 0);
     scratch.clearRect(0, 0, cols, rows);
     scratch.fillStyle = '#000'; scratch.textAlign = 'center'; scratch.textBaseline = 'middle';
     scratch.fillText(text, cols / 2, rows / 2 + fs * 0.06);
-    const data = scratch.getImageData(0, 0, cols, rows).data;
-    const cells = [];
-    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) if (data[(y * cols + x) * 4 + 3] > 105) cells.push({ x, y });
+    scratch.setTransform(1, 0, 0, 1, 0, 0);
+    const data = scratch.getImageData(0, 0, cw, ch).data;
+    const cells = [], n = SS * SS * 255;
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      let sum = 0;
+      for (let sy = 0; sy < SS; sy++) { let i = ((y * SS + sy) * cw + x * SS) * 4 + 3; for (let sx = 0; sx < SS; sx++, i += 4) sum += data[i]; }
+      const cov = sum / n;
+      if (cov > 0.14) cells.push({ x, y, w: Math.min(1, 0.45 + (cov - 0.14) * 1.4) });
+    }
     return fx.delays(cells, cols, rng(seed));
   }
 
   function build() {
     if (!cols || !rows) return;
-    scratch.font = fontAt(Math.max(7, Math.round(rows * 0.72)));
+    scratch.setTransform(1, 0, 0, 1, 0, 0);
+    scratch.font = fontAt(Math.max(7, Math.round(rows * 0.7)));
     const room = cols * 0.88;
     frames = items.flatMap((line) => balanceLine(String(line).split(/\s+/).filter(Boolean), (s) => scratch.measureText(s).width, room))
       .map((text) => ({ text, cells: rasterize(text, hash(text)) }));
@@ -120,11 +141,32 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
       gridLayer = doc.createElement('canvas');
       gridLayer.width = canvas.width; gridLayer.height = canvas.height;
       const g = gridLayer.getContext('2d');
-      g.scale(dpr, dpr); g.fillStyle = INK; g.globalAlpha = 0.16;
-      const d = 1.1, ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
+      g.scale(dpr, dpr); g.fillStyle = INK; g.globalAlpha = 0.14;
+      const d = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
       for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) g.fillRect(ox + x * pitch + pitch / 2 - d / 2, oy + y * pitch + pitch / 2 - d / 2, d, d);
     }
     ctx.drawImage(gridLayer, 0, 0);
+  }
+
+  /** The opening: the grid fades up behind a soft diagonal wave of brighter dots. */
+  function drawIntro(t) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (grid) { ctx.globalAlpha = Math.min(1, t / (INTRO * 0.6)); drawGrid(); ctx.globalAlpha = 1; }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = INK;
+    const full = pitch * 0.8, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
+    const span = INTRO - 0.45;
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      const front = span * (0.85 * (x / cols) + 0.15 * (y / rows));
+      const k = (t - front) / 0.45;
+      if (k <= 0 || k >= 1) continue;
+      const b = Math.sin(Math.PI * k) * (0.55 + 0.45 * ((x * 7 + y * 13) % 5) / 4);
+      const s = dot + (full - dot) * b * 0.8;
+      ctx.globalAlpha = 0.14 + 0.6 * b;
+      ctx.fillRect(ox + x * pitch + pitch / 2 - s / 2, oy + y * pitch + pitch / 2 - s / 2, s, s);
+    }
+    ctx.globalAlpha = 1;
   }
 
   function draw(t) {
@@ -135,11 +177,11 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     if (!f) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = INK;
-    const T = timing(), full = pitch * 0.74, dot = 1.1, ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
+    const T = timing(), full = pitch * 0.8, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
     for (const c of f.cells) {
       const k = reduce ? 1 : fx.size(c, t, T);
       if (k <= 0.01) continue;
-      const s = dot + (full - dot) * Math.min(1.12, k);
+      const s = dot + (full - dot) * Math.min(1.12, k) * (c.w ?? 1);
       ctx.globalAlpha = Math.min(1, 0.16 + 0.84 * Math.min(1, k));
       ctx.fillRect(ox + c.x * pitch + pitch / 2 - s / 2, oy + c.y * pitch + pitch / 2 - s / 2, s, s);
     }
@@ -149,6 +191,13 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   function loop(now) {
     raf = 0;
     if (stopped) return;
+    if (intro) {
+      if (!fontReady) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); if (visible && !doc.hidden) raf = win.requestAnimationFrame(loop); return; }
+      if (introT0 < 0) introT0 = now;
+      const it = (now - introT0) / 1000;
+      if (it < INTRO) { drawIntro(it); if (visible && !doc.hidden) raf = win.requestAnimationFrame(loop); return; }
+      intro = false; t0 = now;
+    }
     const T = timing();
     let t = (now - t0) / 1000;
     if (t >= T.total + 0.25) { at = frames.length ? (at + 1) % frames.length : 0; t0 = now; t = 0; }
@@ -169,14 +218,14 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   const onVis = () => { if (!doc.hidden && !reduce) wake(); };
   doc.addEventListener('visibilitychange', onVis);
   // The display font may still be loading: draw again once it's there.
-  doc.fonts?.ready.then(() => { if (!stopped) { build(); if (reduce) draw(0); } });
+  doc.fonts?.ready.then(() => { fontReady = true; if (!stopped) { build(); if (reduce) draw(0); } });
   if (reduce) startStill(); else wake();
 
   return {
     setLines(next) {
-      const sig = next.join('|');
+      const sig = next.map(sentenceCase).join('|');
       if (sig === items.join('|')) return;
-      items = next.slice(); build();
+      items = next.map(sentenceCase); build();
       if (reduce) draw(0);
     },
     stop() { stopped = true; if (raf) win.cancelAnimationFrame(raf); win.clearInterval(still); ro.disconnect(); io?.disconnect(); doc.removeEventListener('visibilitychange', onVis); },

@@ -120,6 +120,8 @@ export const AoostProjectsContent = z.object({
   showSkull: z.boolean(),
   /** Objects fixed on top of the table (older content has none). */
   fixtures: z.array(AoostFixture).optional(),
+  /** Tapping a piece (without dragging it) opens it full screen in the viewer. Older content: on. */
+  viewer: z.boolean().optional(),
 });
 export type AoostProjectsContent = z.infer<typeof AoostProjectsContent>;
 

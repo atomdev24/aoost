@@ -104,6 +104,16 @@ against `wrangler dev`).
   even frames. Same lines as the ticker (day/late/both, top score, visitors). Options: seconds
   per line, faint grid on or off. Animations live in the `EFFECTS` map (only `breathe` for now);
   adding one there and to the field's options is all a new animation needs.
+  Text is drawn at 4×4 sub-pixels per cell and each cell keeps its share of ink, so letter edges
+  get smaller dots (smooth, not stair-stepped). Lines show in sentence case. The first time the
+  board shows (once the display font is ready) a wave of dots runs across the empty grid.
+- **Hero switches.** "Progress line under the artwork" (`reelBar`) and "Click artwork to open it
+  full screen" (`reelViewer`); the projects table has "Tap a piece to open it full screen"
+  (`viewer`). Older content: all on.
+- **Parallax.** The drift is a `transform`, so it adds to an enter animation (which animates
+  `translate`) instead of cancelling it. A block can name the part that drifts with
+  `data-parallax-inner`: the hero's artwork drifts inside its frame (track enlarged 12%, at most
+  5.5% of the frame's height either way) and starts still when it's on the first screen.
 - **Frame stills and canvases.** `captureFrame` (board/stills.ts) turns canvases into pictures
   before pairing the copy's images with the page's; those pictures are marked
   `data-from-canvas` and left out of the pairing, or every image after a canvas shifts by one.

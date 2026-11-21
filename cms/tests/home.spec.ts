@@ -29,6 +29,7 @@ const home = async (page: Page, path = "/") => {
 // What the published homepage switches on and off (content/pages/home.json).
 const hero = homeBlock("AoostHero");
 const tickerOn = hero.showTicker !== false; // missing means on
+const dotBoard = hero.tickerStyle === "dots";
 const wallOn = !!homeBlock("AoostDrawingWall").show;
 const homeHidesNav = !!(contentPage("home") as { hideNav?: boolean }).hideNav;
 // The nav's page items whose page is published and listed: the only links the public nav shows.
@@ -68,7 +69,8 @@ test.describe("homepage: the original page, from aoost blocks", () => {
   test("the ticker strip follows its switch (off on the live site: no strip), and the leaderboard still loads for everyone", async ({ page }) => {
     await home(page);
     await expect(page.locator("#ticker")).toHaveCount(tickerOn ? 1 : 0);
-    await expect(page.locator(".tk-track")).toHaveCount(tickerOn ? 1 : 0);
+    await expect(page.locator(".tk-track")).toHaveCount(tickerOn && !dotBoard ? 1 : 0);
+    await expect(page.locator("#ticker canvas.dm")).toHaveCount(tickerOn && dotBoard ? 1 : 0);
     await expect(page.locator("#lbScope")).toHaveText("everyone");
     expect(await page.locator("#lbList li").count()).toBeGreaterThan(0);
     await expect(page.locator("#lbList li").first().locator(".n")).toHaveText("01");
@@ -212,6 +214,8 @@ test.describe("homepage on a phone", () => {
 
   test("fits 390px, the game gets its thumb pad, and the sleeve sits above the tracklist and Spotify's player", async ({ page }) => {
     await home(page);
+    // A block sliding in (enter animation) pokes out for a moment; the body hides it, but measure once it has landed.
+    await page.waitForFunction(() => [...document.querySelectorAll("[data-enter].in")].every((e) => ["0px", "none", "0px 0px"].includes(getComputedStyle(e).translate)));
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     expect(await page.locator("#rodeo").evaluate((c) => c.getBoundingClientRect().height)).toBeGreaterThan(300); // includes the 112px thumb pad
     const [sleeve, list, player] = await Promise.all([".pl-rec:visible", ".pl-list:visible", ".pl-player"].map((s) => page.locator(s).boundingBox()));
@@ -276,7 +280,7 @@ test.describe("homepage with draft changes (preview)", () => {
     const site = await draftSite(request, password!);
     const page0 = site.pages.find((p: { id: string }) => p.id === "home");
     const heroBlock = page0.sections.map((s: { children: { type: string; content: Record<string, unknown> }[] }) => s.children[0]).find((n: { type: string }) => n.type === "AoostHero");
-    Object.assign(heroBlock.content, { showTicker: true, ticker: [{ text: "new drawings up", mode: "both" }], lateMode: true });
+    Object.assign(heroBlock.content, { showTicker: true, tickerStyle: "scroll", ticker: [{ text: "new drawings up", mode: "both" }], lateMode: true });
     expect((await request.post("/api/editor/ops", { headers: bearer(password!), data: { ops: [{ op: "putPage", page: page0 }] } })).ok()).toBe(true);
     await guard(page.context());
     await signIn(page, password!);

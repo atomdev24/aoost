@@ -21,6 +21,8 @@ export const fields: Fields<AoostHeroContent> = {
     getItemSummary: (item, i) => item.alt || item.src?.split("/").pop() || `Artwork ${(i ?? 0) + 1}`,
   },
   reelSeconds: { type: "number", label: "Seconds per artwork", min: 1, max: 60 },
+  reelBar: onOff("Progress line under the artwork"),
+  reelViewer: onOff("Click artwork to open it full screen"),
   clockLabel: { type: "text", label: "Clock label (before the time)" },
   timeZone: { type: "text", label: "Clock time zone (e.g. Africa/Johannesburg)" },
   showTicker: onOff("Ticker strip"),

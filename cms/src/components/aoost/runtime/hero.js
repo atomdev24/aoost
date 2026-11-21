@@ -23,7 +23,8 @@ export function initHero(){
     reelItems.forEach((it,i)=>{const b=document.createElement('button');b.className='hr-slide';b.setAttribute('aria-label','Open artwork '+(i+1)+' of '+reelItems.length);
       if(it.src){const img=new Image();img.alt='';img.src=it.src;img.decoding='async';img.loading=i?'lazy':'eager';b.appendChild(img);}
       else{const cv=document.createElement('canvas');b.appendChild(cv);new ResizeObserver(()=>{const[c,w,h]=fit(cv);if(it.fnArt){it.fnArt(c,w,h);}else{c.fillStyle=C.paper;c.fillRect(0,0,w,h);const pc=placeholderCanvas(it.ph,400),s=Math.min(w/pc.width,h/pc.height)*.8;c.drawImage(pc,(w-pc.width*s)/2,(h-pc.height*s)/2,pc.width*s,pc.height*s);}}).observe(cv);}
-      b.addEventListener('click',()=>openViewer(reelItems,i,b));reel.appendChild(b);});
+      if(D.reelViewer!==false)b.addEventListener('click',()=>openViewer(reelItems,i,b));else{b.setAttribute('aria-label','Artwork '+(i+1)+' of '+reelItems.length);b.tabIndex=-1;}
+      reel.appendChild(b);});
     let hrIdx=0,hrT0=performance.now(),hrHold=0,hrOn=true;const HR_DUR=Math.max(1000,(+D.reelSeconds||5.2)*1000);
     ['pointerdown','touchstart','wheel','focusin'].forEach(ev=>reel.addEventListener(ev,()=>{hrHold=performance.now()+4000;},{passive:true}));
     let hrScrollT;reel.addEventListener('scroll',()=>{clearTimeout(hrScrollT);hrScrollT=setTimeout(()=>{hrIdx=Math.round(reel.scrollLeft/Math.max(1,reel.clientWidth));hrT0=performance.now();},120);},{passive:true});
