@@ -41,7 +41,17 @@ export const AoostHeroContent = z.object({
   /** Dot board: how each line appears. "breathe" (older content) or "resolve" (a ghost of the shape, then a wave settles it). */
   dotEffect: z.enum(["breathe", "resolve"]).optional(),
   /** Dot board: "flat" (older content) or "glass" (black, lit from the middle of each stroke, with a halo and bloom). */
-  dotLook: z.enum(["flat", "glass"]).optional(),
+  dotLook: z.enum(["flat", "glass", "glassblock", "liquid"]).optional(),
+  /** Glass block / Liquid glass: how crisp the words stay (0 all bent, 1 crisp), square size (px), how much each square bends, the shimmer, and the liquid's wobble. */
+  dotGlass: z
+    .object({
+      clarity: z.number().min(0).max(1).optional(),
+      cell: z.number().min(6).max(60).optional(),
+      refract: z.number().min(0).max(0.9).optional(),
+      shimmer: z.number().min(0).max(2).optional(),
+      wobble: z.number().min(0).max(6).optional(),
+    })
+    .optional(),
   /** Dot board: idle animation speed (1 = brisk, 0.5 = slow). */
   dotIdleSpeed: z.number().min(0.1).max(3).optional(),
   /** Dot board: letter height, as % of the strip's height. */
@@ -84,8 +94,10 @@ export function tickerLines(content: AoostHeroContent): string[] {
 }
 
 /** The dot board in the editor's frames: the same animation as the site, with the lines as saved. */
-type DotOpts = { seconds: number; grid: boolean; after: string; idleSpeed: number; textSize: number; effect: string; look: string };
-const dotOpts = (c: AoostHeroContent): DotOpts => ({ seconds: c.dotSeconds ?? 4, grid: c.dotGrid !== false, after: c.dotAfter ?? "loop", idleSpeed: c.dotIdleSpeed ?? 0.5, textSize: c.dotTextSize ?? 70, effect: c.dotEffect ?? "breathe", look: c.dotLook ?? "flat" });
+type DotOpts = { seconds: number; grid: boolean; after: string; idleSpeed: number; textSize: number; effect: string; look: string; lensOpts: Record<string, number> };
+const dotOpts = (c: AoostHeroContent): DotOpts => ({ seconds: c.dotSeconds ?? 4, grid: c.dotGrid !== false, after: c.dotAfter ?? "loop", idleSpeed: c.dotIdleSpeed ?? 0.5, textSize: c.dotTextSize ?? 70, effect: c.dotEffect ?? "breathe", look: c.dotLook ?? "flat", lensOpts: lensOf(c) });
+/** The glass settings in effect (the studies' choice where unset). */
+const lensOf = (c: AoostHeroContent) => ({ clarity: 0.65, cell: 18, refract: 0.3, shimmer: 0.7, wobble: 1.5, ...(c.dotGlass ?? {}) });
 
 function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -99,7 +111,7 @@ function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
     });
     return () => { gone = true; board?.stop(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize, opts.effect, opts.look]);
+  }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize, opts.effect, opts.look, JSON.stringify(opts.lensOpts)]);
   return <canvas className="dm" ref={ref} aria-hidden="true" />;
 }
 
@@ -198,7 +210,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
         </header>
         {showTicker && content.tickerStyle === "dots" ? (
           <div
-            className={`ticker dots${content.dotLook === "glass" ? " glass" : ""}`}
+            className={`ticker dots${content.dotLook && content.dotLook !== "flat" ? " glass" : ""}`}
             id="ticker"
             role="img"
             aria-label={lines.length ? `${lines.join(". ")}.` : "Dot board"}
@@ -209,6 +221,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
             data-text-size={content.dotTextSize ?? 70}
             data-effect={content.dotEffect ?? "breathe"}
             data-look={content.dotLook ?? "flat"}
+            data-lens={content.dotLook === "glassblock" || content.dotLook === "liquid" ? JSON.stringify(lensOf(content)) : undefined}
           >
             {ctx.editing ? <EditingDots lines={lines} opts={dotOpts(content)} /> : <canvas className="dm" aria-hidden="true" />}
           </div>

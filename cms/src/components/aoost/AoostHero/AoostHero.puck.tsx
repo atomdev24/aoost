@@ -63,7 +63,20 @@ export const fields: Fields<AoostHeroContent> = {
     options: [
       { label: "Flat", value: "flat" },
       { label: "Glass", value: "glass" },
+      { label: "Glass block", value: "glassblock" },
+      { label: "Liquid glass", value: "liquid" },
     ],
+  },
+  dotGlass: {
+    type: "object",
+    label: "Dot board: glass block / liquid glass settings",
+    objectFields: {
+      clarity: { type: "number", label: "Clarity (0 bent, 1 crisp)", min: 0, max: 1, step: 0.05 },
+      cell: { type: "number", label: "Square size (px)", min: 6, max: 60, step: 1 },
+      refract: { type: "number", label: "Refraction", min: 0, max: 0.9, step: 0.05 },
+      shimmer: { type: "number", label: "Shimmer", min: 0, max: 2, step: 0.05 },
+      wobble: { type: "number", label: "Liquid wobble", min: 0, max: 6, step: 0.1 },
+    },
   },
   dotEffect: {
     type: "radio",

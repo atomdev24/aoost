@@ -2,6 +2,8 @@
 export function wrapLine(words: string[], fits: (s: string) => boolean): string[];
 export function balanceLine(words: string[], width: (s: string) => number, room: number): string[];
 export const EFFECTS: Record<string, unknown>;
-export function startDotBoard(canvas: HTMLCanvasElement, opts?: { lines?: string[]; seconds?: number; grid?: boolean; effect?: string; after?: string; idleSpeed?: number; textSize?: number; look?: string }): { setLines(lines: string[]): void; stop(): void };
+export function startDotBoard(canvas: HTMLCanvasElement, opts?: { lines?: string[]; seconds?: number; grid?: boolean; effect?: string; after?: string; idleSpeed?: number; textSize?: number; look?: string; lensOpts?: LensOpts }): { setLines(lines: string[]): void; stop(): void };
 export function sentenceCase(s: string): string;
 export const IDLE: Record<string, { level(x: number, y: number, t: number, cols: number, rows: number): number }>;
+/** Settings for the glass looks (lens.js). */
+export type LensOpts = { clarity?: number; cell?: number; refract?: number; wobble?: number; ribs?: number; shimmer?: number };

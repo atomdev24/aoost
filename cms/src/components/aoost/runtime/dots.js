@@ -1,3 +1,4 @@
+import { createLens } from './lens.js';
 /* The dot board: an alternative to the scrolling ticker. Each line is drawn in square dots on the
    dark strip; the dots breathe in out of a faint grid (a soft sweep, a slight overshoot), hold with
    a gentle breathe, then shrink back before the next line comes in. Long lines are split at word
@@ -151,7 +152,10 @@ export const IDLE = {
  * Start a dot board on a canvas that fills its strip. Options: lines (strings), seconds per frame,
  * grid (the faint dot grid behind), effect (a key of EFFECTS). Returns { setLines, stop }.
  */
-export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe', after = 'loop', idleSpeed = 0.5, textSize = 70, look = 'flat' } = {}) {
+export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe', after = 'loop', idleSpeed = 0.5, textSize = 70, look = 'flat', lensOpts = {} } = {}) {
+  // Glass block / Liquid glass: the board is lit through a bar of square glass (lens.js, WebGL 2).
+  // It must take the canvas before the 2D context does; without WebGL 2 the board stays flat.
+  const lens = look === 'glassblock' || look === 'liquid' ? createLens(canvas, look) : null;
   // Glass: black board, letters brightest along the middle of each stroke, a halo of dim blocks
   // around them, and a cool bloom over it all, like light coming through frosted glass.
   const glass = look === 'glass';
@@ -163,11 +167,16 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   const doc = canvas.ownerDocument, win = doc.defaultView;
   const reduce = win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fx = EFFECTS[effect] || EFFECTS.breathe;
-  const main = canvas.getContext('2d');
+  const main = lens ? null : canvas.getContext('2d');
+  // Behind glass the dots fill their cells, so letters read as solid light rather than a second texture.
+  const FULL = lens ? 1.04 : 0.8;
+  // with glass in front, everything is drawn on the light layer, which lens.js shows through the glass
   let ctx = main;
   // Glass draws the board as usual onto a light layer, then lights the canvas from it (see present).
   const layer = () => { const c = doc.createElement('canvas'); return [c, c.getContext('2d')]; };
-  const [light, lightCtx] = glass ? layer() : [null, null];
+  const [light, lightCtx] = glass || lens ? layer() : [null, null];
+  const [lit, litCtx] = lens ? layer() : [null, null];
+  if (lens) ctx = lightCtx;
   const [glowA, glowACtx] = glass ? layer() : [null, null];
   const [glowB, glowBCtx] = glass ? layer() : [null, null];
   let grain = null;
@@ -186,6 +195,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     cols = Math.floor(W / pitch); rows = Math.floor(H / pitch);
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     gridLayer = null;
+    if (lens) { light.width = lit.width = canvas.width; light.height = lit.height = canvas.height; lens.resize(canvas.width, canvas.height); }
     if (glass) {
       light.width = canvas.width; light.height = canvas.height;
       glowA.width = Math.max(1, Math.round(canvas.width / 5)); glowA.height = Math.max(1, Math.round(canvas.height / 5));
@@ -285,7 +295,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   }
 
   function drawGrid() {
-    if (!grid) return;
+    if (!grid || lens) return; // behind glass the squares are the texture
     if (!gridLayer) {
       gridLayer = doc.createElement('canvas');
       gridLayer.width = canvas.width; gridLayer.height = canvas.height;
@@ -304,7 +314,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     if (grid) { ctx.globalAlpha = Math.min(1, t / (INTRO * 0.6)); drawGrid(); ctx.globalAlpha = 1; }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = INK;
-    const full = pitch * 0.8, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
+    const full = pitch * FULL, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
     const span = INTRO - 0.45;
     for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
       const front = span * (0.85 * (x / cols) + 0.15 * (y / rows));
@@ -326,7 +336,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     if (!f) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = INK;
-    const T = timing(), full = pitch * 0.8, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
+    const T = timing(), full = pitch * FULL, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
     if (fx.draw && !reduce) {
       // Effects that draw for themselves go over a clear canvas, with the grid put behind afterwards.
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -361,7 +371,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = INK;
     const fade = Math.min(1, t / 1.2), ts = t * idleSpeed;
-    const full = pitch * 0.8, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
+    const full = pitch * FULL, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
     for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
       const k = idleFx.level(x, y, ts, cols, rows) * fade;
       if (k <= 0.03) continue;
@@ -408,8 +418,21 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     main.globalAlpha = 1; main.globalCompositeOperation = 'source-over';
   }
 
+  /** The light behind the glass: black, a faint backlight (so the glass shows where there are no words), the board. */
+  function showThroughGlass() {
+    const w = lit.width, h = lit.height;
+    litCtx.setTransform(1, 0, 0, 1, 0, 0);
+    litCtx.fillStyle = '#000'; litCtx.fillRect(0, 0, w, h);
+    const g = litCtx.createLinearGradient(0, 0, w, 0);
+    g.addColorStop(0, 'rgba(255,255,255,.018)'); g.addColorStop(0.5, 'rgba(255,255,255,.045)'); g.addColorStop(1, 'rgba(255,255,255,.018)');
+    litCtx.fillStyle = g; litCtx.fillRect(0, 0, w, h);
+    litCtx.drawImage(light, 0, 0);
+    lens.render(lit, reduce ? 0 : win.performance.now() / 1000, reduce ? { ...lensOpts, shimmer: 0 } : lensOpts, dpr);
+  }
+
   /** Every drawing goes through here: straight onto the canvas, or onto the light layer for glass. */
   function paint(fn) {
+    if (lens) { fn(); return showThroughGlass(); }
     if (!glass) return fn();
     ctx = lightCtx; fn(); ctx = main; present();
   }

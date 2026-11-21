@@ -119,6 +119,14 @@ against `wrangler dev`).
   comes from how deep it sits in its stroke (`shade`: a distance transform), plus a two-cell halo
   of dim blocks timed like the nearest lit cell. Works with every effect and idle. The editor
   loads dots.js on demand (vite `LATER`), keeping its first download under budget.
+- **Dot board looks: Glass block and Liquid glass.** `runtime/lens.js` (WebGL 2) takes the canvas
+  before the 2D context: the board draws as usual onto a light layer, and a shader shows it through a
+  bar of square glass (glass block: ribbed, magnifying squares with bevels; liquid: soft squares, the
+  light swims, caustics). Clarity bends only towards each square's rim and lays a crisp copy over the
+  bent light. Settings in Hero → "glass block / liquid glass settings" (`dotGlass`; defaults from the
+  studies: clarity .65, squares 18px, refraction .3, shimmer .7, wobble 1.5). Behind glass the dots
+  fill their cells (solid light) and the dot grid is off. No WebGL 2: the board stays flat. The
+  studies page: https://claude.ai/artifact/1oypALjRAJ5DwkCuQwirxE
 - **Dot board idle and size.** "After the last line": repeat the lines, or show each line once and
   then play an idle animation (`IDLE` in dots.js: `wave`, `twinkle`; each is a level 0–1 per cell
   over time, so adding one is a function plus an editor option). Lines that arrive later (the
