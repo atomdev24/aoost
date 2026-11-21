@@ -18,6 +18,10 @@ export const css = `
 .ao .jr-coil,.ao .jr-tip,.ao .jr-deb,.ao .jr-stk{display:none}
 .ao .jr-n{position:absolute;right:-6px;top:-10px;font:500 10px/1 var(--mono);color:var(--ink-2)}
 .ao .jr-shelf{padding-top:64px;row-gap:64px}
+.ao .jr.jr-hasmock{--w:clamp(150px,20vw,220px);aspect-ratio:731/1228}
+.ao .jr-cv.jr-mock{background:none;box-shadow:none;border-radius:0;overflow:visible}
+.ao .jr-cv.jr-mock::before{display:none}
+.ao .jr-mock img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(6px 14px 14px rgba(0,0,0,.32))}
 .ao .jr-n,.ao .cvx .jr-lbl{display:none}
 .ao .jr-cap{display:flex;gap:8px;align-items:baseline;position:absolute;z-index:5;left:0;bottom:calc(100% + 22px);white-space:nowrap;pointer-events:none;
   font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#8E918C;transform-origin:left bottom;transform:rotate(calc(-1 * var(--r,0deg)))}

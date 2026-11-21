@@ -37,7 +37,7 @@ function fromFields(j,n){
   if(o.ribbon)props.ribbon=o.ribbon;if(o.wear&&o.wear!=='none')props.wear=o.wear;if(o.titleStamp)props.title_stamp=true;if(o.coverText==='light')props.cover_text='light';if(o.sound)props.sound=true;if(o.backCover)props.back_cover_url=o.backCover;
   const cov=Array.isArray(j.coverItems)?j.coverItems:[],side=back=>cov.filter(i=>((isObj(i.props)?i.props:{}).side==='back')===back);
   const mat=j.material==='kraft'||j.material==='leather'?j.material:'';
-  return {id:j.id||('j'+n),title:j.title||'',year:j.year||'',cover:j.cover||null,cbg:j.coverColor||(mat==='kraft'?'#A47A4E':'#222'),mat,sticker:j.sticker||null,band:j.band||'#141516',dark:!!j.dark,r:+j.tilt||0,link:j.link||'',
+  return {id:j.id||('j'+n),title:j.title||'',year:j.year||'',cover:j.cover||null,mockup:j.mockup||null,cbg:j.coverColor||(mat==='kraft'?'#A47A4E':'#222'),mat,sticker:j.sticker||null,band:j.band||'#141516',dark:!!j.dark,r:+j.tilt||0,link:j.link||'',
     props,citems:side(false),bitems:side(true),pages:all};}
 
 export function initJournals(){
@@ -116,7 +116,7 @@ const ribbon=j=>{const r=(j.props||{}).ribbon;return r&&r!=='none'?`<span class=
 
 function shelfButton(j,i){const b=document.createElement('button');b.type='button';b.className='jr';b.style.setProperty('--r',(j.r||0)+'deg');
   b.setAttribute('aria-label',`Open journal: ${j.title}`);
-  b.style.setProperty('--i',i);b.innerHTML=`${ribbon(j)}<span class="jr-cv cvx${matCls(j)}" style="${coverStyle(j)}">${coverInner(j)}</span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;
+  b.style.setProperty('--i',i);if(j.mockup){b.classList.add('jr-hasmock');b.innerHTML=`<span class="jr-cv jr-mock"><img src="${esc(j.mockup)}" alt="" draggable="false"></span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;}else b.innerHTML=`${ribbon(j)}<span class="jr-cv cvx${matCls(j)}" style="${coverStyle(j)}">${coverInner(j)}</span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;
   const l=b.querySelector('.it-l');if(l){fillLayer(l,j.citems);l.querySelectorAll('[data-src]').forEach(m=>{m.src=m.dataset.src;if(m.tagName==='VIDEO'){m.autoplay=true;m.play&&m.play().catch(()=>{});}});}
   b.addEventListener('click',()=>PREVIEW?openJ(j,b):openRoom(j,b));return b;}
 JOURNALS.forEach((j,i)=>shelf.appendChild(shelfButton(j,i)));

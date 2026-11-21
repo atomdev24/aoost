@@ -31,6 +31,8 @@ export const AoostJournal = z.object({
   year: z.string().optional(),
   /** Cover image. Without one the cover is the plain cover colour. */
   cover: z.string().optional(),
+  /** A photo of the book (transparent PNG/WebP). When set it stands on the shelf in place of the drawn book. */
+  mockup: z.string().optional(),
   /** Framing of the cover image, per screen size. */
   frame: ResponsiveFrameFit.optional(),
   coverColor: z.string().optional(),
@@ -85,6 +87,22 @@ function ShelfBook({ j, i }: { j: AoostJournal; i: number }) {
   const mat = materialOf(j);
   const base = j.coverColor || (mat === "kraft" ? KRAFT_BROWN : "#222");
   const cover = { "--cbg": j.cover ? `url('${j.cover.replace(/'/g, "%27")}') center/cover no-repeat,${base}` : base, "--tone": "#333", "--band": j.band || "#141516" } as CSSProperties;
+  if (j.mockup)
+    return (
+      <button type="button" className="jr jr-hasmock" aria-label={`Open journal: ${j.title}`} style={{ "--r": `${j.tilt ?? 0}deg`, "--i": i } as CSSProperties}>
+        <span className="jr-cv jr-mock">
+          <img src={j.mockup} alt="" draggable={false} />
+        </span>
+        <span className="jr-n">0{i + 1}</span>
+        <span className="jr-cap">
+          <i>0{i + 1}</i>
+          <b>{j.title}</b>
+          <span>
+            {pageCount(j)} pages · {j.year ?? ""}
+          </span>
+        </span>
+      </button>
+    );
   return (
     <button type="button" className="jr" aria-label={`Open journal: ${j.title}`} style={{ "--r": `${j.tilt ?? 0}deg`, "--i": i } as CSSProperties}>
       {o.ribbon && o.ribbon !== "none" ? <span className="jrib" style={{ "--rib": o.ribbon } as CSSProperties} /> : null}
@@ -116,7 +134,7 @@ export const AoostJournals = defineComponent<AoostJournalsContent>({
   band: matBand,
   schema: AoostJournalsContent,
   frames: (content) =>
-    shownSlots(content.journals, (j) => !j.hidden, (j, i, k) => (j.cover ? { path: ["journals", i], label: `${j.title || `Journal ${k}`} cover`, kind: "bg", selector: `.jr-shelf>.jr:nth-child(${k})>.jr-cv`, src: j.cover } : null)),
+    shownSlots(content.journals, (j) => !j.hidden, (j, i, k) => (j.cover && !j.mockup ? { path: ["journals", i], label: `${j.title || `Journal ${k}`} cover`, kind: "bg", selector: `.jr-shelf>.jr:nth-child(${k})>.jr-cv`, src: j.cover } : null)),
   defaults: {
     content: {
       mat: "light",

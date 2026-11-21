@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { homeBlock } from "./content";
 
 /**
  * Inside a sketchbook (SHARE-VIEWER.md §3): the book opens into the dark room as a two-page spread on
@@ -75,9 +76,13 @@ test.describe("sketchbook: spread in the dark room", () => {
   test("a material cover shows round the spread, and reduced motion crossfades", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    const room = await openBook(page, 2);
-    await expect(room.locator(".jvr-book")).toHaveClass(/cv-kraft/);
-    await expect(room.locator(".jvr-sw")).toHaveClass(/cv-kraft/);
+    const shown = (homeBlock("AoostJournals").journals as { hidden?: boolean; material?: string }[]).filter((j) => !j.hidden);
+    const k = shown.findIndex((j) => j.material === "kraft" || j.material === "leather");
+    test.skip(k < 0, "no material cover on the published shelf");
+    const mat = shown[k]!.material!;
+    const room = await openBook(page, k + 1);
+    await expect(room.locator(".jvr-book")).toHaveClass(new RegExp(`cv-${mat}`));
+    await expect(room.locator(".jvr-sw")).toHaveClass(new RegExp(`cv-${mat}`));
     await page.keyboard.press("ArrowRight");
     await expect(room.locator(".jvr-ct")).toHaveText(/^2/);
     await expect(room.locator(".jvr-leaf")).toHaveCount(0);

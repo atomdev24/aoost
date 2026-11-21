@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { homeBlock } from "./content";
 import { draftSite, editorPassword, onBoard, resetDraft, signIn } from "./helpers";
 
 /**
@@ -195,34 +196,37 @@ test.describe("resizable project pieces", () => {
   });
 });
 
-test.describe("sketchbook cover materials", () => {
+test.describe("sketchbook covers", () => {
   test.beforeAll(() => mkdirSync(shots, { recursive: true }));
+  // Follows the published shelf: a mockup photo stands in for the drawn book; otherwise the material shows.
+  const shown = (homeBlock("AoostJournals").journals as { hidden?: boolean; mockup?: string; material?: string; sticker?: string }[]).filter((j) => !j.hidden);
 
   for (const width of [1440, 390]) {
-    test(`kraft and leather covers on the homepage at ${width}`, async ({ page }) => {
+    test(`shelf covers on the homepage at ${width}`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.context().route(/supabase\.co/, (route) => (route.request().method() === "GET" && !route.request().url().includes("/visits") ? route.continue() : route.abort()));
       await page.goto("/");
       const shelf = page.locator("#jrShelf");
-      await expect(shelf.locator(".jr")).toHaveCount(4);
+      await expect(shelf.locator(".jr")).toHaveCount(shown.length);
       const covers = shelf.locator(".jr-cv");
-      await expect(covers.nth(0)).not.toHaveClass(/cv-/);
-      await expect(covers.nth(1)).toHaveClass(/cv-kraft/);
-      await expect(covers.nth(2)).not.toHaveClass(/cv-/);
-      await expect(covers.nth(3)).toHaveClass(/cv-leather/);
-      // Band and sticker are still there.
-      await expect(covers.nth(1).locator(".jr-band")).toHaveCount(1);
-      await expect(covers.nth(3).locator("img.st")).toHaveCount(1);
+      for (const [k, j] of shown.entries()) {
+        const cv = covers.nth(k);
+        if (j.mockup) {
+          await expect(cv).toHaveClass(/jr-mock/);
+          await expect(cv.locator("img")).toHaveAttribute("src", j.mockup);
+          await expect.poll(() => cv.locator("img").evaluate((m: HTMLImageElement) => m.complete && m.naturalWidth > 0)).toBe(true);
+          continue;
+        }
+        const mat = j.material === "kraft" || j.material === "leather" ? j.material : "";
+        if (mat) await expect(cv).toHaveClass(new RegExp(`cv-${mat}`));
+        else await expect(cv).not.toHaveClass(/cv-/);
+        await expect(cv.locator(".jr-band")).toHaveCount(1);
+        if (j.sticker) await expect(cv.locator("img.st")).toHaveCount(1);
+      }
       const section = page.locator(".journals");
       await section.scrollIntoViewIfNeeded();
       await page.waitForTimeout(800);
       await section.screenshot({ path: resolve(shots, `sketchbooks-${width}.png`) });
-      if (width === 1440) {
-        // The leather catches the light on hover.
-        await shelf.locator(".jr").nth(3).hover();
-        await page.waitForTimeout(1100);
-        await shelf.locator(".jr").nth(3).screenshot({ path: resolve(shots, "leather-hover-1440.png") });
-      }
     });
   }
 });
