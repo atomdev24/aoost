@@ -112,21 +112,55 @@
             "heading": "Projects",
             "projects": [
               {
-                "image": "/art/hero.jpg"
+                "image": "/art/hero.jpg",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.73
+                  }
+                }
               },
               {
                 "image": "/art/monkey-figure.jpg",
                 "hidden": true
               },
               {
-                "image": "/art/storefront.png"
+                "image": "/art/storefront.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.66
+                  }
+                }
               },
               {
                 "image": "/art/hear-no-evil-3d.png",
-                "sticker": false
+                "sticker": false,
+                "frame": {
+                  "base": {
+                    "fit": "fill",
+                    "focalX": 50,
+                    "focalY": 50,
+                    "zoom": 1,
+                    "panX": 0,
+                    "panY": 0
+                  }
+                }
               },
               {
-                "image": "/art/flower-skull.png"
+                "image": "/art/flower-skull.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.61
+                  }
+                }
               },
               {
                 "image": "/art/hear-no-evil-ring.png",
@@ -135,7 +169,7 @@
                     "scale": 1
                   },
                   "desktop": {
-                    "scale": 0.9
+                    "scale": 0.68
                   }
                 },
                 "sticker": false
