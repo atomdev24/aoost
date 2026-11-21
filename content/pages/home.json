@@ -57,7 +57,7 @@
                 "alt": ""
               }
             ],
-            "reelSeconds": 5.2,
+            "reelSeconds": 3,
             "ticker": [
               {
                 "text": "Welcome",
@@ -86,7 +86,7 @@
           },
           "effects": {
             "enter": "slide-left",
-            "parallax": 0.35
+            "parallax": -0.45
           }
         }
       ]
