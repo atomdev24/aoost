@@ -71,6 +71,14 @@
         }, 15000);
       })();
     </script>
+    <script>
+      // Fetch the draft while the editor's script downloads (src/editor/api.ts picks these up once).
+      // Without this the request waited until all of the script had run.
+      window.__aoostPre = {
+        "/api/editor/site": fetch("/api/editor/site", { credentials: "same-origin" }),
+        "/api/editor/state": fetch("/api/editor/state", { credentials: "same-origin" }),
+      };
+    </script>
     <script type="module" src="/src/editor/main.tsx"></script>
   </body>
 </html>

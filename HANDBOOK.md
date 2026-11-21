@@ -169,7 +169,27 @@ same page object back and must reach the canvas).
 
 **Measuring** (`cms/scripts/probes/`, see its README): `audit.mjs` (every flow, Event Timing input→paint, LoAF with source,
 errors, screenshots; never clicks Publish), `trace-click.mjs` (Chrome trace of one action, broken
-down), `profile.mjs` (CPU profile mapped to source; build with `SOURCEMAP=1`), `undo.mjs`.
+down), `profile.mjs` (CPU profile mapped to source; build with `SOURCEMAP=1`), `undo.mjs`,
+`open.mjs` (how fast the editor opens, cold and warm, from the editor's own marks).
+
+**Opening fast** (plan: the "aoost editor: faster opening plan" doc):
+- Marks: `aoost:modules` (the start-up script has run), `aoost:draft` (draft loaded), `aoost:shell`
+  (editor drawn), `aoost:board` (first frame shows its page). `open.mjs` reads them; so can anyone
+  in DevTools (Performance → Timings).
+- Panels, sheets and dialogs load after the board (`src/editor/parts.ts`, `lazy.tsx`): Pages,
+  History, Insert, Media, Navigation, Theme, Fonts, Global, the publish sheet, Compare, the
+  palette, the shortcuts sheet and the problem log. Idle time after the board fetches them one by
+  one; hovering a rail button or Publish fetches that one first. A failed download is retried once,
+  then the part says it couldn't load, with Reload. New panels go in `parts.ts`, and their files
+  in the `LATER` list in `vite.config.ts` (or they end up in the start-up file).
+- The draft is fetched by `index.html` while the script downloads (`window.__aoostPre`, used once
+  by `api.ts`).
+- The build fails if the start-up files grow past `scripts/bundle-budget.json` (decided with
+  Alex): `check-bundle.mjs` prints the size every build. Lower the budget as phases land.
+- Measured locally (median of 5, `open.mjs`): board usable cold 1010 → 816 ms, warm 423 → 319 ms;
+  longest frame while opening cold 831 → 645 ms, warm 290 → 209 ms; start-up files 6 → 3,
+  1644 → 1583 KB. The palette and shortcuts sheet stay in the start-up file (⌘K then typing at once
+  lost letters when the palette loaded late).
 
 **Board layer hint**: `.bd-world` gets `will-change: transform` only while the board moves
 (`is-moving` / `is-interacting`). Left on, Chrome kept the pages at the detail they were first

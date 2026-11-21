@@ -7,6 +7,9 @@ import { guardPinch } from "./pinch-guard";
 import "./editor.css";
 import "./workspace/workspace.css";
 
+// Opening timings (scripts/probes/open.mjs reads them): every module of the first layer has run.
+performance.mark("aoost:modules");
+
 // The service worker gives the home-screen app a fast start (it never caches the API).
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => void navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" }).catch(() => undefined));

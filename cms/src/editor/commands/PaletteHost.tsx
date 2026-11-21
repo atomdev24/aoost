@@ -1,13 +1,15 @@
 import { useEffect } from "react";
 import { insertAnchorName } from "../insert/catalog";
 import { currentPage, getState, megaItemId, subscribe } from "../store";
+import { ProblemsDialog } from "../parts";
 import { CheatSheet } from "./CheatSheet";
-import { ProblemsDialog } from "./ProblemsDialog";
 import { Palette } from "./Palette";
+import { useProblemsDialog } from "../problems";
 import { noteRecent } from "./palette-store";
 
 /** The palette and cheat sheet, plus the Recent list they share: every page opened and block selected. */
 export function PaletteHost() {
+  const problems = useProblemsDialog();
   useEffect(() => {
     let page = "";
     let block = "";
@@ -32,7 +34,7 @@ export function PaletteHost() {
     <>
       <Palette />
       <CheatSheet />
-      <ProblemsDialog />
+      {problems ? <ProblemsDialog /> : null}
     </>
   );
 }

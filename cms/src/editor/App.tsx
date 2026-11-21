@@ -22,6 +22,7 @@ export function App() {
   useEffect(() => {
     Promise.all([api.site(), api.state()])
       .then(([{ site }, state]) => {
+        performance.mark("aoost:draft");
         initStore(site, state.dirty);
         setOnSaved(noteVersion);
         startSync();

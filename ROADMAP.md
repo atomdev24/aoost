@@ -45,6 +45,10 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Faster opening, phases 0 and 1: opening marks and `open.mjs`; a size budget that fails the
+  build; panels, sheets and dialogs load after the board (idle and hover prefetch, retry); the
+  draft is fetched alongside the script. Locally: board usable cold 1010 → 816 ms, warm 423 → 319 ms.
+
 - Compare: a variant or a past version side by side with the live page (Desktop or Mobile,
   scrolling together) with the list of changes, and Elect or Restore from there.
 

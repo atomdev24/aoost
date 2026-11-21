@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { registerMediaPicker, type MediaKind } from "../fields/media";
 import { Modal } from "./kit";
-import { MediaLibrary } from "./MediaLibrary";
+import { MediaLibrary } from "../parts";
 
 type Request = { kind: MediaKind; resolve: (url: string | null) => void };
 
