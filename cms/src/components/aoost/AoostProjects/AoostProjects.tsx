@@ -150,6 +150,12 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
   frames: (content) => [
     ...shownSlots(content.projects, (p) => !!p.image && !p.hidden, (p, i, k) => ({ path: ["projects", i], label: p.title || `Piece ${k}`, kind: "img", selector: `.table>.piece:nth-child(${k})>img`, box: `.table>.piece:nth-child(${k})`, src: p.image })),
     ...(content.note.show && content.note.image ? [{ path: ["note"], label: "Sticky note", kind: "img" as const, selector: '.sticky[data-note="0"]>img', src: content.note.image, frame: content.note.frame }] : []),
+    // Fixtures last: they sit on top, so a click on one picks it over a piece underneath.
+    ...(content.fixtures ?? []).flatMap((f, i) =>
+      f.image && !f.hidden
+        ? [{ path: ["fixtures", i], label: f.image.split("/").pop()?.replace(/\.[a-z0-9]+$/i, "") || `Fixture ${i + 1}`, kind: "img" as const, selector: `.fixture[data-fixture="${i}"]`, box: `.fixture[data-fixture="${i}"]`, src: f.image, fixture: true }]
+        : [],
+    ),
   ],
   defaults: {
     content: {
@@ -188,12 +194,12 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
             ) : (
               <div className="table" id="table" />
             )}
-            {(content.fixtures ?? [])
-              .filter((f) => f.image && !f.hidden)
-              .map((f, i) => (
+            {(content.fixtures ?? []).map((f, i) =>
+              !f.image || f.hidden ? null : (
                 <img
                   key={i}
                   className="fixture"
+                  data-fixture={i}
                   src={f.image}
                   alt=""
                   aria-hidden="true"

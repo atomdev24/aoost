@@ -163,6 +163,12 @@ against `wrangler dev`).
   against the table's final height) while the automatic ones move clear. Placing on Mobile writes
   `x: null` on Desktop when Desktop had no spot, so the bigger sizes stay automatic (`--px: none`).
   The editor frames re-lay the table whenever sizes or spots change, so they match the site.
+- **Picking items on the canvas.** Clicking a piece or fixture opens its own item in the inspector
+  (and closes every other open item in that block's lists), scrolled into view (`editor/canvas/
+  reveal.ts`, found by the list's field label). Fixtures are slots with `fixture: true`
+  (`.fixture[data-fixture=i]`, listed last so they win over pieces under them): drag the box to move
+  one (its x/y % of the table), drag a corner to resize it (its width px); both shared by every
+  size (`setItemKeys`). Fixture slots aren't framed or dropped onto (`slotAtPoint` skips them).
 - **Nav in the editor.** Clicking the nav in the editable frame opens the Navigation panel (the
   wrapper used to be `inert`, which swallowed clicks; now it catches them and never follows links).
   The frames show the nav as the site does: links only to published pages (`live()` in

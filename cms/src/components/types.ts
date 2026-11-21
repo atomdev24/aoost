@@ -57,6 +57,12 @@ export type FrameSlot = {
    */
   box?: string;
   size?: Responsive<ItemSize>;
+  /**
+   * A fixture (an object on top of a table, e.g. the metal clover): selectable and movable on the
+   * canvas like a piece, but it keeps its own x/y (%) and width (px) instead of a per-size size, and
+   * it isn't a picture to frame or drop onto.
+   */
+  fixture?: boolean;
 };
 
 export type ComponentDef<C = Record<string, unknown>> = {

@@ -100,7 +100,7 @@ test.describe("resizable project pieces", () => {
     await expect.poll(() => desktopFrame(page).locator(PIECE).evaluate((el) => getComputedStyle(el).scale)).toBe(desktopScale);
 
     // The inspector row shows the size, tinted on this size, and the scope bar counts it.
-    await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: await pieceFile(request) }).first().click();
+    // picking the piece opened its own item in the inspector (no need to find it in the list)
     const field = page.locator(".ed-sizefield.is-over:visible");
     await expect(field).toBeVisible();
     await expect(field.getByRole("textbox", { name: "Size" })).toHaveValue(String(Math.round(size.base.scale * 100)));
@@ -155,6 +155,43 @@ test.describe("resizable project pieces", () => {
     await page.mouse.dblclick(g2.x + g2.width / 2, g2.y + g2.height / 2);
     await expect.poll(async () => typeof (await pieceSize(request))?.desktop?.x).not.toBe("number");
     await expect(page.locator(".ed-piece-tag")).not.toContainText("placed");
+  });
+
+  test("picking a piece opens its own settings; the clover can be picked, moved and resized", async ({ page, request }) => {
+    const ins = page.locator(".ed-inspector");
+    const expanded = () => ins.locator('[class*="ArrayFieldItem--isExpanded"] > [class*="ArrayFieldItem-summary"]').allTextContents();
+    // a piece: its item opens in the Projects list
+    const piece = editable(page).locator(PIECE);
+    await expect(piece.locator("img")).toHaveJSProperty("complete", true);
+    const b = await onBoard(page, piece);
+    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    await expect.poll(expanded).toEqual([await pieceFile(request)]);
+
+    // the clover (a fixture): picked over what's under it, its item opens, it moves and resizes
+    const fixtures = async () => {
+      const home = (await draftSite(request, password!)).pages.find((p: { id: string }) => p.id === "home");
+      for (const s of home.sections) for (const n of s.children) if (n.type === "AoostProjects") return n.content.fixtures as { image: string; x: number; y: number; width: number }[];
+      return [];
+    };
+    const before = (await fixtures())[0]!;
+    const clover = editable(page).locator('.fixture[data-fixture="0"]');
+    const c = await onBoard(page, clover);
+    await page.mouse.click(c.x + c.width / 2, c.y + c.height / 2);
+    await expect(page.locator(".ed-piece-tag")).toContainText("every size");
+    await expect.poll(expanded).toEqual([before.image.split("/").pop()]);
+    const box = page.getByTestId("piece-box");
+    const g = (await box.boundingBox())!;
+    await page.mouse.move(g.x + g.width / 2, g.y + g.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(g.x + g.width / 2 + 120, g.y + g.height / 2 + 40, { steps: 10 });
+    await page.mouse.up();
+    await expect.poll(async () => (await fixtures())[0]!.x).toBeGreaterThan(before.x + 3);
+    const h = (await page.locator('[data-piece-handle="se"]').boundingBox())!;
+    await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(h.x + 30, h.y + 30, { steps: 8 });
+    await page.mouse.up();
+    await expect.poll(async () => (await fixtures())[0]!.width).toBeGreaterThan(before.width);
   });
 });
 
