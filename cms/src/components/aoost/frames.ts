@@ -76,7 +76,15 @@ export const sizeAt = (r: Responsive<ItemSize> | undefined, bp: Breakpoint): Ite
  * layout gives it), so its neighbours keep their places and it overlaps them like paper on a table.
  * Full size writes nothing.
  */
-export const sizeDecls = (s: ItemSize): Decls => (s.scale === 1 ? {} : { scale: String(Math.round(s.scale * 1000) / 1000) });
+export const sizeDecls = (s: ItemSize): Decls => ({
+  ...(s.scale === 1 ? {} : { scale: String(Math.round(s.scale * 1000) / 1000) }),
+  // A placed item: where its centre sits, read by the table's layout (projects.js, the editor's frames).
+  ...(typeof s.x === "number" && typeof s.y === "number"
+    ? { "--px": String(Math.round(s.x * 10000) / 10000), "--py": String(Math.round(s.y * 10000) / 10000) }
+    : s.x === null
+      ? { "--px": "none", "--py": "none" }
+      : {}),
+});
 
 /** One rule per framed picture: the mobile value, and each other size's in its media query (tablet and widescreen only when set). */
 export function addSlotCss(sheet: Sheet, nodeId: string, slots: FrameSlot[]) {

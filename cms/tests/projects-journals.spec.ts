@@ -15,7 +15,8 @@ const editable = (page: Page) => page.frameLocator("#preview-frame");
 const desktopFrame = (page: Page) => page.frameLocator('iframe.bd-live[data-bp="desktop"]');
 const PIECE = ".table>.piece:nth-child(2)";
 
-type Size = { base: { scale: number }; desktop?: { scale: number } } | undefined;
+type Spot = { scale: number; x?: number | null; y?: number | null };
+type Size = { base: Spot; desktop?: Partial<Spot> } | undefined;
 /** The file name of the second piece shown (PIECE), as the inspector lists it. */
 async function pieceFile(request: Parameters<typeof draftSite>[0]): Promise<string> {
   const home = (await draftSite(request, password!)).pages.find((p: { id: string }) => p.id === "home");
@@ -83,9 +84,15 @@ test.describe("resizable project pieces", () => {
     const after = (await box.boundingBox())!;
     expect(after.width / before.width).toBeCloseTo(after.height / before.height, 1);
     expect(after.width).toBeGreaterThan(before.width * 1.2);
-    // Its neighbour stays where it was.
-    const still = (await editable(page).locator(".table>.piece:nth-child(3)").boundingBox())!;
-    expect(Math.abs(still.x - neighbour.x) + Math.abs(still.y - neighbour.y)).toBeLessThan(1);
+    // Like the site, the table makes room: the grown piece and its neighbour don't sit on each other.
+    await expect
+      .poll(async () => {
+        const [p, n] = [(await piece.boundingBox())!, (await editable(page).locator(".table>.piece:nth-child(3)").boundingBox())!];
+        const ix = Math.max(0, Math.min(p.x + p.width, n.x + n.width) - Math.max(p.x, n.x)), iy = Math.max(0, Math.min(p.y + p.height, n.y + n.height) - Math.max(p.y, n.y));
+        return (ix * iy) / Math.min(p.width * p.height, n.width * n.height);
+      })
+      .toBeLessThan(0.1);
+    void neighbour;
     // The piece is scaled in the Mobile frame and not in the Desktop frame.
     await expect.poll(() => piece.evaluate((el) => getComputedStyle(el).scale)).not.toBe("none");
     // the desktop frame keeps the size it had (none, or the live content's own desktop size)
@@ -103,6 +110,51 @@ test.describe("resizable project pieces", () => {
     await page.getByRole("button", { name: "Undo" }).click();
     await expect.poll(() => pieceSize(request)).toEqual(sizeBefore);
     await expect.poll(() => piece.evaluate((el) => getComputedStyle(el).scale)).toBe(sizeBefore?.base && sizeBefore.base.scale !== 1 ? String(sizeBefore.base.scale) : "none");
+  });
+
+  test("dragging a piece in the Desktop frame places it there on desktop only; the site follows; double-click lets the table place it again", async ({ page, request }) => {
+    const piece = editable(page).locator(PIECE);
+    await expect(piece.locator("img")).toHaveJSProperty("complete", true);
+    const b0 = await onBoard(page, piece);
+    await page.mouse.click(b0.x + b0.width / 2, b0.y + b0.height / 2);
+    const box = page.getByTestId("piece-box");
+    await expect(box).toBeVisible();
+    const g = (await box.boundingBox())!;
+    await page.mouse.move(g.x + g.width / 2, g.y + g.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(g.x + g.width / 2 + 220, g.y + g.height / 2 + 30, { steps: 12 });
+    await page.mouse.up();
+
+    // saved for desktop, as fractions of the table; mobile stays automatic
+    await expect.poll(async () => typeof (await pieceSize(request))?.desktop?.x).toBe("number");
+    const size = (await pieceSize(request))!;
+    expect(typeof size.base.x).not.toBe("number");
+    await expect(page.locator(".ed-piece-tag")).toContainText("placed");
+    // it followed the pointer on the board
+    const b1 = await onBoard(page, piece);
+    expect(b1.x + b1.width / 2 - (b0.x + b0.width / 2)).toBeGreaterThan(150);
+
+    // the site puts it at the same spot on desktop, and not on a phone
+    const site = await page.context().newPage();
+    await site.setViewportSize({ width: 1440, height: 900 });
+    await site.goto("/preview/");
+    const table = site.locator("#table");
+    await table.scrollIntoViewIfNeeded();
+    await site.waitForTimeout(600);
+    const at = await site.evaluate((sel) => {
+      const t = document.querySelector("#table")!.getBoundingClientRect(), p = document.querySelector(sel)!.getBoundingClientRect();
+      return { x: (p.left + p.width / 2 - t.left) / t.width, px: getComputedStyle(document.querySelector(sel)!).getPropertyValue("--px").trim() };
+    }, PIECE);
+    expect(Math.abs(at.x - size.desktop!.x!)).toBeLessThan(0.02);
+    await site.setViewportSize({ width: 390, height: 844 });
+    await expect.poll(() => site.evaluate((sel) => getComputedStyle(document.querySelector(sel)!).getPropertyValue("--px").trim(), PIECE)).not.toMatch(/^0?\.\d|^1$/);
+    await site.close();
+
+    // double-click: back to the automatic spot
+    const g2 = (await box.boundingBox())!;
+    await page.mouse.dblclick(g2.x + g2.width / 2, g2.y + g2.height / 2);
+    await expect.poll(async () => typeof (await pieceSize(request))?.desktop?.x).not.toBe("number");
+    await expect(page.locator(".ed-piece-tag")).not.toContainText("placed");
   });
 });
 

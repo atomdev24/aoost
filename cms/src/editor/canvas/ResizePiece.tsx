@@ -4,7 +4,7 @@ import { sizeAt } from "../../components/aoost/frames";
 import type { FrameSlot } from "../../components/types";
 import { BREAKPOINT_LABEL, type Breakpoint, type Node } from "../../schema";
 import { frameOrigin, getBoard } from "../board/store";
-import { clampScale, setItemScale } from "../fields/size";
+import { clampScale, clearItemPlace, setItemPlace, setItemScale } from "../fields/size";
 import { beginGesture, currentPage, endGesture, getState, useEditor } from "../store";
 import { itemSizeOf, nodeSlots, samePath, type SlotPath } from "./slots";
 
@@ -74,6 +74,17 @@ function findNode(id: string): Node | null {
 }
 
 type Geo = { x: number; y: number; w: number; h: number };
+
+/** The piece's element and its table, in the editable frame. */
+function pieceEls(t: PieceTarget): { piece: HTMLElement; table: HTMLElement } | null {
+  const node = findNode(t.id);
+  const slot = node ? nodeSlots(node).find((s) => s.box && samePath(s.path, t.path)) : null;
+  const doc = document.querySelector<HTMLIFrameElement>("#preview-frame")?.contentDocument;
+  const block = doc?.querySelector(`[data-node-id="${CSS.escape(t.id)}"]`);
+  const piece = slot && block ? block.querySelector<HTMLElement>(slot.box!) : null;
+  const table = piece?.offsetParent as HTMLElement | null;
+  return piece && table ? { piece, table } : null;
+}
 
 /** The piece's box as drawn (its layout box scaled around its centre), in the board's screen pixels. */
 function measure(t: PieceTarget): Geo | null {
@@ -155,7 +166,9 @@ export function ResizePiece() {
   }, [shown]);
 
   if (!shown || !t || !node || !geo) return null;
-  const scale = sizeAt(itemSizeOf(node, t.path), bp).scale;
+  const here = sizeAt(itemSizeOf(node, t.path), bp);
+  const scale = here.scale;
+  const placed = typeof here.x === "number";
   const label = nodeSlots(node).find((s) => samePath(s.path, t.path))?.label ?? "Piece";
 
   const startResize = (e: React.PointerEvent<HTMLElement>) => {
@@ -192,15 +205,65 @@ export function ResizePiece() {
     el.addEventListener("pointercancel", up);
   };
 
+  // Drag the piece itself to place it on this size (its centre, as fractions of the table); one undo step.
+  const startMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.button !== 0 || e.target !== e.currentTarget) return;
+    const els = pieceEls(t);
+    if (!els) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const el = e.currentTarget;
+    el.setPointerCapture(e.pointerId);
+    const tr = els.table.getBoundingClientRect(), pr = els.piece.getBoundingClientRect();
+    const W = els.table.clientWidth || 1, H = els.table.clientHeight || 1;
+    const c0 = { x: pr.left + pr.width / 2 - tr.left, y: pr.top + pr.height / 2 - tr.top };
+    // the spot is kept where all of the piece (as drawn) stays on the table, as on the site
+    const hx = Math.min(0.5, pr.width / 2 / W), hy = Math.min(0.5, pr.height / 2 / H);
+    const keep = (v: number, h: number) => Math.min(1 - h, Math.max(h, v));
+    const zoom = getBoard().view.zoom || 1;
+    const x0 = e.clientX, y0 = e.clientY;
+    let moved = false;
+    const move = (m: PointerEvent) => {
+      const dx = (m.clientX - x0) / zoom, dy = (m.clientY - y0) / zoom;
+      if (!moved) {
+        if (Math.hypot(dx, dy) < 3) return;
+        moved = true;
+        setDragging(true);
+        beginGesture();
+      }
+      setItemPlace(t.id, t.path, keep((c0.x + dx) / W, hx), keep((c0.y + dy) / H, hy));
+    };
+    const up = () => {
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+      if (moved) endGesture();
+      setDragging(false);
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+  };
+
   return (
-    <div ref={host} className="ed-piece" aria-label={`${label}: resize`}>
-      <div className={`ed-piece-box${dragging ? " is-dragging" : ""}`} style={{ left: geo.x, top: geo.y, width: geo.w, height: geo.h }} data-testid="piece-box">
+    <div ref={host} className="ed-piece" aria-label={`${label}: move or resize`}>
+      <div
+        className={`ed-piece-box${dragging ? " is-dragging" : ""}`}
+        style={{ left: geo.x, top: geo.y, width: geo.w, height: geo.h }}
+        data-testid="piece-box"
+        onPointerDown={startMove}
+        onDoubleClick={(e) => {
+          if (e.target !== e.currentTarget || !placed) return;
+          clearItemPlace(t.id, t.path);
+        }}
+        title={placed ? "Drag to move this piece on this size · double-click to let the table place it" : "Drag to move this piece on this size"}
+      >
         {(["nw", "ne", "se", "sw"] as const).map((c) => (
           <span key={c} className={`ed-piece-handle is-${c}`} data-piece-handle={c} onPointerDown={startResize} title="Drag to resize this piece on this size" />
         ))}
       </div>
       <span className="ed-piece-tag" style={{ left: geo.x, top: geo.y + geo.h + 6 }} role="status">
-        {label} · {Math.round(scale * 100)}% · {BREAKPOINT_LABEL[bp]}
+        {label} · {Math.round(scale * 100)}%{placed ? " · placed" : ""} · {BREAKPOINT_LABEL[bp]}
       </span>
     </div>
   );

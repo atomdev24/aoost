@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from "react";
-import { clearLayout, pieceTransform } from "../runtime/table.js";
+import { clearLayout, pieceTransform, placeOf } from "../runtime/table.js";
 import { z } from "zod";
 import { ResponsiveFrameFit, ResponsiveItemSize } from "../../../schema";
 import { defineComponent } from "../../types";
@@ -9,9 +9,11 @@ import { aoostKit, matBand } from "../kit";
 import { css } from "./AoostProjects.styles";
 
 /** The editor's table: the pieces where the site puts them (same layout, same screen width), not draggable here. */
-function EditingTable({ shown }: { shown: { image?: string; title?: string; sticker?: boolean }[] }) {
+function EditingTable({ shown }: { shown: { image?: string; title?: string; sticker?: boolean; size?: unknown }[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const key = shown.map((p) => p.image).join("|");
+  // Sizes and saved spots live in CSS the frame may not report as a change: lay out again when they change.
+  const sizes = JSON.stringify(shown.map((p) => p.size ?? null));
   useEffect(() => {
     const table = ref.current;
     const win = table?.ownerDocument.defaultView;
@@ -30,7 +32,8 @@ function EditingTable({ shown }: { shown: { image?: string; title?: string; stic
           const v = win.getComputedStyle(p).scale;
           return v && v !== "none" ? Number(v.split(" ")[0]) || 1 : 1;
         });
-        const L = clearLayout(table.clientWidth, aspects, scales);
+        const places = pieces.map((p) => placeOf(win.getComputedStyle(p)));
+        const L = clearLayout(table.clientWidth, aspects, scales, places);
         table.classList.remove("ao-static");
         table.style.height = `${L.H}px`;
         pieces.forEach((p, i) => {
@@ -55,7 +58,7 @@ function EditingTable({ shown }: { shown: { image?: string; title?: string; stic
       ro.disconnect();
       mo.disconnect();
     };
-  }, [key]);
+  }, [key, sizes]);
   return (
     <div className="table ao-static" id="table" ref={ref}>
       {shown.map((p, i) => (

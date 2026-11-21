@@ -154,7 +154,15 @@ against `wrangler dev`).
   scales the piece's `translate` (CSS applies the scale property around the element's origin, after
   the transform). `pieceTransform` (table.js) divides it out, so the site and the editor's frames put
   a resized piece's centre exactly where the layout says, drags follow the pointer 1:1, and the
-  drag limits use the scaled size. Positions are not saved: the table is laid out automatically.
+  drag limits use the scaled size.
+- **Placing pieces.** In the editor, click a piece and drag it (the box, not a corner) to place it
+  on that size; double-click the box to let the table place it again. The spot is saved with the
+  size (`ItemSize.x/y`: the piece's centre as fractions of the table's width and height, kept where
+  the whole piece stays on the table) and written as `--px/--py` per size (`sizeDecls`). The site
+  and the editor's frames read them (`placeOf`) and `clearLayout` pins placed pieces there (y
+  against the table's final height) while the automatic ones move clear. Placing on Mobile writes
+  `x: null` on Desktop when Desktop had no spot, so the bigger sizes stay automatic (`--px: none`).
+  The editor frames re-lay the table whenever sizes or spots change, so they match the site.
 - **Frame stills and canvases.** `captureFrame` (board/stills.ts) turns canvases into pictures
   before pairing the copy's images with the page's; those pictures are marked
   `data-from-canvas` and left out of the pairing, or every image after a canvas shifts by one.

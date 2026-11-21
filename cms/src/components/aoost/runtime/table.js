@@ -33,6 +33,12 @@ export function layoutTable(W, aspects) {
   return { H, pw, items };
 }
 
+/** A piece's saved spot on this screen size (the editor writes --px/--py per size), or null. */
+export function placeOf(style) {
+  const x = parseFloat(style.getPropertyValue('--px')), y = parseFloat(style.getPropertyValue('--py'));
+  return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+}
+
 /**
  * The CSS transform that puts a piece's (unscaled) top-left at x, y, tilted, when its size is a CSS
  * `scale` of s around its centre. The scale property also scales the translate, so it's divided out.
@@ -58,13 +64,15 @@ export function separate(pieces, W, H, { pinned = -1, gap = 8 } = {}) {
   });
   const keepOn = (q, cx, cy) => { const R = centreRange(W, H, q.hx, q.hy); return [clamp(cx, R.x0, R.x1), clamp(cy, R.y0, R.y1)]; };
   const hits = (q, cx, cy, placed) => placed.some((o) => q.hx + o.hx + gap - Math.abs(cx - o.cx) > 0.5 && q.hy + o.hy + gap - Math.abs(cy - o.cy) > 0.5);
-  const order = pinned >= 0 && pinned < P.length ? [pinned, ...P.keys()].filter((i, k, all) => all.indexOf(i) === k) : [...P.keys()];
+  // pinned: one index (the piece just put down) or several (pieces placed in the editor); they go first and stay put
+  const pins = (Array.isArray(pinned) ? pinned : [pinned]).filter((i) => i >= 0 && i < P.length);
+  const order = [...pins, ...P.keys()].filter((i, k, all) => all.indexOf(i) === k);
   const placed = [];
   let stuck = 0;
   for (const i of order) {
     const q = P[i];
     let [cx, cy] = keepOn(q, q.cx, q.cy);
-    if (i !== pinned && hits(q, cx, cy, placed)) {
+    if (!pins.includes(i) && hits(q, cx, cy, placed)) {
       // The nearest clear spot: rings of growing radius around where it was, 24 directions each.
       let found = null;
       const far = Math.hypot(W, H);
@@ -100,12 +108,18 @@ export function overlapping(a, b, slack = 0.5) {
  * When they can't all fit clear (a narrow phone, big pieces) the table grows taller, a little at
  * a time, until they do. `scales` are each piece's size on this screen (1 = as laid out).
  */
-export function clearLayout(W, aspects, scales = []) {
+export function clearLayout(W, aspects, scales = [], places = []) {
   const L = layoutTable(W, aspects);
   let H = L.H;
-  let items = L.items.map((p, i) => ({ ...p, s: scales[i] || 1 }));
+  // Pieces placed in the editor: their centre at the saved fractions of the table; the rest keep the
+  // automatic spots and move clear of them.
+  const pinned = L.items.map((_, i) => i).filter((i) => places[i] && Number.isFinite(places[i].x) && Number.isFinite(places[i].y));
+  // (placed pieces are put relative to the table's final height, so a table that grows keeps them in proportion)
+  const at = (H) => L.items.map((p, i) => (pinned.includes(i) ? { ...p, x: places[i].x * W - p.w / 2, y: places[i].y * H - p.h / 2, s: scales[i] || 1 } : { ...p, s: scales[i] || 1 }));
+  let items = at(H);
   for (let grow = 0; grow < 40; grow++) {
-    const next = separate(items, W, H);
+    items = at(H);
+    const next = separate(items, W, H, { pinned });
     if (!next.stuck) { items = next; break; }
     H += 40;
     if (grow === 39) items = next;

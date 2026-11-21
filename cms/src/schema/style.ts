@@ -72,8 +72,12 @@ export const FrameFit = z.object({
 });
 export type FrameFit = z.infer<typeof FrameFit>;
 export const ResponsiveFrameFit = responsive(FrameFit);
-/** A content item's size on its own layout spot (a project piece): a multiplier on its laid-out size. */
-export const ItemSize = z.object({ scale: z.number().min(0.4).max(2.5) });
+/**
+ * A content item on its own layout spot (a project piece): a multiplier on its laid-out size, and
+ * optionally where its centre sits, as fractions of the table's width and height (unset: laid out
+ * automatically; null: laid out automatically on this size even though a narrower size is placed).
+ */
+export const ItemSize = z.object({ scale: z.number().min(0.4).max(2.5), x: z.number().min(0).max(1).nullable().optional(), y: z.number().min(0).max(1).nullable().optional() });
 export type ItemSize = z.infer<typeof ItemSize>;
 export const ResponsiveItemSize = responsive(ItemSize);
 export const DEFAULT_ITEM_SIZE: ItemSize = { scale: 1 };
