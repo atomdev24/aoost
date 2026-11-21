@@ -34,7 +34,9 @@ test.describe("projects table", () => {
     await expect.poll(async () => (await boxes(siteTable)).length).toBeGreaterThan(0);
     // Images load at their own pace on each side; once both have settled they match exactly.
     await expect.poll(async () => JSON.stringify(await boxes(editorTable)) === JSON.stringify(await boxes(siteTable)), { timeout: 10_000 }).toBe(true);
-    expect(stacked(await rects(siteTable))).toEqual([]);
+    // Pieces placed in the editor may overlap on purpose; the automatic layout never stacks them.
+    const placed = await site.evaluate(() => [...document.querySelectorAll("#table>.piece")].some((e) => /^[\d.]+$/.test(getComputedStyle(e).getPropertyValue("--px").trim())));
+    if (!placed) expect(stacked(await rects(siteTable))).toEqual([]);
   });
 
   test("a piece put down on another stays put, and the other moves clear", async ({ page, request }) => {

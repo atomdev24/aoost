@@ -4,6 +4,7 @@ import { updateNode } from "../../model/page-ops";
 import { overridesAt, REFERENCE, resetAt, resolve, setOnly } from "../../responsive/resolve";
 import { DEFAULT_ITEM_SIZE, type Breakpoint, type ItemSize, type Node, type Responsive } from "../../schema";
 import { itemPathOfField, itemSizeOf, withSlotSize, type SlotPath } from "../canvas/slots";
+import { withItemKey } from "../../components/aoost/frames";
 import { currentPage, getState, updatePage, useEditor } from "../store";
 import { OverrideLabel } from "./ResponsiveEditor";
 import { ScrubNumber } from "./ScrubField";
@@ -52,6 +53,12 @@ export const clearItemPlace = (nodeId: string, path: SlotPath) =>
     },
     "Let the table place the piece",
   );
+
+/** Set plain keys on a content item (a fixture's x, y, width): shared by every size; one undo step or merged while dragging. */
+export function setItemKeys(nodeId: string, path: SlotPath, patch: Record<string, number>, what: string) {
+  const { pageId } = getState();
+  updatePage(pageId, (p) => updateNode(p, nodeId, (n) => ({ ...n, content: Object.entries(patch).reduce((c, [k, v]) => withItemKey(c, path, k, v), n.content) })), what);
+}
 
 /** Set an item's scale at the active breakpoint only. */
 export const setItemScale = (nodeId: string, path: SlotPath, scale: number) => editItemSize(nodeId, path, (r, bp) => setOnly(r, bp, { scale: clampScale(scale) }));

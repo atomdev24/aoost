@@ -4,7 +4,8 @@ import { sizeAt } from "../../components/aoost/frames";
 import type { FrameSlot } from "../../components/types";
 import { BREAKPOINT_LABEL, type Breakpoint, type Node } from "../../schema";
 import { frameOrigin, getBoard } from "../board/store";
-import { clampScale, clearItemPlace, setItemPlace, setItemScale } from "../fields/size";
+import { clampScale, clearItemPlace, setItemKeys, setItemPlace, setItemScale } from "../fields/size";
+import { revealItem } from "./reveal";
 import { beginGesture, currentPage, endGesture, getState, useEditor } from "../store";
 import { itemSizeOf, nodeSlots, samePath, type SlotPath } from "./slots";
 
@@ -133,6 +134,13 @@ export function ResizePiece() {
   useEffect(() => {
     if (t && (!node || !nodeSlots(node).some((s) => s.box && samePath(s.path, t.path)))) selectPiece(null);
   }, [t, node, page]);
+  // Picking a piece or fixture opens its own settings in the inspector (and closes the others).
+  const pickedKey = t ? `${t.id}|${t.path.join(".")}` : "";
+  useEffect(() => {
+    const n = t ? findNode(t.id) : null;
+    if (t && n) revealItem(n.type, t.path);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickedKey]);
 
   // Follow the piece every frame (zoom, pan and edits all move it).
   useLayoutEffect(() => {
@@ -169,7 +177,11 @@ export function ResizePiece() {
   const here = sizeAt(itemSizeOf(node, t.path), bp);
   const scale = here.scale;
   const placed = typeof here.x === "number";
-  const label = nodeSlots(node).find((s) => samePath(s.path, t.path))?.label ?? "Piece";
+  const slot = nodeSlots(node).find((s) => samePath(s.path, t.path));
+  const label = slot?.label ?? "Piece";
+  // A fixture keeps its own x/y (% of the table) and width (px), shared by every size.
+  const fixture = !!slot?.fixture;
+  const fix = fixture ? ((node.content as Record<string, unknown[]>)[String(t.path[0])]?.[Number(t.path[1])] as { width?: number } | undefined) : undefined;
 
   const startResize = (e: React.PointerEvent<HTMLElement>) => {
     if (e.button !== 0) return;
@@ -182,16 +194,19 @@ export function ResizePiece() {
     const cy = bd.top + geo.y + geo.h / 2;
     const d0 = Math.hypot(e.clientX - cx, e.clientY - cy) || 1;
     const s0 = scale;
+    const w0 = fix?.width ?? 200;
     let moved = false;
     const move = (m: PointerEvent) => {
-      const next = clampScale((s0 * (Math.hypot(m.clientX - cx, m.clientY - cy) || 1)) / d0);
+      const ratio = (Math.hypot(m.clientX - cx, m.clientY - cy) || 1) / d0;
+      const next = clampScale(s0 * ratio);
       if (!moved) {
-        if (Math.abs(next - s0) < 0.01) return;
+        if (Math.abs(ratio - 1) < 0.01) return;
         moved = true;
         setDragging(true);
         beginGesture();
       }
-      setItemScale(t.id, t.path, next);
+      if (fixture) setItemKeys(t.id, t.path, { width: Math.round(Math.min(800, Math.max(40, w0 * ratio))) }, "Resize fixture");
+      else setItemScale(t.id, t.path, next);
     };
     const up = () => {
       el.removeEventListener("pointermove", move);
@@ -231,7 +246,11 @@ export function ResizePiece() {
         setDragging(true);
         beginGesture();
       }
-      setItemPlace(t.id, t.path, keep((c0.x + dx) / W, hx), keep((c0.y + dy) / H, hy));
+      if (fixture) {
+        // its centre, as % of the table, the same for every size
+        const pct = (v: number) => Math.round(Math.min(100, Math.max(0, v * 100)) * 10) / 10;
+        setItemKeys(t.id, t.path, { x: pct((c0.x + dx) / W), y: pct((c0.y + dy) / H) }, "Move fixture");
+      } else setItemPlace(t.id, t.path, keep((c0.x + dx) / W, hx), keep((c0.y + dy) / H, hy));
     };
     const up = () => {
       el.removeEventListener("pointermove", move);
@@ -253,7 +272,7 @@ export function ResizePiece() {
         data-testid="piece-box"
         onPointerDown={startMove}
         onDoubleClick={(e) => {
-          if (e.target !== e.currentTarget || !placed) return;
+          if (e.target !== e.currentTarget || !placed || fixture) return;
           clearItemPlace(t.id, t.path);
         }}
         title={placed ? "Drag to move this piece on this size · double-click to let the table place it" : "Drag to move this piece on this size"}
@@ -263,7 +282,7 @@ export function ResizePiece() {
         ))}
       </div>
       <span className="ed-piece-tag" style={{ left: geo.x, top: geo.y + geo.h + 6 }} role="status">
-        {label} · {Math.round(scale * 100)}%{placed ? " · placed" : ""} · {BREAKPOINT_LABEL[bp]}
+        {fixture ? `${label} · ${fix?.width ?? 200}px · every size` : `${label} · ${Math.round(scale * 100)}%${placed ? " · placed" : ""} · ${BREAKPOINT_LABEL[bp]}`}
       </span>
     </div>
   );

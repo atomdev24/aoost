@@ -53,6 +53,7 @@ export function itemPathOfField(name: string | undefined): SlotPath | null {
  */
 export function slotAtPoint(node: Node, blockEl: Element, x: number, y: number): { slot: FrameSlot; el: HTMLElement } | null {
   for (const slot of nodeSlots(node)) {
+    if (slot.fixture) continue; // moved and sized on the canvas, not framed or dropped onto
     const el = blockEl.querySelector<HTMLElement>(slot.selector);
     const box = (slot.kind === "img" ? el?.parentElement : el)?.getBoundingClientRect();
     if (el && box && box.width && x >= box.left && x <= box.right && y >= box.top && y <= box.bottom) return { slot, el };
