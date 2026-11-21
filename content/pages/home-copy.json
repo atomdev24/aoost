@@ -1,0 +1,566 @@
+{
+  "id": "home-copy",
+  "title": "Home",
+  "slug": "/home-variant-1",
+  "parentId": null,
+  "status": "draft",
+  "template": "blank",
+  "seo": {
+    "title": "aoost"
+  },
+  "isHome": false,
+  "showInNav": false,
+  "sections": [
+    {
+      "id": "s_ku92uh42",
+      "kind": "flow",
+      "name": "Hero",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_tof3f9xt",
+          "type": "AoostHero",
+          "content": {
+            "label": "aoost / portfolio",
+            "clockLabel": "CPT",
+            "timeZone": "Africa/Johannesburg",
+            "reel": [
+              {
+                "src": "/media/2026/hero-banner-halftone-viho.png",
+                "alt": "",
+                "frame": {
+                  "base": {
+                    "fit": "free",
+                    "focalX": 63.4,
+                    "focalY": 50,
+                    "zoom": 1.02,
+                    "panX": 1,
+                    "panY": 0.6
+                  },
+                  "desktop": {
+                    "focalX": 50,
+                    "fit": "fill",
+                    "zoom": 1,
+                    "panX": 0,
+                    "panY": 0
+                  }
+                }
+              },
+              {
+                "src": "/media/2026/aoost-hero-skull-ethereal-2400x1000-63zv.png",
+                "alt": ""
+              }
+            ],
+            "reelSeconds": 5.2,
+            "ticker": [],
+            "tickerTopScore": true,
+            "tickerVisitors": true,
+            "lateMode": false,
+            "showTicker": true
+          },
+          "style": {
+            "base": {},
+            "desktop": {
+              "alignSelf": "center"
+            }
+          },
+          "effects": {
+            "enter": "slide-right",
+            "parallax": 0.15
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_knkc3bvd",
+      "kind": "flow",
+      "name": "Projects",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_z9l5uj2t",
+          "type": "AoostProjects",
+          "content": {
+            "mat": "light",
+            "intro": "AlexANDER · Cape Town",
+            "heading": "Projects",
+            "projects": [
+              {
+                "image": "/art/hero.jpg"
+              },
+              {
+                "image": "/art/monkey-figure.jpg",
+                "hidden": true
+              },
+              {
+                "image": "/art/storefront.png"
+              },
+              {
+                "image": "/art/hear-no-evil-3d.png"
+              },
+              {
+                "image": "/art/flower-skull.png"
+              },
+              {
+                "image": "/art/hear-no-evil-ring.png"
+              }
+            ],
+            "note": {
+              "show": true,
+              "style": "plain"
+            },
+            "keychain": {
+              "show": false,
+              "image": "/art/keychain.png",
+              "label": "Monkey keychain, give it a swing"
+            },
+            "showCactus": false,
+            "showSkull": false,
+            "fixtures": [
+              {
+                "image": "/art/clover-metal.png",
+                "x": 20,
+                "y": 26,
+                "width": 210,
+                "rotate": -8
+              },
+              {
+                "image": "/media/2026/aoost-skull-resin-transparent-wide-1-bjma.png",
+                "x": 81,
+                "y": 91,
+                "width": 200
+              },
+              {
+                "image": "/media/2026/aoost-skull-side-black-transparent-wide-1-p8mv.png",
+                "x": 5,
+                "y": 78,
+                "width": 200
+              }
+            ]
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_s1n4h9qb",
+      "kind": "flow",
+      "name": "Journals",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_4gjaq9s6",
+          "type": "AoostJournals",
+          "content": {
+            "mat": "light",
+            "heading": "Journals",
+            "sub": "",
+            "journals": [
+              {
+                "title": "sketchbook 1",
+                "year": "2025",
+                "cover": "/art/j-star1.jpg",
+                "band": "#141516",
+                "tilt": -5,
+                "pages": [
+                  {
+                    "id": "cc67ed56-1343-4107-8236-c6fc982e371f",
+                    "paper": "black",
+                    "spread": true,
+                    "items": [
+                      {
+                        "id": "e244da62-0ce7-4377-9ba9-4cb4cec26aa7",
+                        "kind": "sticker",
+                        "src": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/stickers/4e412042-39ad-4a0e-ac61-a61006fd405c.webp",
+                        "x": 0.512805,
+                        "y": 0.478652,
+                        "w": 0.512394,
+                        "rot": -20.8,
+                        "skew": -0.778526,
+                        "z": 1,
+                        "props": {
+                          "lift": 0,
+                          "tape": "none",
+                          "aspect": 0.6330275229357798,
+                          "shadow": "soft",
+                          "tapeStyle": "masking"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "title": "sketchbook 2",
+                "year": "2025",
+                "coverColor": "#B48A5C",
+                "material": "kraft",
+                "sticker": "/art/hear-no-evil-ring.png",
+                "band": "#7A1A1A",
+                "tilt": 4,
+                "pages": []
+              },
+              {
+                "title": "sketchbook 3",
+                "year": "2026",
+                "cover": "/art/j-star2.jpg",
+                "band": "#1B2BA0",
+                "tilt": -2,
+                "pages": []
+              },
+              {
+                "title": "sketchbook 4",
+                "year": "2026",
+                "coverColor": "#141516",
+                "material": "leather",
+                "sticker": "/art/j-monkey.png",
+                "band": "#7C5CFF",
+                "dark": true,
+                "tilt": 6,
+                "pages": []
+              }
+            ]
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_awk0uj48",
+      "kind": "flow",
+      "name": "Skills",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px",
+          "hidden": true
+        }
+      },
+      "children": [
+        {
+          "id": "n_q680w7gy",
+          "type": "AoostTools",
+          "content": {
+            "mat": "light",
+            "heading": "Skills",
+            "tools": [
+              {
+                "abbr": "Id",
+                "name": "InDesign",
+                "level": "Daily",
+                "value": 90
+              },
+              {
+                "abbr": "Ai",
+                "name": "Illustrator",
+                "level": "Fluent",
+                "value": 85
+              },
+              {
+                "abbr": "Ps",
+                "name": "Photoshop",
+                "level": "Daily",
+                "value": 75
+              },
+              {
+                "abbr": "Fg",
+                "name": "Figma",
+                "level": "Fluent",
+                "value": 60
+              },
+              {
+                "abbr": "Ae",
+                "name": "After Effects",
+                "level": "Learning",
+                "value": 45
+              },
+              {
+                "abbr": "Bl",
+                "name": "Blender",
+                "level": "Learning",
+                "value": 35
+              }
+            ]
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_1jvdh2v4",
+      "kind": "flow",
+      "name": "Playlists",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_7ejpzcx5",
+          "type": "AoostPlaylistBand",
+          "content": {
+            "mat": "dark",
+            "heading": "Playlists",
+            "playlists": [
+              {
+                "title": "Rock",
+                "spotify": "2FeVxQ6ZPLOAuoejGJj9Fb",
+                "cover": "/art/cover-disc1.jpg"
+              },
+              {
+                "title": "Alt",
+                "spotify": "3PbXJWUZ4RooUU0aSSdDi0",
+                "cover": "/art/cover-disc2.jpg"
+              },
+              {
+                "title": "H | T | R",
+                "spotify": "6KYCNr0X6Zt189pYxHMx1j",
+                "cover": "/art/cover-disc3.jpg"
+              }
+            ]
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_1nlyix1v",
+      "kind": "flow",
+      "name": "The wall",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_87a3j9v7",
+          "type": "AoostDrawingWall",
+          "content": {
+            "mat": "dark",
+            "show": false,
+            "heading": "The wall",
+            "paint": [
+              {
+                "name": "Black",
+                "color": "#141516"
+              },
+              {
+                "name": "White",
+                "color": "#FFFFFF"
+              },
+              {
+                "name": "Blue",
+                "color": "#2236F2"
+              },
+              {
+                "name": "Pink",
+                "color": "#D9559E"
+              },
+              {
+                "name": "Lime",
+                "color": "#86E06F"
+              },
+              {
+                "name": "Orange",
+                "color": "#F1A23B"
+              }
+            ],
+            "noteColors": [
+              {
+                "name": "Yellow",
+                "color": "#F2E36B"
+              },
+              {
+                "name": "Pink",
+                "color": "#D9559E"
+              },
+              {
+                "name": "Lime",
+                "color": "#86E06F"
+              },
+              {
+                "name": "Blue",
+                "color": "#7FA9E6"
+              },
+              {
+                "name": "White",
+                "color": "#FFFFFF"
+              }
+            ],
+            "backgrounds": [
+              {
+                "name": "White",
+                "color": "#FFFFFF"
+              },
+              {
+                "name": "Paper",
+                "color": "#EFF0EC"
+              },
+              {
+                "name": "Black",
+                "color": "#141516"
+              },
+              {
+                "name": "Neon pink",
+                "color": "#FF2D95"
+              },
+              {
+                "name": "Lime",
+                "color": "#86E06F"
+              },
+              {
+                "name": "Sky",
+                "color": "#7FA9E6"
+              },
+              {
+                "name": "Orange",
+                "color": "#F1A23B"
+              },
+              {
+                "name": "Yellow",
+                "color": "#F2E36B"
+              }
+            ]
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_j0uipi9z",
+      "kind": "flow",
+      "name": "Rodeo",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_pnyan8cu",
+          "type": "AoostRodeo",
+          "content": {
+            "mat": "dark",
+            "heading": "",
+            "copy": "",
+            "showLeaderboard": true,
+            "leaderboardTitle": "Leaderboard"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_mje31sa8",
+      "kind": "flow",
+      "name": "Footer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_5loj76vh",
+          "type": "AoostFooter",
+          "content": {
+            "mat": "dark",
+            "line": "Things I make, when I get to them.",
+            "text": "aoost · 2026",
+            "showScorpion": true,
+            "showSocials": false
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_jtjw3rvy",
+      "kind": "flow",
+      "name": "Artwork viewer",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 0,
+          "padding": "0px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_cyya2lie",
+          "type": "AoostViewer",
+          "content": {},
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": [],
+  "variantOf": "home",
+  "variantName": "Variant 1",
+  "variantIds": {
+    "s_ku92uh42": "home-hero",
+    "n_tof3f9xt": "home-hero-block",
+    "s_knkc3bvd": "home-projects",
+    "n_z9l5uj2t": "home-projects-block",
+    "s_s1n4h9qb": "home-journals",
+    "n_4gjaq9s6": "home-journals-block",
+    "s_awk0uj48": "home-tools",
+    "n_q680w7gy": "home-tools-block",
+    "s_1jvdh2v4": "home-playlistband",
+    "n_7ejpzcx5": "home-playlistband-block",
+    "s_1nlyix1v": "home-drawingwall",
+    "n_87a3j9v7": "home-drawingwall-block",
+    "s_j0uipi9z": "home-rodeo",
+    "n_pnyan8cu": "home-rodeo-block",
+    "s_mje31sa8": "home-footer",
+    "n_5loj76vh": "home-footer-block",
+    "s_jtjw3rvy": "home-viewer",
+    "n_cyya2lie": "home-viewer-block"
+  }
+}

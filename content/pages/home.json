@@ -145,8 +145,14 @@
               {
                 "image": "/media/2026/aoost-skull-side-black-transparent-wide-1-p8mv.png",
                 "x": 5,
-                "y": 78,
+                "y": 16,
                 "width": 200
+              },
+              {
+                "image": "/media/2026/aoost-cactus-transparent-wide-1-33uc.png",
+                "x": 8,
+                "y": 100,
+                "width": 190
               }
             ]
           },
