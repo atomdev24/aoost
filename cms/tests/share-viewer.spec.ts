@@ -18,6 +18,9 @@ async function quiet(page: Page) {
   await page.context().route(/cdn\.jsdelivr\.net\/npm\/@supabase/, (route) => route.abort());
 }
 
+/** The second project that is shown on the table (hidden pieces aren't on it). */
+const secondShown = (projects: { hidden?: boolean }[]) => projects.filter((p) => !p.hidden)[1]!;
+
 async function openPiece(page: Page, n: number) {
   const piece = page.locator(`.table>.piece:nth-child(${n})`);
   await expect(piece.locator("img")).toHaveJSProperty("complete", true);
@@ -77,7 +80,7 @@ test.describe("artwork viewer: the dark room", () => {
       await resetDraft(request, password!);
       const site = await draftSite(request, password!);
       const home = site.pages.find((p: { id: string }) => p.id === "home");
-      for (const s of home.sections) for (const n of s.children) if (n.type === "AoostProjects") Object.assign(n.content.projects[1], { title: "Blue monkey", medium: "Ink", year: "2025", note: "Drawn on the train home." });
+      for (const s of home.sections) for (const n of s.children) if (n.type === "AoostProjects") Object.assign(secondShown(n.content.projects), { title: "Blue monkey", medium: "Ink", year: "2025", note: "Drawn on the train home." });
       const res = await request.post("/api/editor/ops", { headers: bearer(password!), data: { ops: [{ op: "putPage", page: home }] } });
       expect(res.ok()).toBe(true);
       await signIn(page, password!);
