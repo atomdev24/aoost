@@ -163,6 +163,11 @@ against `wrangler dev`).
   against the table's final height) while the automatic ones move clear. Placing on Mobile writes
   `x: null` on Desktop when Desktop had no spot, so the bigger sizes stay automatic (`--px: none`).
   The editor frames re-lay the table whenever sizes or spots change, so they match the site.
+- **Nav in the editor.** Clicking the nav in the editable frame opens the Navigation panel (the
+  wrapper used to be `inert`, which swallowed clicks; now it catches them and never follows links).
+  The frames show the nav as the site does: links only to published pages (`live()` in
+  nav/model.ts ignores editing). Logo text may be empty: the logo is then just the symbol
+  (`.pill-logo.mark-only`, aria-label "Home"), which then shows even if "Sun mark" is off.
 - **Frame stills and canvases.** `captureFrame` (board/stills.ts) turns canvases into pictures
   before pairing the copy's images with the page's; those pictures are marked
   `data-from-canvas` and left out of the pairing, or every image after a canvas shifts by one.

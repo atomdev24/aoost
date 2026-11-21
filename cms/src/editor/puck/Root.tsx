@@ -1,3 +1,4 @@
+import { openPanel } from "../workspace/rail-store";
 import { useMemo, type ReactNode } from "react";
 import { makeCtx } from "../../render/context";
 import { pageCss, pageKits } from "../../render/document";
@@ -34,7 +35,17 @@ export function Root({ children }: { children: ReactNode }) {
       <style>{css}</style>
       <style>{canvasCss + frameBaseCss}</style>
       {mega || page.hideNav ? null : (
-        <div className="ed-nav-preview" inert>
+        // The nav isn't a block on the page: a click on it opens its own panel (Navigation, in the
+        // rail) instead of following a link (it used to be inert, which swallowed clicks).
+        <div
+          className="ed-nav-preview"
+          title="Edit the navigation"
+          onClickCapture={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openPanel("nav");
+          }}
+        >
           <Nav ctx={ctx} />
         </div>
       )}

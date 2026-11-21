@@ -79,12 +79,14 @@ export function NavPanel() {
         </div>
         <div className="ed-row">
           <span className="ed-label">Logo text</span>
-          <TextInput ariaLabel="Logo text" value={nav.logoText} onCommit={(logoText) => logoText && update((s) => setNavBehaviour(s, { logoText }), "Change logo text")} />
+          {/* Empty: the logo is just the symbol. */}
+          <TextInput ariaLabel="Logo text" value={nav.logoText} placeholder="Empty: just the symbol" onCommit={(logoText) => update((s) => setNavBehaviour(s, { logoText: logoText.trim() }), logoText.trim() ? "Change logo text" : "Logo: just the symbol")} />
         </div>
         <div className="ed-row">
           <span className="ed-label">Sun mark in logo</span>
           <div className="ed-control">
-            <Toggle label="Sun mark in logo" checked={nav.showLogoMark} onChange={(showLogoMark) => update((s) => setNavBehaviour(s, { showLogoMark }), "Change logo")} />
+            {/* With no logo text the symbol is the logo, so it stays on. */}
+            <Toggle label="Sun mark in logo" checked={nav.showLogoMark || !nav.logoText.trim()} onChange={(showLogoMark) => (showLogoMark || nav.logoText.trim()) && update((s) => setNavBehaviour(s, { showLogoMark }), "Change logo")} />
           </div>
         </div>
         <div className="ed-row">
