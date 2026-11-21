@@ -334,7 +334,8 @@
                       }
                     ]
                   }
-                ]
+                ],
+                "mockup": "/art/journal-black.webp"
               },
               {
                 "title": "sketchbook 2",
@@ -344,7 +345,8 @@
                 "sticker": "/art/hear-no-evil-ring.png",
                 "band": "#7A1A1A",
                 "tilt": 4,
-                "pages": []
+                "pages": [],
+                "hidden": true
               },
               {
                 "title": "sketchbook 3",
@@ -352,7 +354,8 @@
                 "cover": "/art/j-star2.jpg",
                 "band": "#1B2BA0",
                 "tilt": -2,
-                "pages": []
+                "pages": [],
+                "hidden": true
               },
               {
                 "title": "sketchbook 4",
@@ -363,7 +366,8 @@
                 "band": "#7C5CFF",
                 "dark": true,
                 "tilt": 6,
-                "pages": []
+                "pages": [],
+                "hidden": true
               }
             ]
           },

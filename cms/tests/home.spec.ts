@@ -127,10 +127,11 @@ test.describe("homepage: the original page, from aoost blocks", () => {
 
   test("a journal opens in the dark room, turns spreads and closes", async ({ page }) => {
     const { journals, sub } = homeBlock("AoostJournals");
-    const first = journals[0];
+    const shown = journals.filter((j: { hidden?: boolean }) => !j.hidden);
+    const first = shown[0];
     await home(page);
-    await expect(page.locator("#jrShelf .jr")).toHaveCount(journals.length);
-    await expect(page.locator("#jrShelf .jr .jr-lbl")).toHaveText(journals.map((j: { title: string }) => j.title));
+    await expect(page.locator("#jrShelf .jr")).toHaveCount(shown.length);
+    await expect(page.locator("#jrShelf .jr .jr-cap b")).toHaveText(shown.map((j: { title: string }) => j.title));
     await expect(page.locator(".jr-sub")).toHaveCount(sub?.trim() ? 1 : 0);
     await page.locator("#jrShelf .jr").first().scrollIntoViewIfNeeded();
     await page.locator("#jrShelf .jr").first().click();
