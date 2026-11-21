@@ -45,6 +45,10 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Done (21 Nov 2026)
 
+- Placing project pieces: drag a piece in the editor to set where it sits on that screen size
+  (double-click to go back to automatic); saved like sizes, honoured by the site. Also fixed
+  resized pieces bunching top-left and trailing the pointer.
+
 - Hero fixes: parallax moves the artwork inside its frame and no longer cancels the enter
   slide; switches for the progress line and for opening artwork full screen (hero and projects
   table); dot board finer and smoother, sentence case, with an opening wave.

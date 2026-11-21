@@ -2,7 +2,7 @@
 import { blockData, doodle, fit, PH, placeholderCanvas, reduce, rng, wrap } from './shared.js';
 import { openViewer } from './viewer.js';
 import { centreRange, clamp, rubber, turnedHalf } from './bounds.js';
-import { clearLayout, pieceTransform, separate } from './table.js';
+import { clearLayout, pieceTransform, placeOf, separate } from './table.js';
 
 export function initProjects(){
   const D=blockData('projects');if(!D)return;
@@ -32,7 +32,7 @@ export function initProjects(){
   const scaleOf=el=>{const v=getComputedStyle(el).scale;return v&&v!=='none'?(+v.split(' ')[0]||1):1;};
   /* the layout is shared with the editor's frames (table.js), so the editor shows the same table */
   function layout(animate){const W=table.clientWidth,n=els.length;if(!n)return;
-    const L=clearLayout(W,els.map(s=>s.a),els.map(s=>scaleOf(s.el)));table.style.height=L.H+'px';
+    const L=clearLayout(W,els.map(s=>s.a),els.map(s=>scaleOf(s.el)),els.map(s=>placeOf(getComputedStyle(s.el))));table.style.height=L.H+'px';
     els.forEach((st,i)=>{const it=L.items[i];st.el.style.width=L.pw+'px';st.x=it.x;st.y=it.y;st.rot=it.rot;
       st.el.style.transition=animate&&!reduce?'transform .6s cubic-bezier(.2,.8,.2,1), box-shadow .2s':'box-shadow .2s';place(st);st.el.style.zIndex=i+1;});}
   /* put down on (or near) another piece: the others shift until every piece is clear */

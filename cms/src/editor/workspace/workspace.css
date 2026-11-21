@@ -1814,6 +1814,13 @@ body:has(.ed-scrub.is-scrubbing) {
 .ed-piece-box {
   position: absolute;
   box-shadow: 0 0 0 1.5px var(--ed-accent);
+  /* the piece itself can be dragged to place it */
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+}
+.ed-piece-box.is-dragging {
+  cursor: grabbing;
 }
 .ed-piece-handle {
   position: absolute;

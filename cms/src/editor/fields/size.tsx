@@ -13,13 +13,45 @@ export const SIZE_MAX = 2.5;
 export const clampScale = (n: number) => Math.round(Math.min(SIZE_MAX, Math.max(SIZE_MIN, n)) * 100) / 100;
 
 /** A size that is full size everywhere is stored as no size at all, so the item reads as it did before. */
-const tidy = (r: Responsive<ItemSize>): Responsive<ItemSize> | undefined => (!r.desktop && !r.tablet && !r.widescreen && r.base.scale === 1 ? undefined : r);
+const tidy = (r: Responsive<ItemSize>): Responsive<ItemSize> | undefined =>
+  !r.desktop && !r.tablet && !r.widescreen && r.base.scale === 1 && r.base.x == null && r.base.y == null ? undefined : r;
 
 /** Change one item's size at the active breakpoint (or with `fn`), as one undo step or merged while dragging. */
 export function editItemSize(nodeId: string, path: SlotPath, fn: (r: Responsive<ItemSize>, bp: Breakpoint) => Responsive<ItemSize>, what = "Resize piece") {
   const { pageId, bp } = getState();
   updatePage(pageId, (p) => updateNode(p, nodeId, (n) => withSlotSize(n, path, tidy(fn(itemSizeOf(n, path) ?? { base: DEFAULT_ITEM_SIZE }, bp)))), what);
 }
+
+/** Place an item (its centre, as fractions of the table) at the active breakpoint only. */
+export const setItemPlace = (nodeId: string, path: SlotPath, x: number, y: number) =>
+  editItemSize(
+    nodeId,
+    path,
+    (r, bp) => {
+      const at = { x: Math.round(Math.min(1, Math.max(0, x)) * 10000) / 10000, y: Math.round(Math.min(1, Math.max(0, y)) * 10000) / 10000 };
+      // Placing on mobile mustn't move the piece on the bigger sizes, which inherit from it: they stay automatic.
+      if (bp === "mobile" && r.desktop?.x === undefined && typeof r.base.x !== "number") r = { ...r, desktop: { ...(r.desktop ?? {}), x: null, y: null } };
+      return setOnly(r, bp, at);
+    },
+    "Move piece",
+  );
+
+/** Let the table place an item again at the active breakpoint (the other sizes keep theirs). */
+export const clearItemPlace = (nodeId: string, path: SlotPath) =>
+  editItemSize(
+    nodeId,
+    path,
+    (r, bp) => {
+      const strip = <T extends Partial<ItemSize> | undefined>(v: T) => (v ? (({ x: _x, y: _y, ...rest }) => rest)(v) : v);
+      if (bp === "mobile") {
+        // desktop may only be inheriting the base's spot: give it its own copy before the base forgets it
+        const desk = r.desktop?.x === undefined && typeof r.base.x === "number" ? { ...(r.desktop ?? {}), x: r.base.x, y: r.base.y } : r.desktop;
+        return { ...r, base: strip(r.base) as ItemSize, ...(desk ? { desktop: desk } : {}) };
+      }
+      return { ...r, [bp === "desktop" ? "desktop" : bp]: strip(r[bp === "desktop" ? "desktop" : bp]) };
+    },
+    "Let the table place the piece",
+  );
 
 /** Set an item's scale at the active breakpoint only. */
 export const setItemScale = (nodeId: string, path: SlotPath, scale: number) => editItemSize(nodeId, path, (r, bp) => setOnly(r, bp, { scale: clampScale(scale) }));

@@ -1,10 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { clearLayout, pieceTransform, layoutTable, overlapping, separate } from "./table.js";
+import { clearLayout, pieceTransform, placeOf, layoutTable, overlapping, separate } from "./table.js";
 
 const onTable = (p: { x: number; y: number; w: number; h: number }, W: number, H: number) => p.x + p.w / 2 > 0 && p.x + p.w / 2 < W && p.y + p.h / 2 > 0 && p.y + p.h / 2 < H;
 const anyOverlap = (items: Parameters<typeof overlapping>[0][]) => items.some((a, i) => items.some((b, j) => j > i && overlapping(a, b, 2)));
 
 describe("projects table", () => {
+  it("puts placed pieces where they were saved and moves the others clear of them", () => {
+    const aspects = [1.2, 1, 1.3, 0.8, 1.1], W = 1040;
+    const auto = clearLayout(W, aspects);
+    const places = [null, { x: 0.85, y: 0.5 }, null, null, { x: 0.15, y: 0.68 }];
+    const L = clearLayout(W, aspects, [], places);
+    for (const i of [1, 4]) {
+      const it = L.items[i]!;
+      expect(it.x + it.w / 2).toBeCloseTo(places[i]!.x * W, 0);
+      expect(it.y + it.h / 2).toBeCloseTo(places[i]!.y * L.H, 0);
+    }
+    expect(anyOverlap(L.items)).toBe(false);
+  });
+
+  it("reads a piece's saved spot from its CSS variables, and none means automatic", () => {
+    const style = (px: string, py: string) => ({ getPropertyValue: (k: string) => (k === "--px" ? px : k === "--py" ? py : "") }) as unknown as CSSStyleDeclaration;
+    expect(placeOf(style(" 0.25", "0.6"))).toEqual({ x: 0.25, y: 0.6 });
+    expect(placeOf(style("none", "none"))).toBeNull();
+    expect(placeOf(style("", ""))).toBeNull();
+  });
+
   it("divides a piece's scale out of its translate, so a resized piece sits (and drags) exactly where it's put", () => {
     expect(pieceTransform(100, 50, 3)).toBe("translate(100px,50px) rotate(3deg)");
     expect(pieceTransform(110, 55, -2, 0.55)).toBe("translate(200px,100px) rotate(-2deg)");
