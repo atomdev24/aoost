@@ -58,11 +58,19 @@
               }
             ],
             "reelSeconds": 5.2,
-            "ticker": [],
+            "ticker": [
+              {
+                "text": "",
+                "mode": "both"
+              }
+            ],
             "tickerTopScore": true,
             "tickerVisitors": true,
             "lateMode": false,
-            "showTicker": true
+            "showTicker": true,
+            "tickerStyle": "dots",
+            "dotGrid": true,
+            "dotSeconds": 2.9
           },
           "style": {
             "base": {},
@@ -71,8 +79,8 @@
             }
           },
           "effects": {
-            "enter": "slide-right",
-            "parallax": 0.15
+            "enter": "slide-up",
+            "parallax": 0.35
           }
         }
       ]
