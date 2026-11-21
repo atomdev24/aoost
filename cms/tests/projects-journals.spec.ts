@@ -16,9 +16,16 @@ const desktopFrame = (page: Page) => page.frameLocator('iframe.bd-live[data-bp="
 const PIECE = ".table>.piece:nth-child(2)";
 
 type Size = { base: { scale: number }; desktop?: { scale: number } } | undefined;
+/** The file name of the second piece shown (PIECE), as the inspector lists it. */
+async function pieceFile(request: Parameters<typeof draftSite>[0]): Promise<string> {
+  const home = (await draftSite(request, password!)).pages.find((p: { id: string }) => p.id === "home");
+  for (const s of home.sections) for (const n of s.children) if (n.type === "AoostProjects") return n.content.projects.filter((p: { hidden?: boolean }) => !p.hidden)[1].image.split("/").pop();
+  return "";
+}
+
 async function pieceSize(request: Parameters<typeof draftSite>[0]): Promise<Size> {
   const home = (await draftSite(request, password!)).pages.find((p: { id: string }) => p.id === "home");
-  for (const s of home.sections) for (const n of s.children) if (n.type === "AoostProjects") return n.content.projects[1].size;
+  for (const s of home.sections) for (const n of s.children) if (n.type === "AoostProjects") return n.content.projects.filter((p: { hidden?: boolean }) => !p.hidden)[1].size; // the second piece shown (PIECE)
   return undefined;
 }
 
@@ -80,7 +87,7 @@ test.describe("resizable project pieces", () => {
     await expect.poll(() => desktopFrame(page).locator(PIECE).evaluate((el) => getComputedStyle(el).scale)).toBe("none");
 
     // The inspector row shows the size, tinted on this size, and the scope bar counts it.
-    await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: "grillz.jpg" }).first().click();
+    await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: await pieceFile(request) }).first().click();
     const field = page.locator(".ed-sizefield.is-over:visible");
     await expect(field).toBeVisible();
     await expect(field.getByRole("textbox", { name: "Size" })).toHaveValue(String(Math.round(size.base.scale * 100)));
