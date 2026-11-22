@@ -3,7 +3,7 @@ import "../components/registry";
 import { deepEqual, getAt, mergeFiles, pathLabel, serialize, setAt, type PathSeg } from "../model/merge";
 import { applyOps, diffSite, type Op } from "../model/ops";
 import { locate } from "../model/page-ops";
-import type { ClientMessage, EditorContext, ServerMessage, StagingMeta, SyncInfo } from "../model/protocol";
+import type { ActivityEntry, ClientMessage, EditorContext, Presence, ServerMessage, StagingMeta, SyncInfo } from "../model/protocol";
 import { filesToSite, siteToFiles, validateSite, type Breakpoint, type ContentFiles, type Issue, type Site } from "../schema";
 import type { Env } from "./env";
 import { cleanRefs, type RefItem } from "../model/refs";
@@ -38,6 +38,18 @@ const REFS = "refs:";
 /** The editor's problem log (errors, failed requests, freezes, reports). */
 const PROBLEMS = "problems";
 const COMMENTS = "comments";
+const ACTIVITY = "activity";
+const ACTIVITY_MAX = 120;
+
+/** A presence message from an editor, trimmed to what others need. */
+function cleanPresence(p: unknown): Presence | null {
+  if (!p || typeof p !== "object") return null;
+  const o = p as Record<string, unknown>;
+  const str = (v: unknown, n: number) => (typeof v === "string" ? v.slice(0, n) : "");
+  const bp = ["mobile", "tablet", "desktop", "widescreen"].includes(o.bp as string) ? (o.bp as Presence["bp"]) : "desktop";
+  const cur = o.cur && typeof o.cur === "object" && Number.isFinite((o.cur as { x: number }).x) && Number.isFinite((o.cur as { y: number }).y) ? { x: Math.round((o.cur as { x: number }).x), y: Math.round((o.cur as { y: number }).y) } : null;
+  return { name: str(o.name, 40) || "Guest", color: /^#[0-9a-fA-F]{6}$/.test(str(o.color, 7)) ? str(o.color, 7) : "#8E8E93", pageId: str(o.pageId, 80) || null, bp, sel: Array.isArray(o.sel) ? o.sel.filter((x): x is string => typeof x === "string").slice(0, 20).map((x) => x.slice(0, 80)) : [], cur };
+}
 const BASE_FP = "baseFp";
 /** Values both sides changed differently in the last merge (the draft kept its own). */
 const CONFLICTS = "conflicts";
@@ -275,8 +287,34 @@ export class DraftStore extends DurableObject<Env> {
     if (!result.ok) return { ok: false, issues: result.issues };
     await this.save(result.site);
     this.broadcast({ type: "ops", ops, version: this.version, origin, summary, changedNodeIds }, origin);
-    await this.noteCommentEdits(before, result.site, summary, origin === "mcp" ? "Claude" : by || "Someone");
+    const who = origin === "mcp" ? "Claude" : by || "Someone";
+    await this.noteCommentEdits(before, result.site, summary, who);
+    await this.note({ by: who, kind: "edit", text: summary || "Edited the draft" });
     return { ok: true, version: this.version };
+  }
+
+  // ------------------------------------------------------------- activity
+
+  async getActivity(): Promise<ActivityEntry[]> {
+    return (await this.ctx.storage.get<ActivityEntry[]>(ACTIVITY)) ?? [];
+  }
+
+  /** Add a line to the activity feed (folding the same thing by the same person within two minutes). */
+  private async note(entry: Omit<ActivityEntry, "id" | "at">) {
+    const list = await this.getActivity();
+    const now = Date.now();
+    const last = list.at(-1);
+    let next: ActivityEntry[];
+    let out: ActivityEntry;
+    if (last && last.by === entry.by && last.text === entry.text && last.kind === entry.kind && now - last.at < 120_000) {
+      out = { ...last, at: now, count: (last.count ?? 1) + 1 };
+      next = [...list.slice(0, -1), out];
+    } else {
+      out = { id: "a-" + crypto.randomUUID().slice(0, 12), at: now, ...entry };
+      next = [...list, out].slice(-ACTIVITY_MAX);
+    }
+    await this.ctx.storage.put(ACTIVITY, next);
+    this.broadcast({ type: "activity", entry: out });
   }
 
   // ------------------------------------------------------------- comments
@@ -292,6 +330,11 @@ export class DraftStore extends DurableObject<Env> {
     if (!result.ok) return result;
     await this.ctx.storage.put(COMMENTS, result.threads);
     this.broadcast({ type: "comments", threads: result.threads });
+    const t = result.threads.find((x) => x.id === op.id);
+    if (op.op === "create" || op.op === "reply" || op.op === "resolve") {
+      const text = op.op === "create" ? `commented on ${op.label}: “${op.text.slice(0, 80)}”` : op.op === "reply" ? `replied on ${t?.label ?? "a comment"}: “${op.text.slice(0, 80)}”` : `resolved a comment on ${t?.label ?? "a block"}`;
+      await this.note({ by: op.by.name, kind: "comment", text, pageId: t?.pageId });
+    }
     return result;
   }
 
@@ -455,6 +498,7 @@ export class DraftStore extends DurableObject<Env> {
     // What we just published is now the base: when its deploy lands there is nothing to merge.
     await this.setBase(files);
     this.broadcast({ type: "published", version: this.version });
+    await this.note({ by: "", kind: "publish", text: "Published the site" });
   }
 
   /** Ask an open editor to capture its preview (fallback for get_preview_screenshot). */
@@ -506,10 +550,27 @@ export class DraftStore extends DurableObject<Env> {
       this.waiting.delete(msg.requestId);
     } else if (msg.type === "ping") {
       ws.send('{"type":"pong"}');
+    } else if (msg.type === "presence") {
+      const p = cleanPresence(msg.p);
+      if (!p) return;
+      const first = !ws.deserializeAttachment();
+      ws.serializeAttachment(p);
+      const id = this.ctx.getTags(ws)[0] ?? "";
+      this.broadcast({ type: "presence", clientId: id, p }, id);
+      if (first) {
+        const list = this.ctx
+          .getWebSockets()
+          .filter((o) => o !== ws)
+          .map((o) => ({ clientId: this.ctx.getTags(o)[0] ?? "", p: o.deserializeAttachment() as Presence | null }))
+          .filter((x): x is { clientId: string; p: Presence } => !!x.p && !!x.clientId);
+        ws.send(JSON.stringify({ type: "presences", list } satisfies ServerMessage));
+      }
     }
   }
 
   async webSocketClose(ws: WebSocket) {
+    const id = this.ctx.getTags(ws)[0];
+    if (id && ws.deserializeAttachment()) this.broadcast({ type: "presence", clientId: id, p: null }, id);
     try {
       ws.close();
     } catch {

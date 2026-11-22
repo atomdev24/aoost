@@ -3,6 +3,7 @@ import { lastActivity, type CommentThread } from "../../model/comments";
 import { BREAKPOINT_LABEL } from "../../schema";
 import { useEditor } from "../store";
 import { goToThread } from "./CommentLayer";
+import { ActivityList } from "../presence/Activity";
 import { setCommentMode } from "./mode";
 import { COLORS, getAuthor, isUnread, setAuthor, setShowResolved, startComments, useComments } from "./store";
 
@@ -20,7 +21,7 @@ export function CommentsPanel() {
   const showResolved = useComments((s) => s.showResolved);
   const pages = useEditor((s) => s.site.pages);
   const pageId = useEditor((s) => s.pageId);
-  const [tab, setTab] = useState<"open" | "resolved">("open");
+  const [tab, setTab] = useState<"open" | "resolved" | "activity">("open");
   const [filters, setFilters] = useState<Set<Filter>>(new Set());
   const [author, setA] = useState(getAuthor());
   const [editing, setEditing] = useState(false);
@@ -58,7 +59,11 @@ export function CommentsPanel() {
         <button type="button" role="tab" aria-selected={tab === "resolved"} onClick={() => setTab("resolved")}>
           Resolved · {counts.resolved}
         </button>
+        <button type="button" role="tab" aria-selected={tab === "activity"} onClick={() => setTab("activity")}>
+          Activity
+        </button>
       </div>
+      {tab === "activity" ? <ActivityList /> : <>
       <div className="ed-cmts-filters" role="group" aria-label="Filters">
         {(
           [
@@ -137,6 +142,7 @@ export function CommentsPanel() {
           />
         )}
       </footer>
+      </>}
     </div>
   );
 }

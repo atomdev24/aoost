@@ -25,7 +25,28 @@ export type ServerMessage =
   /** Something was sent to staging (or staging was emptied: null). */
   | { type: "staging"; meta: StagingMeta | null }
   /** The comments changed (a new one, a reply, resolved, or an edit noted in a thread). */
-  | { type: "comments"; threads: CommentThread[] };
+  | { type: "comments"; threads: CommentThread[] }
+  /** Someone else in the editor moved, selected, or left (p: null). */
+  | { type: "presence"; clientId: string; p: Presence | null }
+  /** Everyone else already in the editor, sent when you first say who you are. */
+  | { type: "presences"; list: { clientId: string; p: Presence }[] }
+  /** Something happened (an edit, a comment, a publish): the activity feed's newest line. */
+  | { type: "activity"; entry: ActivityEntry };
+
+/** Who is in the editor and what they're looking at (no accounts: the name and colour they comment under). */
+export type Presence = {
+  name: string;
+  color: string;
+  pageId: string | null;
+  bp: Breakpoint;
+  /** Selected block ids (their soft lock). */
+  sel: string[];
+  /** Their pointer, in the frame's own pixels for their screen size; null when it's off the canvas. */
+  cur: { x: number; y: number } | null;
+};
+
+/** One line of the activity feed. */
+export type ActivityEntry = { id: string; at: number; by: string; kind: "edit" | "comment" | "publish"; text: string; pageId?: string; count?: number };
 
 /** What is in staging: the share link's token, when and by whom it was staged, and the live base it was built on. */
 export type StagingMeta = { token: string; at: number; label: string; by: string; baseFp: string };
@@ -39,4 +60,5 @@ export type SyncInfo = { at: number | null; conflicts: SyncConflict[]; blocked: 
 export type ClientMessage =
   | { type: "context"; context: Omit<EditorContext, "updatedAt"> }
   | { type: "screenshot"; requestId: string; png: string }
+  | { type: "presence"; p: Presence }
   | { type: "ping" };
