@@ -274,11 +274,7 @@
                 "width": 332
               }
             ],
-            "viewer": false,
-            "shadow": {
-              "show": true,
-              "style": "window"
-            }
+            "viewer": false
           },
           "style": {
             "base": {}
@@ -669,6 +665,28 @@
           "content": {},
           "style": {
             "base": {}
+          }
+        },
+        {
+          "id": "n_47094vqs",
+          "type": "Image",
+          "content": {
+            "src": "",
+            "alt": "",
+            "lightbox": true
+          },
+          "style": {
+            "base": {}
+          },
+          "frame": {
+            "base": {
+              "fit": "fill",
+              "focalX": 50,
+              "focalY": 50,
+              "zoom": 1,
+              "panX": 0,
+              "panY": 0
+            }
           }
         }
       ]
