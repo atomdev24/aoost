@@ -73,7 +73,7 @@ export const AoostHeroContent = z.object({
   /** Dot board: the faint dot grid behind the lit dots. Older content: on. */
   dotGrid: z.boolean().optional(),
   /** Dot board: once every line has shown, repeat them ("loop") or play an idle animation instead. Older content: loop. */
-  dotAfter: z.enum(["loop", "wave", "twinkle"]).optional(),
+  dotAfter: z.enum(["loop", "wave", "twinkle", "sky"]).optional(),
   /** Dot board: how each line appears. "breathe" (older content) or "resolve" (a ghost of the shape, then a wave settles it). */
   dotEffect: z.enum(["breathe", "resolve"]).optional(),
   /** Dot board: "flat" (older content) or "glass" (black, lit from the middle of each stroke, with a halo and bloom). */

@@ -1,4 +1,5 @@
 import { createLens } from './lens.js';
+import { createSky } from './sky.js';
 /* The dot board: an alternative to the scrolling ticker. Each line is drawn in square dots on the
    dark strip; the dots breathe in out of a faint grid (a soft sweep, a slight overshoot), hold with
    a gentle breathe, then shrink back before the next line comes in. Long lines are split at word
@@ -160,6 +161,8 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   // around them, and a cool bloom over it all, like light coming through frosted glass.
   const glass = look === 'glass';
   const idleFx = after !== 'loop' ? IDLE[after] || IDLE.wave : null;
+  // Night sky: the wave, then a faint sky where a few shooting stars pass, then the wave again (sky.js).
+  const sky = after === 'sky' ? createSky() : null;
   const glyphOf = (rows) => Math.max(7, Math.round(rows * Math.min(0.95, Math.max(0.3, textSize / 100))));
   // With an idle animation, each frame shows once; then the board idles (new lines still get their turn).
   const shown = new Set();
@@ -372,11 +375,12 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     ctx.fillStyle = INK;
     const fade = Math.min(1, t / 1.2), ts = t * idleSpeed;
     const full = pitch * FULL, dot = Math.max(0.8, pitch * 0.24), ox = (W - cols * pitch) / 2, oy = (H - rows * pitch) / 2;
+    const lv = sky ? sky.levels(t, cols, rows, idleSpeed) : null;
     for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
-      const k = idleFx.level(x, y, ts, cols, rows) * fade;
+      const k = (lv ? lv[y * cols + x] : idleFx.level(x, y, ts, cols, rows)) * fade;
       if (k <= 0.03) continue;
-      const s = dot + (full - dot) * k;
-      ctx.globalAlpha = 0.14 + 0.8 * k;
+      const s = dot + (full - dot) * Math.min(1.1, k);
+      ctx.globalAlpha = Math.min(1, 0.14 + 0.8 * k);
       ctx.fillRect(ox + x * pitch + pitch / 2 - s / 2, oy + y * pitch + pitch / 2 - s / 2, s, s);
     }
     ctx.globalAlpha = 1;

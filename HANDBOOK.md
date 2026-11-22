@@ -129,7 +129,9 @@ against `wrangler dev`).
   studies page: https://claude.ai/artifact/1oypALjRAJ5DwkCuQwirxE
 - **Dot board idle and size.** "After the last line": repeat the lines, or show each line once and
   then play an idle animation (`IDLE` in dots.js: `wave`, `twinkle`; each is a level 0–1 per cell
-  over time, so adding one is a function plus an editor option). Lines that arrive later (the
+  over time, so adding one is a function plus an editor option). `sky` ("Wave, then night sky",
+  sky.js) keeps state, so it is made per board: 8 s of wave, a 1.6 s hand-over, 11 s of faint
+  twinkling stars with three quick shooting stars, then the wave eases back. Lines that arrive later (the
   visitor number) still get their turn, then it idles again. "Idle animation speed" scales its
   time (0.5 = slow). "Text size" is the letter height as % of the strip.
 - **Simulated visitors.** Hero → "Simulated visitors" and "how often" (rare / sometimes / often).

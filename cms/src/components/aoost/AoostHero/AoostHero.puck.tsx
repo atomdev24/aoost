@@ -131,6 +131,7 @@ export const fields: Fields<AoostHeroContent> = {
       { label: "Repeat the lines", value: "loop" },
       { label: "Wave", value: "wave" },
       { label: "Twinkle", value: "twinkle" },
+      { label: "Wave, then night sky with shooting stars", value: "sky" },
     ],
   },
   dotIdleSpeed: { type: "number", label: "Dot board: idle animation speed (0.1 slow – 3 fast)", min: 0.1, max: 3, step: 0.1 },
