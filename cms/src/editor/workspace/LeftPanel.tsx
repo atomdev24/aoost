@@ -180,8 +180,9 @@ const PANEL_PARTS: Partial<Record<PanelId, Part<never>>> = {
   global: LibraryPanel as Part<never>,
 };
 
-const TOP_PANELS: PanelId[] = ["layers", "pages", "insert", "media", "history"];
-const BOTTOM_PANELS: PanelId[] = ["nav", "theme", "fonts", "global"];
+/* Build (what is on this page) above the line, Site (what every page shares) below it. */
+const TOP_PANELS: PanelId[] = ["layers", "insert", "media", "history"];
+const BOTTOM_PANELS: PanelId[] = ["pages", "nav", "theme", "fonts", "global"];
 
 /**
  * Direction B left panel: a slim 36px frosted rail and floating flyouts beside it.

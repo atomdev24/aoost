@@ -112,7 +112,10 @@ export function TopBar() {
             Done editing menu panel
           </button>
         ) : null}
-        <span className="ed-savedot" data-state={save === "error" ? "error" : save === "saving" ? "saving" : "saved"} role="img" aria-label={saveTitle} title={saveTitle} />
+        <span className="ed-savechip" data-state={save === "error" ? "error" : save === "saving" ? "saving" : "saved"} title={saveTitle}>
+          <span className="ed-savedot" data-state={save === "error" ? "error" : save === "saving" ? "saving" : "saved"} role="img" aria-label={saveTitle} title={saveTitle} />
+          <span className="ed-savetext ed-desk-only" aria-hidden="true">{save === "error" ? "Not saved" : save === "saving" ? "Saving…" : "Saved"}</span>
+        </span>
         {notice || remote ? (
           <span className="ed-status" role="status" title={lastLabel ?? undefined}>
             {notice ?? remote}

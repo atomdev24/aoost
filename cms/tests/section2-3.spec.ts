@@ -322,6 +322,11 @@ test.describe("editor sections 2 and 3", () => {
     await expect(page.locator(".ed-savedot")).toHaveAttribute("data-state", "saved");
     await page.locator(".ed-publish-badge").click();
     await expect(page.getByRole("dialog", { name: "Publish details" })).toContainText("Home");
+    // the changed page is checked at phone size before publishing (review, 22 Nov 2026)
+    const checks = page.locator(".ed-checks");
+    await expect(checks).toHaveAttribute("aria-busy", "false", { timeout: 20000 });
+    await expect(checks.locator("li")).toHaveCount(5);
+    await expect(checks.locator('li[data-check="spill"]')).toHaveClass(/is-ok/);
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${shots}/10-publish-sheet.png` });
   });

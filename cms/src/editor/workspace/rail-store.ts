@@ -111,7 +111,7 @@ export function setRailPos(pos: RailState["pos"]) {
 }
 
 export const RAIL_HOME = { x: 10, y: 58 };
-export const RAIL_W = 36;
+export const RAIL_W = 44;
 export const FLYOUT_W = 260;
 const GAP = 6;
 

@@ -1,4 +1,6 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useEditor } from "../store";
+import { checkPage, type PageChecks } from "./checks";
 import { useChanges } from "./changes-count";
 import { closeSheet, publish, pushStaging, usePublish, type Step } from "./publish";
 import { copyStagingLink, emptyStaging, sendToStaging, useStaging } from "./staging";
@@ -71,6 +73,7 @@ export function PublishSheet() {
       ) : phase !== "live" ? (
         <p className="ed-hint">The draft matches what is live.</p>
       ) : null}
+      {list.length && phase !== "live" ? <PhoneChecks pageIds={list.map((p) => p.id)} /> : null}
       {conflicts.length ? (
         <>
           <p className="ed-hint">
@@ -159,6 +162,69 @@ export function PublishSheet() {
           </button>
         )}
       </footer>
+    </section>
+  );
+}
+
+/**
+ * Checks before publishing: each changed page (up to three) opened at phone size and looked over
+ * (checks.ts). Only warnings; publishing stays possible.
+ */
+function PhoneChecks({ pageIds }: { pageIds: string[] }) {
+  const pages = useEditor((s) => s.site.pages);
+  const key = pageIds.join(",");
+  const [state, setState] = useState<{ busy: boolean; results: PageChecks[]; error: string | null }>({ busy: true, results: [], error: null });
+  useEffect(() => {
+    let live = true;
+    const targets = pageIds
+      .map((id) => pages.find((p) => p.id === id))
+      .filter((p): p is NonNullable<typeof p> => !!p && !p.variantOf)
+      .slice(0, 3);
+    setState({ busy: true, results: [], error: null });
+    (async () => {
+      const results: PageChecks[] = [];
+      for (const p of targets) {
+        try {
+          results.push({ page: p.title, slug: p.slug, checks: await checkPage(p.slug) });
+        } catch (e) {
+          results.push({ page: p.title, slug: p.slug, checks: [{ id: "open", ok: false, title: "Couldn't check this page", detail: e instanceof Error ? e.message : String(e) }] });
+        }
+        if (!live) return;
+        setState({ busy: true, results: [...results], error: null });
+      }
+      if (live) setState({ busy: false, results, error: null });
+    })();
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  const warnings = state.results.reduce((n, r) => n + r.checks.filter((c) => !c.ok).length, 0);
+  return (
+    <section className="ed-checks" aria-label="Checks on a phone" aria-busy={state.busy}>
+      <header className="ed-checks-head">
+        <strong>Checks on a phone</strong>
+        <span className="ed-hint">{state.busy ? "Checking…" : warnings ? `${warnings} to look at · you can still publish` : "All clear"}</span>
+      </header>
+      {state.results.map((r) => (
+        <div key={r.slug} className="ed-checks-page">
+          {state.results.length > 1 ? <span className="ed-checks-name">{r.page}</span> : null}
+          <ul>
+            {r.checks.map((c) => (
+              <li key={c.id} className={c.ok ? "is-ok" : "is-warn"} data-check={c.id}>
+                <span className="ed-checks-mark" aria-hidden="true">
+                  {c.ok ? "✓" : "!"}
+                </span>
+                <span>
+                  {c.title}
+                  {c.ok ? null : <span className="ed-checks-detail">{c.detail}</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      {state.busy ? <span className="ed-spinner" aria-hidden="true" /> : null}
     </section>
   );
 }

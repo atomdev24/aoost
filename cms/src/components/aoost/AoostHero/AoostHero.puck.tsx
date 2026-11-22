@@ -1,5 +1,6 @@
 import type { Fields } from "@puckeditor/core";
 import { mediaField } from "../../../editor/fields/media";
+import { withThumb } from "../fields";
 import type { AoostHeroContent } from "./AoostHero";
 
 const onOff = (label: string) => ({
@@ -18,7 +19,7 @@ export const fields: Fields<AoostHeroContent> = {
     label: "Artwork reel (empty = the projects' images)",
     arrayFields: { src: mediaField("Image", "image", { framed: true, altKey: "alt" }), alt: { type: "text", label: "Description (shown full screen, for screen readers)" } },
     defaultItemProps: { src: "", alt: "" },
-    getItemSummary: (item, i) => item.alt || item.src?.split("/").pop() || `Artwork ${(i ?? 0) + 1}`,
+    getItemSummary: (item, i) => withThumb(item.src, item.alt || item.src?.split("/").pop() || `Artwork ${(i ?? 0) + 1}`),
   },
   reelSeconds: { type: "number", label: "Seconds per artwork", min: 1, max: 60 },
   reelBar: onOff("Progress line under the artwork"),

@@ -24,7 +24,7 @@ function serviceWorker(): Plugin {
 }
 
 /** The modules of the parts that load after the board (src/editor/parts.ts). */
-const LATER = /\/src\/editor\/(ui\/(PagesPanel|NewPageModal|PageSettings|HistoryPanel|MediaLibrary|NavPanel|ThemePanel|FontsPanel|LibraryPanel)|insert\/InsertPanel|workspace\/(PublishSheet|CompareView)|commands\/ProblemsDialog)\.tsx$|\/src\/components\/aoost\/runtime\/(dots|lens)\.js$/;
+const LATER = /\/src\/editor\/(ui\/(PagesPanel|NewPageModal|GlobalPanel|OverlayPanel|PageSettings|HistoryPanel|MediaLibrary|NavPanel|ThemePanel|FontsPanel|LibraryPanel)|insert\/InsertPanel|workspace\/(PublishSheet|CompareView)|commands\/ProblemsDialog)\.tsx$|\/src\/editor\/workspace\/checks\.ts$|\/src\/components\/aoost\/runtime\/(dots|lens)\.js$/;
 
 // The admin (editor) SPA. The public site is pre-rendered by scripts/build-site.ts.
 export default defineConfig({
