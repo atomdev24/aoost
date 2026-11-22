@@ -281,7 +281,10 @@
                 "width": 332
               }
             ],
-            "viewer": false
+            "viewer": false,
+            "shadow": {
+              "show": true
+            }
           },
           "style": {
             "base": {}
