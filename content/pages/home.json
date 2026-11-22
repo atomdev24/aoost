@@ -231,6 +231,18 @@
                     "scale": 1.45
                   }
                 }
+              },
+              {
+                "image": "/media/2026/aoost-hero-skullcactus-10-window-wide-jade-pair-2bqi.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 1.29
+                  }
+                },
+                "hidden": true
               }
             ],
             "note": {
