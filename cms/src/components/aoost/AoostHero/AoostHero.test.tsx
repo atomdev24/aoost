@@ -141,11 +141,30 @@ describe("AoostHero", () => {
     expect(AoostHero.css).toContain("prefers-reduced-transparency:reduce");
   });
 
+  it("the opening plays only when set, never in the editor, over the artwork and under the glass", () => {
+    expect(renderNode("AoostHero", d)).not.toContain("hr-intro");
+    const html = renderNode("AoostHero", { ...d, intro: "session", screen: { show: true } });
+    expect(html).toContain('data-intro="session"');
+    expect(html).toMatch(/class="hero-rect focus-sec[^"]*is-intro/);
+    // the cover sits after the artwork and before the matte screen and the labels
+    const i = html.indexOf("hr-intro"), track = html.indexOf("hr-track"), screen = html.indexOf("hr-screen"), top = html.indexOf("hr-top");
+    expect(track).toBeLessThan(i);
+    expect(i).toBeLessThan(screen);
+    expect(screen).toBeLessThan(top);
+    expect(renderNode("AoostHero", { ...d, intro: "always" }, { editing: true })).not.toContain("hr-intro");
+    // without the script it clears itself; reduced motion never sees it
+    expect(AoostHero.css).toContain("animation:hr-safe .4s 9s forwards");
+    expect(AoostHero.css).toContain("@media (prefers-reduced-motion:reduce){.ao .hr-intro{display:none}");
+  });
+
   it("carries the matte screen over the ticker in the hero's dark tone, unless switched off", () => {
     const on = renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotLook: "glassblock", screen: { show: true } });
     expect(on).toContain('class="hero-rect focus-sec sc-joined');
     expect(on).toMatch(/class="ticker dots glass sc-joined"/);
-    expect(on).toContain('data-base="#141516"');
+    // black by default, like the artwork's own black; the screen's tone setting changes it
+    expect(on).toContain('data-base="#000000"');
+    expect(on).toContain("--sc-tone:#000000");
+    expect(renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotLook: "glassblock", screen: { show: true, tone: "#0A0A0B" } })).toContain('data-base="#0A0A0B"');
     expect(on).toContain('class="hr-screen tk-screen"');
     const off = renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", screen: { show: true, ticker: false } });
     expect(off).not.toContain("sc-joined");

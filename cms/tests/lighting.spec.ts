@@ -49,7 +49,7 @@ for (const width of [1440, 1024, 390]) {
       ]);
       // the ticker carries the same screen on, in the hero's dark tone, its part of the shade and glare lined up below the hero's
       await expect(tk).toHaveClass(/sc-joined/);
-      expect(await tk.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(20, 21, 22)");
+      expect(await tk.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(0, 0, 0)");
       const tkLayers = await tk.locator(".tk-screen i").evaluateAll((els) => els.map((e) => { const c = getComputedStyle(e); return [c.mixBlendMode, c.backgroundSize, c.backgroundPosition]; }));
       expect(tkLayers.map(([m, z, p]) => [m, px(z!), p])).toEqual([
         ["multiply", `100% calc(100% + ${heroH}px)`, "0px 100%"],
