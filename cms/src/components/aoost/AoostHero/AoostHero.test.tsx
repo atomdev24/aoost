@@ -98,4 +98,26 @@ describe("AoostHero", () => {
     expect(html).toContain("data-lens=\"{&quot;clarity&quot;:0.65,&quot;cell&quot;:24,&quot;refract&quot;:0.3,&quot;shimmer&quot;:0.7,&quot;wobble&quot;:1.5}\"");
     expect(renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotLook: "flat" })).not.toContain("data-lens");
   });
+  it("draws no overlay unless one is chosen", () => {
+    expect(renderNode("AoostHero", d)).not.toContain("hr-over");
+    expect(renderNode("AoostHero", { ...d, overlay: "off" })).not.toContain("hr-over");
+  });
+  it("renders each text-over-the-artwork look", () => {
+    const reel = [{ src: "/art/a.jpg", alt: "Mask", tone: "#ff00aa" }, { src: "/art/b.jpg", alt: "" }];
+    const diff = renderNode("AoostHero", { ...d, reel, overlay: "difference" });
+    expect(diff).toContain('data-over="difference"');
+    expect(diff).toContain('<span class="ov-word">aoost</span>');
+    const tone = renderNode("AoostHero", { ...d, reel, overlay: "tone", overlayText: "Made slowly, mostly at night" });
+    expect(tone).toContain("--tone:#ff00aa");
+    expect(tone).toContain("Made slowly, <em>mostly at night</em>");
+    expect(tone).toContain("01 · Mask");
+    const hw = renderNode("AoostHero", { ...d, reel, overlay: "handwritten", overlayLines: [{ text: "hi there" }, { text: "" }, { text: "look around" }] });
+    expect(hw.match(/class="ov-hw/g)).toHaveLength(2);
+    expect(hw).toContain('class="ov-hw on"');
+    expect(hw).toContain("fonts.googleapis.com/css2?family=Caveat");
+    expect(hw).toContain('<span class="sr">hi there. look around</span>');
+    const cut = renderNode("AoostHero", { ...d, reel, overlay: "cutout", overlayText: "alex" });
+    expect(cut).toContain('--art:url(&quot;/art/a.jpg&quot;)');
+    expect(cut).toContain(">alex</span>");
+  });
 });

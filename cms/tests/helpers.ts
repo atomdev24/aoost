@@ -100,7 +100,12 @@ export async function clearArea(page: Page) {
 export async function onBoard(page: Page, target: import("@playwright/test").Locator) {
   const board = (await page.locator(".bd").boundingBox())!;
   for (let i = 0; i < 30; i++) {
-    const b = await target.boundingBox();
+    // The frame re-renders after an edit; give the block a moment to be back before giving up.
+    let b = await target.boundingBox();
+    for (let t = 0; !b && t < 30; t++) {
+      await page.waitForTimeout(100);
+      b = await target.boundingBox();
+    }
     if (!b) throw new Error("block not on the board");
     const area = await clearArea(page);
     const h = Math.min(b.height, 160);

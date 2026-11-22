@@ -18,7 +18,7 @@ export function initHero(){
     /* the strip's own images; left empty it reuses the projects' artwork, like the original */
     const projects=(blockData('projects')||{}).projects||[];
     const CAROUSEL=(D.reel||[]).filter(r=>r&&r.src),ARTWORK=projects.filter(p=>p&&p.image&&!p.hidden).map(p=>({src:p.image,alt:p.title,plaque:{title:p.title,medium:p.medium,year:p.year,note:p.note,link:p.link}}));
-    const REEL=(CAROUSEL.length?CAROUSEL:ARTWORK).map(r=>({src:r.src,alt:r.alt,plaque:r.plaque}));
+    const REEL=(CAROUSEL.length?CAROUSEL:ARTWORK).map(r=>({src:r.src,alt:r.alt,plaque:r.plaque,tone:r.tone}));
     const reelItems=REEL.length?REEL:[{fnArt:monkey},{ph:PH[0]},{fnArt:pinkField},{ph:PH[1]},{fnArt:skyField},{ph:PH[2]},{fnArt:orangeField},{ph:PH[4]}];
     reel.innerHTML='';
     reelItems.forEach((it,i)=>{const b=document.createElement('button');b.className='hr-slide';b.setAttribute('aria-label','Open artwork '+(i+1)+' of '+reelItems.length);
@@ -26,12 +26,33 @@ export function initHero(){
       else{const cv=document.createElement('canvas');b.appendChild(cv);new ResizeObserver(()=>{const[c,w,h]=fit(cv);if(it.fnArt){it.fnArt(c,w,h);}else{c.fillStyle=C.paper;c.fillRect(0,0,w,h);const pc=placeholderCanvas(it.ph,400),s=Math.min(w/pc.width,h/pc.height)*.8;c.drawImage(pc,(w-pc.width*s)/2,(h-pc.height*s)/2,pc.width*s,pc.height*s);}}).observe(cv);}
       if(D.reelViewer!==false)b.addEventListener('click',()=>openViewer(reelItems,i,b));else{b.setAttribute('aria-label','Artwork '+(i+1)+' of '+reelItems.length);b.tabIndex=-1;}
       reel.appendChild(b);});
+    /* text over the artwork (block option): kept in step with the artwork on show */
+    const over=reel.parentNode.querySelector('.hr-over'),toneCache={};
+    const toneOf=i=>{const it=reelItems[i]||{};if(it.tone)return Promise.resolve(it.tone);if(toneCache[i])return toneCache[i];
+      return toneCache[i]=new Promise(res=>{if(!it.src)return res('#F3EFE6');const im=new Image();im.crossOrigin='anonymous';
+        im.onload=()=>{try{const N=48,c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0,N,N);const d=g.getImageData(0,0,N,N).data;
+          /* the most common vivid hue, averaged; failing that, the bright pixels (chrome, paper) */
+          const bins={};let br=[0,0,0,0];for(let p=0;p<d.length;p+=4){const r=d[p],gg=d[p+1],b=d[p+2],mx=Math.max(r,gg,b),mn=Math.min(r,gg,b),s=mx?(mx-mn)/mx:0;
+            if(mx>150){br[0]+=r;br[1]+=gg;br[2]+=b;br[3]++;}
+            if(s>.45&&mx>90){let h=0;const dd=mx-mn;h=mx===r?((gg-b)/dd)%6:mx===gg?(b-r)/dd+2:(r-gg)/dd+4;const k=Math.round(((h*60+360)%360)/24);const o=bins[k]||(bins[k]=[0,0,0,0]);o[0]+=r*s;o[1]+=gg*s;o[2]+=b*s;o[3]+=s;}}
+          let best=null;for(const k in bins)if(!best||bins[k][3]>best[3])best=bins[k];
+          let rgb=best&&best[3]>N*N*.012?[best[0]/best[3],best[1]/best[3],best[2]/best[3]]:br[3]?[br[0]/br[3],br[1]/br[3],br[2]/br[3]]:[243,239,230];
+          /* light enough to read on the dark shade */
+          const lift=Math.max(0,180-Math.max(...rgb));rgb=rgb.map(v=>Math.min(255,Math.round(v+lift)));
+          res('#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join(''));}catch(e){res('#F3EFE6');}};
+        im.onerror=()=>res('#F3EFE6');im.src=it.src;});};
+    let overAt=-1;
+    function overSlide(i){if(!over||i===overAt)return;overAt=i;const it=reelItems[i]||{},mode=over.dataset.over;
+      if(mode==='cutout'){const cut=over.querySelector('.ov-cut');if(cut)cut.style.setProperty('--art',it.src?'url("'+it.src+'")':'none');}
+      else if(mode==='tone'){toneOf(i).then(c=>{if(overAt===i)over.style.setProperty('--tone',c);});const k=over.querySelector('.ov-kick');if(k)k.textContent=String(i+1).padStart(2,'0')+(it.alt?' · '+it.alt:'');}
+      else if(mode==='handwritten'){const hs=over.querySelectorAll('.ov-hw');if(!hs.length)return;const on=hs[i%hs.length];hs.forEach(h=>{if(h!==on)h.classList.remove('on');});on.classList.remove('on');void on.getBoundingClientRect();on.classList.add('on');}}
+    overSlide(0);
     let hrIdx=0,hrT0=performance.now(),hrHold=0,hrOn=true;const HR_DUR=Math.max(1000,(+D.reelSeconds||5.2)*1000);
     ['pointerdown','touchstart','wheel','focusin'].forEach(ev=>reel.addEventListener(ev,()=>{hrHold=performance.now()+4000;},{passive:true}));
-    let hrScrollT;reel.addEventListener('scroll',()=>{clearTimeout(hrScrollT);hrScrollT=setTimeout(()=>{hrIdx=Math.round(reel.scrollLeft/Math.max(1,reel.clientWidth));hrT0=performance.now();},120);},{passive:true});
+    let hrScrollT;reel.addEventListener('scroll',()=>{clearTimeout(hrScrollT);hrScrollT=setTimeout(()=>{hrIdx=Math.round(reel.scrollLeft/Math.max(1,reel.clientWidth));hrT0=performance.now();overSlide(hrIdx);},120);},{passive:true});
     if('IntersectionObserver' in window)new IntersectionObserver(es=>es.forEach(e=>hrOn=e.isIntersecting)).observe(reel);
     (function hrLoop(t){if(reduce||reelItems.length<2){hrBar.style.width='0';}
-      else if(hrOn&&t>hrHold&&!document.hidden){const p=Math.min(1,(t-hrT0)/HR_DUR);hrBar.style.width=(p*100)+'%';if(p>=1){hrIdx=(hrIdx+1)%reelItems.length;reel.scrollTo({left:hrIdx*reel.clientWidth,behavior:'smooth'});hrT0=t;}}
+      else if(hrOn&&t>hrHold&&!document.hidden){const p=Math.min(1,(t-hrT0)/HR_DUR);hrBar.style.width=(p*100)+'%';if(p>=1){hrIdx=(hrIdx+1)%reelItems.length;reel.scrollTo({left:hrIdx*reel.clientWidth,behavior:'smooth'});hrT0=t;overSlide(hrIdx);}}
       else{hrT0=t-(parseFloat(hrBar.style.width)||0)/100*HR_DUR;}
       requestAnimationFrame(hrLoop);})(performance.now());
   }
