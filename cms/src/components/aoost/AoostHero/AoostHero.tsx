@@ -50,6 +50,8 @@ export const AoostHeroContent = z.object({
       shade: z.number().min(0).max(1).optional(),
       glare: z.number().min(0).max(1).optional(),
       grain: z.number().min(0).max(1).optional(),
+      /** Carry the screen over the ticker strip too, in the hero's own dark tone, so both read as one display. Older content: on. */
+      ticker: z.boolean().optional(),
     })
     .optional(),
   /** Seconds each artwork stays before the strip moves on. */
@@ -130,8 +132,8 @@ export function tickerLines(content: AoostHeroContent): string[] {
 }
 
 /** The dot board in the editor's frames: the same animation as the site, with the lines as saved. */
-type DotOpts = { seconds: number; grid: boolean; after: string; idleSpeed: number; textSize: number; effect: string; look: string; lensOpts: Record<string, number> };
-const dotOpts = (c: AoostHeroContent): DotOpts => ({ seconds: c.dotSeconds ?? 4, grid: c.dotGrid !== false, after: c.dotAfter ?? "loop", idleSpeed: c.dotIdleSpeed ?? 0.5, textSize: c.dotTextSize ?? 70, effect: c.dotEffect ?? "breathe", look: c.dotLook ?? "flat", lensOpts: lensOf(c) });
+type DotOpts = { seconds: number; grid: boolean; after: string; idleSpeed: number; textSize: number; effect: string; look: string; lensOpts: Record<string, number>; base?: string };
+const dotOpts = (c: AoostHeroContent): DotOpts => ({ seconds: c.dotSeconds ?? 4, grid: c.dotGrid !== false, after: c.dotAfter ?? "loop", idleSpeed: c.dotIdleSpeed ?? 0.5, textSize: c.dotTextSize ?? 70, effect: c.dotEffect ?? "breathe", look: c.dotLook ?? "flat", lensOpts: lensOf(c), base: joinedScreen(c) ? HERO_DARK : undefined });
 /** The glass settings in effect (the studies' choice where unset). */
 const lensOf = (c: AoostHeroContent) => ({ clarity: 0.65, cell: 18, refract: 0.3, shimmer: 0.7, wobble: 1.5, ...(c.dotGlass ?? {}) });
 
@@ -147,7 +149,7 @@ function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
     });
     return () => { gone = true; board?.stop(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize, opts.effect, opts.look, JSON.stringify(opts.lensOpts)]);
+  }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize, opts.effect, opts.look, opts.base, JSON.stringify(opts.lensOpts)]);
   return <canvas className="dm" ref={ref} aria-hidden="true" />;
 }
 
@@ -157,11 +159,16 @@ export const SCREEN = { shade: 0.7, glare: 1, grain: 0.6 };
  * track and the text over the artwork, before the corner labels and the progress line), so the
  * reel's pan, drift and parallax move the artwork underneath and never the glass.
  */
-function MatteScreen({ screen }: { screen: AoostHeroContent["screen"] }) {
+/** The hero's own dark tone (.hero-rect's background): the ticker takes it when it joins the screen. */
+export const HERO_DARK = "#141516";
+/** The matte screen carries on over the ticker strip (on with the screen, unless switched off). */
+export const joinedScreen = (c: AoostHeroContent) => !!c.screen?.show && c.screen.ticker !== false && c.showTicker !== false;
+
+function MatteScreen({ screen, part }: { screen: AoostHeroContent["screen"]; part?: "ticker" }) {
   if (!screen?.show) return null;
   const style = { "--sc-shade": screen.shade ?? SCREEN.shade, "--sc-glare": screen.glare ?? SCREEN.glare, "--sc-grain": screen.grain ?? SCREEN.grain } as CSSProperties;
   return (
-    <div className="hr-screen" style={style} aria-hidden="true">
+    <div className={part ? "hr-screen tk-screen" : "hr-screen"} style={style} aria-hidden="true">
       <i className="sc-shade" />
       <i className="sc-glare" />
       <i className="sc-grain" />
@@ -175,6 +182,11 @@ const screenCss = [
   `.ao .hr-screen .sc-shade{background-image:url(/art/aoost_hero_screen_shade_2400x1000.webp);mix-blend-mode:multiply;opacity:var(--sc-shade)}`,
   `.ao .hr-screen .sc-glare{background-image:url(/art/aoost_hero_screen_glare_2400x1000.webp);mix-blend-mode:screen;opacity:var(--sc-glare)}`,
   `.ao .hr-screen .sc-grain{background-image:url(/art/aoost_hero_screen_grain_tile_512.webp);background-size:256px 256px;background-repeat:repeat;mix-blend-mode:screen;opacity:var(--sc-grain)}`,
+  // carried over the ticker: one screen; its shade and glare span hero + strip (hero.js sets the heights)
+  `.ao .sc-joined.hero-rect .hr-screen i:not(.sc-grain){background-size:100% calc(100% + var(--tk-h,124px))}`,
+  `.ao .ticker.sc-joined:is(*,.dots.glass){background:${HERO_DARK};border-top-color:transparent}`,
+  // no z-index on .tk-screen: it would isolate it and its layers would blend with nothing
+  `.ao .tk-screen i:not(.sc-grain){background-size:100% calc(100% + var(--hero-h,72svh));background-position:0 100%}`,
   `@media (prefers-reduced-transparency:reduce){.ao .hr-screen{display:none}}`,
 ].join("\n") + "\n";
 
@@ -371,6 +383,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     screenCss,
   Render: ({ content, ctx }) => {
     const showTicker = content.showTicker !== false;
+    const joined = joinedScreen(content);
     // Artwork pan: travel d% of the width each way from centre's other side; enlarged just enough to never show an edge.
     const pan = content.artPan === "rtl" || content.artPan === "ltr"
       ? (() => {
@@ -394,7 +407,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
       <Block name="hero" mat="none" data={content}>
         <header
           data-over={content.overlay && content.overlay !== "off" ? content.overlay : undefined}
-          className={`hero-rect focus-sec${content.reelBar === false ? " no-bar" : ""}${content.reelViewer === false ? " no-viewer" : ""}${pan ? " pan" : ""}`}
+          className={`hero-rect focus-sec${joined ? " sc-joined" : ""}${content.reelBar === false ? " no-bar" : ""}${content.reelViewer === false ? " no-viewer" : ""}${pan ? " pan" : ""}`}
           style={pan}
           data-motion={pan ? "keep" : undefined}
           aria-label="Artwork"
@@ -423,7 +436,8 @@ export const AoostHero = defineComponent<AoostHeroContent>({
         </header>
         {showTicker && content.tickerStyle === "dots" ? (
           <div
-            className={`ticker dots${content.dotLook && content.dotLook !== "flat" ? " glass" : ""}`}
+            className={`ticker dots${content.dotLook && content.dotLook !== "flat" ? " glass" : ""}${joined ? " sc-joined" : ""}`}
+            data-base={joined ? HERO_DARK : undefined}
             id="ticker"
             role="img"
             aria-label={lines.length ? `${lines.join(". ")}.` : "Dot board"}
@@ -437,13 +451,15 @@ export const AoostHero = defineComponent<AoostHeroContent>({
             data-lens={content.dotLook === "glassblock" || content.dotLook === "liquid" ? JSON.stringify(lensOf(content)) : undefined}
           >
             {ctx.editing ? <EditingDots lines={lines} opts={dotOpts(content)} /> : <canvas className="dm" aria-hidden="true" />}
+            {joined ? <MatteScreen screen={content.screen} part="ticker" /> : null}
           </div>
         ) : showTicker ? (
-          <div className="ticker" id="ticker" aria-label={lines.length ? `${lines.join(". ")}.` : undefined}>
+          <div className={`ticker${joined ? " sc-joined" : ""}`} id="ticker" aria-label={lines.length ? `${lines.join(". ")}.` : undefined}>
             <div className="tk-track" aria-hidden="true">
               <div className="tk-half">{half}</div>
               <div className="tk-half">{half}</div>
             </div>
+            {joined ? <MatteScreen screen={content.screen} part="ticker" /> : null}
           </div>
         ) : null}
       </Block>

@@ -37,11 +37,24 @@ for (const width of [1440, 1024, 390]) {
       // clicks go through to the slide
       const b = (await hero.boundingBox())!;
       expect(await page.evaluate(([x, y]) => !!document.elementFromPoint(x!, y!)?.closest(".hr-slide"), [b.x + b.width / 2, b.y + b.height / 2])).toBe(true);
+      // shade and glare are drawn across hero + ticker (one screen); the grain tile repeats at 1:1
+      const tk = page.locator(".ticker");
+      const heroH = await hero.evaluate((e) => (e as HTMLElement).offsetHeight), tkH = await tk.evaluate((e) => (e as HTMLElement).offsetHeight);
       const blends = await screen.locator("i").evaluateAll((els) => els.map((e) => { const c = getComputedStyle(e); return [c.mixBlendMode, c.opacity, c.backgroundSize]; }));
-      expect(blends).toEqual([
-        ["multiply", "0.7", "100% 100%"],
-        ["screen", "1", "100% 100%"],
+      const px = (v: string) => v.replace(/(\d+(\.\d+)?)px/g, (_, n) => `${Math.round(Number(n))}px`);
+      expect(blends.map(([m, o, z]) => [m, o, px(z!)])).toEqual([
+        ["multiply", "0.7", `100% calc(100% + ${tkH}px)`],
+        ["screen", "1", `100% calc(100% + ${tkH}px)`],
         ["screen", "0.6", "256px 256px"],
+      ]);
+      // the ticker carries the same screen on, in the hero's dark tone, its part of the shade and glare lined up below the hero's
+      await expect(tk).toHaveClass(/sc-joined/);
+      expect(await tk.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(20, 21, 22)");
+      const tkLayers = await tk.locator(".tk-screen i").evaluateAll((els) => els.map((e) => { const c = getComputedStyle(e); return [c.mixBlendMode, c.backgroundSize, c.backgroundPosition]; }));
+      expect(tkLayers.map(([m, z, p]) => [m, px(z!), p])).toEqual([
+        ["multiply", `100% calc(100% + ${heroH}px)`, "0px 100%"],
+        ["screen", `100% calc(100% + ${heroH}px)`, "0px 100%"],
+        ["screen", "256px 256px", "0px 0px"],
       ]);
     });
 

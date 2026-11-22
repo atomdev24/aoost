@@ -108,7 +108,7 @@ test.describe("hero: matte screen", () => {
     for (const s of home.sections) for (const n of s.children) if (n.type === "AoostHero") Object.assign(n.content, { reel: REEL, overlay: "off", screen: { show: true } });
     expect((await request.post("/api/editor/ops", { headers: bearer(password!), data: { ops: [{ op: "putPage", page: home }] } })).ok()).toBe(true);
     await page.goto("/preview/");
-    const layers = page.locator(".hr-screen i");
+    const layers = page.locator("header.hero-rect > .hr-screen i");
     await expect(layers).toHaveCount(3);
     expect(await layers.evaluateAll((els) => els.map((e) => getComputedStyle(e).mixBlendMode))).toEqual(["multiply", "screen", "screen"]);
     for (const f of ["shade_2400x1000", "glare_2400x1000", "grain_tile_512"]) expect((await request.get(`/art/aoost_hero_screen_${f}.webp`)).ok()).toBe(true);
