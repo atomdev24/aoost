@@ -104,6 +104,8 @@ export const AoostFixture = z.object({
   width: z.number().min(40).max(800),
   rotate: z.number().min(-180).max(180).optional(),
   hidden: z.boolean().optional(),
+  /** Its spot and size on a screen size where it was moved or resized on its own (the editor writes this). */
+  size: ResponsiveItemSize.optional(),
 });
 
 /** Shadow presets: a shade layer (darkens, multiplied) and a sunlight layer (warms the lit patches). */
@@ -161,7 +163,7 @@ const extraCss = `
 .ao .table.ao-static .piece:nth-child(odd){transform:rotate(-3deg)}
 .ao .table.ao-static .piece:nth-child(even){transform:rotate(2.500deg)}
 .ao .table{isolation:isolate}
-.ao .fixture{position:absolute;z-index:8;width:min(var(--fw,200px),36vw);height:auto;left:var(--fx,50%);top:var(--fy,50%);transform:translate(-50%,-50%) rotate(var(--fr,0deg)) scale(var(--fs,1));user-select:none;-webkit-user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none;touch-action:pan-y pinch-zoom;cursor:grab}
+.ao .fixture{position:absolute;z-index:8;width:min(var(--fw,200px),36vw);height:auto;left:var(--fxp,var(--fx,50%));top:var(--fyp,var(--fy,50%));transform:translate(-50%,-50%) rotate(var(--fr,0deg)) scale(var(--fs,1));user-select:none;-webkit-user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none;touch-action:pan-y pinch-zoom;cursor:grab}
 .ao .piece.pressing,.ao .fixture.pressing{transition:filter .3s;filter:brightness(.96)}
 .ao .piece img{-webkit-touch-callout:none}
 .ao .fixture.lifted{--fs:1.06;cursor:grabbing;filter:drop-shadow(0 14px 12px rgba(20,21,22,.18))}
@@ -208,7 +210,7 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
     // Fixtures last: they sit on top, so a click on one picks it over a piece underneath.
     ...(content.fixtures ?? []).flatMap((f, i) =>
       f.image && !f.hidden
-        ? [{ path: ["fixtures", i], label: f.image.split("/").pop()?.replace(/\.[a-z0-9]+$/i, "") || `Fixture ${i + 1}`, kind: "img" as const, selector: `.fixture[data-fixture="${i}"]`, box: `.fixture[data-fixture="${i}"]`, src: f.image, fixture: true }]
+        ? [{ path: ["fixtures", i], label: f.image.split("/").pop()?.replace(/\.[a-z0-9]+$/i, "") || `Fixture ${i + 1}`, kind: "img" as const, selector: `.fixture[data-fixture="${i}"]`, box: `.fixture[data-fixture="${i}"]`, src: f.image, fixture: true, ...(f.size ? { size: f.size } : {}) }]
         : [],
     ),
   ],

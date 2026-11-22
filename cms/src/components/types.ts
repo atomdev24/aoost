@@ -59,8 +59,9 @@ export type FrameSlot = {
   size?: Responsive<ItemSize>;
   /**
    * A fixture (an object on top of a table, e.g. the metal clover): selectable and movable on the
-   * canvas like a piece, but it keeps its own x/y (%) and width (px) instead of a per-size size, and
-   * it isn't a picture to frame or drop onto.
+   * canvas like a piece. Its own x/y (%) and width (px) apply to every size; moving or resizing it on
+   * one size stores that size's spot and scale in `size`, as for pieces. It isn't a picture to frame
+   * or drop onto.
    */
   fixture?: boolean;
 };

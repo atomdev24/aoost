@@ -86,13 +86,27 @@ export const sizeDecls = (s: ItemSize): Decls => ({
       : {}),
 });
 
+/**
+ * A fixture's spot and size on one screen size. Its spot is a % of the table (--fxp/--fyp, read before
+ * its shared --fx/--fy); null puts it back on the shared spot. Its size is a CSS scale on its width.
+ */
+export const fixtureDecls = (s: ItemSize): Decls => ({
+  ...(s.scale === 1 ? {} : { scale: String(Math.round(s.scale * 1000) / 1000) }),
+  ...(typeof s.x === "number" && typeof s.y === "number"
+    ? { "--fxp": `${Math.round(s.x * 10000) / 100}%`, "--fyp": `${Math.round(s.y * 10000) / 100}%` }
+    : s.x === null
+      ? { "--fxp": "var(--fx,50%)", "--fyp": "var(--fy,50%)" }
+      : {}),
+});
+
 /** One rule per framed picture: the mobile value, and each other size's in its media query (tablet and widescreen only when set). */
 export function addSlotCss(sheet: Sheet, nodeId: string, slots: FrameSlot[]) {
   for (const s of slots) {
     if (s.box && s.size) {
       const z = s.size;
-      const extra = { tablet: z.tablet ? sizeDecls(sizeAt(z, "tablet")) : undefined, widescreen: z.widescreen ? sizeDecls(sizeAt(z, "widescreen")) : undefined };
-      sheet.add(`.n-${nodeId} ${s.box}`, sizeDecls(sizeAt(z, "mobile")), sizeDecls(sizeAt(z, "desktop")), extra);
+      const d = s.fixture ? fixtureDecls : sizeDecls;
+      const extra = { tablet: z.tablet ? d(sizeAt(z, "tablet")) : undefined, widescreen: z.widescreen ? d(sizeAt(z, "widescreen")) : undefined };
+      sheet.add(`.n-${nodeId} ${s.box}`, d(sizeAt(z, "mobile")), d(sizeAt(z, "desktop")), extra);
     }
     if (!s.frame) continue;
     const decls = s.kind === "bg" ? slotBgDecls : slotImgDecls;

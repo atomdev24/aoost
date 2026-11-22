@@ -52,6 +52,16 @@ describe("AoostProjects", () => {
     expect(own).not.toContain("sh-sun");
     expect(AoostProjectsContent.safeParse({ ...d, shadow: { show: true, strength: 150 } }).success).toBe(false);
   });
+  it("gives a fixture its own spot and size on a screen size", async () => {
+    const { fixtureDecls } = await import("../frames");
+    expect(fixtureDecls({ scale: 1.2, x: 0.25, y: 0.5 })).toEqual({ scale: "1.2", "--fxp": "25%", "--fyp": "50%" });
+    expect(fixtureDecls({ scale: 1, x: null, y: null })).toEqual({ "--fxp": "var(--fx,50%)", "--fyp": "var(--fy,50%)" });
+    expect(fixtureDecls({ scale: 1 })).toEqual({});
+    const content = { ...d, fixtures: [{ image: "/art/clover-metal.png", x: 22, y: 30, width: 210, size: { base: { scale: 1 }, desktop: { scale: 1.3, x: 0.6, y: 0.4 } } }] };
+    expect(AoostProjectsContent.safeParse(content).success).toBe(true);
+    const slot = AoostProjects.frames!(content).find((f) => f.fixture)!;
+    expect(slot.size?.desktop).toEqual({ scale: 1.3, x: 0.6, y: 0.4 });
+  });
   it("puts fixtures above the table and skips hidden ones", () => {
     const content = { ...d, fixtures: [{ image: "/art/clover-metal.png", x: 22, y: 30, width: 210, rotate: -8 }, { image: "/art/x.png", x: 50, y: 50, width: 100, hidden: true }] };
     expect(AoostProjectsContent.safeParse(content).success).toBe(true);

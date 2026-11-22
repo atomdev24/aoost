@@ -95,7 +95,7 @@ export function initProjects(){
     /* the clover's body, not its transparent margin and shadow, is what must stay on the table */
     const lim=()=>{const W=table.clientWidth,H=table.clientHeight;return centreRange(W,H,f.offsetWidth*.27,f.offsetHeight*.3,4);};
     const centre=()=>{const a=f.getBoundingClientRect(),b=wrapEl.getBoundingClientRect();return[a.left+a.width/2-b.left,a.top+a.height/2-b.top];};
-    const put=(x,y)=>{cx=x;cy=y;f.style.setProperty('--fx',x/table.clientWidth*100+'%');f.style.setProperty('--fy',y/table.clientHeight*100+'%');};
+    const put=(x,y)=>{cx=x;cy=y;const px=x/table.clientWidth*100+'%',py=y/table.clientHeight*100+'%';f.style.setProperty('--fx',px);f.style.setProperty('--fy',py);f.style.setProperty('--fxp',px);f.style.setProperty('--fyp',py);};
     const tilt=(d)=>f.style.setProperty('--fr',rot+d+'deg');
     pressDrag(f,{prevent:true,
       lift:(x,y)=>{sx=x;sy=y;[ocx,ocy]=centre();cx=ocx;cy=ocy;id=1;f.style.transition='filter .2s';f.classList.add('lifted');},
