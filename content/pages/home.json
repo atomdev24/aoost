@@ -32,6 +32,11 @@
             "timeZone": "Africa/Johannesburg",
             "reel": [
               {
+                "src": "/media/2026/aoost-hero-skull-scuffed-chrome-2400x1000-cxr4.png",
+                "alt": "",
+                "date": "22.11.26"
+              },
+              {
                 "src": "/media/2026/hero-banner-halftone-viho.png",
                 "alt": "",
                 "frame": {
@@ -51,11 +56,6 @@
                     "panY": 0
                   }
                 },
-                "date": "22.11.26"
-              },
-              {
-                "src": "/media/2026/aoost-hero-skull-scuffed-chrome-2400x1000-cxr4.png",
-                "alt": "",
                 "date": "22.11.26"
               },
               {
@@ -98,7 +98,8 @@
             "overlay": "minimal",
             "screen": {
               "show": true
-            }
+            },
+            "intro": "session"
           },
           "style": {
             "base": {},
