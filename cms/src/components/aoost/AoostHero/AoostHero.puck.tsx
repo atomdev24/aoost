@@ -1,6 +1,6 @@
 import type { Fields } from "@puckeditor/core";
 import { mediaField } from "../../../editor/fields/media";
-import { withThumb } from "../fields";
+import { withThumb, hexField } from "../fields";
 import type { AoostHeroContent } from "./AoostHero";
 
 const onOff = (label: string) => ({
@@ -28,6 +28,15 @@ export const fields: Fields<AoostHeroContent> = {
     getItemSummary: (item, i) => withThumb(item.src, item.alt || item.src?.split("/").pop() || `Artwork ${(i ?? 0) + 1}`),
   },
   reelSeconds: { type: "number", label: "Seconds per artwork", min: 1, max: 60 },
+  intro: {
+    type: "radio",
+    label: "Opening animation",
+    options: [
+      { label: "Off", value: "off" },
+      { label: "Every visit", value: "always" },
+      { label: "Once per visit", value: "session" },
+    ],
+  },
   overlay: {
     type: "select",
     label: "Text over the artwork",
@@ -49,6 +58,7 @@ export const fields: Fields<AoostHeroContent> = {
       glare: { type: "number", label: "Glare: soft patch of light (0–1, default 1)", min: 0, max: 1, step: 0.05 },
       grain: { type: "number", label: "Grain: fine speckle (0–1, default 0.6)", min: 0, max: 1, step: 0.05 },
       ticker: onOff("Screen covers the ticker too"),
+      tone: hexField("Screen dark (empty = black)"),
     },
   },
   overlayText: { type: "text", label: "Fallback text (for artwork without a title)" },

@@ -3,6 +3,7 @@ import { blockData, C, DRAFT_PREVIEW, fit, IN_CLAUDE, monkey, orangeField, overl
 import { openViewer } from './viewer.js';
 import { startDotBoard } from './dots.js';
 import { startPhantoms } from './phantoms.js';
+import { startIntro } from './intro.js';
 
 export function initHero(){
   const D=blockData('hero');if(!D)return;
@@ -13,6 +14,8 @@ export function initHero(){
   if(clock){function tick(){try{clock.textContent=(D.clockLabel?D.clockLabel+' ':'')+new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:TZ}).format(new Date());}catch(e){}}tick();setInterval(tick,15000);}
 
   /* ---------- header: full-width artwork slideshow — advances on its own, swipe to browse, tap to zoom ---------- */
+  /* the opening: the screen tunes in before the artwork shows (intro.js); the reel waits for it */
+  const introDone=startIntro(document.querySelector('.ao header.hero-rect'));
   const reel=document.getElementById('reel'),hrBar=document.getElementById('hrBar');
   if(reel&&hrBar){
     /* the strip's own images; left empty it reuses the projects' artwork, like the original */
@@ -56,6 +59,7 @@ export function initHero(){
       else if(mode==='handwritten'){const hs=over.querySelectorAll('.ov-hw');if(!hs.length)return;const on=hs[i%hs.length];hs.forEach(h=>{if(h!==on)h.classList.remove('on');});on.classList.remove('on');void on.getBoundingClientRect();on.classList.add('on');}}
     overSlide(0);
     let hrIdx=0,hrT0=performance.now(),hrHold=0,hrOn=true;const HR_DUR=Math.max(1000,(+D.reelSeconds||5.2)*1000);
+    if(introDone){hrHold=Infinity;introDone.then(()=>{hrHold=0;hrT0=performance.now();});}
     ['pointerdown','touchstart','wheel','focusin'].forEach(ev=>reel.addEventListener(ev,()=>{hrHold=performance.now()+4000;},{passive:true}));
     let hrScrollT;reel.addEventListener('scroll',()=>{clearTimeout(hrScrollT);hrScrollT=setTimeout(()=>{hrIdx=Math.round(reel.scrollLeft/Math.max(1,reel.clientWidth));hrT0=performance.now();overSlide(hrIdx);},120);},{passive:true});
     if('IntersectionObserver' in window)new IntersectionObserver(es=>es.forEach(e=>hrOn=e.isIntersecting)).observe(reel);
