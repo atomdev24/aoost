@@ -28,6 +28,7 @@ export const fields: Fields<AoostHeroContent> = {
     getItemSummary: (item, i) => withThumb(item.src, item.alt || item.src?.split("/").pop() || `Artwork ${(i ?? 0) + 1}`),
   },
   reelSeconds: { type: "number", label: "Seconds per artwork", min: 1, max: 60 },
+  artDim: { type: "number", label: "Darken the artwork (0–0.8, default 0.15)", min: 0, max: 0.8, step: 0.05 },
   intro: {
     type: "radio",
     label: "Opening animation",

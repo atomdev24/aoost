@@ -80,7 +80,8 @@ test.describe("hero opening", () => {
     await expect(header(page).locator(".hr-intro")).toHaveCount(0);
   });
 
-  test("off by default, and never in the editor", async ({ page }) => {
+  test("off when set to off", async ({ page, request }) => {
+    await setIntro(request, "off");
     await page.goto("/preview/");
     await expect(header(page).locator(".hr-intro")).toHaveCount(0);
   });

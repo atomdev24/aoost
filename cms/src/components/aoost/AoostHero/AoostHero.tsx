@@ -62,6 +62,8 @@ export const AoostHeroContent = z.object({
    * switching on). "always": every page load; "session": once per visit. Older content: off.
    */
   intro: z.enum(["off", "always", "session"]).optional(),
+  /** Darken the artwork (0 = as it is, 0.8 = very dark), under the text and the glass. Older content: 0.15. */
+  artDim: z.number().min(0).max(0.8).optional(),
   /** Seconds each artwork stays before the strip moves on. */
   reelSeconds: z.number().min(1).max(60),
   /** The thin progress line along the bottom of the artwork. Older content: shown. */
@@ -169,6 +171,8 @@ export const SCREEN = { shade: 0.7, glare: 1, grain: 0.6 };
  */
 /** The hero's own dark tone (.hero-rect's background): the ticker takes it when it joins the screen. */
 export const HERO_DARK = "#000000";
+/** How much the artwork is darkened unless set. */
+export const ART_DIM = 0.15;
 /** The screen's dark tone: the hero's own setting, else black (the artwork's black). */
 export const screenTone = (c: AoostHeroContent) => (/^#[0-9a-f]{6}$/i.test(c.screen?.tone ?? "") ? c.screen!.tone! : HERO_DARK);
 /** The opening animation plays (on the site and in preview; never in the editor's canvas). */
@@ -199,6 +203,9 @@ const screenCss = [
   `.ao .ticker.sc-joined:is(*,.dots.glass),.ao .hero-rect.sc-joined{background:var(--sc-tone,#000)}.ao .ticker.sc-joined{border-top-color:transparent}`,
   // the opening: a blank screen in the screen's tone over the artwork, its canvas drawn by runtime/intro.js;
   // if the script never takes over, it clears itself after 9 s; reduced motion never sees it
+  // behind the hero (focus effect on scroll): black, with a blurred dim copy of the piece showing (hero.js); the artwork dimmed a touch
+  `.ao .ao-b[data-ao="hero"]{position:relative;isolation:isolate}.ao .hr-ambient{position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:calc(-1*var(--s5) - 40px);height:calc(var(--hero-h,clamp(320px,72svh,760px)) + 80px);background:#000;overflow:hidden;pointer-events:none}.ao .hr-ambient::after{content:"";position:absolute;inset:-10%;background:var(--amb,none) center/cover no-repeat;filter:blur(36px) brightness(.4);transition:opacity .8s}`,
+  `.ao .hr-dim{position:absolute;inset:0;background:#000;opacity:var(--dim,.15);pointer-events:none}`,
   `.ao .hr-intro{position:absolute;inset:0;background:var(--sc-tone,#000);pointer-events:none;animation:hr-safe .4s 9s forwards}.ao .hr-intro.is-playing{animation:none;background:none}.ao .hr-intro canvas{position:absolute;inset:0;width:100%;height:100%}`,
   `.ao .hr-top,.ao .hr-bar{transition:opacity .7s}.ao .is-intro :is(.hr-top,.hr-bar){opacity:0;animation:hr-show 0s 9s forwards}@keyframes hr-safe{to{opacity:0;visibility:hidden}}@keyframes hr-show{to{opacity:1}}`,
   `@media (prefers-reduced-motion:reduce){.ao .hr-intro{display:none}.ao .is-intro :is(.hr-top,.hr-bar){opacity:1}}`,
@@ -425,6 +432,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     );
     return (
       <Block name="hero" mat="none" data={content}>
+        <div className="hr-ambient" aria-hidden="true" />
         <header
           data-over={content.overlay && content.overlay !== "off" ? content.overlay : undefined}
           className={`hero-rect focus-sec${joined ? " sc-joined" : ""}${intro ? " is-intro" : ""}${content.reelBar === false ? " no-bar" : ""}${content.reelViewer === false ? " no-viewer" : ""}${pan ? " pan" : ""}`}
@@ -443,6 +451,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
                 </button>
               ))}
           </div>
+          <div className="hr-dim" aria-hidden="true" style={{ "--dim": content.artDim ?? ART_DIM } as CSSProperties} />
           <HeroOverlay content={content} />
           {intro ? <div className="hr-intro" aria-hidden="true" /> : null}
           <MatteScreen screen={content.screen} />

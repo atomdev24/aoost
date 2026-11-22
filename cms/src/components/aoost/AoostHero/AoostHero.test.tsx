@@ -141,6 +141,16 @@ describe("AoostHero", () => {
     expect(AoostHero.css).toContain("prefers-reduced-transparency:reduce");
   });
 
+  it("darkens the artwork a touch (setting), and keeps black with the piece's glow behind the hero", () => {
+    const html = renderNode("AoostHero", d);
+    expect(html).toContain('class="hr-ambient"');
+    expect(html).toContain("--dim:0.15");
+    expect(renderNode("AoostHero", { ...d, artDim: 0.4 })).toContain("--dim:0.4");
+    // the dim sits on the artwork, under the text over it
+    expect(html.indexOf("hr-track")).toBeLessThan(html.indexOf("hr-dim"));
+    expect(AoostHero.css).toContain(".ao .hr-ambient{position:absolute;z-index:-1;");
+  });
+
   it("the opening plays only when set, never in the editor, over the artwork and under the glass", () => {
     expect(renderNode("AoostHero", d)).not.toContain("hr-intro");
     const html = renderNode("AoostHero", { ...d, intro: "session", screen: { show: true } });
