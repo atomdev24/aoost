@@ -1,3 +1,4 @@
+import { imageSources } from "../../../render/media";
 import type { CSSProperties } from "react";
 import { z } from "zod";
 import { ResponsiveFrameFit } from "../../../schema";
@@ -91,7 +92,7 @@ function ShelfBook({ j, i }: { j: AoostJournal; i: number }) {
     return (
       <button type="button" className="jr jr-hasmock" aria-label={`Open journal: ${j.title}`} style={{ "--r": `${j.tilt ?? 0}deg`, "--i": i } as CSSProperties}>
         <span className="jr-cv jr-mock">
-          <img src={j.mockup} alt="" draggable={false} />
+          <img {...imageSources(j.mockup)} sizes="(max-width: 640px) 45vw, 220px" alt="" draggable={false} />
         </span>
         <span className="jr-n">0{i + 1}</span>
         <span className="jr-cap">

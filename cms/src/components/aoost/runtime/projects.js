@@ -1,4 +1,5 @@
 /* projects: the table of loose work (drag a piece, tap to zoom), the sticky note, the monkey keychain */
+import { setSources } from './sources.js';
 import { blockData, doodle, fit, PH, placeholderCanvas, reduce, rng, wrap } from './shared.js';
 import { openViewer } from './viewer.js';
 import { centreRange, clamp, rubber, turnedHalf } from './bounds.js';
@@ -25,7 +26,7 @@ export function initProjects(){
   function addPiece(item){const el=document.createElement('div');el.className='piece'+(item.src&&STICKER_ART.has(item.src)?' stk':'');if(D.viewer===false){el.setAttribute('role','img');el.setAttribute('aria-label',item.alt||'Artwork');}else{el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label',item.alt?'Open artwork: '+item.alt:'Open artwork');}
     const tape=document.createElement('span');tape.className='tape';el.appendChild(tape);
     const st={el,item,x:0,y:0,rot:0,a:1.25};
-    if(item.src){const img=new Image();img.alt='';img.draggable=false;img.decoding='async';img.src=item.src;img.onload=()=>{st.a=img.naturalHeight/img.naturalWidth||1.25;layout(false);};el.appendChild(img);}
+    if(item.src){const img=new Image();img.alt='';img.draggable=false;img.decoding='async';setSources(img,item.src,'(max-width: 640px) 45vw, 260px');img.onload=()=>{st.a=img.naturalHeight/img.naturalWidth||1.25;layout(false);};el.appendChild(img);}
     else{el.appendChild(placeholderCanvas(item.ph,240));}
     table.appendChild(el);els.push(st);bindDrag(st);return st;}
   /* a piece's size on this screen (the editor's per-size "size" is a CSS scale) */
