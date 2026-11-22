@@ -50,15 +50,18 @@
                     "panX": 0,
                     "panY": 0
                   }
-                }
+                },
+                "date": "22.11.2026"
               },
               {
                 "src": "/media/2026/aoost-hero-skull-scuffed-chrome-2400x1000-cxr4.png",
-                "alt": ""
+                "alt": "",
+                "date": "22.11.2026"
               },
               {
                 "src": "/media/2026/aoost-hero-jadeskull-01-front-close-w4dd.png",
-                "alt": ""
+                "alt": "",
+                "date": "22.11.2026"
               }
             ],
             "reelSeconds": 3,
@@ -92,7 +95,7 @@
             "dotLook": "glassblock",
             "phantoms": true,
             "phantomRate": "sometimes",
-            "overlay": "off",
+            "overlay": "minimal",
             "screen": {
               "show": true
             }
@@ -404,7 +407,8 @@
                 "pages": [],
                 "hidden": true
               }
-            ]
+            ],
+            "windowLight": true
           },
           "style": {
             "base": {}
