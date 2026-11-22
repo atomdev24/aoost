@@ -63,7 +63,7 @@ describe("AoostProjects", () => {
     expect(html.indexOf('id="table"')).toBeLessThan(html.indexOf('class="fixture"'));
     const css = AoostProjects.css!;
     expect(css).toContain(".ao .table{isolation:isolate}");
-    expect(css).toMatch(/\.ao \.fixture\{[^}]*touch-action:none/); // picked up and moved on the site
+    expect(css).toMatch(/\.ao \.fixture\{[^}]*touch-action:pan-y/); // picked up and moved on the site; a swipe on a phone still scrolls
     expect(css).toContain(".ao .table.ao-static~.fixture{pointer-events:none}"); // but left alone in the editor
     expect(AoostProjectsContent.safeParse(d).success).toBe(true); // older content without fixtures still works
   });

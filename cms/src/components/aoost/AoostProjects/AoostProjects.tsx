@@ -161,7 +161,9 @@ const extraCss = `
 .ao .table.ao-static .piece:nth-child(odd){transform:rotate(-3deg)}
 .ao .table.ao-static .piece:nth-child(even){transform:rotate(2.500deg)}
 .ao .table{isolation:isolate}
-.ao .fixture{position:absolute;z-index:8;width:min(var(--fw,200px),36vw);height:auto;left:var(--fx,50%);top:var(--fy,50%);transform:translate(-50%,-50%) rotate(var(--fr,0deg)) scale(var(--fs,1));user-select:none;-webkit-user-select:none;-webkit-user-drag:none;touch-action:none;cursor:grab}
+.ao .fixture{position:absolute;z-index:8;width:min(var(--fw,200px),36vw);height:auto;left:var(--fx,50%);top:var(--fy,50%);transform:translate(-50%,-50%) rotate(var(--fr,0deg)) scale(var(--fs,1));user-select:none;-webkit-user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none;touch-action:pan-y pinch-zoom;cursor:grab}
+.ao .piece.pressing,.ao .fixture.pressing{transition:filter .3s;filter:brightness(.96)}
+.ao .piece img{-webkit-touch-callout:none}
 .ao .fixture.lifted{--fs:1.06;cursor:grabbing;filter:drop-shadow(0 14px 12px rgba(20,21,22,.18))}
 .ao.editing .fixture,.ao .table.ao-static~.fixture{pointer-events:none}
 /* The whole section, edge to edge: out to the screen's sides and over the band's padding (the band clips it). */
