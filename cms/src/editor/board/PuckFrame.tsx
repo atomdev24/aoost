@@ -10,6 +10,7 @@ import { attachFrameGestures } from "../touch/gestures";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { watchWindow } from "../problems";
 import { guardPinch } from "../pinch-guard";
+import { attachCommentClicks } from "../comments/mode";
 import { stillMotion } from "./frame-css";
 
 /**
@@ -34,6 +35,8 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
 
   useEffect(() => {
     if (!doc) return;
+    // First, so that while commenting a click reaches nothing else.
+    const detachComments = attachCommentClicks(doc);
     const detach = attachKeys(doc);
     const detachDrops = attachCanvasDrops(doc);
     const detachPieces = attachPieceSelect(doc);
@@ -71,6 +74,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     const mo = new (doc.defaultView!.MutationObserver)(measure);
     mo.observe(doc.body, { childList: true });
     return () => {
+      detachComments();
       detach();
       detachDrops();
       detachPieces();

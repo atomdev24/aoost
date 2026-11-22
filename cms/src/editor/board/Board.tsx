@@ -21,6 +21,7 @@ import { RefLayer, RefNotice } from "./RefLayer";
 import { attachRefDrops } from "./refs-store";
 import { attachGestures } from "../touch/gestures";
 import { LONG_PRESS_MS } from "../touch/longpress";
+import { CommentLayer } from "../parts";
 import "./board.css";
 
 const NAME = BREAKPOINT_LABEL;
@@ -307,6 +308,7 @@ export function Board() {
 
       <RefNotice />
       <ResizePiece />
+      <CommentLayer />
       <AdjustImage />
       {!hidden[bp] ? <EmptyPage rect={{ ...screen(active.x, active.y), width: active.w * view.zoom, height: active.h * view.zoom }} /> : null}
       {loading ? (

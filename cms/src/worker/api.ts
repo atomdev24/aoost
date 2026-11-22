@@ -10,6 +10,7 @@ import { mediaApi } from "./media";
 import { problemsReport } from "../model/problems";
 import { buildStatus, publishToGitHub } from "./publish";
 import { cachedVersionFiles, listVersions } from "./history";
+import { CommentOp } from "../model/comments";
 import { filesToSite } from "../schema";
 
 /** How recently the connector must have called for the editor to show "Claude connected". */
@@ -47,9 +48,10 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
     case "GET /state":
       return json({ ok: true, ...(await draft.state()) });
     case "POST /ops": {
-      const body = await readJson<{ ops: Op[]; clientId?: string; summary?: string }>(request);
+      const body = await readJson<{ ops: Op[]; clientId?: string; summary?: string; author?: string }>(request);
       if (!body || !Array.isArray(body.ops)) return error(400, "Expected { ops: [...] } as JSON.");
-      const result = await draft.apply(JSON.stringify(body.ops), body.clientId ?? who.via, body.summary);
+      const by = (typeof body.author === "string" && body.author.trim().slice(0, 40)) || byline(who) || "Someone";
+      const result = await draft.apply(JSON.stringify(body.ops), body.clientId ?? who.via, body.summary, undefined, by);
       return result.ok ? json(result) : error(422, "That change would make the site invalid.", { issues: result.issues });
     }
     case "POST /reset": {
@@ -146,6 +148,14 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       // "Connected" means the connector has credentials that work: it made an authenticated call recently.
       const seenAt = await draft.connectorSeenAt();
       return json({ ok: true, connected: !!seenAt && Date.now() - seenAt < CONNECTOR_FRESH_MS, seenAt });
+    }
+    case "GET /comments":
+      return json({ ok: true, threads: await draft.getComments() });
+    case "POST /comments": {
+      const parsed = CommentOp.safeParse(await readJson<unknown>(request));
+      if (!parsed.success) return error(400, "That comment doesn't fit (too long, empty, or missing a field).");
+      const result = await draft.commentOp(JSON.stringify(parsed.data), who.who);
+      return result.ok ? json({ ok: true, threads: result.threads }) : error(409, result.error);
     }
     case "POST /problems": {
       const body = await readJson<{ items?: unknown }>(request);

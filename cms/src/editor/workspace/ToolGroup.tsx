@@ -5,6 +5,7 @@ import { applyTool, setToolListener } from "../board/keys";
 import { TOOLS, type Tool } from "../board/tools";
 import { currentPage, useEditor } from "../store";
 import { usePalette } from "../commands/palette-store";
+import { useCommentMode } from "../comments/mode";
 
 /**
  * The segmented tool group in the middle of the top bar. Select is the
@@ -14,11 +15,13 @@ import { usePalette } from "../commands/palette-store";
 export function ToolGroup() {
   const [flash, setFlash] = useState<Tool | null>(null);
   const [asking, setAsking] = useState(false);
+  const commenting = useCommentMode();
   const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setToolListener((tool) => {
       if (tool === "claude") setAsking((a) => !a);
+      else if (tool === "comment") setAsking(false);
       else {
         setAsking(false);
         setFlash(tool);
@@ -51,7 +54,7 @@ export function ToolGroup() {
     <div className="ed-tools-wrap" ref={box}>
       <div className="ed-tools" role="toolbar" aria-label="Tools">
         {TOOLS.map((t) => {
-          const pressed = t.id === "claude" ? asking : t.id === "select" ? !flash && !asking : flash === t.id;
+          const pressed = t.id === "claude" ? asking : t.id === "comment" ? commenting : t.id === "select" ? !flash && !asking && !commenting : flash === t.id;
           return (
             <button key={t.id} type="button" className="ed-tool" data-tool={t.id} aria-label={t.label} aria-pressed={pressed} title={t.key ? `${t.label} (${t.key})` : t.label} onClick={() => applyTool(t.id)}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

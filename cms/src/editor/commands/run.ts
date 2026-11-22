@@ -89,6 +89,7 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
   "tool.frame": () => applyTool("frame"),
   "tool.text": () => applyTool("text"),
   "tool.image": () => applyTool("image"),
+  "tool.comment": () => applyTool("comment"),
   "tool.section": () => applyTool("section"),
   "canvas.zoomIn": () => zoomStep(1),
   "canvas.zoomOut": () => zoomStep(-1),

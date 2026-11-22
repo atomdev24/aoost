@@ -102,13 +102,23 @@ export async function pushStaging() {
   }
 }
 
+/** The name typed in the publish sheet for the next version ("Shadow over projects"); used once. */
+let versionName = "";
+export const setVersionName = (name: string) => {
+  versionName = name.slice(0, 80);
+};
+export const getVersionName = () => versionName;
+
 export async function publish() {
   if (state.phase === "github" || state.phase === "rebuilding") return;
   set({ phase: "github", failed: null, error: null, note: null });
   try {
     if (!(await flush())) throw new Error(`The draft couldn't be saved${getState().saveError ? `: ${getState().saveError}` : ""}.`);
     const site = getState().site;
-    const result = await api.publish();
+    const name = versionName.trim();
+    // The history panel shows "Publish from the editor: <name>" as "Published <name>".
+    const result = await api.publish(name ? `Publish from the editor: ${name}` : undefined);
+    versionName = "";
     setUnpublished(false);
     set({ published: site });
     if (!result.commit) {

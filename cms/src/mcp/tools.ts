@@ -341,6 +341,16 @@ export const tools: Tool[] = [
     "Read the editor's problem log: errors, failed saves or requests, lost live connection, long freezes, failed publishes, and problems people reported with Report a problem. Newest first, each with when, who, what happened and where the editor was (page, screen size, zoom, browser, build). Use it first when Alex says something in the editor went wrong.",
     z.object({ limit: z.number().int().min(1).max(400).default(50).describe("How many of the newest entries."), kind: z.enum(["error", "request", "connection", "stall", "publish", "report"]).optional().describe("Only this kind.") }),
   ),
+  tool(
+    "get_comments",
+    "Read the comments people left on the canvas: each thread's id, page, what it's pinned to (block id and label, the screen size), who said what, edits made to that block since, and whether it's open or resolved. Use it when Alex asks what feedback there is, or before working through review notes.",
+    z.object({ status: z.enum(["open", "resolved", "all"]).default("open"), page: z.string().optional().describe("Only this page id.") }),
+  ),
+  tool(
+    "reply_to_comment",
+    "Reply to a comment thread as Claude (shown with Claude's own colour), and optionally resolve it. Use it to say what you changed for a comment, after making the change.",
+    z.object({ id: z.string().describe("The thread id from get_comments."), text: z.string().min(1).max(2000), resolve: z.boolean().default(false) }),
+  ),
   // The three tools below need the Worker (network, R2, an open editor, GitHub); it supplies their behaviour.
   tool(
     "upload_media_from_url",

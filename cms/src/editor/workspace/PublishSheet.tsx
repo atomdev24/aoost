@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useEditor } from "../store";
 import { checkPage, type PageChecks } from "./checks";
 import { useChanges } from "./changes-count";
-import { closeSheet, publish, pushStaging, usePublish, type Step } from "./publish";
+import { closeSheet, getVersionName, publish, pushStaging, setVersionName, usePublish, type Step } from "./publish";
 import { copyStagingLink, emptyStaging, sendToStaging, useStaging } from "./staging";
 import { resolveConflict, useSync } from "./sync";
 
@@ -148,6 +148,7 @@ export function PublishSheet() {
         ) : null}
         {stagingError ? <p className="ed-sheet-error">{stagingError}</p> : null}
       </section>
+      {n && !busy && phase !== "live" ? <VersionName /> : null}
       <footer className="ed-sheet-foot">
         <button type="button" className="ed-btn ed-btn-sm" disabled={stagingBusy || busy} onClick={() => void sendToStaging()}>
           {stagingBusy ? "Sending…" : staged ? "Update staging" : "Send to staging"}
@@ -199,14 +200,36 @@ function PhoneChecks({ pageIds }: { pageIds: string[] }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
-  const warnings = state.results.reduce((n, r) => n + r.checks.filter((c) => !c.ok).length, 0);
+  // Open comments on these pages: a review that isn't finished yet.
+  const [open, setOpen] = useState<Record<string, number> | null>(null);
+  useEffect(() => {
+    let live = true;
+    fetch("/api/editor/comments", { credentials: "same-origin" })
+      .then((r) => r.json())
+      .then((d: { threads?: { pageId: string; status: string }[] }) => {
+        if (!live) return;
+        const n: Record<string, number> = {};
+        for (const t of d.threads ?? []) if (t.status === "open") n[t.pageId] = (n[t.pageId] ?? 0) + 1;
+        setOpen(n);
+      })
+      .catch(() => live && setOpen({}));
+    return () => {
+      live = false;
+    };
+  }, [key]);
+  const results = state.results.map((r) => {
+    const id = pages.find((p) => p.slug === r.slug && !p.variantOf)?.id;
+    const n = (id && open?.[id]) || 0;
+    return open ? { ...r, checks: [...r.checks, { id: "comments", ok: !n, title: n ? `${n} open ${n === 1 ? "comment" : "comments"}` : "No open comments", detail: n ? "Resolve them in the Comments panel, or publish anyway." : "Nothing left to answer on this page." }] } : r;
+  });
+  const warnings = results.reduce((n, r) => n + r.checks.filter((c) => !c.ok).length, 0);
   return (
     <section className="ed-checks" aria-label="Checks on a phone" aria-busy={state.busy}>
       <header className="ed-checks-head">
         <strong>Checks on a phone</strong>
         <span className="ed-hint">{state.busy ? "Checking…" : warnings ? `${warnings} to look at · you can still publish` : "All clear"}</span>
       </header>
-      {state.results.map((r) => (
+      {results.map((r) => (
         <div key={r.slug} className="ed-checks-page">
           {state.results.length > 1 ? <span className="ed-checks-name">{r.page}</span> : null}
           <ul>
@@ -226,6 +249,27 @@ function PhoneChecks({ pageIds }: { pageIds: string[] }) {
       ))}
       {state.busy ? <span className="ed-spinner" aria-hidden="true" /> : null}
     </section>
+  );
+}
+
+/** A name for this version, so it's easy to find (and go back to) in History. */
+function VersionName() {
+  const [name, setName] = useState(getVersionName());
+  return (
+    <label className="ed-version-name">
+      <span>Name this version (optional)</span>
+      <input
+        className="ed-input"
+        value={name}
+        maxLength={80}
+        placeholder="e.g. Shadow over projects"
+        onChange={(e) => {
+          setName(e.target.value);
+          setVersionName(e.target.value);
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      />
+    </label>
   );
 }
 
