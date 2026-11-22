@@ -1,6 +1,7 @@
 /* journals: A6 books on the mat, opened in a 3D viewer.
    Ported from the original page. The journals come from the block's fields (fromFields below);
    everything after that is the original script, including the Atom app's preview hook. */
+import { sourceAttrs } from './sources.js';
 import { blockData, overlays } from './shared.js';
 
 /* ---- journals ----
@@ -116,7 +117,7 @@ const ribbon=j=>{const r=(j.props||{}).ribbon;return r&&r!=='none'?`<span class=
 
 function shelfButton(j,i){const b=document.createElement('button');b.type='button';b.className='jr';b.style.setProperty('--r',(j.r||0)+'deg');
   b.setAttribute('aria-label',`Open journal: ${j.title}`);
-  b.style.setProperty('--i',i);if(j.mockup){b.classList.add('jr-hasmock');b.innerHTML=`<span class="jr-cv jr-mock"><img src="${esc(j.mockup)}" alt="" draggable="false"></span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;}else b.innerHTML=`${ribbon(j)}<span class="jr-cv cvx${matCls(j)}" style="${coverStyle(j)}">${coverInner(j)}</span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;
+  b.style.setProperty('--i',i);if(j.mockup){b.classList.add('jr-hasmock');b.innerHTML=`<span class="jr-cv jr-mock"><img ${sourceAttrs(j.mockup,'(max-width: 640px) 45vw, 220px',esc)} alt="" draggable="false"></span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;}else b.innerHTML=`${ribbon(j)}<span class="jr-cv cvx${matCls(j)}" style="${coverStyle(j)}">${coverInner(j)}</span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;
   const l=b.querySelector('.it-l');if(l){fillLayer(l,j.citems);l.querySelectorAll('[data-src]').forEach(m=>{m.src=m.dataset.src;if(m.tagName==='VIDEO'){m.autoplay=true;m.play&&m.play().catch(()=>{});}});}
   b.addEventListener('click',()=>PREVIEW?openJ(j,b):openRoom(j,b));return b;}
 JOURNALS.forEach((j,i)=>shelf.appendChild(shelfButton(j,i)));

@@ -67,7 +67,8 @@ describe("AoostProjects", () => {
     expect(AoostProjectsContent.safeParse(content).success).toBe(true);
     const html = renderNode("AoostProjects", content);
     expect(html.match(/class="fixture"/g)).toHaveLength(1);
-    expect(html).toContain('src="/art/clover-metal.png"');
+    expect(html).toContain('src="/art/clover-metal.960.webp"'); // a right-sized copy the build makes
+    expect(html).toContain('/art/clover-metal.480.webp 480w');
     expect(html).toContain("--fx:22%;--fy:30%;--fw:210px;--fr:-8deg");
     // the fixture sits after the table so it stacks above every piece, even a lifted one
     expect(html.indexOf('id="table"')).toBeLessThan(html.indexOf('class="fixture"'));

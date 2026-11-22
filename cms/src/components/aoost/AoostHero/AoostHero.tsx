@@ -1,3 +1,4 @@
+import { imageSources } from "../../../render/media";
 import { Fragment, useEffect, useRef, type CSSProperties } from "react";
 import { z } from "zod";
 import { ResponsiveFrameFit } from "../../../schema";
@@ -194,7 +195,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
               .filter((r) => r.src)
               .map((r, i, all) => (
                 <button key={i} type="button" className="hr-slide" aria-label={`Open artwork ${i + 1} of ${all.length}`}>
-                  <img src={r.src} alt="" decoding="async" loading={i ? "lazy" : "eager"} />
+                  <img {...imageSources(r.src)} sizes="100vw" alt="" decoding="async" loading={i ? "lazy" : "eager"} />
                 </button>
               ))}
           </div>

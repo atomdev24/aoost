@@ -215,7 +215,7 @@ test.describe("sketchbook covers", () => {
         const cv = covers.nth(k);
         if (j.mockup) {
           await expect(cv).toHaveClass(/jr-mock/);
-          await expect(cv.locator("img")).toHaveAttribute("src", j.mockup);
+          await expect(cv.locator("img")).toHaveAttribute("src", new RegExp(j.mockup.split("/").pop()!.replace(/\.[a-z]+$/i, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))); // a right-sized copy
           await expect.poll(() => cv.locator("img").evaluate((m: HTMLImageElement) => m.complete && m.naturalWidth > 0)).toBe(true);
           continue;
         }

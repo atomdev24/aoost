@@ -1,3 +1,4 @@
+import { imageSources } from "../../../render/media";
 import { useEffect, useRef, type CSSProperties } from "react";
 import { clearLayout, pieceTransform, placeOf } from "../runtime/table.js";
 import { z } from "zod";
@@ -257,7 +258,8 @@ export const AoostProjects = defineComponent<AoostProjectsContent>({
                   key={i}
                   className="fixture"
                   data-fixture={i}
-                  src={f.image}
+                  {...imageSources(f.image)}
+                  sizes={`${f.width}px`}
                   alt=""
                   aria-hidden="true"
                   draggable={false}
