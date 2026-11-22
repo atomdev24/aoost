@@ -4,7 +4,7 @@ import { renderPage } from "../render/document";
 import { validateSite } from "../schema";
 import { searchIndex } from "../render/build";
 import type { Identity } from "./auth";
-import { draftStub, readDraft, type Env } from "./env";
+import { demoStub, draftStub, readDraft, type Env } from "./env";
 import { error, html, json, readJson } from "./http";
 import { mediaApi } from "./media";
 import { problemsReport } from "../model/problems";
@@ -35,9 +35,62 @@ function publishLocked(env: Env, url: URL): Response | null {
 /** The name to sign a publish with: the part of a sign-in email before the @ (password and token sign-ins have none). */
 const byline = (who: Identity) => (who.who.includes("@") ? who.who.split("@")[0]!.slice(0, 40) : null);
 
-const stagingInfo = (meta: StagingMeta) => ({ at: meta.at, label: meta.label, by: meta.by, path: `/staging/${meta.token}/` });
+const stagingInfo = (meta: StagingMeta, env: Env) => ({ at: meta.at, label: meta.label, by: meta.by, path: `${env.IS_DEMO ? "/demo" : ""}/staging/${meta.token}/` });
+
+/** The demo's pictures: the grey placeholders it ships with (uploads are off there). */
+const DEMO_MEDIA = ["wide", "square", "tall", "wide-dark", "square-dark", "tall-dark"].map((n, i) => ({
+  key: `demo/${n}.svg`,
+  url: `/demo-art/${n}.svg`,
+  name: `placeholder-${n}.svg`,
+  kind: "image",
+  size: 600,
+  uploaded: new Date(Date.UTC(2026, 10, 1, 12, i)).toISOString(),
+  width: n.startsWith("wide") ? 1600 : n.startsWith("square") ? 1200 : 900,
+  height: n.startsWith("wide") ? 900 : 1200,
+  variants: [],
+}));
+const DEMO_COMMIT = "de0000000000";
+
+/**
+ * The demo editor (/demo/, open to anyone): the same routes on the demo draft, except that
+ * nothing reaches GitHub or the media library. Publishing and pushing pretend: the demo's "live"
+ * becomes the draft, and the editor shows the rebuild finishing.
+ */
+async function demoRoute(request: Request, env: Env, url: URL): Promise<Response | null> {
+  const route = `${request.method} ${url.pathname.replace(/^\/api\/editor/, "")}`;
+  const draft = draftStub(env);
+  switch (route) {
+    case "GET /media":
+      return json({ ok: true, items: DEMO_MEDIA, cursor: null });
+    case "POST /media":
+    case "DELETE /media":
+      return error(403, "Uploads are off in the demo. Pick one of the placeholder pictures instead.");
+    case "POST /publish":
+      await draft.markPublished();
+      return json({ ok: true, commit: DEMO_COMMIT, url: null, changed: [], demo: true });
+    case "POST /staging/push": {
+      const staged = await draft.getStagedForPush();
+      if (!staged) return error(409, "Nothing is in staging.");
+      await draft.markPublished(staged.files);
+      await draft.clearStaging();
+      return json({ ok: true, commit: DEMO_COMMIT, url: null, changed: [], demo: true });
+    }
+    case "GET /publish/status":
+      return json({ ok: true, state: "success" });
+    case "GET /history":
+      return json({ ok: true, versions: [], unavailable: "Version history reads the real site's history, so it's off in the demo." });
+    case "POST /demo/reset":
+      await demoStub(env).wipe();
+      return json({ ok: true });
+  }
+  return null;
+}
 
 export async function editorApi(request: Request, env: Env, url: URL, who: Identity): Promise<Response> {
+  if (env.IS_DEMO) {
+    const handled = await demoRoute(request, env, url);
+    if (handled) return handled;
+  }
   if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
   const draft = draftStub(env);
   const route = `${request.method} ${url.pathname.replace(/^\/api\/editor/, "")}`;
@@ -93,12 +146,12 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
     }
     case "GET /staging": {
       const meta = await draft.getStaging();
-      return json({ ok: true, staging: meta?.at ? stagingInfo(meta) : null });
+      return json({ ok: true, staging: meta?.at ? stagingInfo(meta, env) : null });
     }
     case "POST /staging": {
       const body = await readJson<{ label?: string }>(request);
       const meta = await draft.stage(body?.label?.trim() || "Draft", who.who);
-      return json({ ok: true, staging: stagingInfo(meta) });
+      return json({ ok: true, staging: stagingInfo(meta, env) });
     }
     case "DELETE /staging":
       await draft.clearStaging(url.searchParams.get("forget") === "1");
@@ -192,33 +245,35 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
 export async function preview(env: Env, url: URL): Promise<Response> {
   const { site, version } = await readDraft(env);
   const path = url.pathname.replace(/^\/preview/, "") || "/";
-  if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: "/preview" + e.url })));
+  if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: (env.IS_DEMO ? "/demo/preview" : "/preview") + e.url })));
   const slug = path.length > 1 ? path.replace(/\/$/, "") : "/";
   const page = site.pages.find((p) => p.slug === slug);
   if (!page) return html("<!doctype html><meta charset=utf-8><title>Not in the draft</title><p style='font:16px system-ui;padding:40px'>No page at this URL in the draft.</p>", 404);
-  return html(renderPage(site, page, { preview: { prefix: "/preview" }, assetVersion: String(version) }));
+  const prefix = env.IS_DEMO ? "/demo/preview" : "/preview";
+  return html(renderPage(site, page, { preview: { prefix }, assetVersion: String(version) }));
 }
 
 const STAGING_TAG = `<div style="position:fixed;left:12px;bottom:12px;z-index:2147483647;font:600 11px/1 system-ui,sans-serif;letter-spacing:.02em;color:#fff;background:#8e44ff;padding:7px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:none" aria-hidden="true">Staging preview</div>`;
 
 /** /staging/<token>/<slug>: what staging holds, rendered exactly like the public site. Public: the token is the key. */
 export async function staging(env: Env, url: URL): Promise<Response> {
-  const m = /^\/staging\/([\w-]{16,64})(\/.*)?$/.exec(url.pathname);
+  const m = /^\/staging\/([\w-]{16,64})(\/.*)?$/.exec(url.pathname.replace(/^\/demo/, ""));
   const notFound = () => html("<!doctype html><meta charset=utf-8><meta name=robots content=noindex><title>Not found</title><p style='font:16px system-ui;padding:40px'>This staging link isn't active. Ask for a new one.</p>", 404);
   if (!m) return notFound();
   const token = m[1]!;
-  if (!m[2]) return Response.redirect(new URL(`/staging/${token}/`, url).toString(), 301);
+  if (!m[2]) return Response.redirect(new URL(`${env.IS_DEMO ? "/demo" : ""}/staging/${token}/`, url).toString(), 301);
   const text = await draftStub(env).getStagedSiteJson(token);
   if (!text) return notFound();
   const parsed = validateSite(JSON.parse(text));
   if (!parsed.ok) return notFound();
   const site = parsed.site;
-  const prefix = `/staging/${token}`;
+  const prefix = `${env.IS_DEMO ? "/demo" : ""}/staging/${token}`;
   const path = m[2].replace(/\/$/, "") || "/";
   if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: prefix + e.url })));
   const page = site.pages.find((p) => p.slug === path && p.status !== "draft" && p.variantOf === undefined);
   if (!page) return html("<!doctype html><meta charset=utf-8><meta name=robots content=noindex><title>Not in staging</title><p style='font:16px system-ui;padding:40px'>No page at this address in staging.</p>", 404);
-  const body = renderPage(site, page, { preview: { prefix }, assetVersion: "staging" }).replace("</body>", `${STAGING_TAG}</body>`);
+  const tag = env.IS_DEMO ? STAGING_TAG.replace("Staging preview", "Demo · staging preview") : STAGING_TAG;
+  const body = renderPage(site, page, { preview: { prefix }, assetVersion: "staging" }).replace("</body>", `${tag}</body>`);
   const res = html(body);
   res.headers.set("X-Robots-Tag", "noindex");
   res.headers.set("Cache-Control", "no-store");
@@ -255,8 +310,8 @@ export async function livePage(env: Env, url: URL): Promise<Response> {
   const parsed = validateSite(JSON.parse(await draftStub(env).getPublishedJson()));
   if (!parsed.ok) return html("<!doctype html><meta charset=utf-8><title>Can't show the live site</title><p style='font:16px system-ui;padding:40px'>The live content couldn't be read.</p>", 502);
   const site = parsed.site;
-  const prefix = "/preview/_live";
-  const path = url.pathname.slice(prefix.length).replace(/\/$/, "") || "/";
+  const prefix = env.IS_DEMO ? "/demo/preview/_live" : "/preview/_live";
+  const path = url.pathname.slice("/preview/_live".length).replace(/\/$/, "") || "/";
   if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: prefix + e.url })));
   const page = site.pages.find((p) => p.slug === path && p.variantOf === undefined);
   if (!page) return html("<!doctype html><meta charset=utf-8><title>Not live</title><p style='font:16px system-ui;padding:40px'>This page isn't on the live site yet.</p>", 404);

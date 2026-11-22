@@ -1,7 +1,6 @@
 import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
-import { AdjustImage } from "../canvas/AdjustImage";
 import { ResizePiece } from "../canvas/ResizePiece";
 import { EmptyPage } from "../insert/EmptyPage";
 import { useSnapshot } from "./snapshots";
@@ -21,7 +20,7 @@ import { RefLayer, RefNotice } from "./RefLayer";
 import { attachRefDrops } from "./refs-store";
 import { attachGestures } from "../touch/gestures";
 import { LONG_PRESS_MS } from "../touch/longpress";
-import { CommentLayer, PresenceLayer } from "../parts";
+import { AdjustImage, CommentLayer, PresenceLayer } from "../parts";
 import "./board.css";
 
 const NAME = BREAKPOINT_LABEL;

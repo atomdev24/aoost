@@ -31,6 +31,19 @@ class_name = "DraftStore"
 tag = "v1"
 new_sqlite_classes = ["DraftStore"]
 
+# The public demo editor's draft (/demo/), kept apart from the real one.
+[[durable_objects.bindings]]
+name = "DEMO"
+class_name = "DemoStore"
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["DemoStore"]
+
+# 01:00 UTC = 03:00 in Cape Town: the demo editor goes back to its wireframe site.
+[triggers]
+crons = ["0 1 * * *"]
+
 [vars]
 # "password" (EDITOR_PASSWORD secret) or "access" (Cloudflare Access JWT). See docs/auth.md.
 AUTH_MODE = "access"

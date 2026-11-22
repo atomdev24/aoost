@@ -727,3 +727,64 @@ html.ed-commenting #preview-frame {
   cursor: pointer;
   font: inherit;
 }
+
+/* ---------- demo editor (workspace/DemoBar.tsx) ---------- */
+.ed-demo {
+  position: relative;
+}
+.ed-demo-chip {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ed-attn) 55%, transparent);
+  background: color-mix(in srgb, var(--ed-attn) 16%, transparent);
+  color: var(--ed-attn);
+  font: 600 12px/1 var(--ed-font, system-ui, sans-serif);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.ed-demo-chip:focus-visible {
+  outline: 2px solid var(--ed-accent-strong);
+  outline-offset: 2px;
+}
+.ed-demo-card {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 400;
+  width: 320px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #1c1c1f;
+  border: 1px solid #34343a;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  color: #e8e8ea;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.ed-demo-card h2 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ed-demo-card p {
+  margin: 0 0 8px;
+  color: var(--ed-sub);
+}
+.ed-demo-card ul {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  color: var(--ed-sub);
+}
+.ed-demo-card li + li {
+  margin-top: 2px;
+}
+.ed-demo-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.ed-demo-note {
+  margin: 10px 0 0 !important;
+  color: #e8e8ea !important;
+}
