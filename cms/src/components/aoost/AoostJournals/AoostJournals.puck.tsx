@@ -1,6 +1,6 @@
 import type { Fields } from "@puckeditor/core";
 import { mediaField } from "../../../editor/fields/media";
-import { hexField, matField, onOff } from "../fields";
+import { hexField, matField, onOff, withThumb } from "../fields";
 import type { AoostJournalsContent } from "./AoostJournals";
 
 export const fields: Fields<AoostJournalsContent> = {
@@ -81,7 +81,7 @@ export const fields: Fields<AoostJournalsContent> = {
       hidden: onOff("Hidden"),
     } as never,
     defaultItemProps: { title: "new journal", year: String(new Date().getFullYear()), coverColor: "#222222", band: "#141516", tilt: 3, pages: [] },
-    getItemSummary: (j) => j.title || "Journal",
+    getItemSummary: (j) => withThumb(j.mockup || j.cover, j.title || "Journal"),
   },
   mat: matField,
 };

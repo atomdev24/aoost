@@ -30,6 +30,7 @@ import { BrowserZoomNotice } from "./workspace/BrowserZoomNotice";
 import { warmUp } from "./warmup";
 import "./workspace/workspace.css";
 import "./workspace/phone.css";
+import "./workspace/refresh.css";
 
 const VIEWPORTS = [
   { width: DESIGN_WIDTH.desktop, height: "auto" as const, label: "Desktop", icon: "Monitor" as const },

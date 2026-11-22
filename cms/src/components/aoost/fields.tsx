@@ -1,6 +1,17 @@
 import type { CustomField } from "@puckeditor/core";
 
 /** Small field helpers shared by the aoost blocks' editor forms. */
+
+/** A list row that shows the picture it holds next to its name (the text stays the row's name). */
+export const withThumb = (src: string | undefined, text: string) =>
+  src ? (
+    <span className="ed-sum">
+      <img src={src} alt="" loading="lazy" decoding="async" />
+      <span>{text}</span>
+    </span>
+  ) : (
+    text
+  );
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const onOff = (label: string): any => ({
   type: "radio",
