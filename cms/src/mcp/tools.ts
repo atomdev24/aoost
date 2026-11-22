@@ -5,6 +5,7 @@ import { addNode, addSection, createNode, createSection, locate, moveNode, moveS
 import { createPage, renamePage, setParent, setSeo, setShowInNav, setSlug, setStatus } from "../model/pages";
 import type { EditorContext } from "../model/protocol";
 import { setAt } from "../responsive/resolve";
+import { designSection, DesignInput } from "./design";
 import { FrameFit, LinkTarget, NAV_ITEM_TYPES, SectionLayout, Style, type Node, type Page, type Responsive, type Section, type Site } from "../schema";
 
 /**
@@ -130,6 +131,24 @@ export const tools: Tool[] = [
       const footer = page.sections.findIndex((s) => s.children.some((n) => n.type === "Footer" || (n.type === "Global" && ctx.site.globals.find((g) => g.id === n.content.globalId)?.node.type === "Footer")));
       const next = addSection(page, section, a.index ?? (footer >= 0 ? footer : undefined));
       return { site: withPage(ctx.site, next), text: json({ sectionId: section.id, nodeIds: section.children.map((n) => n.id), page: page.id }), summary: `Add ${a.kind} section${a.name ? ` "${a.name}"` : ""} to ${page.title}`, changed: [section.id] };
+    },
+  ),
+
+  tool(
+    "import_design",
+    "Bring in a design as a free-layout section in one call: a Figma frame (read it with the Figma connector, upload its pictures with upload_media_from_url first) or any flat list of layers. Desktop keeps the design's layout, scaled to 1440 px; phones use the design's phone frame if you pass one (layers matched by name), otherwise the layers are stacked in reading order at phone width. Text takes the theme text style nearest its size. Returns the new section and node ids; check it with get_preview_screenshot at both sizes and tidy with update_node.",
+    z.object({ page: PageRef, name: z.string().optional().describe("Section name, e.g. the Figma frame's name."), index: z.number().int().min(0).optional().describe("Position on the page (0 = top). Default: before the footer."), design: DesignInput }),
+    (a, ctx) => {
+      const page = findPage(ctx, a.page);
+      const section = designSection(ctx.site, a.design, a.name);
+      for (const n of section.children) {
+        const def = getComponent(n.type)!;
+        const checked = def.schema.safeParse(n.content);
+        if (!checked.success) fail(`Layer "${n.name ?? n.type}": ${checked.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")}`);
+      }
+      const footer = page.sections.findIndex((s) => s.children.some((n) => n.type === "Footer"));
+      const next = addSection(page, section, a.index ?? (footer >= 0 ? footer : undefined));
+      return { site: withPage(ctx.site, next), text: json({ sectionId: section.id, nodeIds: section.children.map((n) => n.id), page: page.id }), summary: `Import design${a.name ? ` "${a.name}"` : ""} to ${page.title}`, changed: [section.id] };
     },
   ),
 
