@@ -47,20 +47,38 @@ export function initProjects(){
      the table's corner and making them trail the pointer); dividing by it keeps the piece's centre
      exactly where it's put. pieceTransform is shared with the editor. */
   function place(st){st.el.style.transform=pieceTransform(st.x,st.y,st.rot,scaleOf(st.el))+(st.el.classList.contains('lifted')?' scale(1.04)':'');}
-  function bindDrag(st){const el=st.el;let sx,sy,ox,oy,moved=false,id=null;
-    el.addEventListener('pointerdown',e=>{id=e.pointerId;el.setPointerCapture(id);sx=e.clientX;sy=e.clientY;ox=st.x;oy=st.y;moved=false;el.style.zIndex=++z+10;el.style.transition='box-shadow .2s';el.classList.add('lifted');st.rot*=.4;place(st);});
-    el.addEventListener('pointermove',e=>{if(e.pointerId!==id)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.hypot(dx,dy)>6)moved=true;st.rot=Math.max(-10,Math.min(10,dx*.04));
+  /* Picking things up. With a mouse or pen a piece lifts at once. On touch it waits for a press and hold
+     (HOLD ms, a light buzz where the phone can), so a swipe that starts on a piece still scrolls the page;
+     moving more than 10 px first gives the gesture back to the page. A quick tap is a tap. Once lifted,
+     the page stays put until the piece is let go. */
+  const HOLD=300;
+  function pressDrag(el,h){let id=null,timer=0,held=false,sx=0,sy=0,lx=0,ly=0;
+    const end=()=>{clearTimeout(timer);id=null;held=false;el.classList.remove('pressing');};
+    el.addEventListener('pointerdown',e=>{if(id!==null||(h.busy&&h.busy())||e.button>0)return;id=e.pointerId;sx=lx=e.clientX;sy=ly=e.clientY;
+      const go=()=>{held=true;el.classList.remove('pressing');try{el.setPointerCapture(id);}catch(_){}h.lift(sx,sy);if(lx!==sx||ly!==sy)h.drag(lx,ly);};
+      if(e.pointerType==='touch'){el.classList.add('pressing');timer=setTimeout(()=>{go();try{navigator.vibrate&&navigator.vibrate(10);}catch(_){}},HOLD);}
+      else{if(h.prevent)e.preventDefault();go();}});
+    el.addEventListener('pointermove',e=>{if(e.pointerId!==id)return;lx=e.clientX;ly=e.clientY;if(held)h.drag(lx,ly);else if(Math.hypot(lx-sx,ly-sy)>10)end();});
+    el.addEventListener('pointerup',e=>{if(e.pointerId!==id)return;const was=held;end();if(was)h.drop();else if(h.tap)h.tap();});
+    el.addEventListener('pointercancel',e=>{if(e.pointerId!==id)return;const was=held;end();if(was)(h.cancel||h.drop)();});
+    el.addEventListener('touchmove',e=>{if(held&&e.cancelable)e.preventDefault();},{passive:false});
+    el.addEventListener('contextmenu',e=>{if(id!==null||held)e.preventDefault();});
+    return {active:()=>id!==null};}
+  function bindDrag(st){const el=st.el;let sx,sy,ox,oy,moved=false,ghost=false;
+    const lift=(x,y)=>{sx=x;sy=y;ox=st.x;oy=st.y;moved=false;el.style.zIndex=++z+10;el.style.transition='box-shadow .2s';el.classList.add('lifted');st.rot*=.4;place(st);};
+    const drag=(x,y)=>{const dx=x-sx,dy=y-sy;if(Math.hypot(dx,dy)>6)moved=true;st.rot=Math.max(-10,Math.min(10,dx*.04));
       /* past an edge it drags with growing resistance */
-      const r=range(st,st.rot);st.x=rubber(ox+dx+r.w/2,r.x0,r.x1)-r.w/2;st.y=rubber(oy+dy+r.h/2,r.y0,r.y1)-r.h/2;place(st);});
-    const up=e=>{if(e.pointerId!==id)return;id=null;el.classList.remove('lifted');st.rot=(Math.random()-.5)*8;
-      /* let go off the edge: it springs back to where it's fully on the table */
-      const back=settle(st);el.style.transition=reduce?'none':back?'transform .55s cubic-bezier(.34,1.45,.5,1), box-shadow .2s':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);if(moved)makeRoom(st);else open(st);};
-    el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{moved=true;up(e);});
+      const r=range(st,st.rot);st.x=rubber(ox+dx+r.w/2,r.x0,r.x1)-r.w/2;st.y=rubber(oy+dy+r.h/2,r.y0,r.y1)-r.h/2;place(st);};
+    /* let go off the edge: it springs back to where it's fully on the table */
+    const drop=tap=>{el.classList.remove('lifted');st.rot=(Math.random()-.5)*8;const back=settle(st);
+      el.style.transition=reduce?'none':back?'transform .55s cubic-bezier(.34,1.45,.5,1), box-shadow .2s':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);if(tap&&!moved)open(st);else makeRoom(st);};
+    const press=pressDrag(el,{lift,drag,drop:()=>drop(true),cancel:()=>{moved=true;drop(false);},tap:()=>open(st),busy:()=>ghost});
     /* a simulated visitor (phantoms.js) moving the piece: the same drag, never a tap; ignored while someone real holds it */
-    el.addEventListener('ghostdrag',e=>{const d=e.detail||{};if(id!==null&&id!=='ghost')return;
-      if(d.type==='down'){id='ghost';sx=d.x;sy=d.y;ox=st.x;oy=st.y;moved=true;el.style.zIndex=++z+10;el.style.transition='box-shadow .2s';el.classList.add('lifted');st.rot*=.4;place(st);}
-      else if(d.type==='move'&&id==='ghost'){const dx=d.x-sx,dy=d.y-sy;st.rot=Math.max(-10,Math.min(10,dx*.04));const r=range(st,st.rot);st.x=rubber(ox+dx+r.w/2,r.x0,r.x1)-r.w/2;st.y=rubber(oy+dy+r.h/2,r.y0,r.y1)-r.h/2;place(st);}
-      else if(d.type==='up'&&id==='ghost'){id=null;el.classList.remove('lifted');st.rot=(Math.random()-.5)*8;const back=settle(st);el.style.transition=reduce?'none':back?'transform .55s cubic-bezier(.34,1.45,.5,1), box-shadow .2s':'transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .2s';place(st);makeRoom(st);}});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open(st);}});}
+    el.addEventListener('ghostdrag',e=>{const d=e.detail||{};if(press.active())return;
+      if(d.type==='down'){ghost=true;lift(d.x,d.y);moved=true;}
+      else if(d.type==='move'&&ghost)drag(d.x,d.y);
+      else if(d.type==='up'&&ghost){ghost=false;moved=true;drop(false);}});
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open(st);}});}
   /* the whole table is the room's sequence, starting from the piece tapped */
   function open(st){if(D.viewer===false)return;openViewer(els.map(s=>s.item),els.indexOf(st),st.el);}
   /* a piece carries its project's plaque (title, medium, year, note, link); the viewer shows it only if there's text */
@@ -79,11 +97,11 @@ export function initProjects(){
     const centre=()=>{const a=f.getBoundingClientRect(),b=wrapEl.getBoundingClientRect();return[a.left+a.width/2-b.left,a.top+a.height/2-b.top];};
     const put=(x,y)=>{cx=x;cy=y;f.style.setProperty('--fx',x/table.clientWidth*100+'%');f.style.setProperty('--fy',y/table.clientHeight*100+'%');};
     const tilt=(d)=>f.style.setProperty('--fr',rot+d+'deg');
-    f.addEventListener('pointerdown',e=>{e.preventDefault();id=e.pointerId;f.setPointerCapture(id);sx=e.clientX;sy=e.clientY;[ocx,ocy]=centre();cx=ocx;cy=ocy;f.style.transition='filter .2s';f.classList.add('lifted');});
-    f.addEventListener('pointermove',e=>{if(e.pointerId!==id)return;const dx=e.clientX-sx,dy=e.clientY-sy,r=lim();put(rubber(ocx+dx,r.x0,r.x1),rubber(ocy+dy,r.y0,r.y1));tilt(Math.max(-8,Math.min(8,dx*.03)));});
-    const up=e=>{if(e.pointerId!==id)return;id=null;f.classList.remove('lifted');const r=lim(),nx=clamp(cx,r.x0,r.x1),ny=clamp(cy,r.y0,r.y1),back=Math.hypot(nx-cx,ny-cy)>1;
-      f.style.transition=reduce?'none':back?'left .55s cubic-bezier(.34,1.45,.5,1), top .55s cubic-bezier(.34,1.45,.5,1), transform .4s, filter .2s':'transform .4s cubic-bezier(.2,.8,.2,1), filter .2s';put(nx,ny);tilt(0);};
-    f.addEventListener('pointerup',up);f.addEventListener('pointercancel',up);
+    pressDrag(f,{prevent:true,
+      lift:(x,y)=>{sx=x;sy=y;[ocx,ocy]=centre();cx=ocx;cy=ocy;id=1;f.style.transition='filter .2s';f.classList.add('lifted');},
+      drag:(x,y)=>{const dx=x-sx,dy=y-sy,r=lim();put(rubber(ocx+dx,r.x0,r.x1),rubber(ocy+dy,r.y0,r.y1));tilt(Math.max(-8,Math.min(8,dx*.03)));},
+      drop:()=>{id=null;f.classList.remove('lifted');const r=lim(),nx=clamp(cx,r.x0,r.x1),ny=clamp(cy,r.y0,r.y1),back=Math.hypot(nx-cx,ny-cy)>1;
+        f.style.transition=reduce?'none':back?'left .55s cubic-bezier(.34,1.45,.5,1), top .55s cubic-bezier(.34,1.45,.5,1), transform .4s, filter .2s':'transform .4s cubic-bezier(.2,.8,.2,1), filter .2s';put(nx,ny);tilt(0);}});
     /* a narrower screen: keep it on the table */
     new ResizeObserver(()=>{if(id!==null)return;const[x,y]=centre(),r=lim();f.style.transition='none';put(clamp(x,r.x0,r.x1),clamp(y,r.y0,r.y1));}).observe(table);
   });

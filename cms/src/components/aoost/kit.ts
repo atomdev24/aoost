@@ -41,10 +41,28 @@ const soloCss = `
 .ao .mat .ao-b[data-mat]{margin:0;padding:0;background:none}
 `;
 
+/**
+ * Phones (review of 22 Nov 2026): text meant to be read is at least 12 px, and anything tapped is at
+ * least 44 px tall. Chips and the "more" link keep their look; an invisible band around them takes the tap.
+ * Decorative numbers (the mat rulers and angles) stay small.
+ */
+const phoneCss = `
+@media (max-width:640px){
+.ao .label{font-size:max(12px,var(--t-xs))}
+.ao .jr-cap{font-size:12px}
+.ao .pl-track .pl-n,.ao .pl-track .pl-du,.ao .pl-more{font-size:12px}
+}
+@media (pointer:coarse),(max-width:640px){
+.ao .pl-chip,.ao .pl-more{position:relative}
+.ao .pl-chip::after,.ao .pl-more::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:44px;transform:translateY(-50%)}
+.ao .pl-track{min-height:44px}
+}
+`;
+
 export const aoostKit: ComponentKit = {
   id: "aoost",
   css: kitBaseCss + bridgeCss + soloCss,
-  cssAfter: kitAfterCss,
+  cssAfter: kitAfterCss + phoneCss,
   // The fonts the original page loads.
   googleFonts: ["Inter:wght@500;600", "Lexend:wght@300;400;500", "JetBrains Mono:wght@400;500", "Manrope:wght@400;500", "IBM Plex Mono:wght@400"],
   // The original loads its fonts with a normal (render-blocking) stylesheet; do the same so type doesn't jump.

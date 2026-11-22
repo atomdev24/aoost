@@ -8,7 +8,7 @@ export const css = `
 .ao .table-wrap{position:relative;margin-top:var(--s2)}
 .ao .table{position:relative;min-height:clamp(560px,120vw,640px);background:var(--paper-2);overflow:hidden;border-radius:2px}
 .ao .table::before{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);background-size:32px 32px;opacity:.45;pointer-events:none}
-.ao .piece{position:absolute;left:0;top:0;background:var(--white);padding:6px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform;transition:box-shadow .2s;box-shadow:0 1px 0 rgba(20,21,22,.08)}
+.ao .piece{position:absolute;left:0;top:0;background:var(--white);padding:6px;touch-action:pan-y pinch-zoom;-webkit-touch-callout:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform;transition:box-shadow .2s;box-shadow:0 1px 0 rgba(20,21,22,.08)}
 .ao .piece img,.ao .piece canvas{display:block;width:100%;height:auto;max-width:100%;pointer-events:none;-webkit-user-drag:none}
 .ao .piece.lifted{cursor:grabbing;box-shadow:0 18px 30px -12px rgba(20,21,22,.35)}
 .ao .piece .tape{position:absolute;top:-8px;left:50%;width:42%;max-width:46px;height:15px;transform:translateX(-50%) rotate(-3deg);background:var(--blue-soft);border:1px solid rgba(34,54,242,.18)}
