@@ -134,8 +134,9 @@ describe("AoostHero", () => {
     expect(renderNode("AoostHero", { ...d, screen: { show: false } })).not.toContain("hr-screen");
     const html = renderNode("AoostHero", { ...d, screen: { show: true, glare: 0.3 } });
     expect(html).toContain("--sc-glare:0.3");
-    expect(html).toContain("--sc-shade:0.85");
+    expect(html).toContain("--sc-shade:0.7");
     expect(html.match(/class="sc-/g)).toHaveLength(3);
-    expect(AoostHero.css).toContain("/art/hero-screen-glare.webp");
+    expect(AoostHero.css).toContain("/art/aoost_hero_screen_glare_2400x1000.webp");
+    expect(AoostHero.css).toContain("prefers-reduced-transparency:reduce");
   });
 });

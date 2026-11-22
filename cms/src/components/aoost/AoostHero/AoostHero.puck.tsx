@@ -45,9 +45,9 @@ export const fields: Fields<AoostHeroContent> = {
     label: "Matte screen (the artwork seen through a matte display)",
     objectFields: {
       show: onOff("Matte screen"),
-      shade: { type: "number", label: "Shade: darker edges (0–1)", min: 0, max: 1, step: 0.05 },
-      glare: { type: "number", label: "Glare: soft patch of light (0–1)", min: 0, max: 1, step: 0.05 },
-      grain: { type: "number", label: "Grain: fine speckle (0–1)", min: 0, max: 1, step: 0.05 },
+      shade: { type: "number", label: "Shade: darker edges (0–1, default 0.7)", min: 0, max: 1, step: 0.05 },
+      glare: { type: "number", label: "Glare: soft patch of light (0–1, default 1)", min: 0, max: 1, step: 0.05 },
+      grain: { type: "number", label: "Grain: fine speckle (0–1, default 0.6)", min: 0, max: 1, step: 0.05 },
     },
   },
   overlayText: { type: "text", label: "Fallback text (for artwork without a title)" },

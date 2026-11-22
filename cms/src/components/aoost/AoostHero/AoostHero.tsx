@@ -151,8 +151,12 @@ function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
   return <canvas className="dm" ref={ref} aria-hidden="true" />;
 }
 
-export const SCREEN = { shade: 0.85, glare: 0.6, grain: 0.5 };
-/** The matte screen's three layers, over the artwork and its text, under the corner labels. */
+export const SCREEN = { shade: 0.7, glare: 1, grain: 0.6 };
+/**
+ * The matte screen's three layers: the "glass". They hang on header.hero-rect itself (after the
+ * track and the text over the artwork, before the corner labels and the progress line), so the
+ * reel's pan, drift and parallax move the artwork underneath and never the glass.
+ */
 function MatteScreen({ screen }: { screen: AoostHeroContent["screen"] }) {
   if (!screen?.show) return null;
   const style = { "--sc-shade": screen.shade ?? SCREEN.shade, "--sc-glare": screen.glare ?? SCREEN.glare, "--sc-grain": screen.grain ?? SCREEN.grain } as CSSProperties;
@@ -166,10 +170,12 @@ function MatteScreen({ screen }: { screen: AoostHeroContent["screen"] }) {
 }
 const screenCss = [
   `.ao .hr-screen{position:absolute;inset:0;pointer-events:none}`,
-  `.ao .hr-screen i{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat}`,
-  `.ao .hr-screen .sc-shade{background-image:url(/art/hero-screen-shade.webp);mix-blend-mode:multiply;opacity:var(--sc-shade)}`,
-  `.ao .hr-screen .sc-glare{background-image:url(/art/hero-screen-glare.webp);mix-blend-mode:screen;opacity:var(--sc-glare)}`,
-  `.ao .hr-screen .sc-grain{background-image:url(/art/hero-screen-grain.webp);background-size:256px 256px;background-repeat:repeat;background-position:0 0;mix-blend-mode:screen;opacity:var(--sc-grain)}`,
+  // shade and glare are drawn for the hero's shape (2400×1000) and stretched to it; the grain tile repeats at 1:1 so it stays sharp
+  `.ao .hr-screen i{position:absolute;inset:0;background-position:0 0;background-size:100% 100%;background-repeat:no-repeat}`,
+  `.ao .hr-screen .sc-shade{background-image:url(/art/aoost_hero_screen_shade_2400x1000.webp);mix-blend-mode:multiply;opacity:var(--sc-shade)}`,
+  `.ao .hr-screen .sc-glare{background-image:url(/art/aoost_hero_screen_glare_2400x1000.webp);mix-blend-mode:screen;opacity:var(--sc-glare)}`,
+  `.ao .hr-screen .sc-grain{background-image:url(/art/aoost_hero_screen_grain_tile_512.webp);background-size:256px 256px;background-repeat:repeat;mix-blend-mode:screen;opacity:var(--sc-grain)}`,
+  `@media (prefers-reduced-transparency:reduce){.ao .hr-screen{display:none}}`,
 ].join("\n") + "\n";
 
 /** Text over the artwork: the four looks (see HeroOverlay). */

@@ -175,6 +175,7 @@ const extraCss = `
 .ao .board-shadow>i{position:absolute;inset:0;background-repeat:no-repeat;background-size:max(calc(var(--sh-s,110) * 1cqw),100cqh);background-position:var(--sh-x,50%) var(--sh-y,40%)}
 .ao .board-shadow .sh-shade{mix-blend-mode:multiply;opacity:var(--sh-k,.7)}
 .ao .board-shadow .sh-sun{mix-blend-mode:soft-light;opacity:var(--sh-w,.6)}
+.ao .board-shadow.sh-continued{-webkit-mask-image:none;mask-image:none}
 `;
 
 function BoardShadow({ shadow }: { shadow?: z.infer<typeof AoostShadow> }) {

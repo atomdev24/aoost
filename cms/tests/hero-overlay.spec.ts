@@ -111,7 +111,7 @@ test.describe("hero: matte screen", () => {
     const layers = page.locator(".hr-screen i");
     await expect(layers).toHaveCount(3);
     expect(await layers.evaluateAll((els) => els.map((e) => getComputedStyle(e).mixBlendMode))).toEqual(["multiply", "screen", "screen"]);
-    for (const f of ["shade", "glare", "grain"]) expect((await request.get(`/art/hero-screen-${f}.webp`)).ok()).toBe(true);
+    for (const f of ["shade_2400x1000", "glare_2400x1000", "grain_tile_512"]) expect((await request.get(`/art/aoost_hero_screen_${f}.webp`)).ok()).toBe(true);
     await page.waitForTimeout(1200);
     await page.screenshot({ path: `${shots}/matte-screen-desktop.png`, clip: { x: 0, y: 0, width: 1440, height: 760 } });
   });
