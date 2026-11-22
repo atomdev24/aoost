@@ -88,7 +88,11 @@ test.describe("homepage in the editor", () => {
     await expect(canvas(page).locator("#reel img").first()).toHaveAttribute("src", /grillz/);
 
     // 3. one more playlist
-    await select(page, '.ao-b[data-ao="playlists"] #h-pl');
+    // Selected for sure (a click while the board is still settling can land on the block next door).
+    await expect(async () => {
+      await select(page, '.ao-b[data-ao="playlists"] #h-pl');
+      await expect(page.locator(".ed-inspector-title strong")).toContainText(/playlist/i, { timeout: 1500 });
+    }).toPass({ timeout: 15_000 });
     await page.locator('[class*="ArrayField-addButton"]:visible').first().click();
     const title = page.locator(`input[name="playlists[${playlists}].title"]:visible`);
     if (!(await title.count())) await page.locator('[class*="ArrayFieldItem-summary"]:visible', { hasText: "New playlist" }).click();

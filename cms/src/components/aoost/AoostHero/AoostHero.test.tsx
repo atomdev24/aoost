@@ -120,4 +120,13 @@ describe("AoostHero", () => {
     expect(cut).toContain('--art:url(&quot;/art/a.jpg&quot;)');
     expect(cut).toContain(">alex</span>");
   });
+  it("draws the matte screen only when switched on, with its three layers", () => {
+    expect(renderNode("AoostHero", d)).not.toContain("hr-screen");
+    expect(renderNode("AoostHero", { ...d, screen: { show: false } })).not.toContain("hr-screen");
+    const html = renderNode("AoostHero", { ...d, screen: { show: true, glare: 0.3 } });
+    expect(html).toContain("--sc-glare:0.3");
+    expect(html).toContain("--sc-shade:0.85");
+    expect(html.match(/class="sc-/g)).toHaveLength(3);
+    expect(AoostHero.css).toContain("/art/hero-screen-glare.webp");
+  });
 });

@@ -35,6 +35,16 @@ export const fields: Fields<AoostHeroContent> = {
       { label: "Cut-out: paper strip with the wordmark cut out", value: "cutout" },
     ],
   },
+  screen: {
+    type: "object",
+    label: "Matte screen (the artwork seen through a matte display)",
+    objectFields: {
+      show: onOff("Matte screen"),
+      shade: { type: "number", label: "Shade: darker edges (0–1)", min: 0, max: 1, step: 0.05 },
+      glare: { type: "number", label: "Glare: soft patch of light (0–1)", min: 0, max: 1, step: 0.05 },
+      grain: { type: "number", label: "Grain: fine speckle (0–1)", min: 0, max: 1, step: 0.05 },
+    },
+  },
   overlayText: { type: "text", label: "Overlay text (wordmark; for Artwork colour, the headline)" },
   overlayLines: {
     type: "array",

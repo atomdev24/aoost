@@ -198,12 +198,33 @@ function MediaPopover({ anchor, value, onChange, kind, label, node, slot, altKey
   );
 }
 
+/**
+ * With `trim`, a transparent picture chosen here is swapped, a moment later, for a copy with the
+ * empty space around it cut off (trim.ts), unless something else was chosen in the meantime.
+ */
+const latest = new Map<string, string>();
+const trimming = (name: string, onChange: (v: string) => void) => (v: string) => {
+  latest.set(name, v);
+  onChange(v);
+  if (!v) return;
+  void import("../trim")
+    .then((m) => m.trimTransparent(v))
+    .then((t) => {
+      if (t && latest.get(name) === v) {
+        latest.set(name, t);
+        onChange(t);
+      }
+    })
+    .catch(() => undefined);
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const mediaField = (label: string, kind: MediaKind, opts: { owner?: boolean; framed?: boolean; altKey?: string } = {}): CustomField<any> => ({
+export const mediaField = (label: string, kind: MediaKind, opts: { owner?: boolean; framed?: boolean; altKey?: string; trim?: boolean } = {}): CustomField<any> => ({
   type: "custom",
   label,
-  render: ({ value, onChange, name }) =>
-    opts.framed ? (
+  render: ({ value, onChange: set, name }) => {
+    const onChange = opts.trim ? trimming(name, set) : set;
+    return opts.framed ? (
       <FramedMediaField name={name} value={value} onChange={onChange} kind={kind} label={label} altKey={opts.altKey} />
     ) : (
       <div className={`ed-field${label.length > 16 ? " is-long" : ""}`}>
@@ -212,7 +233,8 @@ export const mediaField = (label: string, kind: MediaKind, opts: { owner?: boole
         </span>
         <MediaInput value={value} onChange={onChange} kind={kind} label={label} owner={opts.owner} />
       </div>
-    ),
+    );
+  },
 });
 
 /**

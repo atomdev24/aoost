@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import "../components/registry";
 import { api } from "./api";
 import { Editor } from "./Editor";
-import { QuickEdit } from "./QuickEdit";
 import { capturePreview } from "./screenshot";
 import { noteVersion, onServerMessage, startSync } from "./socket";
 import { startProblemLog } from "./problems";
 import { flush, getState, initStore, setOnSaved } from "./store";
 import { startSyncNotices } from "./workspace/sync";
+
+/** The phone quick editor (?quick) is its own screen: it loads only when asked for. */
+const QuickEdit = lazy(() => import("./QuickEdit").then((m) => ({ default: m.QuickEdit })));
 
 /**
  * Phones get the full editor too (adapted for touch). The older quick-edit
@@ -44,5 +46,11 @@ export function App() {
 
   if (error) return <div className="ed-splash">Could not load the draft: {error}</div>;
   if (!ready) return <div className="ed-splash">Loading the draft…</div>;
-  return quick ? <QuickEdit /> : <Editor />;
+  return quick ? (
+    <Suspense fallback={<div className="ed-splash">Loading…</div>}>
+      <QuickEdit />
+    </Suspense>
+  ) : (
+    <Editor />
+  );
 }

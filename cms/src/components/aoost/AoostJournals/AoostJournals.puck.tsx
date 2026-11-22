@@ -12,7 +12,7 @@ export const fields: Fields<AoostJournalsContent> = {
     arrayFields: {
       title: { type: "text", label: "Title" },
       year: { type: "text", label: "Year" },
-      mockup: mediaField("Mockup photo (replaces the drawn book on the shelf)", "image"),
+      mockup: mediaField("Mockup photo (replaces the drawn book on the shelf; empty space around it is trimmed)", "image", { trim: true }),
       cover: mediaField("Cover image (empty = plain colour)", "image", { framed: true }),
       coverColor: hexField("Cover colour"),
       material: {
