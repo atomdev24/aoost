@@ -119,7 +119,10 @@ function shelfButton(j,i){const b=document.createElement('button');b.type='butto
   b.setAttribute('aria-label',`Open journal: ${j.title}`);
   b.style.setProperty('--i',i);if(j.mockup){b.classList.add('jr-hasmock');b.innerHTML=`<span class="jr-cv jr-mock"><img ${sourceAttrs(j.mockup,'(max-width: 640px) 45vw, 220px',esc)} alt="" draggable="false"></span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;}else b.innerHTML=`${ribbon(j)}<span class="jr-cv cvx${matCls(j)}" style="${coverStyle(j)}">${coverInner(j)}</span><span class="jr-n">0${i+1}</span><span class="jr-cap"><i>0${i+1}</i><b>${esc(j.title)}</b><span>${j.pages.length} pages · ${j.year||''}</span></span>`;
   const l=b.querySelector('.it-l');if(l){fillLayer(l,j.citems);l.querySelectorAll('[data-src]').forEach(m=>{m.src=m.dataset.src;if(m.tagName==='VIDEO'){m.autoplay=true;m.play&&m.play().catch(()=>{});}});}
+  if(j.mockup)fitMock(b);
   b.addEventListener('click',()=>PREVIEW?openJ(j,b):openRoom(j,b));return b;}
+/* a mockup keeps its own shape: same height on the shelf, width from the picture */
+function fitMock(b){const im=b.querySelector('.jr-mock img');if(!im)return;const fit=()=>{if(im.naturalWidth&&im.naturalHeight)b.style.setProperty('--ar',(im.naturalWidth/im.naturalHeight).toFixed(4));};if(im.complete)fit();im.addEventListener('load',fit);}
 JOURNALS.forEach((j,i)=>shelf.appendChild(shelfButton(j,i)));
 
 /* ---------- pages ---------- */

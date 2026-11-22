@@ -18,7 +18,7 @@ export const css = `
 .ao .jr-coil,.ao .jr-tip,.ao .jr-deb,.ao .jr-stk{display:none}
 .ao .jr-n{position:absolute;right:-6px;top:-10px;font:500 10px/1 var(--mono);color:var(--ink-2)}
 .ao .jr-shelf{padding-top:64px;row-gap:64px}
-.ao .jr.jr-hasmock{--w:clamp(150px,20vw,220px);aspect-ratio:731/1228}
+.ao .jr.jr-hasmock{--w:clamp(150px,20vw,220px);--h:calc(var(--w)*1228/731);height:var(--h);width:calc(var(--h)*var(--ar,.5953));aspect-ratio:auto}
 .ao .jr-cv.jr-mock{background:none;box-shadow:none;border-radius:0;overflow:visible}
 .ao .jr-cv.jr-mock::before{display:none}
 .ao .jr-mock img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(6px 14px 14px rgba(0,0,0,.32))}
