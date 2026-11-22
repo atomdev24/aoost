@@ -149,6 +149,8 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
       const seenAt = await draft.connectorSeenAt();
       return json({ ok: true, connected: !!seenAt && Date.now() - seenAt < CONNECTOR_FRESH_MS, seenAt });
     }
+    case "GET /activity":
+      return json({ ok: true, entries: await draft.getActivity() });
     case "GET /comments":
       return json({ ok: true, threads: await draft.getComments() });
     case "POST /comments": {

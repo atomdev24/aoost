@@ -16,4 +16,6 @@ export const GlobalPanel = part("global block settings", () => import("./ui/Glob
 export const OverlayPanel = part("overlay settings", () => import("./ui/OverlayPanel").then((m) => m.OverlayPanel));
 export const CommentLayer = part("comments", () => import("./comments/CommentLayer").then((m) => m.CommentLayer));
 export const CommentsPanel = part("Comments panel", () => import("./comments/CommentsPanel").then((m) => m.CommentsPanel));
+export const PresenceLayer = part("people here", () => import("./presence/PresenceLayer").then((m) => m.PresenceLayer));
+export const Avatars = part("people here", () => import("./presence/PresenceLayer").then((m) => m.Avatars));
 export const ProblemsDialog = part("problem log", () => import("./commands/ProblemsDialog").then((m) => m.ProblemsDialog));
