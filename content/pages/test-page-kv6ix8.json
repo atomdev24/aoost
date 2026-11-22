@@ -1,0 +1,122 @@
+{
+  "id": "test-page-kv6ix8",
+  "title": "Test page",
+  "slug": "/test-page-2",
+  "parentId": null,
+  "status": "draft",
+  "template": "blank",
+  "seo": {},
+  "isHome": false,
+  "showInNav": true,
+  "sections": [
+    {
+      "id": "s_uqs7sa5a",
+      "kind": "flow",
+      "name": "Content",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "120px 20px 64px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "160px 56px 96px"
+        }
+      },
+      "children": [
+        {
+          "id": "n_db1ih82j",
+          "type": "Text",
+          "content": {
+            "text": "Test page",
+            "styleId": "h1",
+            "tag": "h1"
+          },
+          "style": {
+            "base": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "FlowSection-0719949f-6891-4fb1-859c-e864a80cd7a8",
+      "kind": "flow",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "56px 20px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "96px 56px"
+        }
+      },
+      "children": [
+        {
+          "id": "Image-d330792f-8a8c-4f30-bcd6-3838269696c1",
+          "type": "Image",
+          "content": {
+            "src": "/media/2026/apple-cluster-plate-4k-k0tb.png",
+            "alt": "",
+            "lightbox": true
+          },
+          "style": {
+            "base": {}
+          },
+          "frame": {
+            "base": {
+              "fit": "fill",
+              "focalX": 50,
+              "focalY": 50,
+              "zoom": 1,
+              "panX": 0,
+              "panY": 0
+            }
+          }
+        },
+        {
+          "id": "Text-f8a33ed5-7050-4786-8fc8-d4892d4e2589",
+          "type": "Text",
+          "content": {
+            "text": "Say something",
+            "styleId": "body",
+            "tag": "p"
+          },
+          "style": {
+            "base": {}
+          }
+        },
+        {
+          "id": "Video-efd94cd0-9117-4a5c-907d-8988134e9403",
+          "type": "Video",
+          "content": {
+            "source": "upload",
+            "src": "",
+            "autoplay": true,
+            "loop": true,
+            "controls": false,
+            "playInView": true
+          },
+          "style": {
+            "base": {
+              "aspectRatio": "16/9"
+            }
+          },
+          "frame": {
+            "base": {
+              "fit": "fill",
+              "focalX": 50,
+              "focalY": 50,
+              "zoom": 1,
+              "panX": 0,
+              "panY": 0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "overlays": []
+}

@@ -298,13 +298,13 @@
               {
                 "image": "/media/2026/aoost-copper-ring-transparent-wide-1-35rq.png",
                 "x": 98,
-                "y": 19,
+                "y": 22,
                 "width": 53
               },
               {
                 "image": "/media/2026/aoost-journal-transparent-wide-2vq7.png",
                 "x": 96,
-                "y": 37,
+                "y": 49,
                 "width": 332
               }
             ],
@@ -391,16 +391,34 @@
                         "id": "96da5f08-1516-44b5-b276-a070b1ca0a23",
                         "kind": "sticker",
                         "src": "/media/2026/wip-scorpion-kmt8.png",
-                        "x": 0.5,
-                        "y": 0.5,
-                        "w": 0.55,
-                        "rot": 3,
+                        "x": 0.36,
+                        "y": 0.46,
+                        "w": 0.5,
+                        "rot": -3,
                         "skew": 0,
                         "z": 1,
                         "props": {
                           "lift": 0,
                           "tape": "none",
                           "aspect": 0.6579365079365079,
+                          "shadow": "soft",
+                          "tapeStyle": "masking"
+                        }
+                      },
+                      {
+                        "id": "2f53659f-47da-4226-901e-fecfc6419e2f",
+                        "kind": "sticker",
+                        "src": "/media/2026/wip-cactus-86ro.png",
+                        "x": 0.72,
+                        "y": 0.62,
+                        "w": 0.3,
+                        "rot": 6,
+                        "skew": 0,
+                        "z": 2,
+                        "props": {
+                          "lift": 0,
+                          "tape": "none",
+                          "aspect": 0.49847405900305186,
                           "shadow": "soft",
                           "tapeStyle": "masking"
                         }

@@ -195,6 +195,16 @@
         },
         "showOn": "both",
         "hover": "tint"
+      },
+      {
+        "id": "nav_8yobus83",
+        "type": "page",
+        "target": {
+          "kind": "page",
+          "pageId": "test-page-kv6ix8"
+        },
+        "showOn": "both",
+        "hover": "tint"
       }
     ]
   },
@@ -464,6 +474,7 @@
     "about",
     "links",
     "sample",
-    "test-page"
+    "test-page",
+    "test-page-kv6ix8"
   ]
 }
