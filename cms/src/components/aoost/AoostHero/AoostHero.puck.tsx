@@ -17,11 +17,32 @@ export const fields: Fields<AoostHeroContent> = {
   reel: {
     type: "array",
     label: "Artwork reel (empty = the projects' images)",
-    arrayFields: { src: mediaField("Image", "image", { framed: true, altKey: "alt" }), alt: { type: "text", label: "Description (shown full screen, for screen readers)" } },
+    arrayFields: { src: mediaField("Image", "image", { framed: true, altKey: "alt" }), alt: { type: "text", label: "Description (shown full screen, for screen readers)" },
+      tone: { type: "text", label: "Overlay colour (hex, e.g. #FF4FA3; empty = taken from the artwork)" },
+    },
     defaultItemProps: { src: "", alt: "" },
     getItemSummary: (item, i) => withThumb(item.src, item.alt || item.src?.split("/").pop() || `Artwork ${(i ?? 0) + 1}`),
   },
   reelSeconds: { type: "number", label: "Seconds per artwork", min: 1, max: 60 },
+  overlay: {
+    type: "select",
+    label: "Text over the artwork",
+    options: [
+      { label: "Off", value: "off" },
+      { label: "Difference: wordmark that inverts against the art", value: "difference" },
+      { label: "Artwork colour: headline takes each piece's colour", value: "tone" },
+      { label: "Handwritten: a line writes itself across each piece", value: "handwritten" },
+      { label: "Cut-out: paper strip with the wordmark cut out", value: "cutout" },
+    ],
+  },
+  overlayText: { type: "text", label: "Overlay text (wordmark; for Artwork colour, the headline)" },
+  overlayLines: {
+    type: "array",
+    label: "Handwritten lines (one per artwork, in turn)",
+    arrayFields: { text: { type: "text", label: "Line" } },
+    defaultItemProps: { text: "" },
+    getItemSummary: (item) => item.text || "New line",
+  },
   reelBar: onOff("Progress line under the artwork"),
   reelViewer: onOff("Click artwork to open it full screen"),
   artPan: {

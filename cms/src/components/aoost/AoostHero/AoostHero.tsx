@@ -16,7 +16,26 @@ export const AoostHeroContent = z.object({
   /** IANA time zone for the clock, and for late mode. */
   timeZone: z.string(),
   /** The artwork strip. Left empty, it reuses the projects' images (as the original does). */
-  reel: z.array(z.object({ src: z.string(), alt: z.string().optional(), /** Framing of the artwork, per screen size. */ frame: ResponsiveFrameFit.optional() })),
+  reel: z.array(
+    z.object({
+      src: z.string(),
+      alt: z.string().optional(),
+      /** Framing of the artwork, per screen size. */
+      frame: ResponsiveFrameFit.optional(),
+      /** "Artwork colour" overlay: this piece's colour (hex). Empty: taken from the artwork. */
+      tone: z.string().optional(),
+    }),
+  ),
+  /**
+   * Text over the artwork. "difference": a big wordmark that inverts against whatever is behind it;
+   * "tone": a headline whose accent takes each artwork's colour; "handwritten": a line that writes
+   * itself across each piece; "cutout": a paper strip with the wordmark cut out of it. Older content: off.
+   */
+  overlay: z.enum(["off", "difference", "tone", "handwritten", "cutout"]).optional(),
+  /** The wordmark (difference, cut-out) or the headline (artwork colour: the part after the first comma takes the colour). */
+  overlayText: z.string().optional(),
+  /** Handwritten: one line per artwork, in turn. */
+  overlayLines: z.array(z.object({ text: z.string() })).optional(),
   /** Seconds each artwork stays before the strip moves on. */
   reelSeconds: z.number().min(1).max(60),
   /** The thin progress line along the bottom of the artwork. Older content: shown. */
@@ -116,6 +135,109 @@ function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
   return <canvas className="dm" ref={ref} aria-hidden="true" />;
 }
 
+/** Text over the artwork: the four looks (see HeroOverlay). */
+const overlayCss = [
+  `.ao .hr-over{position:absolute;inset:0;pointer-events:none}`,
+  // Difference: white text that inverts whatever is behind it; the corner labels follow suit.
+  `.ao .hr-over[data-over="difference"]{mix-blend-mode:difference}`,
+  `.ao .hero-rect[data-over="difference"] .hr-top{background:none;mix-blend-mode:difference}`,
+  `.ao .ov-word{position:absolute;left:clamp(14px,3vw,40px);bottom:-.16em;color:#fff;font:700 clamp(96px,23vw,360px)/1 var(--display);letter-spacing:-.045em;white-space:nowrap}`,
+  // Artwork colour: a soft shade from the left (from below on phones), a headline whose accent takes the artwork's colour.
+  `.ao .hr-over[data-over="tone"]{display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:14px;padding:0 clamp(18px,4vw,56px) clamp(34px,7svh,72px);background:linear-gradient(90deg,rgba(0,0,0,.72),rgba(0,0,0,.35) 38%,rgba(0,0,0,0) 64%)}`,
+  `@media (max-width:640px){.ao .hr-over[data-over="tone"]{background:linear-gradient(0deg,rgba(0,0,0,.78),rgba(0,0,0,.3) 50%,rgba(0,0,0,0) 72%)}}`,
+  `.ao .ov-kick{font:500 12px/1.3 var(--mono,ui-monospace,monospace);letter-spacing:.14em;text-transform:uppercase;color:var(--tone,#F3EFE6);transition:color .9s ease}`,
+  `.ao .ov-head{margin:0;max-width:min(660px,92%);font:700 clamp(38px,6.4vw,92px)/.95 var(--display);letter-spacing:-.035em;color:#F3EFE6}`,
+  `.ao .ov-head em{font-style:normal;color:var(--tone,#F3EFE6);transition:color .9s ease}`,
+  `.ao .ov-rule{display:block;width:72px;height:4px;border-radius:2px;background:var(--tone,#F3EFE6);transition:background-color .9s ease}`,
+  // Handwritten: the line traces itself, then fills in, then the underline draws.
+  `.ao .ov-hw{position:absolute;left:clamp(10px,4vw,60px);bottom:clamp(18px,7svh,90px);width:min(88%,980px);height:auto;overflow:visible;transform:rotate(-4deg);transform-origin:0 100%}`,
+  `.ao .ov-hw text{font-family:'Caveat',cursive;font-weight:700;fill:transparent;stroke:#F3EFE6;stroke-width:1.6;stroke-dasharray:2200;stroke-dashoffset:2200;opacity:0}`,
+  `.ao .ov-hw path{fill:none;stroke:#F3EFE6;stroke-width:5;stroke-linecap:round;stroke-dasharray:1200;stroke-dashoffset:1200;opacity:0}`,
+  `.ao .ov-hw.on text{opacity:1;animation:ov-draw 2.4s cubic-bezier(.6,.1,.3,1) forwards,ov-ink .7s 1.9s ease forwards}`,
+  `.ao .ov-hw.on path{opacity:.9;animation:ov-draw 1s 2.2s ease-out forwards}`,
+  `@media (max-width:640px){.ao .ov-hw{left:8px;width:calc(100% - 16px);transform:rotate(-3deg)}.ao .ov-word{font-size:30vw}}`,
+  `@keyframes ov-draw{to{stroke-dashoffset:0}}`,
+  `@keyframes ov-ink{to{fill:#F3EFE6;stroke-width:0}}`,
+  `@media (prefers-reduced-motion:reduce){.ao .ov-hw.on text{animation:none;fill:#F3EFE6;stroke-width:0;stroke-dashoffset:0}.ao .ov-hw.on path{animation:none;stroke-dashoffset:0}}`,
+  // Cut-out: a paper strip along the bottom with the wordmark cut out, showing the artwork through it.
+  `.ao .hero-rect[data-over="cutout"]{container-type:size}`,
+  `.ao .ov-band{position:absolute;left:0;right:0;bottom:0;height:28%;background:var(--c-bone,#F3EFE6)}`,
+  `.ao .ov-cut{position:absolute;inset:0;display:flex;align-items:flex-end;padding:0 clamp(12px,3vw,36px) 2cqh;clip-path:inset(72% 0 0 0);background-image:var(--art);background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;color:transparent;font:700 min(34cqh,38cqw)/.78 var(--display);letter-spacing:-.05em;white-space:nowrap}`,
+  `.ao .hero-rect[data-over="cutout"] .hr-bar{display:none}`,
+].join("\n") + "\n";
+
+export const OVERLAY_TEXT = { tone: "Things I make, when I get to them.", word: "aoost" };
+export const OVERLAY_LINES = ["hey, welcome", "take a look around", "things I make, when I get to them"];
+const HW_FONT = "https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap";
+
+/** One handwritten line: sized to fit the box (Caveat is about 0.42em a letter), with an underline as long as the words. */
+function HandLine({ text, on }: { text: string; on: boolean }) {
+  const size = Math.round(Math.min(170, 960 / Math.max(1, text.length * 0.42)));
+  const w = Math.round(Math.min(970, 20 + text.length * size * 0.42));
+  return (
+    <svg className={`ov-hw${on ? " on" : ""}`} viewBox="0 0 1000 260" aria-hidden="true">
+      <text x="10" y="170" fontSize={size}>
+        {text}
+      </text>
+      <path d={`M14 ${196 + size * 0.08} C ${Math.round(w * 0.3)} ${186 + size * 0.06}, ${Math.round(w * 0.66)} ${214 + size * 0.06}, ${w} ${180 + size * 0.04}`} />
+    </svg>
+  );
+}
+
+/** The text over the artwork (hero.js keeps it in step with the reel on the site). */
+function HeroOverlay({ content }: { content: AoostHeroContent }) {
+  const mode = content.overlay ?? "off";
+  if (mode === "off") return null;
+  const first = content.reel.find((r) => r.src);
+  if (mode === "difference")
+    return (
+      <div className="hr-over" data-over="difference" aria-hidden="true">
+        <span className="ov-word">{content.overlayText || OVERLAY_TEXT.word}</span>
+      </div>
+    );
+  if (mode === "cutout")
+    return (
+      <div className="hr-over" data-over="cutout" aria-hidden="true">
+        <i className="ov-band" />
+        <span className="ov-cut" style={first ? ({ "--art": `url("${first.src}")` } as CSSProperties) : undefined}>
+          {content.overlayText || OVERLAY_TEXT.word}
+        </span>
+      </div>
+    );
+  if (mode === "tone") {
+    const text = content.overlayText || OVERLAY_TEXT.tone;
+    const cut = text.indexOf(",");
+    return (
+      <div className="hr-over" data-over="tone" style={first?.tone ? ({ "--tone": first.tone } as CSSProperties) : undefined}>
+        <span className="ov-kick" aria-hidden="true">
+          01{first?.alt ? ` · ${first.alt}` : ""}
+        </span>
+        <p className="ov-head">
+          {cut > 0 ? (
+            <>
+              {text.slice(0, cut + 1)} <em>{text.slice(cut + 1).trim()}</em>
+            </>
+          ) : (
+            text
+          )}
+        </p>
+        <i className="ov-rule" aria-hidden="true" />
+      </div>
+    );
+  }
+  const lines = (content.overlayLines ?? []).map((l) => l.text).filter(Boolean);
+  const shown = lines.length ? lines : OVERLAY_LINES;
+  return (
+    <div className="hr-over" data-over="handwritten">
+      <link rel="stylesheet" href={HW_FONT} />
+      {shown.map((t, i) => (
+        <HandLine key={i} text={t} on={i === 0} />
+      ))}
+      <span className="sr">{shown.join(". ")}</span>
+    </div>
+  );
+}
+
 export const AoostHero = defineComponent<AoostHeroContent>({
   type: "AoostHero",
   label: "Hero: artwork reel, clock and ticker",
@@ -159,7 +281,8 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     `@media (prefers-reduced-motion:reduce){.ao .hero-rect.pan .hr-slide img,.ao .hero-rect.pan .hr-slide canvas{animation:none;translate:0 0}}\n` +
     // Parallax: the artwork drifts inside its frame (effects.ts sets --drift), enlarged so no edge shows.
     // (on the track, since each image's own transform is its framing).
-    `.ao .hero-rect.drifting .hr-track{transform:translate3d(0,var(--drift,0px),0) scale(var(--drift-scale,1));transform-origin:var(--drift-origin,50% 50%);will-change:transform}\n`,
+    `.ao .hero-rect.drifting .hr-track{transform:translate3d(0,var(--drift,0px),0) scale(var(--drift-scale,1));transform-origin:var(--drift-origin,50% 50%);will-change:transform}\n` +
+    overlayCss,
   Render: ({ content, ctx }) => {
     const showTicker = content.showTicker !== false;
     // Artwork pan: travel d% of the width each way from centre's other side; enlarged just enough to never show an edge.
@@ -184,6 +307,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     return (
       <Block name="hero" mat="none" data={content}>
         <header
+          data-over={content.overlay && content.overlay !== "off" ? content.overlay : undefined}
           className={`hero-rect focus-sec${content.reelBar === false ? " no-bar" : ""}${content.reelViewer === false ? " no-viewer" : ""}${pan ? " pan" : ""}`}
           style={pan}
           data-motion={pan ? "keep" : undefined}
@@ -199,6 +323,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
                 </button>
               ))}
           </div>
+          <HeroOverlay content={content} />
           <div className="hr-top">
             <span className="label">{content.label}</span>
             <span className="label clock" id="clock">

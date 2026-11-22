@@ -216,7 +216,8 @@ test.describe("sketchbook covers", () => {
         if (j.mockup) {
           await expect(cv).toHaveClass(/jr-mock/);
           await expect(cv.locator("img")).toHaveAttribute("src", new RegExp(j.mockup.split("/").pop()!.replace(/\.[a-z]+$/i, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))); // a right-sized copy
-          await expect.poll(() => cv.locator("img").evaluate((m: HTMLImageElement) => m.complete && m.naturalWidth > 0)).toBe(true);
+          // an upload lives in production storage only, so a test server can't load it
+          if (!j.mockup.startsWith("/media/")) await expect.poll(() => cv.locator("img").evaluate((m: HTMLImageElement) => m.complete && m.naturalWidth > 0)).toBe(true);
           continue;
         }
         const mat = j.material === "kraft" || j.material === "leather" ? j.material : "";

@@ -20,4 +20,6 @@ export const PresenceLayer = part("people here", () => import("./presence/Presen
 export const Avatars = part("people here", () => import("./presence/PresenceLayer").then((m) => m.Avatars));
 export const AdjustImage = part("image adjusting", () => import("./canvas/AdjustImage").then((m) => m.AdjustImage));
 export const DemoBar = part("demo notice", () => import("./workspace/DemoBar").then((m) => m.DemoBar));
+export const VariantBand = part("variant notice", () => import("./workspace/VariantBand").then((m) => m.VariantBand));
+export const BrowserZoomNotice = part("zoom notice", () => import("./workspace/BrowserZoomNotice").then((m) => m.BrowserZoomNotice));
 export const ProblemsDialog = part("problem log", () => import("./commands/ProblemsDialog").then((m) => m.ProblemsDialog));
