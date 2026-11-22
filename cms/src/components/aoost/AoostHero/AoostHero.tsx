@@ -36,6 +36,18 @@ export const AoostHeroContent = z.object({
   overlayText: z.string().optional(),
   /** Handwritten: one line per artwork, in turn. */
   overlayLines: z.array(z.object({ text: z.string() })).optional(),
+  /**
+   * Matte screen: the artwork seen through a matte display. Shade (darker edges, multiply), glare
+   * (a soft patch of light, screen) and grain (fine speckle, screen), each 0 to 1. Older content: off.
+   */
+  screen: z
+    .object({
+      show: z.boolean(),
+      shade: z.number().min(0).max(1).optional(),
+      glare: z.number().min(0).max(1).optional(),
+      grain: z.number().min(0).max(1).optional(),
+    })
+    .optional(),
   /** Seconds each artwork stays before the strip moves on. */
   reelSeconds: z.number().min(1).max(60),
   /** The thin progress line along the bottom of the artwork. Older content: shown. */
@@ -134,6 +146,27 @@ function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
   }, [key, opts.seconds, opts.grid, opts.after, opts.idleSpeed, opts.textSize, opts.effect, opts.look, JSON.stringify(opts.lensOpts)]);
   return <canvas className="dm" ref={ref} aria-hidden="true" />;
 }
+
+export const SCREEN = { shade: 0.85, glare: 0.6, grain: 0.5 };
+/** The matte screen's three layers, over the artwork and its text, under the corner labels. */
+function MatteScreen({ screen }: { screen: AoostHeroContent["screen"] }) {
+  if (!screen?.show) return null;
+  const style = { "--sc-shade": screen.shade ?? SCREEN.shade, "--sc-glare": screen.glare ?? SCREEN.glare, "--sc-grain": screen.grain ?? SCREEN.grain } as CSSProperties;
+  return (
+    <div className="hr-screen" style={style} aria-hidden="true">
+      <i className="sc-shade" />
+      <i className="sc-glare" />
+      <i className="sc-grain" />
+    </div>
+  );
+}
+const screenCss = [
+  `.ao .hr-screen{position:absolute;inset:0;pointer-events:none}`,
+  `.ao .hr-screen i{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat}`,
+  `.ao .hr-screen .sc-shade{background-image:url(/art/hero-screen-shade.webp);mix-blend-mode:multiply;opacity:var(--sc-shade)}`,
+  `.ao .hr-screen .sc-glare{background-image:url(/art/hero-screen-glare.webp);mix-blend-mode:screen;opacity:var(--sc-glare)}`,
+  `.ao .hr-screen .sc-grain{background-image:url(/art/hero-screen-grain.webp);background-size:256px 256px;background-repeat:repeat;background-position:0 0;mix-blend-mode:screen;opacity:var(--sc-grain)}`,
+].join("\n") + "\n";
 
 /** Text over the artwork: the four looks (see HeroOverlay). */
 const overlayCss = [
@@ -282,7 +315,8 @@ export const AoostHero = defineComponent<AoostHeroContent>({
     // Parallax: the artwork drifts inside its frame (effects.ts sets --drift), enlarged so no edge shows.
     // (on the track, since each image's own transform is its framing).
     `.ao .hero-rect.drifting .hr-track{transform:translate3d(0,var(--drift,0px),0) scale(var(--drift-scale,1));transform-origin:var(--drift-origin,50% 50%);will-change:transform}\n` +
-    overlayCss,
+    overlayCss +
+    screenCss,
   Render: ({ content, ctx }) => {
     const showTicker = content.showTicker !== false;
     // Artwork pan: travel d% of the width each way from centre's other side; enlarged just enough to never show an edge.
@@ -324,6 +358,7 @@ export const AoostHero = defineComponent<AoostHeroContent>({
               ))}
           </div>
           <HeroOverlay content={content} />
+          <MatteScreen screen={content.screen} />
           <div className="hr-top">
             <span className="label">{content.label}</span>
             <span className="label clock" id="clock">

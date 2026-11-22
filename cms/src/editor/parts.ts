@@ -22,4 +22,5 @@ export const AdjustImage = part("image adjusting", () => import("./canvas/Adjust
 export const DemoBar = part("demo notice", () => import("./workspace/DemoBar").then((m) => m.DemoBar));
 export const VariantBand = part("variant notice", () => import("./workspace/VariantBand").then((m) => m.VariantBand));
 export const BrowserZoomNotice = part("zoom notice", () => import("./workspace/BrowserZoomNotice").then((m) => m.BrowserZoomNotice));
+export const ClaudePill = part("Claude status", () => import("./workspace/ClaudePill").then((m) => m.ClaudePill));
 export const ProblemsDialog = part("problem log", () => import("./commands/ProblemsDialog").then((m) => m.ProblemsDialog));

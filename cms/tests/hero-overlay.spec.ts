@@ -82,3 +82,26 @@ test.describe("hero: text over the artwork", () => {
     });
   }
 });
+
+test.describe("hero: matte screen", () => {
+  test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
+  test.afterAll(async ({ request }) => {
+    await resetDraft(request, password!);
+  });
+  test("shade, glare and grain sit over the artwork", async ({ page, request }) => {
+    await resetDraft(request, password!);
+    await signIn(page, password!);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const site = await draftSite(request, password!);
+    const home = site.pages.find((p: { id: string }) => p.id === "home");
+    for (const s of home.sections) for (const n of s.children) if (n.type === "AoostHero") Object.assign(n.content, { reel: REEL, overlay: "off", screen: { show: true } });
+    expect((await request.post("/api/editor/ops", { headers: bearer(password!), data: { ops: [{ op: "putPage", page: home }] } })).ok()).toBe(true);
+    await page.goto("/preview/");
+    const layers = page.locator(".hr-screen i");
+    await expect(layers).toHaveCount(3);
+    expect(await layers.evaluateAll((els) => els.map((e) => getComputedStyle(e).mixBlendMode))).toEqual(["multiply", "screen", "screen"]);
+    for (const f of ["shade", "glare", "grain"]) expect((await request.get(`/art/hero-screen-${f}.webp`)).ok()).toBe(true);
+    await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${shots}/matte-screen-desktop.png`, clip: { x: 0, y: 0, width: 1440, height: 760 } });
+  });
+});
