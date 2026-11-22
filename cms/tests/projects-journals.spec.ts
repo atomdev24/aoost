@@ -171,14 +171,14 @@ test.describe("resizable project pieces", () => {
     // the clover (a fixture): picked over what's under it, its item opens, it moves and resizes
     const fixtures = async () => {
       const home = (await draftSite(request, password!)).pages.find((p: { id: string }) => p.id === "home");
-      for (const s of home.sections) for (const n of s.children) if (n.type === "AoostProjects") return n.content.fixtures as { image: string; x: number; y: number; width: number }[];
+      for (const s of home.sections) for (const n of s.children) if (n.type === "AoostProjects") return n.content.fixtures as { image: string; x: number; y: number; width: number; size?: { base: { scale: number; x?: number | null }; desktop?: { scale?: number; x?: number | null } } }[];
       return [];
     };
     const before = (await fixtures())[0]!;
     const clover = editable(page).locator('.fixture[data-fixture="0"]');
     const c = await onBoard(page, clover);
     await page.mouse.click(c.x + c.width / 2, c.y + c.height / 2);
-    await expect(page.locator(".ed-piece-tag")).toContainText("every size");
+    await expect(page.locator(".ed-piece-tag")).toContainText("Desktop");
     await expect.poll(expanded).toEqual([before.image.split("/").pop()]);
     const box = page.getByTestId("piece-box");
     const g = (await box.boundingBox())!;
@@ -186,13 +186,15 @@ test.describe("resizable project pieces", () => {
     await page.mouse.down();
     await page.mouse.move(g.x + g.width / 2 + 120, g.y + g.height / 2 + 40, { steps: 10 });
     await page.mouse.up();
-    await expect.poll(async () => (await fixtures())[0]!.x).toBeGreaterThan(before.x + 3);
+    // moved on Desktop: its own spot there (a fraction of the table); phones keep the shared spot
+    await expect.poll(async () => (await fixtures())[0]!.size?.desktop?.x ?? -1).toBeGreaterThan(before.x / 100 + 0.03);
+    expect((await fixtures())[0]!.size?.base.x ?? null).toBeNull();
     const h = (await page.locator('[data-piece-handle="se"]').boundingBox())!;
     await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2);
     await page.mouse.down();
     await page.mouse.move(h.x + 30, h.y + 30, { steps: 8 });
     await page.mouse.up();
-    await expect.poll(async () => (await fixtures())[0]!.width).toBeGreaterThan(before.width);
+    await expect.poll(async () => (await fixtures())[0]!.size?.desktop?.scale ?? 1).toBeGreaterThan(1);
   });
 });
 

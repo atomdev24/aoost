@@ -179,9 +179,8 @@ export function ResizePiece() {
   const placed = typeof here.x === "number";
   const slot = nodeSlots(node).find((s) => samePath(s.path, t.path));
   const label = slot?.label ?? "Piece";
-  // A fixture keeps its own x/y (% of the table) and width (px), shared by every size.
+  // A fixture has a shared x/y and width; moving or resizing it here stores this size's own spot and scale.
   const fixture = !!slot?.fixture;
-  const fix = fixture ? ((node.content as Record<string, unknown[]>)[String(t.path[0])]?.[Number(t.path[1])] as { width?: number } | undefined) : undefined;
 
   const startResize = (e: React.PointerEvent<HTMLElement>) => {
     if (e.button !== 0) return;
@@ -194,7 +193,6 @@ export function ResizePiece() {
     const cy = bd.top + geo.y + geo.h / 2;
     const d0 = Math.hypot(e.clientX - cx, e.clientY - cy) || 1;
     const s0 = scale;
-    const w0 = fix?.width ?? 200;
     let moved = false;
     const move = (m: PointerEvent) => {
       const ratio = (Math.hypot(m.clientX - cx, m.clientY - cy) || 1) / d0;
@@ -205,8 +203,7 @@ export function ResizePiece() {
         setDragging(true);
         beginGesture();
       }
-      if (fixture) setItemKeys(t.id, t.path, { width: Math.round(Math.min(800, Math.max(40, w0 * ratio))) }, "Resize fixture");
-      else setItemScale(t.id, t.path, next);
+      setItemScale(t.id, t.path, next);
     };
     const up = () => {
       el.removeEventListener("pointermove", move);
@@ -246,11 +243,9 @@ export function ResizePiece() {
         setDragging(true);
         beginGesture();
       }
-      if (fixture) {
-        // its centre, as % of the table, the same for every size
-        const pct = (v: number) => Math.round(Math.min(100, Math.max(0, v * 100)) * 10) / 10;
-        setItemKeys(t.id, t.path, { x: pct((c0.x + dx) / W), y: pct((c0.y + dy) / H) }, "Move fixture");
-      } else setItemPlace(t.id, t.path, keep((c0.x + dx) / W, hx), keep((c0.y + dy) / H, hy));
+      // a fixture's spot is its centre, which may sit near the edge (it overhangs on purpose)
+      if (fixture) setItemPlace(t.id, t.path, Math.min(1, Math.max(0, (c0.x + dx) / W)), Math.min(1, Math.max(0, (c0.y + dy) / H)));
+      else setItemPlace(t.id, t.path, keep((c0.x + dx) / W, hx), keep((c0.y + dy) / H, hy));
     };
     const up = () => {
       el.removeEventListener("pointermove", move);
@@ -272,7 +267,7 @@ export function ResizePiece() {
         data-testid="piece-box"
         onPointerDown={startMove}
         onDoubleClick={(e) => {
-          if (e.target !== e.currentTarget || !placed || fixture) return;
+          if (e.target !== e.currentTarget || !placed) return;
           clearItemPlace(t.id, t.path);
         }}
         title={placed ? "Drag to move this piece on this size · double-click to let the table place it" : "Drag to move this piece on this size"}
@@ -282,7 +277,7 @@ export function ResizePiece() {
         ))}
       </div>
       <span className="ed-piece-tag" style={{ left: geo.x, top: geo.y + geo.h + 6 }} role="status">
-        {fixture ? `${label} · ${fix?.width ?? 200}px · every size` : `${label} · ${Math.round(scale * 100)}%${placed ? " · placed" : ""} · ${BREAKPOINT_LABEL[bp]}`}
+        {`${label} · ${Math.round(scale * 100)}%${placed ? (fixture ? " · own spot" : " · placed") : ""} · ${BREAKPOINT_LABEL[bp]}`}
       </span>
     </div>
   );
