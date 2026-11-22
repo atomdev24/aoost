@@ -376,8 +376,8 @@
                 "band": "#7A1A1A",
                 "tilt": 4,
                 "pages": [],
-                "hidden": true,
-                "mockup": "/media/2026/aoost-journal-transparent-wide-2vq7.png"
+                "hidden": false,
+                "mockup": "/media/2026/aoost-clear-journal-trimmed-r4ez.png"
               },
               {
                 "title": "sketchbook 3",
