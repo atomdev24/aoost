@@ -191,7 +191,103 @@
       "rot": 6,
       "props": {},
       "cover_items": [],
-      "pages": []
+      "pages": [
+        {
+          "id": "6baf3d3d-e470-4a37-8ccd-b8a731d0b1d9",
+          "image_url": null,
+          "props": {},
+          "items": [
+            {
+              "id": "35622023-cb5b-4e6f-a272-777d61af6df9",
+              "journal_id": "f23e4dd2-b012-41a8-ae3b-45b535357b7c",
+              "page_id": "6baf3d3d-e470-4a37-8ccd-b8a731d0b1d9",
+              "kind": "photo",
+              "src": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/items/f23e4dd2-b012-41a8-ae3b-45b535357b7c/c1412896-9532-40e6-8a32-db7e07d05b62.png",
+              "x": 0.488672,
+              "y": 0.164493,
+              "w": 1.07952,
+              "rot": -1.8,
+              "skew": 0,
+              "z": 2,
+              "props": {
+                "edit": {
+                  "orig": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/effects/orig/0c48f177-1b8c-460c-bb2d-32b9dcb74ace.png",
+                  "effect": {
+                    "key": "photocopy",
+                    "edge": 0,
+                    "grain": 0.2800000011920929,
+                    "threshold": 0.2800000011920929
+                  }
+                },
+                "lift": 0,
+                "tape": "none",
+                "aspect": 2.39880059970015,
+                "shadow": "soft",
+                "tapeStyle": "masking"
+              },
+              "created_at": "2026-11-17T22:32:52.543774+00:00",
+              "updated_at": "2026-11-17T22:36:46.397681+00:00"
+            },
+            {
+              "id": "f5a8f905-7117-4fdd-af37-491351dd72f1",
+              "journal_id": "f23e4dd2-b012-41a8-ae3b-45b535357b7c",
+              "page_id": "6baf3d3d-e470-4a37-8ccd-b8a731d0b1d9",
+              "kind": "photo",
+              "src": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/items/f23e4dd2-b012-41a8-ae3b-45b535357b7c/005303cd-df8e-495e-a479-d3db9f731ba8.png",
+              "x": 0.48424,
+              "y": 0.843061,
+              "w": 1.4,
+              "rot": -0.3,
+              "skew": 0,
+              "z": 4,
+              "props": {
+                "edit": {
+                  "orig": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/effects/orig/f9de873c-256d-46e4-853a-e6bbe2f229e2.png",
+                  "effect": {
+                    "key": "riso",
+                    "mis": 5,
+                    "ink1": "#B48A5C",
+                    "ink2": "#1B2BA0",
+                    "grain": 0.46000000834465027
+                  }
+                },
+                "lift": 0,
+                "tape": "none",
+                "aspect": 2.39880059970015,
+                "shadow": "soft",
+                "tapeStyle": "masking"
+              },
+              "created_at": "2026-11-17T22:37:08.954011+00:00",
+              "updated_at": "2026-11-17T22:38:31.851787+00:00"
+            },
+            {
+              "id": "ef80c432-a536-4c96-a540-412275721693",
+              "journal_id": "f23e4dd2-b012-41a8-ae3b-45b535357b7c",
+              "page_id": "6baf3d3d-e470-4a37-8ccd-b8a731d0b1d9",
+              "kind": "photo",
+              "src": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/items/f23e4dd2-b012-41a8-ae3b-45b535357b7c/e3ff469f-8542-47a4-ad7b-906ab67cef4e.jpg",
+              "x": 0.340426,
+              "y": 0.489441,
+              "w": 1.4,
+              "rot": -0.3,
+              "skew": 0,
+              "z": 5,
+              "props": {
+                "edit": {
+                  "orig": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/effects/orig/6e5f4719-9a78-4774-9b17-f533be7b55d5.jpg"
+                },
+                "lift": 0,
+                "tape": "none",
+                "aspect": 2.39880059970015,
+                "shadow": "soft",
+                "tapeStyle": "masking"
+              },
+              "created_at": "2026-11-17T22:32:22.605474+00:00",
+              "updated_at": "2026-11-17T22:38:36.128376+00:00"
+            }
+          ]
+        }
+      ]
     }
   ],
   "ticker": [
