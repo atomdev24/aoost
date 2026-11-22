@@ -5,7 +5,7 @@ import type { Section } from "../../schema";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage, useEditor } from "../store";
 import { LayersPanel } from "../ui/LayersPanel";
-import { FontsPanel, HistoryPanel, InsertPanel, LibraryPanel, MediaLibrary, NavPanel, PagesPanel, ThemePanel } from "../parts";
+import { CommentsPanel, FontsPanel, HistoryPanel, InsertPanel, LibraryPanel, MediaLibrary, NavPanel, PagesPanel, ThemePanel } from "../parts";
 import type { Part } from "../lazy";
 import {
   closeFlyout,
@@ -24,6 +24,7 @@ const PANEL_TITLES: Record<PanelId, string> = {
   pages: "Pages",
   insert: "Insert",
   media: "Media",
+  comments: "Comments",
   history: "History",
   nav: "Navigation",
   theme: "Theme",
@@ -90,6 +91,12 @@ const RailIcon = ({ id }: { id: PanelId }) => {
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M4 2h5.5L13 5.5V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" />
           <path d="M9 2v4h4" />
+        </svg>
+      );
+    case "comments":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M8 2.5a5.5 5 0 1 1-3.2 9.1L2.5 13l.9-2.6A5 5 0 0 1 8 2.5z" />
         </svg>
       );
     case "insert":
@@ -174,6 +181,7 @@ const PANEL_PARTS: Partial<Record<PanelId, Part<never>>> = {
   history: HistoryPanel as Part<never>,
   insert: InsertPanel as Part<never>,
   media: MediaLibrary as Part<never>,
+  comments: CommentsPanel as Part<never>,
   nav: NavPanel as Part<never>,
   theme: ThemePanel as Part<never>,
   fonts: FontsPanel as Part<never>,
@@ -181,7 +189,7 @@ const PANEL_PARTS: Partial<Record<PanelId, Part<never>>> = {
 };
 
 /* Build (what is on this page) above the line, Site (what every page shares) below it. */
-const TOP_PANELS: PanelId[] = ["layers", "insert", "media", "history"];
+const TOP_PANELS: PanelId[] = ["layers", "insert", "media", "comments", "history"];
 const BOTTOM_PANELS: PanelId[] = ["pages", "nav", "theme", "fonts", "global"];
 
 /**
@@ -337,6 +345,7 @@ export function LeftPanel() {
             ) : null}
             {active === "pages" ? <PagesPanel /> : null}
             {active === "history" ? <HistoryPanel /> : null}
+            {active === "comments" ? <CommentsPanel /> : null}
             {active === "insert" ? <InsertPanel /> : null}
             {active === "media" ? (
               <div className="ed-panel ed-theme">

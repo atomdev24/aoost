@@ -4,6 +4,7 @@ import { matchShortcut } from "../commands/shortcuts";
 import { closeUnpinnedFlyout, getRailState } from "../workspace/rail-store";
 import { selectBlock } from "./bridge";
 import { getBoard, setSpaceDown } from "./store";
+import { setCommentMode, toggleCommentMode } from "../comments/mode";
 import { runTool, type Tool } from "./tools";
 
 /**
@@ -40,6 +41,8 @@ const HISTORY = new Set(["history.undo", "history.redo"]);
 
 export function applyTool(tool: Tool) {
   onTool?.(tool);
+  if (tool === "comment") return toggleCommentMode();
+  if (tool !== "claude") setCommentMode(false);
   if (tool === "select" || tool === "claude") return;
   const id = runTool(tool);
   if (id) selectBlock(id);

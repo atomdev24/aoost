@@ -1,4 +1,5 @@
 import type { Breakpoint } from "../schema";
+import type { CommentThread } from "./comments";
 import type { Op } from "./ops";
 
 /** What the open editor is looking at; lets Claude resolve "make this rounder". */
@@ -22,7 +23,9 @@ export type ServerMessage =
   /** A newer deploy couldn't be merged into the draft; the editor offers a way out. */
   | { type: "sync-blocked"; reason: string }
   /** Something was sent to staging (or staging was emptied: null). */
-  | { type: "staging"; meta: StagingMeta | null };
+  | { type: "staging"; meta: StagingMeta | null }
+  /** The comments changed (a new one, a reply, resolved, or an edit noted in a thread). */
+  | { type: "comments"; threads: CommentThread[] };
 
 /** What is in staging: the share link's token, when and by whom it was staged, and the live base it was built on. */
 export type StagingMeta = { token: string; at: number; label: string; by: string; baseFp: string };

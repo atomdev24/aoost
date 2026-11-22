@@ -38,6 +38,7 @@ export const SHORTCUTS: Shortcut[] = [
   one("tool.frame", "Tools", "Frame", "f"),
   one("tool.text", "Tools", "Text", "t"),
   one("tool.image", "Tools", "Image", "i"),
+  one("tool.comment", "Tools", "Comment", "c"),
 
   { id: "canvas.pan", group: "Canvas", label: "Pan (hold and drag)", keys: ["Space"], combos: [{ code: "Space" }] },
   { id: "canvas.zoomIn", action: "canvas.zoomIn", group: "Canvas", label: "Zoom in", keys: ["mod", "+"], combos: [{ key: "=", mod: true, shift: "any" }, { key: "+", mod: true, shift: "any" }] },

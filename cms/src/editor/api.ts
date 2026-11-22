@@ -2,6 +2,16 @@ import type { Op } from "../model/ops";
 import type { SyncInfo } from "../model/protocol";
 import type { Issue, Site } from "../schema";
 import type { RefItem } from "../model/refs";
+
+/** The name this person comments under (comments/author.ts), so edits noted in a comment thread say who. */
+const authorName = (): string | undefined => {
+  try {
+    const a = JSON.parse(localStorage.getItem("ed-comment-author") ?? "null") as { name?: string } | null;
+    return a?.name?.slice(0, 40) || undefined;
+  } catch {
+    return undefined;
+  }
+};
 import { noteProblem } from "./problems";
 
 export class ApiError extends Error {
@@ -54,7 +64,7 @@ export type DraftState = { version: number; dirty: boolean; editors: number; syn
 export const api = {
   site: () => call<{ site: Site; version: number }>("/api/editor/site"),
   state: () => call<DraftState>("/api/editor/state"),
-  ops: (ops: Op[], clientId: string, summary?: string) => call<{ version: number }>("/api/editor/ops", { method: "POST", body: JSON.stringify({ ops, clientId, summary }) }),
+  ops: (ops: Op[], clientId: string, summary?: string) => call<{ version: number }>("/api/editor/ops", { method: "POST", body: JSON.stringify({ ops, clientId, summary, author: authorName() }) }),
   reset: () => call<{ version: number }>("/api/editor/reset", { method: "POST" }),
   publish: (message?: string) => call<{ commit: string | null; url: string | null; changed: string[] }>("/api/editor/publish", { method: "POST", body: JSON.stringify({ message }) }),
   resolveConflict: (id: string, choice: "live" | "mine") => call<{ version: number }>("/api/editor/conflict", { method: "POST", body: JSON.stringify({ id, choice }) }),

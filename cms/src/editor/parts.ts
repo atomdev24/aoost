@@ -14,4 +14,6 @@ export const CompareView = part("compare view", () => import("./workspace/Compar
 // The palette and the shortcuts sheet stay in the start-up file: ⌘K then typing at once must not lose letters.
 export const GlobalPanel = part("global block settings", () => import("./ui/GlobalPanel").then((m) => m.GlobalPanel));
 export const OverlayPanel = part("overlay settings", () => import("./ui/OverlayPanel").then((m) => m.OverlayPanel));
+export const CommentLayer = part("comments", () => import("./comments/CommentLayer").then((m) => m.CommentLayer));
+export const CommentsPanel = part("Comments panel", () => import("./comments/CommentsPanel").then((m) => m.CommentsPanel));
 export const ProblemsDialog = part("problem log", () => import("./commands/ProblemsDialog").then((m) => m.ProblemsDialog));

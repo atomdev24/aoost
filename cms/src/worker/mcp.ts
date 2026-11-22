@@ -48,6 +48,37 @@ async function callTool(name: string, args: Record<string, unknown>, env: Env, o
     return text(problemsReport(items, a.limit));
   }
 
+  if (name === "get_comments") {
+    const a = parsed.data as { status: "open" | "resolved" | "all"; page?: string };
+    const list = (await draft.getComments()).filter((t) => (a.status === "all" || t.status === a.status) && (!a.page || t.pageId === a.page));
+    if (!list.length) return text(a.status === "open" ? "No open comments." : "No comments.");
+    const day = (n: number) => new Date(n).toISOString().replace("T", " ").slice(0, 16);
+    return text(
+      list
+        .map((t) =>
+          [
+            `${t.id} · ${t.status} · page ${t.pageId} · block ${t.nodeId}${t.path ? ` ${JSON.stringify(t.path)}` : ""} · "${t.label}" · ${t.bp}`,
+            ...[...t.messages.map((m) => ({ at: m.at, line: `  ${day(m.at)} ${m.by.name}: ${m.text}` })), ...t.events.map((e) => ({ at: e.at, line: `  ${day(e.at)} (${e.by} · ${e.text}${e.count > 1 ? ` ×${e.count}` : ""})` }))]
+              .sort((x, y) => x.at - y.at)
+              .map((x) => x.line),
+          ].join("\n"),
+        )
+        .join("\n\n"),
+    );
+  }
+
+  if (name === "reply_to_comment") {
+    const a = parsed.data as { id: string; text: string; resolve: boolean };
+    const by = { name: "Claude", color: "#D97757" };
+    const reply = await draft.commentOp(JSON.stringify({ op: "reply", id: a.id, msgId: "m-" + crypto.randomUUID().slice(0, 12), by, text: a.text }), "claude");
+    if (!reply.ok) return text(reply.error, true);
+    if (a.resolve) {
+      const done = await draft.commentOp(JSON.stringify({ op: "resolve", id: a.id, by }), "claude");
+      if (!done.ok) return text(done.error, true);
+    }
+    return text(a.resolve ? "Replied and resolved." : "Replied.");
+  }
+
   if (name === "upload_media_from_url") {
     const a = parsed.data as { url: string; name?: string };
     const url = new URL(a.url);

@@ -12,6 +12,7 @@ export const ACTION_IDS = [
   "tool.frame",
   "tool.text",
   "tool.image",
+  "tool.comment",
   "tool.section",
   "canvas.zoomIn",
   "canvas.zoomOut",
@@ -81,6 +82,7 @@ export const ACTIONS: ActionMeta[] = [
   { id: "tool.frame", title: "Add a free-layout section (Frame)", group: "Tools", keywords: "frame canvas" },
   { id: "tool.text", title: "Add text", group: "Tools", keywords: "type copy words" },
   { id: "tool.image", title: "Add an image", group: "Tools", keywords: "picture photo" },
+  { id: "tool.comment", title: "Comment on something", group: "Tools", keywords: "note feedback review pin" },
   { id: "tool.section", title: "Add a section", group: "Tools", keywords: "flow stack" },
 
   { id: "canvas.zoomIn", title: "Zoom in", group: "Canvas" },

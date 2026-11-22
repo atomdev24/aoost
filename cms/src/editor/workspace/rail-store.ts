@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export type PanelId = "layers" | "pages" | "insert" | "media" | "history" | "nav" | "theme" | "fonts" | "global";
+export type PanelId = "layers" | "pages" | "insert" | "media" | "comments" | "history" | "nav" | "theme" | "fonts" | "global";
 
 export type RailState = {
   active: PanelId | null;

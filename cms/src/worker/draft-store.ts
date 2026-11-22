@@ -2,10 +2,12 @@ import { DurableObject } from "cloudflare:workers";
 import "../components/registry";
 import { deepEqual, getAt, mergeFiles, pathLabel, serialize, setAt, type PathSeg } from "../model/merge";
 import { applyOps, diffSite, type Op } from "../model/ops";
+import { locate } from "../model/page-ops";
 import type { ClientMessage, EditorContext, ServerMessage, StagingMeta, SyncInfo } from "../model/protocol";
 import { filesToSite, siteToFiles, validateSite, type Breakpoint, type ContentFiles, type Issue, type Site } from "../schema";
 import type { Env } from "./env";
 import { cleanRefs, type RefItem } from "../model/refs";
+import { applyCommentOp, cleanThreads, CommentOp, noteEdits, type CommentThread } from "../model/comments";
 import { appendProblems, cleanProblems, type StoredProblem } from "../model/problems";
 
 const same = (a: ContentFiles, b: ContentFiles) => {
@@ -35,6 +37,7 @@ const BASE = "base:";
 const REFS = "refs:";
 /** The editor's problem log (errors, failed requests, freezes, reports). */
 const PROBLEMS = "problems";
+const COMMENTS = "comments";
 const BASE_FP = "baseFp";
 /** Values both sides changed differently in the last merge (the draft kept its own). */
 const CONFLICTS = "conflicts";
@@ -265,13 +268,51 @@ export class DraftStore extends DurableObject<Env> {
   }
 
   /** Apply ops to the draft. Rejects anything that would make the site invalid. */
-  async apply(opsJson: string, origin: string, summary?: string, changedNodeIds?: string[]): Promise<ApplyResult> {
+  async apply(opsJson: string, origin: string, summary?: string, changedNodeIds?: string[], by?: string): Promise<ApplyResult> {
     const ops = JSON.parse(opsJson) as Op[];
-    const result = validateSite(applyOps(await this.load(), ops));
+    const before = await this.load();
+    const result = validateSite(applyOps(before, ops));
     if (!result.ok) return { ok: false, issues: result.issues };
     await this.save(result.site);
     this.broadcast({ type: "ops", ops, version: this.version, origin, summary, changedNodeIds }, origin);
+    await this.noteCommentEdits(before, result.site, summary, origin === "mcp" ? "Claude" : by || "Someone");
     return { ok: true, version: this.version };
+  }
+
+  // ------------------------------------------------------------- comments
+
+  async getComments(): Promise<CommentThread[]> {
+    return cleanThreads(await this.ctx.storage.get(COMMENTS));
+  }
+
+  /** One change to the comments (validated by the API), then every open editor hears about it. */
+  async commentOp(opJson: string, who: string): Promise<{ ok: true; threads: CommentThread[] } | { ok: false; error: string }> {
+    const op = CommentOp.parse(JSON.parse(opJson));
+    const result = applyCommentOp(await this.getComments(), op, Date.now(), who);
+    if (!result.ok) return result;
+    await this.ctx.storage.put(COMMENTS, result.threads);
+    this.broadcast({ type: "comments", threads: result.threads });
+    return result;
+  }
+
+  /** Edits to a block with an open comment show up in that comment's thread. */
+  private async noteCommentEdits(before: Site, after: Site, summary: string | undefined, by: string) {
+    const threads = await this.getComments();
+    const open = [...new Set(threads.filter((t) => t.status === "open").map((t) => `${t.pageId}\u0000${t.nodeId}`))];
+    if (!open.length) return;
+    const nodeJson = (site: Site, pageId: string, nodeId: string) => {
+      const page = site.pages.find((p) => p.id === pageId);
+      const at = page ? locate(page, nodeId) : null;
+      return at?.kind === "node" ? JSON.stringify(at.node) : null;
+    };
+    const changed = open
+      .map((k) => k.split("\u0000") as [string, string])
+      .filter(([pageId, nodeId]) => nodeJson(before, pageId, nodeId) !== nodeJson(after, pageId, nodeId))
+      .map(([, nodeId]) => nodeId);
+    const next = noteEdits(threads, changed, summary, by, Date.now(), () => "e-" + crypto.randomUUID().slice(0, 12));
+    if (!next) return;
+    await this.ctx.storage.put(COMMENTS, next);
+    this.broadcast({ type: "comments", threads: next });
   }
 
   /** Throw the draft away and start again from the published content. */
