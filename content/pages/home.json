@@ -222,7 +222,15 @@
                 }
               },
               {
-                "image": "/media/2026/aoost-hero-jadeskull-02-tilt-1h1t.png"
+                "image": "/media/2026/aoost-hero-jadeskull-02-tilt-1h1t.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 1.45
+                  }
+                }
               }
             ],
             "note": {
