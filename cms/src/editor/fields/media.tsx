@@ -7,7 +7,7 @@ import type { FrameSlot } from "../../components/types";
 import { DEFAULT_FRAME_FIT, type FrameFit, type Node, type Responsive } from "../../schema";
 import { FILL_FRAME } from "../canvas/adjust";
 import { itemPathOfField, slotOf, withItemValue, withSlotFrame, type SlotPath } from "../canvas/slots";
-import { uploadFile } from "../media";
+import { isCancelled, uploadFile } from "../media";
 import { currentPage, getState, updatePage, useEditor } from "../store";
 import { TextInput } from "../ui/kit";
 import { anchorOf, Popover, type Anchor } from "../ui/Popover";
@@ -86,6 +86,7 @@ function editSlotFrame(ref: SlotRef, fn: (r: Responsive<FrameFit>) => Responsive
  */
 export function MediaInput({ value, onChange, kind, label, owner = false, slot = null, altKey }: { value: string | undefined; onChange: (v: string) => void; kind: MediaKind; label: string; owner?: boolean; slot?: SlotRef | null; altKey?: string }) {
   const [busy, setBusy] = useState(false);
+  const [dropping, setDropping] = useState(false);
   const [open, setOpen] = useState<Anchor | null>(null);
   const node = useOwner(owner);
   const bp = useEditor((s) => s.bp);
@@ -95,9 +96,15 @@ export function MediaInput({ value, onChange, kind, label, owner = false, slot =
   const isImage = !!value && (kind === "image" || IMAGE.test(value));
   return (
     <div
-      className={`ed-mediarow${busy ? " is-busy" : ""}${over ? " is-over" : ""}`}
-      onDragOver={(e) => e.dataTransfer.types.includes("Files") && e.preventDefault()}
+      className={`ed-mediarow${busy ? " is-busy" : ""}${over ? " is-over" : ""}${dropping ? " is-dropping" : ""}`}
+      onDragOver={(e) => {
+        if (!e.dataTransfer.types.includes("Files")) return;
+        e.preventDefault();
+        setDropping(true);
+      }}
+      onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as globalThis.Node | null) && setDropping(false)}
       onDrop={async (e) => {
+        setDropping(false);
         const file = e.dataTransfer.files[0];
         if (!file) return;
         e.preventDefault();
@@ -105,7 +112,8 @@ export function MediaInput({ value, onChange, kind, label, owner = false, slot =
         try {
           onChange((await uploadFile(file)).url);
         } catch (err) {
-          window.alert(err instanceof Error ? err.message : "Upload failed.");
+          // the upload tray shows what went wrong (or that it was cancelled)
+          if (!isCancelled(err)) console.warn(err);
         } finally {
           setBusy(false);
         }
@@ -113,7 +121,7 @@ export function MediaInput({ value, onChange, kind, label, owner = false, slot =
     >
       <button type="button" className="ed-mediarow-main" aria-label={`${label}: ${value ? fileName(value) : "none"}. Open media options`} aria-haspopup="dialog" aria-expanded={!!open} onClick={(e) => setOpen(open ? null : anchorOf(e.currentTarget))}>
         <span className="ed-mediarow-thumb">{isImage ? <img src={/\.(svg|gif)(\?|$)/i.test(value!) || /^https?:/.test(value!) ? value : `${value}?w=96`} alt="" /> : <span>{GLYPH[kind]}</span>}</span>
-        <span className="ed-mediarow-name">{busy ? "Uploading…" : value ? fileName(value) : "Choose…"}</span>
+        <span className="ed-mediarow-name">{dropping ? "Drop to upload" : busy ? "Uploading…" : value ? fileName(value) : "Choose…"}</span>
         {fit && value ? <span className="ed-mediarow-fit">{FIT_NAME[fit.fit]}</span> : null}
       </button>
       {open ? <MediaPopover anchor={open} value={value} onChange={onChange} kind={kind} label={label} node={node} slot={slot} altKey={altKey} fit={fit} onClose={() => setOpen(null)} /> : null}

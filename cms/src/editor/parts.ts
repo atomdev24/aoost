@@ -23,4 +23,5 @@ export const DemoBar = part("demo notice", () => import("./workspace/DemoBar").t
 export const VariantBand = part("variant notice", () => import("./workspace/VariantBand").then((m) => m.VariantBand));
 export const BrowserZoomNotice = part("zoom notice", () => import("./workspace/BrowserZoomNotice").then((m) => m.BrowserZoomNotice));
 export const ClaudePill = part("Claude status", () => import("./workspace/ClaudePill").then((m) => m.ClaudePill));
+export const UploadTray = part("upload progress", () => import("./ui/UploadTray").then((m) => m.UploadTray));
 export const ProblemsDialog = part("problem log", () => import("./commands/ProblemsDialog").then((m) => m.ProblemsDialog));

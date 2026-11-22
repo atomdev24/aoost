@@ -1,5 +1,5 @@
 import { addNode, addSection, createNode, createSection, locate, updateNode } from "../../model/page-ops";
-import { uploadFile } from "../media";
+import { isCancelled, uploadFile } from "../media";
 import { currentPage, getState, updatePage } from "../store";
 import { selectBlock } from "../board/bridge";
 import { adjustable, startAdjust } from "./adjust-state";
@@ -125,7 +125,8 @@ export function attachCanvasDrops(doc: Document) {
       if (id && item.kind === "image") replaceImage(id, item);
       else placeMedia(target, item);
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Upload failed.");
+      // the upload tray already shows a failure or a cancel
+      if (!isCancelled(err)) console.warn(err);
     }
   };
   const leave = (e: DragEvent) => {
