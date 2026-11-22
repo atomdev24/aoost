@@ -433,7 +433,8 @@
                 "pages": [],
                 "hidden": true
               }
-            ]
+            ],
+            "windowLight": true
           },
           "style": {
             "base": {}
