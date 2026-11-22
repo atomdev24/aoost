@@ -92,7 +92,10 @@
             "dotLook": "glassblock",
             "phantoms": true,
             "phantomRate": "sometimes",
-            "overlay": "off"
+            "overlay": "off",
+            "screen": {
+              "show": true
+            }
           },
           "style": {
             "base": {},
