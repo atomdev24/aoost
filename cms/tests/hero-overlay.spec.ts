@@ -13,9 +13,9 @@ const shots = resolve(dirname(fileURLToPath(import.meta.url)), "../../docs/scree
 
 /** Artwork that exists on a test server (uploads live in production storage only). */
 const REEL = [
-  { src: "/art/hero.jpg", alt: "Studio piece" },
-  { src: "/art/grillz.jpg", alt: "Grillz" },
-  { src: "/art/monkey-figure.jpg", alt: "Monkey figure" },
+  { src: "/art/hero.jpg", alt: "Studio piece", title: "Studio piece", date: "2025" },
+  { src: "/art/grillz.jpg", alt: "Grillz", title: "Grillz", date: "Mar 2026" },
+  { src: "/art/monkey-figure.jpg", alt: "Monkey figure", title: "Monkey figure", date: "Nov 2026" },
 ];
 async function setOverlay(request: APIRequestContext, overlay: string) {
   const site = await draftSite(request, password!);
@@ -79,6 +79,17 @@ test.describe("hero: text over the artwork", () => {
       await page.waitForTimeout(1200);
       await page.screenshot({ path: `${shots}/cutout-${size.name}.png`, clip });
       await expect.poll(() => cut.evaluate((el) => (el as HTMLElement).style.getPropertyValue("--art")), { timeout: 6000 }).not.toBe(first);
+      await expect(cut).toHaveText("Grillz");
+
+      // Minimal: the artwork's own title and date, small, on the left, halfway down
+      await setOverlay(request, "minimal");
+      await open(page);
+      await expect(page.locator(".ov-t")).toHaveText("Studio piece");
+      await expect(page.locator(".ov-d")).toHaveText("2025");
+      await page.waitForTimeout(800);
+      await page.screenshot({ path: `${shots}/minimal-${size.name}.png`, clip });
+      await expect(page.locator(".ov-t")).toHaveText("Grillz", { timeout: 6000 });
+      await expect(page.locator(".ov-d")).toHaveText("Mar 2026");
     });
   }
 });

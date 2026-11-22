@@ -17,7 +17,11 @@ export const fields: Fields<AoostHeroContent> = {
   reel: {
     type: "array",
     label: "Artwork reel (empty = the projects' images)",
-    arrayFields: { src: mediaField("Image", "image", { framed: true, altKey: "alt" }), alt: { type: "text", label: "Description (shown full screen, for screen readers)" },
+    arrayFields: {
+      src: mediaField("Image", "image", { framed: true, altKey: "alt" }),
+      title: { type: "text", label: "Title (shown by the text over the artwork)" },
+      date: { type: "text", label: "Date (e.g. 2026 or Nov 2026)" },
+      alt: { type: "text", label: "Description (shown full screen, for screen readers)" },
       tone: { type: "text", label: "Overlay colour (hex, e.g. #FF4FA3; empty = taken from the artwork)" },
     },
     defaultItemProps: { src: "", alt: "" },
@@ -33,6 +37,7 @@ export const fields: Fields<AoostHeroContent> = {
       { label: "Artwork colour: headline takes each piece's colour", value: "tone" },
       { label: "Handwritten: a line writes itself across each piece", value: "handwritten" },
       { label: "Cut-out: paper strip with the wordmark cut out", value: "cutout" },
+      { label: "Minimal: small title and date, left, halfway down", value: "minimal" },
     ],
   },
   screen: {
@@ -45,10 +50,10 @@ export const fields: Fields<AoostHeroContent> = {
       grain: { type: "number", label: "Grain: fine speckle (0–1)", min: 0, max: 1, step: 0.05 },
     },
   },
-  overlayText: { type: "text", label: "Overlay text (wordmark; for Artwork colour, the headline)" },
+  overlayText: { type: "text", label: "Fallback text (for artwork without a title)" },
   overlayLines: {
     type: "array",
-    label: "Handwritten lines (one per artwork, in turn)",
+    label: "Handwritten: fallback lines (for artwork without a title)",
     arrayFields: { text: { type: "text", label: "Line" } },
     defaultItemProps: { text: "" },
     getItemSummary: (item) => item.text || "New line",

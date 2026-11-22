@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderNode } from "../../test-utils";
-import { AoostHero, tickerLines } from "./AoostHero";
+import { AoostHero, overlayTexts, tickerLines } from "./AoostHero";
 
 const d = AoostHero.defaults.content;
 
@@ -102,23 +102,32 @@ describe("AoostHero", () => {
     expect(renderNode("AoostHero", d)).not.toContain("hr-over");
     expect(renderNode("AoostHero", { ...d, overlay: "off" })).not.toContain("hr-over");
   });
-  it("renders each text-over-the-artwork look", () => {
-    const reel = [{ src: "/art/a.jpg", alt: "Mask", tone: "#ff00aa" }, { src: "/art/b.jpg", alt: "" }];
+  it("renders each text-over-the-artwork look from the artwork's own title and date", () => {
+    const reel = [{ src: "/art/a.jpg", alt: "Mask", tone: "#ff00aa", title: "Halftone mask", date: "Nov 2026" }, { src: "/art/b.jpg", alt: "" }];
     const diff = renderNode("AoostHero", { ...d, reel, overlay: "difference" });
     expect(diff).toContain('data-over="difference"');
-    expect(diff).toContain('<span class="ov-word">aoost</span>');
-    const tone = renderNode("AoostHero", { ...d, reel, overlay: "tone", overlayText: "Made slowly, mostly at night" });
+    expect(diff).toContain(">Halftone mask</span>");
+    expect(diff).toContain("01 · Nov 2026");
+    const tone = renderNode("AoostHero", { ...d, reel, overlay: "tone" });
     expect(tone).toContain("--tone:#ff00aa");
-    expect(tone).toContain("Made slowly, <em>mostly at night</em>");
-    expect(tone).toContain("01 · Mask");
-    const hw = renderNode("AoostHero", { ...d, reel, overlay: "handwritten", overlayLines: [{ text: "hi there" }, { text: "" }, { text: "look around" }] });
-    expect(hw.match(/class="ov-hw/g)).toHaveLength(2);
-    expect(hw).toContain('class="ov-hw on"');
+    expect(tone).toContain('data-ov="title">Halftone mask</p>');
+    const hw = renderNode("AoostHero", { ...d, reel, overlay: "handwritten", overlayLines: [{ text: "hi there" }] });
+    expect(hw.match(/class="ov-hw/g)).toHaveLength(2); // one per artwork
     expect(hw).toContain("fonts.googleapis.com/css2?family=Caveat");
-    expect(hw).toContain('<span class="sr">hi there. look around</span>');
+    expect(hw).toContain('<span class="sr">Halftone mask. hi there</span>');
     const cut = renderNode("AoostHero", { ...d, reel, overlay: "cutout", overlayText: "alex" });
     expect(cut).toContain('--art:url(&quot;/art/a.jpg&quot;)');
-    expect(cut).toContain(">alex</span>");
+    expect(cut).toContain(">Halftone mask</span>");
+    expect(cut).toContain("01 / 02");
+    const min = renderNode("AoostHero", { ...d, reel, overlay: "minimal" });
+    expect(min).toContain('class="ov-t" data-ov="title">Halftone mask</span>');
+    expect(min).toContain('class="ov-d" data-ov="date">Nov 2026</span>');
+  });
+  it("hands the script each artwork's words, with the fallback for untitled ones", () => {
+    const reel = [{ src: "/art/a.jpg", title: "One", date: "2025" }, { src: "/art/b.jpg" }, { src: "" }];
+    expect(overlayTexts({ ...d, reel, overlay: "difference", overlayText: "aoost" })).toEqual([{ t: "One", d: "2025" }, { t: "aoost", d: "" }]);
+    expect(overlayTexts({ ...d, reel, overlay: "minimal" })).toEqual([{ t: "One", d: "2025" }, { t: "", d: "" }]);
+    expect(overlayTexts({ ...d, reel, overlay: "handwritten" })[1]).toEqual({ t: "take a look around", d: "" });
   });
   it("draws the matte screen only when switched on, with its three layers", () => {
     expect(renderNode("AoostHero", d)).not.toContain("hr-screen");
