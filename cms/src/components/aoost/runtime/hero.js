@@ -57,14 +57,20 @@ export function initHero(){
       if(mode==='cutout'){const cut=over.querySelector('.ov-cut');if(cut)cut.style.setProperty('--art',it.src?'url("'+it.src+'")':'none');}
       else if(mode==='tone'){toneOf(i).then(c=>{if(overAt===i)over.style.setProperty('--tone',c);});}
       else if(mode==='handwritten'){const hs=over.querySelectorAll('.ov-hw');if(!hs.length)return;const on=hs[i%hs.length];hs.forEach(h=>{if(h!==on)h.classList.remove('on');});on.classList.remove('on');void on.getBoundingClientRect();on.classList.add('on');}}
-    overSlide(0);
+    /* behind the hero: a blurred, dimmed copy of the piece showing, so when the hero eases back on
+       scroll (the focus effect) the gap around it is the artwork's own glow, never the light page */
+    const amb=document.querySelector('.ao .hr-ambient');
+    function ambientAt(i){if(!amb)return;const im=reel.children[i]&&reel.children[i].querySelector('img');const src=im&&(im.currentSrc||im.src);amb.style.setProperty('--amb',src?'url("'+src.replace(/"/g,'%22')+'")':'none');}
+    function onSlide(i){overSlide(i);ambientAt(i);}
+    if(amb){const im0=reel.children[0]&&reel.children[0].querySelector('img');if(im0&&!im0.complete)im0.addEventListener('load',()=>ambientAt(hrIdx||0),{once:true});}
+    onSlide(0);
     let hrIdx=0,hrT0=performance.now(),hrHold=0,hrOn=true;const HR_DUR=Math.max(1000,(+D.reelSeconds||5.2)*1000);
     if(introDone){hrHold=Infinity;introDone.then(()=>{hrHold=0;hrT0=performance.now();});}
     ['pointerdown','touchstart','wheel','focusin'].forEach(ev=>reel.addEventListener(ev,()=>{hrHold=performance.now()+4000;},{passive:true}));
-    let hrScrollT;reel.addEventListener('scroll',()=>{clearTimeout(hrScrollT);hrScrollT=setTimeout(()=>{hrIdx=Math.round(reel.scrollLeft/Math.max(1,reel.clientWidth));hrT0=performance.now();overSlide(hrIdx);},120);},{passive:true});
+    let hrScrollT;reel.addEventListener('scroll',()=>{clearTimeout(hrScrollT);hrScrollT=setTimeout(()=>{hrIdx=Math.round(reel.scrollLeft/Math.max(1,reel.clientWidth));hrT0=performance.now();onSlide(hrIdx);},120);},{passive:true});
     if('IntersectionObserver' in window)new IntersectionObserver(es=>es.forEach(e=>hrOn=e.isIntersecting)).observe(reel);
     (function hrLoop(t){if(reduce||reelItems.length<2){hrBar.style.width='0';}
-      else if(hrOn&&t>hrHold&&!document.hidden){const p=Math.min(1,(t-hrT0)/HR_DUR);hrBar.style.width=(p*100)+'%';if(p>=1){hrIdx=(hrIdx+1)%reelItems.length;reel.scrollTo({left:hrIdx*reel.clientWidth,behavior:'smooth'});hrT0=t;overSlide(hrIdx);}}
+      else if(hrOn&&t>hrHold&&!document.hidden){const p=Math.min(1,(t-hrT0)/HR_DUR);hrBar.style.width=(p*100)+'%';if(p>=1){hrIdx=(hrIdx+1)%reelItems.length;reel.scrollTo({left:hrIdx*reel.clientWidth,behavior:'smooth'});hrT0=t;onSlide(hrIdx);}}
       else{hrT0=t-(parseFloat(hrBar.style.width)||0)/100*HR_DUR;}
       requestAnimationFrame(hrLoop);})(performance.now());
   }
