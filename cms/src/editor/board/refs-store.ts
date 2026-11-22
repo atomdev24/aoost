@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { placeRef, type RefItem } from "../../model/refs";
 import { api } from "../api";
-import { uploadFile } from "../media";
+import { isCancelled, uploadFile } from "../media";
 import { MEDIA_MIME, type DraggedMedia } from "../canvas/drops";
 import { setExtraFitRects } from "./store";
 
@@ -135,7 +135,7 @@ export function attachRefDrops(host: HTMLElement, toWorld: (e: { clientX: number
         const size = item.width && item.height ? { w: item.width, h: item.height } : await naturalSize(item.url);
         addRef(placeRef(newId(), item.url, at.x + i * 40, at.y + i * 40, size.w, size.h));
       } catch (err) {
-        set({ error: err instanceof Error ? err.message : "Upload failed." });
+        if (!isCancelled(err)) set({ error: err instanceof Error ? err.message : "Upload failed." });
       }
     }
   };

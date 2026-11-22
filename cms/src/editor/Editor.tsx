@@ -22,6 +22,7 @@ import { FieldLabel } from "./workspace/FieldLabel";
 import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
+import { UploadTrayHost } from "./ui/UploadTrayHost";
 import { CompareView, BrowserZoomNotice, VariantBand } from "./parts";
 import { useCompare } from "./workspace/compare";
 import { TopBar } from "./workspace/TopBar";
@@ -112,6 +113,7 @@ export function Editor() {
           <QuickInsert />
           <PaletteHost />
           <BrowserZoomNotice />
+          <UploadTrayHost />
         </div>
       </Puck>
     </>

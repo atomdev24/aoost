@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { instantiate } from "../../model/library";
-import { uploadFile } from "../media";
+import { isCancelled, uploadFile } from "../media";
 import { MEDIA_MIME, placeMedia, type DraggedMedia } from "../canvas/drops";
 import { currentPage, getState, updatePage, useEditor } from "../store";
 import { BUILTIN_STARTERS, isEmptyPage } from "./page-templates";
@@ -39,7 +39,7 @@ export function EmptyPage({ rect }: { rect: { left: number; top: number; width: 
         const media = e.dataTransfer.getData(MEDIA_MIME);
         if (media) return void placeMedia(null, JSON.parse(media) as DraggedMedia);
         const file = [...e.dataTransfer.files].find((f) => /^image\//.test(f.type));
-        if (file) placeMedia(null, await uploadFile(file));
+        if (file) await uploadFile(file).then((item) => placeMedia(null, item), (err) => void (isCancelled(err) || console.warn(err)));
       }}
     >
       <strong className="ed-start-title">Start from</strong>

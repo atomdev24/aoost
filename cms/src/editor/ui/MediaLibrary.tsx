@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "./uploads.css";
 import { MEDIA_MIME, type DraggedMedia } from "../canvas/drops";
 import type { MediaKind } from "../fields/media";
-import { deleteMedia, formatSize, listMedia, uploadFile, type MediaItem } from "../media";
+import { deleteMedia, formatSize, isCancelled, listMedia, uploadFile, type MediaItem } from "../media";
 import { mediaUsage } from "../media-usage";
 import { useEditor } from "../store";
 
@@ -46,7 +47,6 @@ const dragStart = (item: MediaItem) => (e: React.DragEvent) => {
  */
 export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKind; onPick?: (item: MediaItem) => void; compact?: boolean }) {
   const [items, setItems] = useState<MediaItem[] | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [over, setOver] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -74,17 +74,19 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
   const upload = async (files: FileList | File[]) => {
     setError(null);
     const list = [...files];
-    for (const [i, file] of list.entries()) {
-      setBusy(`Uploading ${file.name}${list.length > 1 ? ` (${i + 1} of ${list.length})` : ""}…`);
-      try {
-        const item = await uploadFile(file);
-        setItems((prev) => [item, ...(prev ?? [])]);
-        if (onPick && list.length === 1 && KIND_FILTER[kind](item)) onPick(item);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Upload failed.");
-      }
-    }
-    setBusy(null);
+    // All at once: each shows in the upload tray with its own progress bar and Cancel button.
+    await Promise.all(
+      list.map(async (file) => {
+        try {
+          const item = await uploadFile(file);
+          setItems((prev) => [item, ...(prev ?? [])]);
+          if (onPick && list.length === 1 && KIND_FILTER[kind](item)) onPick(item);
+        } catch (e) {
+          // the tray says what happened; nothing more to show here
+          if (!isCancelled(e)) console.warn(e);
+        }
+      }),
+    );
   };
 
   const usage = useMemo(() => mediaUsage(site, (items ?? []).map((i) => i.url)), [site, items]);
@@ -174,7 +176,7 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
             </svg>
           </button>
         </div>
-        <button type="button" className="ed-btn ed-btn-accent ed-btn-sm" onClick={() => input.current?.click()} disabled={!!busy}>
+        <button type="button" className="ed-btn ed-btn-accent ed-btn-sm" onClick={() => input.current?.click()}>
           Upload
         </button>
       </div>
@@ -192,7 +194,19 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
         ))}
       </div>
       <input ref={input} type="file" multiple hidden onChange={(e) => e.target.files?.length && void upload(e.target.files).then(() => (e.target.value = ""))} />
-      {busy ? <p className="ed-hint">{busy}</p> : <p className="ed-hint ed-medialib-tip">Drop files anywhere here to upload. Drag an item onto the page or onto an image.</p>}
+      <button type="button" className="ed-drop ed-medialib-drop" onClick={() => input.current?.click()}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M10 13V3.5M6 7.5l4-4 4 4M3.5 12.5v2.5a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5v-2.5" />
+        </svg>
+        <span>Drop files here, or click to choose</span>
+        <small>Pictures, video, audio and fonts, up to 95 MB each</small>
+      </button>
+      {over ? (
+        <div className="ed-medialib-over" aria-hidden="true">
+          <span>Drop to upload</span>
+        </div>
+      ) : null}
+      {!compact ? <p className="ed-hint ed-medialib-tip">Drag an item onto the page, or onto a picture to replace it.</p> : null}
       {error ? (
         <p className="ed-note" role="alert">
           {error}
