@@ -135,8 +135,21 @@ describe("AoostHero", () => {
     const html = renderNode("AoostHero", { ...d, screen: { show: true, glare: 0.3 } });
     expect(html).toContain("--sc-glare:0.3");
     expect(html).toContain("--sc-shade:0.7");
-    expect(html.match(/class="sc-/g)).toHaveLength(3);
+    // three layers on the hero, and (carried over by default) three on the ticker
+    expect(html.match(/class="sc-/g)).toHaveLength(6);
     expect(AoostHero.css).toContain("/art/aoost_hero_screen_glare_2400x1000.webp");
     expect(AoostHero.css).toContain("prefers-reduced-transparency:reduce");
+  });
+
+  it("carries the matte screen over the ticker in the hero's dark tone, unless switched off", () => {
+    const on = renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", dotLook: "glassblock", screen: { show: true } });
+    expect(on).toContain('class="hero-rect focus-sec sc-joined');
+    expect(on).toMatch(/class="ticker dots glass sc-joined"/);
+    expect(on).toContain('data-base="#141516"');
+    expect(on).toContain('class="hr-screen tk-screen"');
+    const off = renderNode("AoostHero", { ...d, showTicker: true, tickerStyle: "dots", screen: { show: true, ticker: false } });
+    expect(off).not.toContain("sc-joined");
+    expect(off).not.toContain("tk-screen");
+    expect(AoostHero.css).toContain(".ao .tk-screen i:not(.sc-grain){background-size:100% calc(100% + var(--hero-h,72svh));background-position:0 100%}");
   });
 });

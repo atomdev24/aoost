@@ -153,7 +153,20 @@ export const IDLE = {
  * Start a dot board on a canvas that fills its strip. Options: lines (strings), seconds per frame,
  * grid (the faint dot grid behind), effect (a key of EFFECTS). Returns { setLines, stop }.
  */
-export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe', after = 'loop', idleSpeed = 0.5, textSize = 70, look = 'flat', lensOpts = {} } = {}) {
+/**
+ * The colour to put behind the glass-block lens so the empty glass shows as `hex`. The lens roughly
+ * does: out = (1.885 × in + 0.018) × (0.86, 0.93, 1.06) in the dark (lens.js, glass block), so this
+ * runs that backwards per channel.
+ */
+export function glassBacking(hex) {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(String(hex).trim());
+  if (!m) return '#000';
+  const tint = [0.86, 0.93, 1.06];
+  const ch = [m[1], m[2], m[3]].map((h, i) => Math.round(Math.max(0, Math.min(1, (parseInt(h, 16) / 255 / tint[i] - 0.018) / 1.885)) * 255));
+  return '#' + ch.map((c) => c.toString(16).padStart(2, '0')).join('');
+}
+
+export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe', after = 'loop', idleSpeed = 0.5, textSize = 70, look = 'flat', lensOpts = {}, base = '' } = {}) {
   // Glass block / Liquid glass: the board is lit through a bar of square glass (lens.js, WebGL 2).
   // It must take the canvas before the 2D context does; without WebGL 2 the board stays flat.
   const lens = look === 'glassblock' || look === 'liquid' ? createLens(canvas, look) : null;
@@ -422,14 +435,21 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     main.globalAlpha = 1; main.globalCompositeOperation = 'source-over';
   }
 
+  /** With a base tone (the hero's dark), the light behind the glass is the colour that comes out of the glass as that tone. */
+  const backing = lens && base ? glassBacking(base) : '';
   /** The light behind the glass: black, a faint backlight (so the glass shows where there are no words), the board. */
   function showThroughGlass() {
     const w = lit.width, h = lit.height;
     litCtx.setTransform(1, 0, 0, 1, 0, 0);
-    litCtx.fillStyle = '#000'; litCtx.fillRect(0, 0, w, h);
-    const g = litCtx.createLinearGradient(0, 0, w, 0);
-    g.addColorStop(0, 'rgba(255,255,255,.018)'); g.addColorStop(0.5, 'rgba(255,255,255,.045)'); g.addColorStop(1, 'rgba(255,255,255,.018)');
-    litCtx.fillStyle = g; litCtx.fillRect(0, 0, w, h);
+    if (backing) {
+      // Joined to the hero's matte screen: the glass's dark ends up the hero's own dark tone.
+      litCtx.fillStyle = backing; litCtx.fillRect(0, 0, w, h);
+    } else {
+      litCtx.fillStyle = '#000'; litCtx.fillRect(0, 0, w, h);
+      const g = litCtx.createLinearGradient(0, 0, w, 0);
+      g.addColorStop(0, 'rgba(255,255,255,.018)'); g.addColorStop(0.5, 'rgba(255,255,255,.045)'); g.addColorStop(1, 'rgba(255,255,255,.018)');
+      litCtx.fillStyle = g; litCtx.fillRect(0, 0, w, h);
+    }
     litCtx.drawImage(light, 0, 0);
     lens.render(lit, reduce ? 0 : win.performance.now() / 1000, reduce ? { ...lensOpts, shimmer: 0 } : lensOpts, dpr);
   }
