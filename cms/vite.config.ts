@@ -24,11 +24,14 @@ function serviceWorker(): Plugin {
 }
 
 /** The modules of the parts that load after the board (src/editor/parts.ts). */
-const LATER = /\/src\/editor\/(ui\/(PagesPanel|NewPageModal|GlobalPanel|OverlayPanel|PageSettings|HistoryPanel|MediaLibrary|NavPanel|ThemePanel|FontsPanel|LibraryPanel)|insert\/InsertPanel|workspace\/(PublishSheet|CompareView)|commands\/ProblemsDialog)\.tsx$|\/src\/editor\/workspace\/checks\.ts$|\/src\/editor\/comments\/(CommentLayer|CommentsPanel)\.tsx$|\/src\/editor\/comments\/store\.ts$|\/src\/editor\/presence\/(store\.ts|PresenceLayer\.tsx|Activity\.tsx)$|\/src\/components\/aoost\/runtime\/(dots|lens)\.js$/;
+const LATER = /\/src\/editor\/(ui\/(PagesPanel|NewPageModal|GlobalPanel|OverlayPanel|PageSettings|HistoryPanel|MediaLibrary|NavPanel|ThemePanel|FontsPanel|LibraryPanel)|insert\/InsertPanel|workspace\/(PublishSheet|CompareView)|commands\/ProblemsDialog)\.tsx$|\/src\/editor\/workspace\/checks\.ts$|\/src\/editor\/comments\/(CommentLayer|CommentsPanel)\.tsx$|\/src\/editor\/comments\/store\.ts$|\/src\/editor\/workspace\/DemoBar\.tsx$|\/src\/editor\/canvas\/AdjustImage\.tsx$|\/src\/editor\/presence\/(store\.ts|PresenceLayer\.tsx|Activity\.tsx)$|\/src\/components\/aoost\/runtime\/(dots|lens)\.js$/;
 
 // The admin (editor) SPA. The public site is pre-rendered by scripts/build-site.ts.
 export default defineConfig({
   base: "/admin/",
+  // Scripts and styles find each other by relative address, so the same build also runs at /demo/
+  // (the public demo editor, outside the paths Cloudflare Access guards).
+  experimental: { renderBuiltUrl: (_file: string, { hostType }: { hostType: string }) => (hostType === "html" ? undefined : { relative: true }) },
   plugins: [react(), serviceWorker()],
   build: {
     outDir: "dist/admin",

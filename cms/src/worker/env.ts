@@ -1,9 +1,14 @@
+import type { DemoStore } from "./demo-store";
 import type { DraftStore } from "./draft-store";
 
 export interface Env {
   ASSETS: Fetcher;
   MEDIA: R2Bucket;
   DRAFT: DurableObjectNamespace<DraftStore>;
+  /** The public demo editor's draft (/demo/), apart from the real one. */
+  DEMO: DurableObjectNamespace<DemoStore>;
+  /** Set (by the worker, per request) while serving the demo editor: everything reads and writes the demo draft. */
+  IS_DEMO?: "1";
   /** "password" (EDITOR_PASSWORD) or "access" (Cloudflare Access JWT). */
   AUTH_MODE: string;
   ACCESS_TEAM_DOMAIN: string;
@@ -16,8 +21,12 @@ export interface Env {
   ALLOW_LOCAL_PUBLISH?: string;
 }
 
-/** One draft per site: a single, fixed Durable Object. */
-export const draftStub = (env: Env) => env.DRAFT.get(env.DRAFT.idFromName("site"));
+/** One draft per site: a single, fixed Durable Object (and one more for the demo editor). */
+export const draftStub = (env: Env): DurableObjectStub<DraftStore> =>
+  env.IS_DEMO ? (env.DEMO.get(env.DEMO.idFromName("demo")) as unknown as DurableObjectStub<DraftStore>) : env.DRAFT.get(env.DRAFT.idFromName("site"));
+export const demoStub = (env: Env) => env.DEMO.get(env.DEMO.idFromName("demo"));
+/** The env for a demo request: the demo draft, and nothing that reaches GitHub or publishes. */
+export const demoEnv = (env: Env): Env => ({ ...env, IS_DEMO: "1", GITHUB_TOKEN: undefined, ALLOW_LOCAL_PUBLISH: undefined });
 
 /** Read the draft site through RPC. */
 export async function readDraft(env: Env): Promise<{ site: import("../schema").Site; version: number }> {

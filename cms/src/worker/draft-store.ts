@@ -76,8 +76,8 @@ const parse = (text: string | undefined): unknown => (text === undefined ? undef
  * open editors over WebSocket. Nothing here is live until Publish.
  */
 export class DraftStore extends DurableObject<Env> {
-  private site: Site | null = null;
-  private version = 0;
+  protected site: Site | null = null;
+  protected version = 0;
   private waiting = new Map<string, (png: string | null) => void>();
   private lastSyncCheck = 0;
   private syncing: Promise<{ blocked: string | null }> | null = null;
@@ -105,13 +105,13 @@ export class DraftStore extends DurableObject<Env> {
     return this.built();
   }
 
-  private async built(): Promise<ContentFiles> {
+  protected async built(): Promise<ContentFiles> {
     const res = await this.env.ASSETS.fetch(PUBLISHED_URL);
     if (!res.ok) throw new Error("published content is missing from the build (_published.json)");
     return (await res.json()) as ContentFiles;
   }
 
-  private async load(): Promise<Site> {
+  protected async load(): Promise<Site> {
     if (this.site) return this.site;
     this.version = (await this.ctx.storage.get<number>("version")) ?? 0;
     const stored = await this.ctx.storage.list<string>({ prefix: FILE });
@@ -126,7 +126,7 @@ export class DraftStore extends DurableObject<Env> {
     return this.site;
   }
 
-  private async save(site: Site) {
+  protected async save(site: Site) {
     const files = siteToFiles(site);
     const existing = await this.ctx.storage.list<string>({ prefix: FILE });
     const puts: Record<string, string> = {};
@@ -578,7 +578,7 @@ export class DraftStore extends DurableObject<Env> {
     }
   }
 
-  private broadcast(message: ServerMessage, exceptClient?: string) {
+  protected broadcast(message: ServerMessage, exceptClient?: string) {
     const text = JSON.stringify(message);
     for (const ws of this.ctx.getWebSockets()) {
       if (exceptClient && this.ctx.getTags(ws).includes(exceptClient)) continue;

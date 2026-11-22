@@ -2,7 +2,7 @@ import { addNode, addSection, createNode, createSection, locate, updateNode } fr
 import { uploadFile } from "../media";
 import { currentPage, getState, updatePage } from "../store";
 import { selectBlock } from "../board/bridge";
-import { adjustable, startAdjust } from "./AdjustImage";
+import { adjustable, startAdjust } from "./adjust-state";
 import { slotAtPoint } from "./slots";
 import { selectPiece } from "./ResizePiece";
 import { attachDoubleTap } from "../touch/longpress";

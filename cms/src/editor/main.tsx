@@ -1,3 +1,4 @@
+import { DEMO } from "./demo";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
@@ -11,7 +12,7 @@ import "./workspace/workspace.css";
 performance.mark("aoost:modules");
 
 // The service worker gives the home-screen app a fast start (it never caches the API).
-if (import.meta.env.PROD && "serviceWorker" in navigator) {
+if (import.meta.env.PROD && !DEMO && "serviceWorker" in navigator) {
   window.addEventListener("load", () => void navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" }).catch(() => undefined));
 }
 

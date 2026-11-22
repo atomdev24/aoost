@@ -18,4 +18,6 @@ export const CommentLayer = part("comments", () => import("./comments/CommentLay
 export const CommentsPanel = part("Comments panel", () => import("./comments/CommentsPanel").then((m) => m.CommentsPanel));
 export const PresenceLayer = part("people here", () => import("./presence/PresenceLayer").then((m) => m.PresenceLayer));
 export const Avatars = part("people here", () => import("./presence/PresenceLayer").then((m) => m.Avatars));
+export const AdjustImage = part("image adjusting", () => import("./canvas/AdjustImage").then((m) => m.AdjustImage));
+export const DemoBar = part("demo notice", () => import("./workspace/DemoBar").then((m) => m.DemoBar));
 export const ProblemsDialog = part("problem log", () => import("./commands/ProblemsDialog").then((m) => m.ProblemsDialog));

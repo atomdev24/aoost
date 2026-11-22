@@ -1,12 +1,13 @@
 import { authenticate, login, logout } from "./auth";
 import { editorApi, historyPage, livePage, preview, staging } from "./api";
-import { draftStub, type Env } from "./env";
+import { demoEnv, demoStub, draftStub, type Env } from "./env";
 import { error, html, json } from "./http";
 import { loginPage } from "./login-page";
 import { mcp } from "./mcp";
 import { serveMedia } from "./media";
 
 export { DraftStore } from "./draft-store";
+export { DemoStore } from "./demo-store";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -19,7 +20,7 @@ export default {
       }
     }
     // Public pages and files go straight to the static site (no sign-in work on every visit).
-    if (!/^\/(admin|api|mcp|media|preview|staging|_published\.json)(\/|$)/.test(new URL(request.url).pathname)) return env.ASSETS.fetch(request);
+    if (!/^\/(admin|api|mcp|media|preview|staging|demo|_published\.json)(\/|$)/.test(new URL(request.url).pathname)) return env.ASSETS.fetch(request);
     const url = new URL(request.url);
     const path = url.pathname;
     try {
@@ -28,6 +29,10 @@ export default {
       console.error(e);
       return path.startsWith("/api/") || path.startsWith("/mcp") ? error(500, e instanceof Error ? e.message : "Something went wrong.") : new Response("Something went wrong.", { status: 500 });
     }
+  },
+  // Every night (03:00 in Cape Town) the demo editor goes back to its wireframe site.
+  async scheduled(_event: ScheduledController, env: Env): Promise<void> {
+    await demoStub(env).wipe();
   },
 } satisfies ExportedHandler<Env>;
 
@@ -43,6 +48,9 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
   if (path.startsWith("/media/")) return serveMedia(request, env, url);
   // A staging share link: public on purpose (like a Framer staging link); the long random token is the key.
   if (path === "/staging" || path.startsWith("/staging/")) return staging(env, url);
+
+  if (path === "/demo") return Response.redirect(new URL("/demo/", url).toString(), 302);
+  if (path.startsWith("/demo/")) return demo(request, env, url, path.slice("/demo".length));
 
   const who = await authenticate(request, env);
 
@@ -85,4 +93,54 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
 
   if (path.startsWith("/api/") || path.startsWith("/mcp")) return error(404, "Not built yet.");
   return env.ASSETS.fetch(request);
+}
+
+const noindex = (res: Response, store = false) => {
+  const headers = new Headers(res.headers);
+  headers.set("X-Robots-Tag", "noindex");
+  if (store) headers.set("Cache-Control", "no-store");
+  return new Response(res.body, { status: res.status, headers });
+};
+
+/**
+ * /demo/*: the editor with the wireframe demo site, open to anyone with the link and kept apart
+ * from the real draft. It lives outside the paths Cloudflare Access guards (/admin, /api/editor,
+ * /preview), so the editor's files are read from /admin here, and its API and previews answer
+ * under /demo. Nothing here can publish, reach GitHub, the media library or the connector.
+ */
+async function demo(request: Request, env: Env, url: URL, rest: string): Promise<Response> {
+  const denv = demoEnv(env);
+  const at = (p: string) => {
+    const u = new URL(url);
+    u.pathname = p;
+    return u;
+  };
+  if (rest === "/api/session") return json({ ok: true, authMode: "demo", passwordSet: true, demo: true });
+  if (rest === "/api/logout" || rest === "/api/login") return json({ ok: true });
+  if (rest.startsWith("/api/editor/")) {
+    const u = at(rest);
+    return editorApi(new Request(u, request), denv, u, { via: "session", who: "demo" });
+  }
+  if (rest.startsWith("/api/")) return error(404, "Not in the demo.");
+  if (rest === "/preview" || rest.startsWith("/preview/")) {
+    if (rest.startsWith("/preview/_version/")) return html("<!doctype html><meta charset=utf-8><title>Not in the demo</title><p style='font:16px system-ui;padding:40px'>Past versions are off in the demo.</p>", 404);
+    const u = at(rest);
+    return noindex(rest === "/preview/_live" || rest.startsWith("/preview/_live/") ? await livePage(denv, u) : await preview(denv, u), true);
+  }
+  if (rest.startsWith("/staging/")) return staging(denv, at(rest));
+  // The editor's own files (scripts, styles, icons). No service worker: the demo is never a home-screen app.
+  if (/\.[a-z0-9]+$/i.test(rest)) {
+    if (rest === "/sw.js" || rest === "/manifest.webmanifest") return new Response("Not found", { status: 404 });
+    return env.ASSETS.fetch(new Request(at("/admin" + rest), request));
+  }
+  // Any other /demo route: the editor's page, pointed at /demo.
+  const shell = await env.ASSETS.fetch(new Request(at("/admin/"), request));
+  const text = (await shell.text())
+    .replace(/<link rel="manifest"[^>]*>\s*/, "")
+    .replace(/(src|href)="\/admin\//g, '$1="/demo/')
+    // the page's own early requests (the draft, its state, the problem log) go to the demo too
+    .replace(/\("\/api\/editor\//g, '("/demo/api/editor/')
+    .replace(/<title>[^<]*<\/title>/, "<title>Editor demo</title>")
+    .replace("<head>", '<head>\n    <meta name="aoost-demo" content="1" />');
+  return noindex(new Response(text, { status: shell.status, headers: { "Content-Type": "text/html; charset=utf-8" } }), true);
 }

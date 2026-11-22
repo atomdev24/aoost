@@ -6,7 +6,7 @@ import { applyTool } from "../board/keys";
 import { resetBlockOverrides } from "../board/overrides";
 import { fit, frameRects, revealRect, setFrameHidden, toggleDotGrid, zoomStep, zoomTo } from "../board/store";
 import { deleteBlock, duplicateBlock, moveBlock, toggleBlockHidden } from "../canvas/actions";
-import { adjustable, isAdjusting, startAdjust } from "../canvas/AdjustImage";
+import { adjustable, isAdjusting, startAdjust } from "../canvas/adjust-state";
 import { openQuickInsert } from "../insert/QuickInsert";
 import { currentPage, flush, getState, megaItemId, redo, undo, updatePage } from "../store";
 import { openSheet, publish, pushStaging } from "../workspace/publish";

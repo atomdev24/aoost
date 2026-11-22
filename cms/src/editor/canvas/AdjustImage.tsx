@@ -1,51 +1,18 @@
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { updateNode } from "../../model/page-ops";
 import { resolve, setOnly } from "../../responsive/resolve";
 import { DEFAULT_FRAME_FIT, type FrameFit, type Node } from "../../schema";
 import { frameOrigin, getBoard, useBoard } from "../board/store";
-import { beginGesture, currentPage, endGesture, getState, updatePage, useEditor } from "../store";
+import { currentPage, getState, updatePage, useEditor } from "../store";
 import { dragImage, imageRect, scaleImage, type Rect, type Size } from "./adjust";
-import { naturalSize, slotOf, withSlotFrame, type SlotPath } from "./slots";
+import { naturalSize, slotOf, withSlotFrame } from "./slots";
 import { usePhone } from "../touch/device";
 import { pinchOf } from "../touch/gestures";
-
-// ------------------------------------------------------------ which image is being adjusted
-
-/** A block's own picture (Image, Video), or one picture inside its content (`path`, the aoost blocks). */
-export type AdjustTarget = { id: string; path?: SlotPath };
-
-let adjusting: AdjustTarget | null = null;
-const listeners = new Set<() => void>();
-/** Enter adjust mode. The whole session, however many drags and scrolls, is one undo step. */
-export const startAdjust = (id: string, path?: SlotPath) => {
-  if (adjusting) endGesture();
-  adjusting = { id, path };
-  beginGesture();
-  listeners.forEach((l) => l());
-};
-export const stopAdjust = () => {
-  if (adjusting === null) return;
-  adjusting = null;
-  endGesture();
-  listeners.forEach((l) => l());
-};
-export const isAdjusting = () => adjusting !== null;
-const useAdjusting = () =>
-  useSyncExternalStore(
-    (l) => {
-      listeners.add(l);
-      return () => listeners.delete(l);
-    },
-    () => adjusting,
-  );
+import { useAdjusting, stopAdjust, type AdjustTarget } from "./adjust-state";
+export { adjustable, isAdjusting, startAdjust, stopAdjust, type AdjustTarget } from "./adjust-state";
 
 /** The node's element in Puck's editable frame. */
 const nodeEl = (id: string) => document.querySelector<HTMLIFrameElement>("#preview-frame")?.contentDocument?.querySelector<HTMLElement>(`[data-node-id="${CSS.escape(id)}"]`) ?? null;
-
-/** Can this block be adjusted on the canvas? (A framed picture with a loaded image.) */
-export function adjustable(el: Element | null): el is HTMLElement {
-  return !!el?.querySelector(".frame > .media, .frame > a > .media") && el.querySelector<HTMLImageElement>("img.media") !== null;
-}
 
 function findNode(id: string): Node | null {
   const page = currentPage(getState());

@@ -9,7 +9,8 @@ import { ClaudePill } from "./ClaudePill";
 import { loadPublished, openSheet, publish, usePublish } from "./publish";
 import { loadStaging, useStaging } from "./staging";
 import { useChanges } from "./changes-count";
-import { Avatars, PublishSheet } from "../parts";
+import { DEMO } from "../demo";
+import { Avatars, DemoBar, PublishSheet } from "../parts";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
 import { openPalette } from "../commands/palette-store";
@@ -162,8 +163,9 @@ export function TopBar() {
 
       {/* Right island: Claude status pill, Preview, Discard draft, Publish */}
       <div className="ed-island ed-island-right" role="toolbar" aria-label="Publishing and preview">
+        {DEMO ? <DemoBar /> : null}
         <Avatars />
-        <ClaudePill />
+        {DEMO ? null : <ClaudePill />}
         <button type="button" className="ed-btn ed-desk-only" onClick={preview}>
           Preview
         </button>
