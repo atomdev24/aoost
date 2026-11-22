@@ -88,6 +88,11 @@ const pageCount = (j: AoostJournal) => {
 /** The cover material that changes the look ("" for the plain cover). */
 const materialOf = (j: AoostJournal) => (j.material === "kraft" || j.material === "leather" ? j.material : "");
 
+/** A mockup keeps its own shape: every one is the same height on the shelf, its width follows the picture. */
+const fitMock = (im: HTMLImageElement | null) => {
+  if (im?.naturalWidth && im.naturalHeight) (im.closest(".jr") as HTMLElement | null)?.style.setProperty("--ar", (im.naturalWidth / im.naturalHeight).toFixed(4));
+};
+
 /** One book on the shelf: the same markup the script builds, so the editor and the first paint match it. */
 function ShelfBook({ j, i }: { j: AoostJournal; i: number }) {
   const o = j.options ?? {};
@@ -98,7 +103,7 @@ function ShelfBook({ j, i }: { j: AoostJournal; i: number }) {
     return (
       <button type="button" className="jr jr-hasmock" aria-label={`Open journal: ${j.title}`} style={{ "--r": `${j.tilt ?? 0}deg`, "--i": i } as CSSProperties}>
         <span className="jr-cv jr-mock">
-          <img {...imageSources(j.mockup)} sizes="(max-width: 640px) 45vw, 220px" alt="" draggable={false} />
+          <img {...imageSources(j.mockup)} sizes="(max-width: 640px) 45vw, 220px" alt="" draggable={false} ref={fitMock} onLoad={(e) => fitMock(e.currentTarget)} />
         </span>
         <span className="jr-n">0{i + 1}</span>
         <span className="jr-cap">
