@@ -342,29 +342,27 @@
               {
                 "title": "sketchbook 1",
                 "year": "2025",
-                "cover": "/art/j-star1.jpg",
                 "band": "#141516",
                 "tilt": -5,
                 "pages": [
                   {
-                    "id": "cc67ed56-1343-4107-8236-c6fc982e371f",
+                    "id": "194db5e7-f4cc-474c-b8f9-048c2c703197",
                     "paper": "black",
-                    "spread": true,
                     "items": [
                       {
-                        "id": "e244da62-0ce7-4377-9ba9-4cb4cec26aa7",
+                        "id": "6f4ccca9-b268-48e4-9071-0e35df0d0487",
                         "kind": "sticker",
-                        "src": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/stickers/4e412042-39ad-4a0e-ac61-a61006fd405c.webp",
-                        "x": 0.512805,
-                        "y": 0.478652,
-                        "w": 0.512394,
-                        "rot": -20.8,
-                        "skew": -0.778526,
+                        "src": "/media/2026/wip-cactus-86ro.png",
+                        "x": 0.5,
+                        "y": 0.5,
+                        "w": 0.42,
+                        "rot": -4,
+                        "skew": 0,
                         "z": 1,
                         "props": {
                           "lift": 0,
                           "tape": "none",
-                          "aspect": 0.6330275229357798,
+                          "aspect": 0.49847405900305186,
                           "shadow": "soft",
                           "tapeStyle": "masking"
                         }
@@ -372,19 +370,47 @@
                     ]
                   }
                 ],
-                "mockup": "/art/journal-black.webp"
+                "mockup": "/art/journal-black.webp",
+                "dark": true,
+                "coverColor": "#141516",
+                "material": "none"
               },
               {
                 "title": "sketchbook 2",
                 "year": "2025",
-                "coverColor": "#B48A5C",
-                "material": "kraft",
-                "sticker": "/art/hear-no-evil-ring.png",
-                "band": "#7A1A1A",
+                "coverColor": "#141516",
+                "material": "none",
+                "band": "#141516",
                 "tilt": 4,
-                "pages": [],
+                "pages": [
+                  {
+                    "id": "5ec5089d-9031-4629-bfb5-08e0a4847e2e",
+                    "paper": "black",
+                    "items": [
+                      {
+                        "id": "96da5f08-1516-44b5-b276-a070b1ca0a23",
+                        "kind": "sticker",
+                        "src": "/media/2026/wip-scorpion-kmt8.png",
+                        "x": 0.5,
+                        "y": 0.5,
+                        "w": 0.55,
+                        "rot": 3,
+                        "skew": 0,
+                        "z": 1,
+                        "props": {
+                          "lift": 0,
+                          "tape": "none",
+                          "aspect": 0.6579365079365079,
+                          "shadow": "soft",
+                          "tapeStyle": "masking"
+                        }
+                      }
+                    ]
+                  }
+                ],
                 "hidden": false,
-                "mockup": "/media/2026/aoost-clear-journal-v2-trimmed-wuz3.png"
+                "mockup": "/media/2026/aoost-clear-journal-v2-trimmed-wuz3.png",
+                "dark": true
               },
               {
                 "title": "sketchbook 3",
