@@ -384,37 +384,19 @@
                 "tilt": 4,
                 "pages": [
                   {
-                    "id": "5ec5089d-9031-4629-bfb5-08e0a4847e2e",
+                    "id": "25a4eadd-7ae2-4a9b-8368-20576b5a250a",
                     "paper": "black",
                     "items": [
                       {
-                        "id": "96da5f08-1516-44b5-b276-a070b1ca0a23",
-                        "kind": "sticker",
-                        "src": "/media/2026/wip-scorpion-kmt8.png",
-                        "x": 0.36,
-                        "y": 0.46,
-                        "w": 0.5,
-                        "rot": -3,
-                        "skew": 0,
-                        "z": 1,
-                        "props": {
-                          "lift": 0,
-                          "tape": "none",
-                          "aspect": 0.6579365079365079,
-                          "shadow": "soft",
-                          "tapeStyle": "masking"
-                        }
-                      },
-                      {
-                        "id": "2f53659f-47da-4226-901e-fecfc6419e2f",
+                        "id": "f62ac00e-ebf8-42c6-af96-f775ca18bf9a",
                         "kind": "sticker",
                         "src": "/media/2026/wip-cactus-86ro.png",
-                        "x": 0.72,
-                        "y": 0.62,
-                        "w": 0.3,
-                        "rot": 6,
+                        "x": 0.5,
+                        "y": 0.5,
+                        "w": 0.42,
+                        "rot": -4,
                         "skew": 0,
-                        "z": 2,
+                        "z": 1,
                         "props": {
                           "lift": 0,
                           "tape": "none",
