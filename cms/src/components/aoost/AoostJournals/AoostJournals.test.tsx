@@ -77,4 +77,12 @@ describe("AoostJournals cover materials", () => {
     expect(["none", "kraft", "leather"].map(ok)).toEqual([true, true, true]);
     expect(ok("paper")).toBe(false);
   });
+  it("carries the window light pieces (gap and room) unless switched off", () => {
+    const on = renderNode("AoostJournals", d);
+    expect(on).toContain('class="jr-light jl-gap"');
+    expect(on).toContain('class="jr-light jl-room"');
+    expect(on).toContain("/art/aoost_mat_window2_sunlight_3000x1650.webp");
+    expect(renderNode("AoostJournals", { ...d, windowLight: false })).not.toContain("jr-light");
+    expect(AoostJournals.css).toContain(".ao .jl-room .jl-sun{mix-blend-mode:screen;opacity:.7}");
+  });
 });

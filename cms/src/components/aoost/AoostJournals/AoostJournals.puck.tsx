@@ -84,4 +84,5 @@ export const fields: Fields<AoostJournalsContent> = {
     getItemSummary: (j) => withThumb(j.mockup || j.cover, j.title || "Journal"),
   },
   mat: matField,
+  windowLight: onOff("Window light continuing from the Projects shadow"),
 };
