@@ -91,7 +91,8 @@
             "dotTextSize": 40,
             "dotLook": "glassblock",
             "phantoms": true,
-            "phantomRate": "sometimes"
+            "phantomRate": "sometimes",
+            "overlay": "off"
           },
           "style": {
             "base": {},
@@ -377,7 +378,7 @@
                 "tilt": 4,
                 "pages": [],
                 "hidden": false,
-                "mockup": "/media/2026/aoost-clear-journal-trimmed-r4ez.png"
+                "mockup": "/media/2026/aoost-clear-journal-v2-trimmed-wuz3.png"
               },
               {
                 "title": "sketchbook 3",
