@@ -17,8 +17,8 @@ export function initHero(){
   if(reel&&hrBar){
     /* the strip's own images; left empty it reuses the projects' artwork, like the original */
     const projects=(blockData('projects')||{}).projects||[];
-    const CAROUSEL=(D.reel||[]).filter(r=>r&&r.src),ARTWORK=projects.filter(p=>p&&p.image&&!p.hidden).map(p=>({src:p.image,alt:p.title,plaque:{title:p.title,medium:p.medium,year:p.year,note:p.note,link:p.link}}));
-    const REEL=(CAROUSEL.length?CAROUSEL:ARTWORK).map(r=>({src:r.src,alt:r.alt,plaque:r.plaque,tone:r.tone}));
+    const CAROUSEL=(D.reel||[]).filter(r=>r&&r.src),ARTWORK=projects.filter(p=>p&&p.image&&!p.hidden).map(p=>({src:p.image,alt:p.title,title:p.title,date:p.year?String(p.year):'',plaque:{title:p.title,medium:p.medium,year:p.year,note:p.note,link:p.link}}));
+    const REEL=(CAROUSEL.length?CAROUSEL:ARTWORK).map(r=>({src:r.src,alt:r.alt,plaque:r.plaque,tone:r.tone,title:r.title,date:r.date}));
     const reelItems=REEL.length?REEL:[{fnArt:monkey},{ph:PH[0]},{fnArt:pinkField},{ph:PH[1]},{fnArt:skyField},{ph:PH[2]},{fnArt:orangeField},{ph:PH[4]}];
     reel.innerHTML='';
     reelItems.forEach((it,i)=>{const b=document.createElement('button');b.className='hr-slide';b.setAttribute('aria-label','Open artwork '+(i+1)+' of '+reelItems.length);
@@ -42,9 +42,17 @@ export function initHero(){
           res('#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join(''));}catch(e){res('#F3EFE6');}};
         im.onerror=()=>res('#F3EFE6');im.src=it.src;});};
     let overAt=-1;
+    let overTexts=[];try{overTexts=JSON.parse(over&&over.dataset.texts||'[]');}catch(e){}
+    const pad2=n=>String(n).padStart(2,'0');
     function overSlide(i){if(!over||i===overAt)return;overAt=i;const it=reelItems[i]||{},mode=over.dataset.over;
+      /* this artwork's words: its title and date, else the fallback the page was built with */
+      const x=overTexts[i]||{t:it.title||(overTexts[0]&&overTexts[0].t)||'',d:it.date||''};
+      over.querySelectorAll('[data-ov="title"]').forEach(el=>{el.textContent=x.t;el.style.setProperty('--ch',Math.max(3,x.t.length));});
+      over.querySelectorAll('[data-ov="date"]').forEach(el=>{el.textContent=x.d;});
+      over.querySelectorAll('[data-ov="count"]').forEach(el=>{el.textContent=pad2(i+1)+' / '+pad2(reelItems.length);});
+      over.querySelectorAll('[data-ov="kick"]').forEach(el=>{el.textContent=mode==='difference'&&!x.d?'':pad2(i+1)+(x.d?' · '+x.d:'');});
       if(mode==='cutout'){const cut=over.querySelector('.ov-cut');if(cut)cut.style.setProperty('--art',it.src?'url("'+it.src+'")':'none');}
-      else if(mode==='tone'){toneOf(i).then(c=>{if(overAt===i)over.style.setProperty('--tone',c);});const k=over.querySelector('.ov-kick');if(k)k.textContent=String(i+1).padStart(2,'0')+(it.alt?' · '+it.alt:'');}
+      else if(mode==='tone'){toneOf(i).then(c=>{if(overAt===i)over.style.setProperty('--tone',c);});}
       else if(mode==='handwritten'){const hs=over.querySelectorAll('.ov-hw');if(!hs.length)return;const on=hs[i%hs.length];hs.forEach(h=>{if(h!==on)h.classList.remove('on');});on.classList.remove('on');void on.getBoundingClientRect();on.classList.add('on');}}
     overSlide(0);
     let hrIdx=0,hrT0=performance.now(),hrHold=0,hrOn=true;const HR_DUR=Math.max(1000,(+D.reelSeconds||5.2)*1000);

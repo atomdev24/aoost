@@ -19,6 +19,10 @@ export const AoostHeroContent = z.object({
   reel: z.array(
     z.object({
       src: z.string(),
+      /** Shown by the text over the artwork. */
+      title: z.string().optional(),
+      /** Shown by the text over the artwork, as written ("2026", "Nov 2026"). */
+      date: z.string().optional(),
       alt: z.string().optional(),
       /** Framing of the artwork, per screen size. */
       frame: ResponsiveFrameFit.optional(),
@@ -31,10 +35,10 @@ export const AoostHeroContent = z.object({
    * "tone": a headline whose accent takes each artwork's colour; "handwritten": a line that writes
    * itself across each piece; "cutout": a paper strip with the wordmark cut out of it. Older content: off.
    */
-  overlay: z.enum(["off", "difference", "tone", "handwritten", "cutout"]).optional(),
-  /** The wordmark (difference, cut-out) or the headline (artwork colour: the part after the first comma takes the colour). */
+  overlay: z.enum(["off", "difference", "tone", "handwritten", "cutout", "minimal"]).optional(),
+  /** Shown when an artwork has no title of its own. */
   overlayText: z.string().optional(),
-  /** Handwritten: one line per artwork, in turn. */
+  /** Handwritten: lines for artworks with no title, in turn. */
   overlayLines: z.array(z.object({ text: z.string() })).optional(),
   /**
    * Matte screen: the artwork seen through a matte display. Shade (darker edges, multiply), glare
@@ -174,13 +178,13 @@ const overlayCss = [
   // Difference: white text that inverts whatever is behind it; the corner labels follow suit.
   `.ao .hr-over[data-over="difference"]{mix-blend-mode:difference}`,
   `.ao .hero-rect[data-over="difference"] .hr-top{background:none;mix-blend-mode:difference}`,
-  `.ao .ov-word{position:absolute;left:clamp(14px,3vw,40px);bottom:-.16em;color:#fff;font:700 clamp(96px,23vw,360px)/1 var(--display);letter-spacing:-.045em;white-space:nowrap}`,
+  `.ao .ov-word{position:absolute;left:clamp(14px,3vw,40px);bottom:-.16em;color:#fff;font:700 min(clamp(96px,23vw,360px),calc(170vw / var(--ch,5)))/1 var(--display);letter-spacing:-.045em;white-space:nowrap}`,
+  `.ao .ov-meta{position:absolute;left:clamp(16px,3vw,42px);top:clamp(52px,8svh,76px);color:#fff;font:500 12px/1.3 var(--mono,ui-monospace,monospace);letter-spacing:.14em;text-transform:uppercase}`,
   // Artwork colour: a soft shade from the left (from below on phones), a headline whose accent takes the artwork's colour.
   `.ao .hr-over[data-over="tone"]{display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:14px;padding:0 clamp(18px,4vw,56px) clamp(34px,7svh,72px);background:linear-gradient(90deg,rgba(0,0,0,.72),rgba(0,0,0,.35) 38%,rgba(0,0,0,0) 64%)}`,
   `@media (max-width:640px){.ao .hr-over[data-over="tone"]{background:linear-gradient(0deg,rgba(0,0,0,.78),rgba(0,0,0,.3) 50%,rgba(0,0,0,0) 72%)}}`,
   `.ao .ov-kick{font:500 12px/1.3 var(--mono,ui-monospace,monospace);letter-spacing:.14em;text-transform:uppercase;color:var(--tone,#F3EFE6);transition:color .9s ease}`,
-  `.ao .ov-head{margin:0;max-width:min(660px,92%);font:700 clamp(38px,6.4vw,92px)/.95 var(--display);letter-spacing:-.035em;color:#F3EFE6}`,
-  `.ao .ov-head em{font-style:normal;color:var(--tone,#F3EFE6);transition:color .9s ease}`,
+  `.ao .ov-head{margin:0;max-width:min(760px,92%);font:700 clamp(38px,6.4vw,92px)/.95 var(--display);letter-spacing:-.035em;color:var(--tone,#F3EFE6);transition:color .9s ease}`,
   `.ao .ov-rule{display:block;width:72px;height:4px;border-radius:2px;background:var(--tone,#F3EFE6);transition:background-color .9s ease}`,
   // Handwritten: the line traces itself, then fills in, then the underline draws.
   `.ao .ov-hw{position:absolute;left:clamp(10px,4vw,60px);bottom:clamp(18px,7svh,90px);width:min(88%,980px);height:auto;overflow:visible;transform:rotate(-4deg);transform-origin:0 100%}`,
@@ -188,15 +192,22 @@ const overlayCss = [
   `.ao .ov-hw path{fill:none;stroke:#F3EFE6;stroke-width:5;stroke-linecap:round;stroke-dasharray:1200;stroke-dashoffset:1200;opacity:0}`,
   `.ao .ov-hw.on text{opacity:1;animation:ov-draw 2.4s cubic-bezier(.6,.1,.3,1) forwards,ov-ink .7s 1.9s ease forwards}`,
   `.ao .ov-hw.on path{opacity:.9;animation:ov-draw 1s 2.2s ease-out forwards}`,
-  `@media (max-width:640px){.ao .ov-hw{left:8px;width:calc(100% - 16px);transform:rotate(-3deg)}.ao .ov-word{font-size:30vw}}`,
+  `@media (max-width:640px){.ao .ov-hw{left:8px;width:calc(100% - 16px);transform:rotate(-3deg)}.ao .ov-word{font-size:min(30vw,calc(190vw / var(--ch,5)))}}`,
   `@keyframes ov-draw{to{stroke-dashoffset:0}}`,
   `@keyframes ov-ink{to{fill:#F3EFE6;stroke-width:0}}`,
   `@media (prefers-reduced-motion:reduce){.ao .ov-hw.on text{animation:none;fill:#F3EFE6;stroke-width:0;stroke-dashoffset:0}.ao .ov-hw.on path{animation:none;stroke-dashoffset:0}}`,
   // Cut-out: a paper strip along the bottom with the wordmark cut out, showing the artwork through it.
   `.ao .hero-rect[data-over="cutout"]{container-type:size}`,
   `.ao .ov-band{position:absolute;left:0;right:0;bottom:0;height:28%;background:var(--c-bone,#F3EFE6)}`,
-  `.ao .ov-cut{position:absolute;inset:0;display:flex;align-items:flex-end;padding:0 clamp(12px,3vw,36px) 2cqh;clip-path:inset(72% 0 0 0);background-image:var(--art);background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;color:transparent;font:700 min(34cqh,38cqw)/.78 var(--display);letter-spacing:-.05em;white-space:nowrap}`,
+  `.ao .ov-cut{position:absolute;inset:0;display:flex;align-items:flex-end;padding:0 clamp(12px,3vw,36px) 0;clip-path:inset(72% 0 0 0);background-image:var(--art);background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;color:transparent;font:700 min(26cqh,38cqw,calc(170cqw / var(--ch,5)))/1 var(--display);letter-spacing:-.05em;white-space:nowrap}`,
+  `.ao .ov-band-meta{position:absolute;right:clamp(14px,3vw,40px);bottom:calc(28% - 34px);color:#141414;font:500 12px/1.3 var(--mono,ui-monospace,monospace);letter-spacing:.12em;text-transform:uppercase;text-align:right}`,
   `.ao .hero-rect[data-over="cutout"] .hr-bar{display:none}`,
+  // Minimal: a small title and date, on the left, halfway down, in paper white with a soft shadow.
+  `.ao .hr-over[data-over="minimal"]{display:flex;align-items:center;padding-left:clamp(16px,4vw,56px);color:#F3EFE6;text-shadow:0 1px 2px rgba(0,0,0,.45),0 0 18px rgba(0,0,0,.35)}`,
+  `.ao .ov-min{display:flex;flex-direction:column;gap:6px;max-width:min(360px,70%)}`,
+  `.ao .ov-min .ov-idx,.ao .ov-min .ov-d{font:500 12px/1.4 var(--mono,ui-monospace,monospace);letter-spacing:.14em;text-transform:uppercase;opacity:.8}`,
+  `.ao .ov-min .ov-t{font:500 clamp(15px,1.35vw,19px)/1.3 var(--display);letter-spacing:-.005em}`,
+  `.ao .hr-over [data-ov]:empty{display:none}`,
 ].join("\n") + "\n";
 
 export const OVERLAY_TEXT = { tone: "Things I make, when I get to them.", word: "aoost" };
@@ -217,56 +228,91 @@ function HandLine({ text, on }: { text: string; on: boolean }) {
   );
 }
 
+const pad2 = (n: number) => String(n).padStart(2, "0");
+/** "03 · Nov 2026" */
+const kick = (i: number, date: string) => pad2(i + 1) + (date ? ` · ${date}` : "");
+
+/**
+ * What each artwork says over itself: its own title and date (set on the artwork in the reel),
+ * else the fallback text. hero.js reads the list (data-texts) and swaps the words as the reel moves.
+ */
+export function overlayTexts(content: AoostHeroContent): { t: string; d: string }[] {
+  const mode = content.overlay ?? "off";
+  const lines = (content.overlayLines ?? []).map((l) => l.text).filter(Boolean);
+  const fallback = (k: number) =>
+    mode === "handwritten" ? (lines.length ? lines : OVERLAY_LINES)[k % (lines.length || OVERLAY_LINES.length)]! : content.overlayText || (mode === "tone" ? OVERLAY_TEXT.tone : mode === "minimal" ? "" : OVERLAY_TEXT.word);
+  const reel = content.reel.filter((r) => r.src);
+  return (reel.length ? reel : [{ src: "" }]).map((r: { title?: string; date?: string }, k) => ({ t: r.title?.trim() || fallback(k), d: r.date?.trim() || "" }));
+}
+
 /** The text over the artwork (hero.js keeps it in step with the reel on the site). */
 function HeroOverlay({ content }: { content: AoostHeroContent }) {
   const mode = content.overlay ?? "off";
   if (mode === "off") return null;
   const first = content.reel.find((r) => r.src);
+  const texts = overlayTexts(content);
+  const n = content.reel.filter((r) => r.src).length;
+  const { t, d } = texts[0]!;
+  const ch = { "--ch": Math.max(3, t.length) } as CSSProperties;
+  const common = { className: "hr-over", "data-over": mode, "data-texts": JSON.stringify(texts) };
   if (mode === "difference")
     return (
-      <div className="hr-over" data-over="difference" aria-hidden="true">
-        <span className="ov-word">{content.overlayText || OVERLAY_TEXT.word}</span>
+      <div {...common} aria-hidden="true">
+        <span className="ov-meta" data-ov="kick">
+          {d ? kick(0, d) : ""}
+        </span>
+        <span className="ov-word" data-ov="title" style={ch}>
+          {t}
+        </span>
       </div>
     );
   if (mode === "cutout")
     return (
-      <div className="hr-over" data-over="cutout" aria-hidden="true">
+      <div {...common} aria-hidden="true">
         <i className="ov-band" />
-        <span className="ov-cut" style={first ? ({ "--art": `url("${first.src}")` } as CSSProperties) : undefined}>
-          {content.overlayText || OVERLAY_TEXT.word}
+        <span className="ov-cut" data-ov="title" style={{ ...ch, ...(first ? { "--art": `url("${first.src}")` } : {}) } as CSSProperties}>
+          {t}
+        </span>
+        <span className="ov-band-meta">
+          <span data-ov="date">{d}</span>
+          {d ? <br /> : null}
+          <span data-ov="count">{`${pad2(1)} / ${pad2(Math.max(1, n))}`}</span>
         </span>
       </div>
     );
-  if (mode === "tone") {
-    const text = content.overlayText || OVERLAY_TEXT.tone;
-    const cut = text.indexOf(",");
+  if (mode === "tone")
     return (
-      <div className="hr-over" data-over="tone" style={first?.tone ? ({ "--tone": first.tone } as CSSProperties) : undefined}>
-        <span className="ov-kick" aria-hidden="true">
-          01{first?.alt ? ` · ${first.alt}` : ""}
+      <div {...common} style={first?.tone ? ({ "--tone": first.tone } as CSSProperties) : undefined}>
+        <span className="ov-kick" data-ov="kick" aria-hidden="true">
+          {kick(0, d)}
         </span>
-        <p className="ov-head">
-          {cut > 0 ? (
-            <>
-              {text.slice(0, cut + 1)} <em>{text.slice(cut + 1).trim()}</em>
-            </>
-          ) : (
-            text
-          )}
+        <p className="ov-head" data-ov="title">
+          {t}
         </p>
         <i className="ov-rule" aria-hidden="true" />
       </div>
     );
-  }
-  const lines = (content.overlayLines ?? []).map((l) => l.text).filter(Boolean);
-  const shown = lines.length ? lines : OVERLAY_LINES;
+  if (mode === "minimal")
+    return (
+      <div {...common}>
+        <div className="ov-min">
+          <span className="ov-idx" data-ov="count" aria-hidden="true">{`${pad2(1)} / ${pad2(Math.max(1, n))}`}</span>
+          <span className="ov-t" data-ov="title">
+            {t}
+          </span>
+          <span className="ov-d" data-ov="date">
+            {d}
+          </span>
+        </div>
+      </div>
+    );
   return (
-    <div className="hr-over" data-over="handwritten">
+    <div {...common}>
       <link rel="stylesheet" href={HW_FONT} />
-      {shown.map((t, i) => (
-        <HandLine key={i} text={t} on={i === 0} />
+      {texts.map((x, i) => (
+        <HandLine key={i} text={x.t} on={i === 0} />
       ))}
-      <span className="sr">{shown.join(". ")}</span>
+      <span className="sr">{texts.map((x) => x.t).join(". ")}</span>
     </div>
   );
 }
