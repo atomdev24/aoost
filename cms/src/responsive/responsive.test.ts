@@ -162,6 +162,13 @@ describe("css generation", () => {
     expect(css).toBe(".n-a{width:100%}\n.n-b{opacity:0.5}\n@media (min-width:900px){\n.n-a{width:50%}\n}");
     expect(css.match(/@media/g)).toHaveLength(1);
   });
+  it("darkens and blurs a picture, per screen size", () => {
+    const sheet = new Sheet();
+    addNodeCss(sheet, { id: "p", type: "Image", content: {}, style: { base: { shade: 40 }, desktop: { blur: 12 } } });
+    const css = sheet.toString();
+    expect(css).toContain(".n-p .shade{background:rgba(0,0,0,0.4);-webkit-backdrop-filter:none;backdrop-filter:none}");
+    expect(css).toMatch(/@media \(min-width:900px\)\{[^]*\.n-p \.shade\{-webkit-backdrop-filter:blur\(12px\);backdrop-filter:blur\(12px\)\}/);
+  });
   it("emits no media query when nothing is overridden", () => {
     const sheet = new Sheet();
     addNodeCss(sheet, { id: "a", type: "Text", content: {}, style: { base: { width: "100%" } } });
