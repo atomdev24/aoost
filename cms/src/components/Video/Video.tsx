@@ -57,14 +57,22 @@ export const Video = defineComponent<VideoContent>({
       // (without a poster of our own, YouTube's thumbnail picture stands in).
       const play = content.play ?? "classic";
       const ytId = info.provider === "youtube" ? info.src.split("/").pop() : undefined;
-      const poster = content.poster || (content.play && ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "");
+      // YouTube's full-size thumbnail (1280 wide); the small one only if a video has none (runtime/video.ts, or onError in the editor).
+      const poster = content.poster || (content.play && ytId ? `https://i.ytimg.com/vi/${ytId}/maxresdefault.jpg` : "");
       if (poster) {
         const name = content.title?.trim();
         const channel = content.channel?.trim();
         return (
           <div className="frame vid">
             <button type="button" className={`vid-facade vid-p-${play}`} data-video-embed={ctx.editing ? undefined : `${info.src}${params}&autoplay=1`} aria-label={`Play ${name || label}`}>
-              <img className="media" {...(poster.startsWith("/") ? imageSources(poster) : { src: poster })} alt="" loading="lazy" decoding="async" />
+              <img
+                className="media"
+                {...(poster.startsWith("/") ? imageSources(poster) : { src: poster })}
+                {...(content.poster ? {} : { "data-yt-fallback": poster.replace("maxresdefault", "hqdefault"), onError: (e: React.SyntheticEvent<HTMLImageElement>) => (e.currentTarget.src = e.currentTarget.dataset.ytFallback!) })}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
               {name || channel ? (
                 <span className="vid-chan">
                   <span className="vid-av">{content.avatar ? <img src={content.avatar} alt="" /> : (channel || name || "?").slice(0, 1).toUpperCase()}</span>

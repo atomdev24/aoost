@@ -37,11 +37,11 @@ const brackets = (
 /** A label's size: fixed, or growing and shrinking with its ring (the default ring is 8% of the width). */
 export const labelScale = (r: number, grow: boolean) => (grow ? Math.round(Math.min(2.2, Math.max(0.6, r / 8)) * 100) / 100 : 1);
 
-export function Annotations({ marks, style, editing, grow = false }: { marks: Mark[]; style: (typeof MARK_STYLES)[number]; editing: boolean; grow?: boolean }): ReactElement | null {
+export function Annotations({ marks, style, editing, grow = false, delay }: { marks: Mark[]; style: (typeof MARK_STYLES)[number]; editing: boolean; grow?: boolean; delay?: number }): ReactElement | null {
   if (!marks.length) return null;
   const sorted = marks.map((m, i) => ({ m, i }));
   return (
-    <div className={`ann ann-${style}${editing ? " in ann-edit" : ""}`} data-ann="" aria-hidden="true">
+    <div className={`ann ann-${style}${editing ? " in ann-edit" : ""}`} data-ann="" data-delay={delay ? String(delay) : undefined} aria-hidden="true">
       {sorted.map(({ m, i }) => {
         const c = FRUIT_COLOURS[m.colour];
         return (

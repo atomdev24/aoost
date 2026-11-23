@@ -13,7 +13,10 @@ export const css = `
 .frame>a.press:hover .media{filter:brightness(1.06)}
 .frame>a:focus-visible{outline:3px solid var(--c-rust);outline-offset:-3px}
 /* Parallax on a picture: it slides inside its frame (runtime/effects.ts); the frame stays put. */
-.media.drifting{translate:0 var(--drift,0px);scale:var(--drift-scale,1);transform-origin:var(--drift-origin,50% 50%);will-change:translate}
+.frame>.drift{position:relative;width:100%;height:100%}
+.drift>.media,.drift>a>.media{display:block;width:100%;height:100%;object-fit:cover}
+.drift>a{display:block;width:100%;height:100%}
+.drift.drifting{translate:0 var(--drift,0px);scale:var(--drift-scale,1);transform-origin:var(--drift-origin,50% 50%);will-change:translate}
 @media (prefers-reduced-motion:reduce){.n:has(>.frame>a.press:active){scale:none}}
 .frame-empty{display:flex;align-items:center;justify-content:center;min-height:120px;border:1.5px dashed #9C9486;border-radius:4px;color:var(--c-muted);font:500 13px var(--font-body)}
 `;

@@ -25,6 +25,8 @@ export const ImageContent = z.object({
   markStyle: z.enum(MARK_STYLES).optional(),
   /** Labels grow and shrink with their rings ("scale"), or stay one size. */
   markLabels: z.enum(["fixed", "scale"]).optional(),
+  /** Seconds to wait (after the picture comes into view) before the readings play. */
+  markDelay: z.number().min(0).max(20).optional(),
 });
 export type ImageContent = z.infer<typeof ImageContent>;
 
@@ -65,7 +67,6 @@ export const Image = defineComponent<ImageContent>({
         fetchPriority={content.eager ? "high" : undefined}
         decoding="async"
         draggable={false}
-        data-parallax-inner=""
       />
     );
     const l = content.link;
@@ -80,10 +81,23 @@ export const Image = defineComponent<ImageContent>({
     ) : (
       img
     );
+    const marks = content.marks?.length ? (
+      <Annotations marks={content.marks} style={content.markStyle ?? "ring"} editing={ctx.editing} grow={content.markLabels === "scale"} delay={content.markDelay} />
+    ) : null;
     return (
       <figure className="frame" {...(content.lightbox && !href ? { "data-lightbox": content.src, "data-caption": content.caption ?? content.alt } : {})}>
-        {inner}
-        {content.marks?.length ? <Annotations marks={content.marks} style={content.markStyle ?? "ring"} editing={ctx.editing} grow={content.markLabels === "scale"} /> : null}
+        {/* With parallax, the picture and its readings slide together inside the frame (runtime/effects.ts). */}
+        {node.effects?.parallax ? (
+          <div className="drift" data-parallax-inner="">
+            {inner}
+            {marks}
+          </div>
+        ) : (
+          <>
+            {inner}
+            {marks}
+          </>
+        )}
         {content.caption ? <figcaption className="t-small">{content.caption}</figcaption> : null}
       </figure>
     );

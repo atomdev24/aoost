@@ -13,7 +13,7 @@ describe("Video cover for YouTube and Vimeo", () => {
     expect(html).not.toContain("<iframe");
   });
   it("uses YouTube's thumbnail when a play style is set without a poster", () => {
-    expect(renderNode("Video", { ...base, play: "disc" })).toContain("https://i.ytimg.com/vi/27Aj5-LUDUU/hqdefault.jpg");
+    expect(renderNode("Video", { ...base, play: "disc" })).toContain("https://i.ytimg.com/vi/27Aj5-LUDUU/maxresdefault.jpg");
   });
   it("puts the length inside the pill, and never starts the player while editing", () => {
     const html = renderNode("Video", { ...base, poster: "/art/a.webp", play: "pill", duration: "2:40" }, { editing: true });
