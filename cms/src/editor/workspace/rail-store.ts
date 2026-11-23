@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export type PanelId = "layers" | "pages" | "insert" | "media" | "comments" | "history" | "nav" | "theme" | "fonts" | "global";
+export type PanelId = "layers" | "pages" | "insert" | "media" | "comments" | "history" | "nav" | "theme" | "fonts" | "global" | "templates";
 
 export type RailState = {
   active: PanelId | null;
@@ -35,7 +35,7 @@ const remember = (key: string, value: string) => {
 };
 
 const initialPanel = remembered<string>("aoost.rail.panel", "layers");
-const validPanels: PanelId[] = ["layers", "pages", "insert", "media", "history", "nav", "theme", "fonts", "global"];
+const validPanels: PanelId[] = ["layers", "pages", "insert", "media", "history", "nav", "theme", "fonts", "global", "templates"];
 // On a phone a flyout covers most of the canvas, so the editor opens with none.
 const phoneAtLoad = typeof window !== "undefined" && window.matchMedia?.("(max-width: 767px)").matches;
 const initialActive = !phoneAtLoad && validPanels.includes(initialPanel as PanelId) ? (initialPanel as PanelId) : null;

@@ -1,5 +1,6 @@
 import { fields as Audio } from "./Audio/Audio.puck";
 import { fields as Button } from "./Button/Button.puck";
+import { fields as Cards } from "./Cards/Cards.puck";
 import { fields as Code } from "./Code/Code.puck";
 import { fields as DiaryList } from "./DiaryList/DiaryList.puck";
 import { fields as Divider } from "./Divider/Divider.puck";
@@ -29,4 +30,4 @@ import { fields as AoostFooter } from "./aoost/AoostFooter/AoostFooter.puck";
 
 /** Editor-only: each component's content fields. Kept apart from registry.ts so the Worker never bundles editor UI. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const contentFields: Record<string, Record<string, any>> = { Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, DiaryList, PlaylistCard, Footer, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout };
+export const contentFields: Record<string, Record<string, any>> = { Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, Cards, DiaryList, PlaylistCard, Footer, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout };

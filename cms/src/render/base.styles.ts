@@ -17,6 +17,7 @@ main{display:block;overflow-x:clip}
 .s[data-kind="canvas"]>.si>.n{position:absolute;--cs:calc(100cqw / var(--cw))}
 .s[data-kind="canvas"]>.si>.n>*{width:100%;height:100%}
 .s-bg{position:absolute;inset:0;overflow:hidden;z-index:0}
+.s-bg picture{position:absolute;inset:0}
 .s-bg img,.s-bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .s-bg video{display:none}
 .s-bg-tint{position:absolute;inset:0}

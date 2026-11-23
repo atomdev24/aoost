@@ -10,6 +10,8 @@ export const ThemePanel = part("Theme panel", () => import("./ui/ThemePanel").th
 export const FontsPanel = part("Fonts panel", () => import("./ui/FontsPanel").then((m) => m.FontsPanel));
 export const LibraryPanel = part("Global panel", () => import("./ui/LibraryPanel").then((m) => m.LibraryPanel));
 export const PublishSheet = part("publish sheet", () => import("./workspace/PublishSheet").then((m) => m.PublishSheet));
+export const TemplatesPanel = part("Templates panel", () => import("./templates/TemplatesPanel").then((m) => m.TemplatesPanel));
+export const DesignsBoard = part("designs side by side", () => import("./templates/DesignsBoard").then((m) => m.DesignsBoard));
 export const CompareView = part("compare view", () => import("./workspace/CompareView").then((m) => m.CompareView));
 // The palette and the shortcuts sheet stay in the start-up file: ⌘K then typing at once must not lose letters.
 export const GlobalPanel = part("global block settings", () => import("./ui/GlobalPanel").then((m) => m.GlobalPanel));

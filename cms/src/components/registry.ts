@@ -1,6 +1,7 @@
 import { registerContentSchema } from "../schema/validate";
 import { Audio } from "./Audio/Audio";
 import { Button } from "./Button/Button";
+import { Cards } from "./Cards/Cards";
 import { Code } from "./Code/Code";
 import { DiaryList } from "./DiaryList/DiaryList";
 import { Divider } from "./Divider/Divider";
@@ -31,7 +32,7 @@ import type { ComponentDef } from "./types";
 
 /** Every component the renderer and the editor know about. Add new ones here (and in fields.ts). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, DiaryList, PlaylistCard, Footer, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout];
+export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, Cards, DiaryList, PlaylistCard, Footer, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout];
 
 export const componentMap = new Map(components.map((c) => [c.type, c]));
 for (const c of components) registerContentSchema(c.type, c.schema);

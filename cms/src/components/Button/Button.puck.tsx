@@ -14,6 +14,7 @@ export const fields: Fields<ButtonContent> = {
       { label: "Text", value: "text" },
     ],
   },
+  color: { type: "text", label: "Colour (optional, e.g. #0075E1)" },
   newTab: {
     type: "radio",
     label: "Open in a new tab",

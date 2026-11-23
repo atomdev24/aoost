@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ownerPage, renameVariant } from "../../model/variants";
+import { ownerPage, renameVariant, variantsOf } from "../../model/variants";
+import { openDesigns } from "../templates/designs-open";
 import { currentPage, setPage, update, useEditor } from "../store";
 import { compareCurrentVariant, electCurrentVariant, useStaging } from "./staging";
 
@@ -48,6 +49,11 @@ export function VariantBand() {
       <button type="button" className="ed-btn ed-btn-sm ed-desk-only" title="Compare with the live page, side by side" onClick={() => void compareCurrentVariant()}>
         Compare
       </button>
+      {variantsOf(site, owner.id).length > 1 ? (
+        <button type="button" className="ed-btn ed-btn-sm ed-desk-only" title="Every design of this page side by side" onClick={() => openDesigns(owner.id)}>
+          All designs
+        </button>
+      ) : null}
       <button type="button" className="ed-btn ed-btn-sm" onClick={() => setPage(owner.id)}>
         Back<span className="ed-desk-only"> to {owner.title}</span>
       </button>

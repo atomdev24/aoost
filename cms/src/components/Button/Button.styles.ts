@@ -7,4 +7,5 @@ export const css = `
 .btn-outline:hover{background:var(--c-ink);color:var(--c-bone)}
 .btn-text{border-color:transparent;padding:0 4px;text-decoration:underline;text-underline-offset:4px}
 .btn-text:hover{color:var(--c-rust)}
+.btn-tint.btn-filled:hover{filter:brightness(1.1)}
 `;
