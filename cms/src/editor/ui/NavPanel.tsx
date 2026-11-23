@@ -3,6 +3,8 @@ import { addNavItem, MENU_CHILD_TYPES, moveNavItem, NAV_TYPE_LABELS, removeNavIt
 import { ICON_NAMES } from "../../render/icons";
 import { NAV_ITEM_TYPES, type NavItem, type Site } from "../../schema";
 import { LinkField } from "../fields/LinkField";
+import { MediaInput } from "../fields/media";
+import { applyAeroboticsNav } from "../../model/nav-presets";
 import { megaPageId, setPage, update, useEditor } from "../store";
 import { Segmented, Select, TextInput, Toggle } from "./kit";
 
@@ -52,6 +54,39 @@ export function NavPanel() {
             setOpen(made);
           }}
         />
+      </div>
+
+      <div className="ed-side-section ed-side-rule">
+        <h3>Look</h3>
+      </div>
+      <div className="ed-side-body">
+        <div className="ed-row">
+          <span className="ed-label">Style</span>
+          <Select
+            ariaLabel="Nav style"
+            value={nav.style === "bar" ? "bar" : "pill"}
+            options={[
+              { value: "pill", label: "Floating pill" },
+              { value: "bar", label: "Wide bar (Aerobotics)" },
+            ]}
+            onChange={(style) => style && update((s) => setNavBehaviour(s, { style }), "Change nav style")}
+          />
+        </div>
+        <MediaInput label="Logo picture" kind="image" value={nav.logoImage} onChange={(logoImage) => update((s) => setNavBehaviour(s, { logoImage: logoImage || undefined }), "Change nav logo")} />
+        {nav.style === "bar" ? (
+          <div className="ed-row">
+            <span className="ed-label">Accent colour</span>
+            <TextInput ariaLabel="Accent colour" value={nav.accent ?? ""} placeholder="#0075E1" onCommit={(accent) => update((s) => setNavBehaviour(s, { accent: accent.trim() || undefined }), "Change nav accent")} />
+          </div>
+        ) : null}
+        <button
+          type="button"
+          className="ed-btn ed-btn-sm"
+          title="Replace the nav with the aerobotics.com bar: logo, Products menu, links, Login and Request a demo. Everything stays editable."
+          onClick={() => update(applyAeroboticsNav, "Use the Aerobotics nav")}
+        >
+          Use the Aerobotics nav
+        </button>
       </div>
 
       <div className="ed-side-section ed-side-rule">
@@ -247,6 +282,10 @@ function ItemSettings({ item, site, open, setOpen, depth }: { item: NavItem; sit
             </label>
           </div>
           <div className="ed-form-two ed-form-tight">
+            <label className="ed-field">
+              <span className="ed-field-label">Description (in menus)</span>
+              <TextInput value={item.description ?? ""} placeholder="A line under the label" onCommit={(description) => edit(item.id, { description: description.trim() || undefined }, "Change nav description")} />
+            </label>
             <label className="ed-field">
               <span className="ed-field-label">Badge</span>
               <TextInput value={item.badge?.text ?? ""} placeholder="e.g. New" onCommit={(text) => edit(item.id, { badge: text ? { ...item.badge, text } : undefined }, "Change nav badge")} />

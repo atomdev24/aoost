@@ -19,6 +19,7 @@ export type ResolvedItem = {
   children: ResolvedItem[];
   panel?: Section[];
   variant?: "filled" | "outline";
+  description?: string;
   code?: string;
   divider?: boolean;
 };
@@ -65,6 +66,7 @@ export function resolveItem(item: NavItem, ctx: RenderCtx, today: string): Resol
     type: item.type,
     label: item.label?.trim() || targetPage?.title || "",
     ariaLabel: item.ariaLabel?.trim() || undefined,
+    description: item.description?.trim() || undefined,
     href,
     newTab: !!item.newTab,
     external: !!href && /^https?:/i.test(href),
