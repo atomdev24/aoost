@@ -99,7 +99,7 @@
             "screen": {
               "show": true
             },
-            "intro": "session"
+            "intro": "always"
           },
           "style": {
             "base": {},

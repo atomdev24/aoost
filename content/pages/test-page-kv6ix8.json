@@ -7,7 +7,7 @@
   "template": "blank",
   "seo": {},
   "isHome": false,
-  "showInNav": true,
+  "showInNav": false,
   "sections": [
     {
       "id": "s_uqs7sa5a",

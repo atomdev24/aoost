@@ -147,61 +147,11 @@
     "currentMarker": "pill",
     "items": [
       {
-        "id": "nav-work",
-        "type": "page",
-        "target": {
-          "kind": "page",
-          "pageId": "work"
-        },
-        "showOn": "both",
-        "hover": "tint"
-      },
-      {
-        "id": "nav-diary",
-        "type": "page",
-        "target": {
-          "kind": "page",
-          "pageId": "diary"
-        },
-        "showOn": "both",
-        "hover": "tint"
-      },
-      {
-        "id": "nav-playlists",
-        "type": "page",
-        "target": {
-          "kind": "page",
-          "pageId": "playlists"
-        },
-        "showOn": "both",
-        "hover": "tint"
-      },
-      {
-        "id": "nav-rodeo",
-        "type": "page",
-        "target": {
-          "kind": "page",
-          "pageId": "rodeo"
-        },
-        "showOn": "both",
-        "hover": "tint"
-      },
-      {
-        "id": "nav-about",
+        "id": "nav_8y3xmrqp",
         "type": "page",
         "target": {
           "kind": "page",
           "pageId": "about"
-        },
-        "showOn": "both",
-        "hover": "tint"
-      },
-      {
-        "id": "nav_8yobus83",
-        "type": "page",
-        "target": {
-          "kind": "page",
-          "pageId": "test-page-kv6ix8"
         },
         "showOn": "both",
         "hover": "tint"

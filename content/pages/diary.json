@@ -7,7 +7,7 @@
   "template": "diary",
   "seo": {},
   "isHome": false,
-  "showInNav": true,
+  "showInNav": false,
   "sections": [
     {
       "id": "diary-head",

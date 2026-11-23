@@ -7,7 +7,7 @@
   "template": "playlist",
   "seo": {},
   "isHome": false,
-  "showInNav": true,
+  "showInNav": false,
   "sections": [
     {
       "id": "playlists-head",

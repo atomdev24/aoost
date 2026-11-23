@@ -7,7 +7,7 @@
   "template": "gallery",
   "seo": {},
   "isHome": false,
-  "showInNav": true,
+  "showInNav": false,
   "sections": [
     {
       "id": "work-head",
