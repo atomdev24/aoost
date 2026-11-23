@@ -32,6 +32,7 @@ export function resolveLayerIconType(typeOrKind: string): LayerIconType {
     case "AoostPlaylistBand":
     case "AoostDrawingWall":
       return "media";
+    case "TrueFruitSeason":
     case "Embed":
     case "SpotifyEmbed":
     case "Code":

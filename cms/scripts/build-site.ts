@@ -61,6 +61,8 @@ await build({ entryPoints: [resolve(cms, "src/runtime/model-viewer-entry.ts")], 
 
 // The aoost homepage's own scripts (the ported original), loaded only on pages that use those blocks.
 await build({ entryPoints: [resolve(cms, "src/components/aoost/runtime/index.js")], outfile: resolve(dist, "assets/aoost.js"), bundle: true, minify: true, format: "iife", target: "es2020" });
+// The TrueFruit by season block's script (ported from the Framer component), loaded only on pages that use it.
+await build({ entryPoints: [resolve(cms, "src/components/TrueFruitSeason/runtime.ts")], outfile: resolve(dist, "assets/truefruit.js"), bundle: true, minify: true, format: "iife", target: "es2020" });
 // The rodeo's horse-and-rider sprite sheet sits at the repo root; the game loads it from /rider.png.
 if (existsSync(resolve(repo, "rider.png"))) cpSync(resolve(repo, "rider.png"), resolve(dist, "rider.png"));
 
