@@ -13,6 +13,7 @@ export function resolveLayerIconType(typeOrKind: string): LayerIconType {
     case "Button":
     case "DiaryList":
     case "Divider":
+    case "Shape":
     case "Spacer":
     case "AoostJournals":
     case "AoostTools":

@@ -16,6 +16,14 @@ export const css = `
 .frame>.drift{position:relative;width:100%;height:100%}
 .drift>.media,.drift>a>.media{display:block;width:100%;height:100%;object-fit:cover}
 .drift>a{display:block;width:100%;height:100%}
+/* Slow pan (Ken Burns): a gentle, endless sweep, enlarged just enough to never show an edge. */
+.drift.kb{animation:kb-left var(--kb,24s) ease-in-out infinite alternate;will-change:transform}
+.drift.kb-right{animation-name:kb-right}.drift.kb-in{animation-name:kb-in}.drift.kb-out{animation-name:kb-out}
+@keyframes kb-left{from{transform:scale(1.12) translateX(4.5%)}to{transform:scale(1.12) translateX(-4.5%)}}
+@keyframes kb-right{from{transform:scale(1.12) translateX(-4.5%)}to{transform:scale(1.12) translateX(4.5%)}}
+@keyframes kb-in{from{transform:scale(1.02)}to{transform:scale(1.16)}}
+@keyframes kb-out{from{transform:scale(1.16)}to{transform:scale(1.02)}}
+@media (prefers-reduced-motion:reduce){.drift.kb{animation:none}}
 .drift.drifting{translate:0 var(--drift,0px);scale:var(--drift-scale,1);transform-origin:var(--drift-origin,50% 50%);will-change:translate}
 @media (prefers-reduced-motion:reduce){.n:has(>.frame>a.press:active){scale:none}}
 .frame-empty{display:flex;align-items:center;justify-content:center;min-height:120px;border:1.5px dashed #9C9486;border-radius:4px;color:var(--c-muted);font:500 13px var(--font-body)}

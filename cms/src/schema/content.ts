@@ -12,6 +12,10 @@ export const ScrollEffects = z.object({
   enter: z.enum(["none", "fade", "slide-up", "slide-left", "slide-right", "scale"]).optional(),
   /** -1..1: fraction of scroll distance the node drifts by. 0 = off. */
   parallax: z.number().min(-1).max(1).optional(),
+  /** Slow pan (the Ken Burns effect): the picture keeps drifting this way, back and forth. */
+  pan: z.enum(["left", "right", "in", "out"]).optional(),
+  /** Seconds for one sweep of the slow pan. */
+  panSeconds: z.number().min(4).max(120).optional(),
   sticky: z.boolean().optional(),
   stickyTop: z.number().optional(),
 });

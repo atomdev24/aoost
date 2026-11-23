@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { z } from "zod";
-import { annotationCss, FRUIT_COLOURS, MARK_STYLES } from "../Image/annotations";
+import { annotationCss, MARK_STYLES, ReadingChips } from "../Image/annotations";
 import { defineComponent } from "../types";
 
 /**
@@ -14,6 +14,8 @@ import { defineComponent } from "../types";
 export const FruitReadingContent = z.object({
   size: z.number().min(0).max(999),
   colour: z.enum(["green", "break", "mostly", "orange"]),
+  /** The colour callout's block, when it should differ from the stage's usual colour. */
+  swatch: z.string().optional(),
   look: z.enum(MARK_STYLES),
   side: z.enum(["right", "left"]),
   labels: z.enum(["fixed", "scale"]),
@@ -36,7 +38,6 @@ export const FruitReading = defineComponent<FruitReadingContent>({
 .fr .ann-m{left:50%;top:50%}
 `,
   Render: ({ content, ctx }) => {
-    const c = FRUIT_COLOURS[content.colour];
     const a = content.anchor;
     return (
       <div className="fr" data-fr="" data-labels={content.labels} {...(a ? { "data-anchor": a.id, "data-ax": String(a.x), "data-ay": String(a.y) } : {})}>
@@ -54,13 +55,7 @@ export const FruitReading = defineComponent<FruitReadingContent>({
               <span className="ann-dot" />
             )}
             {content.look === "brackets" ? <span className="ann-scan" /> : null}
-            <span className="ann-chip">
-              <small>Size</small>
-              <b data-count={content.size}>{content.size}</b> mm
-              <small className="ann-gap">Colour</small>
-              <span className="ann-sw" style={{ background: c.swatch }} />
-              <b>{c.label}</b>
-            </span>
+            <ReadingChips size={content.size} colour={content.colour} swatch={content.swatch} />
           </span>
         </div>
       </div>
