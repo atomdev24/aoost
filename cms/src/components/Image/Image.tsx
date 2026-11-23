@@ -51,7 +51,7 @@ export function imageSizes(node: Node): string {
 function driftStyle(node: Node, editing: boolean): CSSProperties | undefined {
   const fx = node.effects;
   const s: Record<string, string> = {};
-  if (fx?.pan) s["--kb"] = `${fx.panSeconds ?? 600}s`;
+  if (fx?.pan) s["--kb"] = `${Math.min(fx.panSeconds ?? 180, 180)}s`;
   if (editing && fx?.parallax) {
     const f = fx.parallax;
     s.scale = String(Math.round((1 + Math.abs(f) * 0.45) * 1000) / 1000);
