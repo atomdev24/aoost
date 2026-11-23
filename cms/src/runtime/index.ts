@@ -7,6 +7,7 @@ import { initNav } from "./nav";
 import { initSearch } from "./search";
 import { initVideo } from "./video";
 import { initAnnotations } from "./annotations";
+import { watchAnchors } from "../components/FruitReading/follow";
 
 const start = () => {
   initNav();
@@ -16,6 +17,7 @@ const start = () => {
   initSearch();
   initVideo();
   initAnnotations();
+  watchAnchors(document);
   initLazy();
 };
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);

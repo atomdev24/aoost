@@ -24,7 +24,7 @@ html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!imp
 .ed-h[data-ed-handle="sw"]{left:0;top:100%;cursor:nesw-resize}.ed-h[data-ed-handle="w"]{left:0;top:50%;cursor:ew-resize}
 .ed-guides{position:absolute;inset:0;z-index:999;pointer-events:none}
 /* Keep-proportions switch on a selected layer or picture, just above its top-left corner. */
-.n>.ed-ratio{position:absolute;right:0;left:auto;bottom:100%;z-index:11;display:inline-flex!important;align-items:center;gap:calc(4px * var(--ed-px,1));width:auto!important;height:auto!important;margin:0 0 calc(4px * var(--ed-px,1));padding:calc(2px * var(--ed-px,1)) calc(7px * var(--ed-px,1)) calc(2px * var(--ed-px,1)) calc(5px * var(--ed-px,1));border:0;border-radius:calc(5px * var(--ed-px,1));background:#0A84FF;color:#fff;font:600 calc(11px * var(--ed-px,1))/1.4 -apple-system,system-ui,sans-serif;cursor:pointer;pointer-events:auto!important;transform-origin:100% 100%}
+.n>.ed-ratio{position:absolute;right:0;left:auto;top:100%;z-index:11;display:inline-flex!important;align-items:center;gap:calc(4px * var(--ed-px,1));width:auto!important;height:auto!important;margin:calc(4px * var(--ed-px,1)) 0 0;padding:calc(2px * var(--ed-px,1)) calc(7px * var(--ed-px,1)) calc(2px * var(--ed-px,1)) calc(5px * var(--ed-px,1));border:0;border-radius:calc(5px * var(--ed-px,1));background:#0A84FF;color:#fff;font:600 calc(11px * var(--ed-px,1))/1.4 -apple-system,system-ui,sans-serif;cursor:pointer;pointer-events:auto!important;transform-origin:100% 0}
 .n>.ed-ratio[aria-pressed="false"]{background:#3a3a40}
 .n>.ed-ratio svg{width:calc(12px * var(--ed-px,1));height:calc(12px * var(--ed-px,1))}
 /* Resize handle for a picture in a stacked or grid section: bottom-right corner. */

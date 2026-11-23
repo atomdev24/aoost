@@ -8,6 +8,7 @@ import { Divider } from "./Divider/Divider";
 import { Embed } from "./Embed/Embed";
 import { FileDownload } from "./FileDownload/FileDownload";
 import { Footer } from "./Footer/Footer";
+import { FruitReading } from "./FruitReading/FruitReading";
 import { GalleryGrid } from "./GalleryGrid/GalleryGrid";
 import { Global } from "./Global/Global";
 import { Image } from "./Image/Image";
@@ -33,7 +34,7 @@ import type { ComponentDef } from "./types";
 
 /** Every component the renderer and the editor know about. Add new ones here (and in fields.ts). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, Cards, DiaryList, PlaylistCard, Footer, TrueFruitSeason, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout];
+export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, FruitReading, Cards, DiaryList, PlaylistCard, Footer, TrueFruitSeason, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout];
 
 export const componentMap = new Map(components.map((c) => [c.type, c]));
 for (const c of components) registerContentSchema(c.type, c.schema);
