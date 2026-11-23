@@ -1396,3 +1396,8 @@ body {
   border-radius: 8px;
   background: rgba(10, 132, 255, 0.1);
 }
+
+/* Insert panel: things that go on top of a picture (fruit readings) */
+.ed-overlay-cards { display: flex; flex-direction: column; gap: 6px; padding: 10px 2px 4px; border-top: 1px solid var(--ed-line); }
+.ed-card-overlay { cursor: grab; }
+.ed-card-thumb-ann { display: block; width: 100%; aspect-ratio: 100 / 64; }

@@ -1,0 +1,86 @@
+import type { CSSProperties, ReactElement } from "react";
+import { z } from "zod";
+
+/**
+ * Fruit annotations: readings drawn on top of a picture, like the TrueFruit
+ * scanner overlay. Each mark circles a fruit and a frosted label gives its
+ * reading (size in mm, colour stage). They play in when the picture scrolls
+ * into view (runtime/annotations.ts); the editor shows them settled.
+ */
+export const FRUIT_COLOURS = { green: { label: "Green", swatch: "#6aa53a" }, break: { label: "Colour break", swatch: "#d4c233" }, mostly: { label: "Mostly orange", swatch: "#f0a030" }, orange: { label: "Orange", swatch: "#f28a1c" } } as const;
+export const Mark = z.object({
+  /** Centre, in percent of the picture's frame. */
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  /** Radius, in percent of the frame's width. */
+  r: z.number().min(1).max(40),
+  size: z.number().min(0).max(999),
+  colour: z.enum(["green", "break", "mostly", "orange"]),
+  /** Which side of the fruit the label sits. */
+  side: z.enum(["right", "left"]),
+});
+export type Mark = z.infer<typeof Mark>;
+export const MARK_STYLES = ["ring", "brackets", "pulse"] as const;
+export const NEW_MARK: Mark = { x: 50, y: 50, r: 8, size: 68, colour: "break", side: "right" };
+
+const ring = (
+  <svg className="ann-shape" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="47" pathLength="100" />
+  </svg>
+);
+const brackets = (
+  <svg className="ann-shape" viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M2 24V2h22M76 2h22v22M98 76v22H76M24 98H2V76" />
+  </svg>
+);
+
+export function Annotations({ marks, style, editing }: { marks: Mark[]; style: (typeof MARK_STYLES)[number]; editing: boolean }): ReactElement | null {
+  if (!marks.length) return null;
+  const sorted = marks.map((m, i) => ({ m, i }));
+  return (
+    <div className={`ann ann-${style}${editing ? " in ann-edit" : ""}`} data-ann="" aria-hidden="true">
+      {sorted.map(({ m, i }) => {
+        const c = FRUIT_COLOURS[m.colour];
+        return (
+          <span key={i} className={`ann-m ann-${m.side === "left" || m.x > 74 ? "left" : "right"}`} data-ann-i={i} style={{ left: `${m.x}%`, top: `${m.y}%`, "--r": `${m.r}cqw`, "--d": `${i * 0.65}s` } as CSSProperties}>
+            {style === "ring" ? ring : style === "brackets" ? brackets : <span className="ann-dot" />}
+            {style === "brackets" ? <span className="ann-scan" /> : null}
+            <span className="ann-chip">
+              <small>Size</small>
+              <b data-count={m.size}>{m.size}</b> mm
+              <small className="ann-gap">Colour</small>
+              <span className="ann-sw" style={{ background: c.swatch }} />
+              <b>{c.label}</b>
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+export const annotationCss = `
+.ann{position:absolute;inset:0;z-index:2;container-type:inline-size;pointer-events:none;font-family:var(--font-body)}
+.ann-m{position:absolute;width:calc(var(--r)*2);height:calc(var(--r)*2);translate:-50% -50%}
+.ann-shape{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ann-ring circle{fill:rgba(255,255,255,.08);stroke:#fff;stroke-width:3.5;stroke-dasharray:100;stroke-dashoffset:100}
+.ann-brackets path{fill:none;stroke:#fff;stroke-width:3px;stroke-linecap:round;vector-effect:non-scaling-stroke;opacity:0;scale:1.5;transform-origin:50% 50%}
+.ann-scan{position:absolute;left:0;right:0;top:0;height:3px;border-radius:2px;background:rgba(255,255,255,.85);opacity:0}
+.ann-dot{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px;border-radius:50%;background:#fff;box-shadow:0 0 0 0 rgba(255,255,255,.7);opacity:0}
+.ann-chip{position:absolute;bottom:calc(100% + 6px);left:calc(100% - 6px);padding:6px 10px 7px;border:1px solid rgba(255,255,255,.35);border-radius:10px;background:rgba(16,24,20,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;font-size:11px;line-height:1.25;white-space:nowrap;opacity:0;translate:0 6px;transition:opacity .35s ease,translate .35s cubic-bezier(.2,.8,.2,1)}
+.ann-left .ann-chip{left:auto;right:calc(100% - 6px)}
+.ann-chip small{display:block;font-size:9.5px;opacity:.7}
+.ann-chip .ann-gap{margin-top:4px}
+.ann-chip b{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.ann-sw{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:2px}
+.ann-ring.in circle{transition:stroke-dashoffset .7s ease var(--d);stroke-dashoffset:0}
+.ann-brackets.in path{transition:scale .45s cubic-bezier(.2,.8,.2,1) var(--d),opacity .3s var(--d);scale:1;opacity:1}
+.ann.in .ann-scan{animation:ann-scan .6s ease-in-out calc(var(--d) + .3s) both}
+.ann.in .ann-dot{opacity:1;transition:opacity .2s var(--d);animation:ann-pulse 1.1s ease-out var(--d) 2}
+.ann.in .ann-chip{opacity:1;translate:0 0;transition-delay:calc(var(--d) + .6s)}
+@keyframes ann-scan{0%{opacity:1;top:0}90%{opacity:1}100%{opacity:0;top:calc(100% - 3px)}}
+@keyframes ann-pulse{to{box-shadow:0 0 0 calc(var(--r) - 6px) rgba(255,255,255,0)}}
+.ann-edit .ann-m{pointer-events:auto;cursor:grab}
+.ann-edit .ann-m:active{cursor:grabbing}
+@media (prefers-reduced-motion:reduce){.ann *{transition:none!important;animation:none!important}}
+`;

@@ -4,6 +4,7 @@ import { imageSources } from "../../render/media";
 import { LinkTarget, type Node } from "../../schema/content";
 import { defineComponent } from "../types";
 import { css } from "./Image.styles";
+import { Annotations, annotationCss, Mark, MARK_STYLES } from "./annotations";
 
 export const ImageContent = z.object({
   src: z.string(),
@@ -19,6 +20,9 @@ export const ImageContent = z.object({
   link: LinkTarget.optional(),
   /** With a link: how the picture answers a press ("press": it sinks a little while held). */
   press: z.enum(["press", "none"]).optional(),
+  /** Fruit readings drawn on top (see ./annotations). */
+  marks: z.array(Mark).optional(),
+  markStyle: z.enum(MARK_STYLES).optional(),
 });
 export type ImageContent = z.infer<typeof ImageContent>;
 
@@ -40,7 +44,7 @@ export const Image = defineComponent<ImageContent>({
   framed: true,
   schema: ImageContent,
   defaults: { content: { src: "", alt: "", lightbox: true } },
-  css,
+  css: css + annotationCss,
   Render: ({ node, content, ctx }) => {
     if (!content.src) {
       return ctx.editing ? <div className="frame frame-empty">Choose an image</div> : null;
@@ -77,6 +81,7 @@ export const Image = defineComponent<ImageContent>({
     return (
       <figure className="frame" {...(content.lightbox && !href ? { "data-lightbox": content.src, "data-caption": content.caption ?? content.alt } : {})}>
         {inner}
+        {content.marks?.length ? <Annotations marks={content.marks} style={content.markStyle ?? "ring"} editing={ctx.editing} /> : null}
         {content.caption ? <figcaption className="t-small">{content.caption}</figcaption> : null}
       </figure>
     );
