@@ -10,6 +10,8 @@ a{color:inherit}
 .skip:focus{top:12px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 main{display:block;overflow-x:clip}
+.shade{position:absolute;inset:0;display:block;pointer-events:none}
+.frame:has(>.shade){position:relative}
 .s{position:relative}
 .si{position:relative;display:grid;margin:0 auto;width:100%}
 .n{min-width:0}

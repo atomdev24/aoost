@@ -22,4 +22,9 @@ describe("Image as a button", () => {
     const zoomed = renderNode("Image", base, { node: { frame: { base: { fit: "free", focalX: 50, focalY: 50, zoom: 2, panX: 0, panY: 0 } } } });
     expect(zoomed).toContain('sizes="200vw"');
   });
+  it("adds the darken layer only when darken or blur is set", () => {
+    expect(renderNode("Image", base)).not.toContain("shade");
+    const html = renderNode("Image", base, { node: { style: { base: {}, desktop: { shade: 30 } } } });
+    expect(html).toContain('<i class="shade" aria-hidden="true"></i>');
+  });
 });

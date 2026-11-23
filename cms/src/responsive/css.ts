@@ -96,6 +96,13 @@ export function filterDecls(s: Style): { media: Decls; frame: Decls; after: Decl
   };
 }
 
+/** The darken-and-blur layer over a picture or video (components/shade.tsx). */
+export function shadeDecls(s: Style): Decls | null {
+  if (s.shade === undefined && s.blur === undefined) return null;
+  const blur = s.blur ? `blur(${Math.round(s.blur * 10) / 10}px)` : "none";
+  return { background: `rgba(0,0,0,${Math.round(s.shade ?? 0) / 100})`, "-webkit-backdrop-filter": blur, "backdrop-filter": blur };
+}
+
 export function sectionDecls(kind: Section["kind"], l: SectionLayout, artboard?: { width: number; height: number }): { outer: Decls; inner: Decls } {
   const outer: Decls = {};
   const inner: Decls = {};
@@ -218,6 +225,14 @@ export function addNodeCss(sheet: Sheet, node: Node, section?: Section) {
       const sub = part === "media" ? ".media" : part === "frame" ? ".frame" : ".frame::after";
       sheet.add(`${sel} ${sub}`, (fm ?? none)[part], (fd ?? fm ?? none)[part], extraDecls((bp) => !!extra[bp], (bp) => fx[bp as keyof typeof fx][part]));
     }
+  }
+  const sm = shadeDecls(m.style);
+  const sd = shadeDecls(d.style);
+  const st = extra.tablet ? shadeDecls(extra.tablet.style) : null;
+  const sw = extra.widescreen ? shadeDecls(extra.widescreen.style) : null;
+  if (sm || sd || st || sw) {
+    const sx = { tablet: st ?? sm ?? {}, widescreen: sw ?? sd ?? sm ?? {} };
+    sheet.add(`${sel} .shade`, sm ?? {}, sd ?? sm ?? {}, extraDecls((bp) => !!extra[bp], (bp) => sx[bp as keyof typeof sx]));
   }
 }
 

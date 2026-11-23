@@ -72,6 +72,8 @@ export const STYLE_ROWS: RowDef<Style>[] = [
     options: [{ value: "", label: "Default" }, ...["normal", "multiply", "screen", "overlay", "darken", "lighten", "difference", "exclusion", "luminosity", "soft-light", "hard-light", "color-burn", "color-dodge"].map((v) => ({ value: v, label: v }))],
   },
   { key: "filter", label: "Filter", group: "Look", kind: "filter", when: (c) => !!c.framed },
+  { key: "shade", label: "Darken", group: "Look", kind: "number", min: 0, max: 100, step: 1, suffix: "%", placeholder: "0", pair: "Overlay", glyph: "◑", when: (c) => !!c.framed },
+  { key: "blur", label: "Blur", group: "Look", kind: "number", min: 0, max: 40, step: 1, suffix: "px", placeholder: "0", pair: "Overlay", glyph: "≋", when: (c) => !!c.framed },
   { key: "background", label: "Fill", group: "Look", kind: "color" },
   { key: "color", label: "Text colour", group: "Look", kind: "color" },
   {
