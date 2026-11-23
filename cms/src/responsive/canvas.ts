@@ -27,12 +27,27 @@ export function derivedScale(mobileHeight: number): number {
   return Math.min(DESIGN_WIDTH.desktop / DESIGN_WIDTH.mobile, DERIVED_MAX_HEIGHT / mobileHeight);
 }
 
+const hasBox = (s?: Partial<Style>) => !!s && (s.x !== undefined || s.y !== undefined || s.w !== undefined || s.h !== undefined);
+
+/** True while the mobile box is still derived from desktop (a layer placed on desktop first). */
+export const isMobileDerived = (node: Node) => !hasBox(node.style.base) && hasBox(node.style.desktop);
+
 /**
- * A layer's box at a breakpoint (SPEC §3). If desktop has no position yet it
- * is derived by scaling the mobile box, centred, until Alex moves the layer.
+ * A layer's box at a breakpoint (SPEC §3). Whichever of mobile and desktop has
+ * a position leads: the other is derived by scaling the composition to fit its
+ * artboard (centred across), until the layer is moved or resized on that size.
  */
 export function layerBox(section: Section, node: Node, bp: Breakpoint): Box {
-  if (bp === "mobile") return boxOf(node.style.base);
+  if (bp === "mobile") {
+    if (!isMobileDerived(node)) return boxOf(node.style.base);
+    // Placed on desktop first: the desktop composition, shrunk to fit the phone's artboard.
+    const d = boxOf(resolve(node.style, "desktop"));
+    const dh = canvasSize(section, "desktop").height;
+    const mh = canvasSize(section, "mobile").height;
+    const s = Math.min(DESIGN_WIDTH.mobile / DESIGN_WIDTH.desktop, mh / dh);
+    const offsetX = (DESIGN_WIDTH.mobile - DESIGN_WIDTH.desktop * s) / 2;
+    return { x: round(offsetX + d.x * s), y: round(d.y * s), w: round(d.w * s), h: round(d.h * s), rotation: d.rotation, z: d.z };
+  }
   if (bp === "tablet" || bp === "widescreen") return scaledBox(section, node, bp);
   const d = node.style.desktop ?? {};
   const hasOwn = d.x !== undefined || d.y !== undefined || d.w !== undefined || d.h !== undefined;

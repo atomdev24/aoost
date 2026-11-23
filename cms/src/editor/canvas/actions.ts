@@ -1,4 +1,4 @@
-import { canvasSize, layerBox, type Box } from "../../responsive/canvas";
+import { canvasSize, isMobileDerived, layerBox, type Box } from "../../responsive/canvas";
 import { setAt } from "../../responsive/resolve";
 import type { Breakpoint, Node, Page, Section, Style } from "../../schema";
 import { duplicate, isHidden, locate, nudgeOrder, remove, setHidden } from "../../model/page-ops";
@@ -12,7 +12,12 @@ export function findCanvas(page: Page, nodeId: string): Section | undefined {
 
 /** Write a layer's box at a breakpoint (SPEC §3: x, y, w, h, rotation, z per breakpoint). */
 export function withBox(section: Section, node: Node, bp: Breakpoint, patch: Partial<Box>): Node {
-  if (bp === "mobile") return { ...node, style: setAt(node.style, "mobile", patch as Partial<Style>) };
+  if (bp === "mobile") {
+    // The first change on mobile to a box derived from desktop stores the whole box there.
+    const derived = isMobileDerived(node) ? layerBox(section, node, "mobile") : null;
+    const full = derived ? { x: derived.x, y: derived.y, w: derived.w, h: derived.h, ...patch } : patch;
+    return { ...node, style: setAt(node.style, "mobile", full as Partial<Style>) };
+  }
   // The first move on another size turns a box derived from mobile (or desktop) into a stored one.
   const { x, y, w, h } = layerBox(section, node, bp);
   return { ...node, style: setAt(node.style, bp, { x, y, w, h, ...patch } as Partial<Style>) };
