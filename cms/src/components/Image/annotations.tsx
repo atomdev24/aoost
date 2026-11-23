@@ -20,6 +20,8 @@ export const Mark = z.object({
   side: z.enum(["right", "left"]),
   /** The colour callout's block, when it should differ from the stage's usual colour. */
   swatch: z.string().optional(),
+  /** The colour callout's words, when they should differ from the stage's name. */
+  colourText: z.string().optional(),
 });
 export type Mark = z.infer<typeof Mark>;
 export const MARK_STYLES = ["ring", "brackets", "pulse"] as const;
@@ -39,7 +41,7 @@ const brackets = (
 /** A label's size: fixed, or growing and shrinking with its ring (the default ring is 8% of the width). */
 export const labelScale = (r: number, grow: boolean) => (grow ? Math.round(Math.min(2.2, Math.max(0.6, r / 8)) * 100) / 100 : 1);
 
-export function ReadingChips({ size, colour, swatch }: { size: number; colour: keyof typeof FRUIT_COLOURS; swatch?: string }): ReactElement {
+export function ReadingChips({ size, colour, swatch, text }: { size: number; colour: keyof typeof FRUIT_COLOURS; swatch?: string; text?: string }): ReactElement {
   const c = FRUIT_COLOURS[colour];
   return (
     <span className="ann-chips">
@@ -50,7 +52,7 @@ export function ReadingChips({ size, colour, swatch }: { size: number; colour: k
       <span className="ann-chip">
         <small>Colour</small>
         <span className="ann-sw" style={{ background: swatch || c.swatch }} />
-        <b>{c.label}</b>
+        <b>{text?.trim() || c.label}</b>
       </span>
     </span>
   );
@@ -66,7 +68,7 @@ export function Annotations({ marks, style, editing, grow = false, delay }: { ma
           <span key={i} className={`ann-m ann-${m.side === "left" || m.x > 74 ? "left" : "right"}`} data-ann-i={i} style={{ left: `${m.x}%`, top: `${m.y}%`, "--r": `${m.r}cqw`, "--d": `${i * 0.65}s`, "--ls": labelScale(m.r, grow) } as CSSProperties}>
             {style === "ring" ? ring : style === "brackets" ? brackets : <span className="ann-dot" />}
             {style === "brackets" ? <span className="ann-scan" /> : null}
-            <ReadingChips size={m.size} colour={m.colour} swatch={m.swatch} />
+            <ReadingChips size={m.size} colour={m.colour} swatch={m.swatch} text={m.colourText} />
             {editing ? <i className="ann-h" data-ann-h="" title="Drag to resize" /> : null}
           </span>
         );

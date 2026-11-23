@@ -1,4 +1,5 @@
 import type { Fields } from "@puckeditor/core";
+import { colorField } from "../../editor/fields/color";
 import { linkField } from "../../editor/fields/custom";
 import { mediaField } from "../../editor/fields/media";
 import type { ImageContent } from "./Image";
@@ -66,7 +67,8 @@ export const fields: Partial<Fields<ImageContent>> = {
           { label: "Orange", value: "orange" },
         ],
       },
-      swatch: { type: "text", label: "Colour block (optional, e.g. #E2C12F)" },
+      colourText: { type: "text", label: "Colour words (optional, replaces the stage name)" },
+      swatch: colorField("Colour block") as never,
       side: { type: "radio", label: "Label", options: [{ label: "Right", value: "right" }, { label: "Left", value: "left" }] },
       r: { type: "number", label: "Ring size (% of width)", min: 1, max: 40 },
       x: { type: "number", label: "Across (%)", min: 0, max: 100 },
