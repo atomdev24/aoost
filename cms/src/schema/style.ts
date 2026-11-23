@@ -55,6 +55,10 @@ export const Style = z.object({
   color: Color.optional(),
   textAlign: z.enum(["left", "center", "right"]).optional(),
   filter: ImageFilter.optional(),
+  /** Pictures and video: a black layer over the content, in % dark (0 to 100). */
+  shade: z.number().min(0).max(100).optional(),
+  /** Pictures and video: blur under that layer, in px. */
+  blur: z.number().min(0).max(40).optional(),
 });
 export type Style = z.infer<typeof Style>;
 export const ResponsiveStyle = responsive(Style);

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { imageSources } from "../../render/media";
+import { Shade } from "../shade";
 import { embedFor } from "../Embed/providers";
 import { defineComponent } from "../types";
 import { css } from "./Video.styles";
@@ -47,7 +48,7 @@ export const Video = defineComponent<VideoContent>({
   schema: VideoContent,
   defaults: { content: { source: "upload", src: "", autoplay: true, loop: true, controls: false, playInView: true }, style: { aspectRatio: "16/9" } },
   css,
-  Render: ({ content, ctx }) => {
+  Render: ({ node, content, ctx }) => {
     const label = content.alt || "Video";
     if (content.source === "link") {
       const info = content.url ? embedFor(content.url) : null;
@@ -73,6 +74,7 @@ export const Video = defineComponent<VideoContent>({
                 loading="lazy"
                 decoding="async"
               />
+              <Shade node={node} />
               {name || channel ? (
                 <span className="vid-chan">
                   <span className="vid-av">{content.avatar ? <img src={content.avatar} alt="" /> : (channel || name || "?").slice(0, 1).toUpperCase()}</span>
@@ -108,6 +110,7 @@ export const Video = defineComponent<VideoContent>({
       return (
         <div className="frame vid">
           <iframe className="media" {...(ctx.editing ? { src: `${info.src}${params}` } : { "data-src": `${info.src}${params}` })} title={label} loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" />
+          <Shade node={node} />
         </div>
       );
     }
@@ -131,6 +134,7 @@ export const Video = defineComponent<VideoContent>({
           data-mobile-src={content.mobileSrc || undefined}
         />
         {content.mobileStill && content.poster ? <img className="media vid-still" {...imageSources(content.poster)} alt={content.alt ?? ""} loading="lazy" decoding="async" /> : null}
+        <Shade node={node} />
       </div>
     );
   },

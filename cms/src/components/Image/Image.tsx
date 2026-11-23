@@ -4,6 +4,7 @@ import { imageSources } from "../../render/media";
 import { LinkTarget, type Node } from "../../schema/content";
 import { defineComponent } from "../types";
 import { css } from "./Image.styles";
+import { Shade } from "../shade";
 import { Annotations, annotationCss, Mark, MARK_STYLES } from "./annotations";
 
 export const ImageContent = z.object({
@@ -90,11 +91,13 @@ export const Image = defineComponent<ImageContent>({
         {node.effects?.parallax ? (
           <div className="drift" data-parallax-inner="">
             {inner}
+            <Shade node={node} />
             {marks}
           </div>
         ) : (
           <>
             {inner}
+            <Shade node={node} />
             {marks}
           </>
         )}
