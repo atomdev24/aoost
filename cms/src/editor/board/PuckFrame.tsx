@@ -3,6 +3,7 @@ import { components } from "../../components/registry";
 import { getState, useEditor } from "../store";
 import { attachCanvasDrops } from "../canvas/drops";
 import { attachAnnotationDrag } from "../canvas/annotations";
+import { attachFlowResize } from "../canvas/flow-resize";
 import { attachPieceSelect } from "../canvas/ResizePiece";
 import { attachKeys } from "./keys";
 import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
@@ -41,6 +42,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     const detach = attachKeys(doc);
     const detachDrops = attachCanvasDrops(doc);
     const detachMarks = attachAnnotationDrag(doc);
+    const detachFlowResize = attachFlowResize(doc);
     const detachPieces = attachPieceSelect(doc);
     const unwatch = watchWindow(doc.defaultView!, "editable frame");
     const unguard = guardPinch(doc.defaultView);
@@ -80,6 +82,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       detach();
       detachDrops();
       detachMarks();
+      detachFlowResize();
       detachPieces();
       unwatch();
       unguard();

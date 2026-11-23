@@ -23,3 +23,16 @@ describe("fruit readings on a picture", () => {
     expect(renderNode("Image", base)).not.toContain("ann");
   });
 });
+
+describe("fruit reading labels", () => {
+  it("grow and shrink with the ring when set to scale, within limits", async () => {
+    const { labelScale } = await import("./annotations");
+    expect(labelScale(8, true)).toBe(1);
+    expect(labelScale(16, true)).toBe(2);
+    expect(labelScale(40, true)).toBe(2.2);
+    expect(labelScale(2, true)).toBe(0.6);
+    expect(labelScale(16, false)).toBe(1);
+    const html = renderNode("Image", { ...base, marks: [{ ...marks[0], r: 12 }], markLabels: "scale" });
+    expect(html).toContain("--ls:1.5");
+  });
+});

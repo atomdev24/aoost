@@ -2,6 +2,7 @@ import { useGetPuck } from "@puckeditor/core";
 import { useEffect, useRef } from "react";
 import { canvasSize, layerBox } from "../../responsive/canvas";
 import { currentPage, getState, setSelection } from "../store";
+import { keepsRatio } from "./ratio";
 import { nudgeSelection, setLayerBoxes } from "./actions";
 import { axisLock, resize, snapMove, type Guide, type Handle, type Rect } from "./geometry";
 
@@ -12,8 +13,8 @@ const DRAG_START_PX = 3;
 /**
  * Free-canvas interaction, living inside the preview iframe: drag layers
  * anywhere, resize from handles, snap to the artboard and to other layers
- * with smart guides, hold Shift to lock an axis (or keep the ratio while
- * resizing), Alt to turn snapping off, arrows to nudge.
+ * with smart guides, hold Shift to lock an axis (or flip "keep proportions"
+ * while resizing), Alt to turn snapping off, arrows to nudge.
  * Puck still owns selection; this only takes over once the pointer moves.
  */
 export function CanvasController() {
@@ -29,6 +30,8 @@ export function CanvasController() {
       const target = e.target as Element;
       const el = target.closest<HTMLElement>(LAYER);
       if (!el) return;
+      // Fruit-reading marks and the proportions switch handle their own presses.
+      if (target.closest("[data-ann-i], [data-ed-ratio]")) return;
       const id = el.dataset.nodeId!;
       const si = el.parentElement!;
       const state = getState();
@@ -94,7 +97,7 @@ export function CanvasController() {
         let guides: Guide[] = [];
         result = new Map();
         if (handle) {
-          const r = resize(first, handle, dx, dy, { keepRatio: ev.shiftKey, others, artboard, threshold });
+          const r = resize(first, handle, dx, dy, { keepRatio: keepsRatio(node) !== ev.shiftKey, others, artboard, threshold });
           guides = r.guides;
           result.set(id, r.box);
         } else {
