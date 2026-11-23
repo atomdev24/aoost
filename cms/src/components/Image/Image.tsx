@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { imageSources } from "../../render/media";
-import { LinkTarget } from "../../schema/content";
+import { LinkTarget, type Node } from "../../schema/content";
 import { defineComponent } from "../types";
 import { css } from "./Image.styles";
 
@@ -19,6 +19,17 @@ export const ImageContent = z.object({
 });
 export type ImageContent = z.infer<typeof ImageContent>;
 
+/**
+ * How wide the picture may show, for the browser to pick a sharp enough file. A
+ * picture can fill the screen at any size, and one zoomed inside its frame
+ * shows a part of itself larger still, so it asks for that much more.
+ */
+export function imageSizes(node: Node): string {
+  const zooms = Object.values(node.frame ?? {}).map((f) => (f && f.fit === "free" ? f.zoom : 1));
+  const zoom = Math.min(3, Math.max(1, ...zooms));
+  return `${Math.round(100 * zoom)}vw`;
+}
+
 export const Image = defineComponent<ImageContent>({
   type: "Image",
   label: "Image",
@@ -27,7 +38,7 @@ export const Image = defineComponent<ImageContent>({
   schema: ImageContent,
   defaults: { content: { src: "", alt: "", lightbox: true } },
   css,
-  Render: ({ content, ctx }) => {
+  Render: ({ node, content, ctx }) => {
     if (!content.src) {
       return ctx.editing ? <div className="frame frame-empty">Choose an image</div> : null;
     }
@@ -37,7 +48,7 @@ export const Image = defineComponent<ImageContent>({
         className="media"
         src={src}
         srcSet={srcSet}
-        sizes={srcSet ? "(min-width:900px) 50vw, 100vw" : undefined}
+        sizes={srcSet ? imageSizes(node) : undefined}
         alt={content.alt}
         width={content.width}
         height={content.height}
