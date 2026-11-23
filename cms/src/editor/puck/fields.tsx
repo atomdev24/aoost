@@ -9,6 +9,7 @@ import { isHidden, locate, setHidden, updateNode } from "../../model/page-ops";
 import { isEdgeToEdge, setEdgeToEdge } from "../../model/edge";
 import { currentPage, updatePage, useEditor } from "../store";
 import { alignSelection, distributeSelection } from "../canvas/actions";
+import { previewDrift } from "../canvas/drift-preview";
 import type { AlignMode } from "../canvas/geometry";
 import { Select, Toggle } from "../ui/kit";
 import { usePuck } from "./usePuck";
@@ -236,7 +237,22 @@ export const effectsField: CustomField<Node["effects"]> = {
         <div className="ed-row">
           <span className="ed-label">Parallax</span>
           <div className="ed-control">
-            <input className="ed-range" type="range" min={-0.5} max={0.5} step={0.05} value={fx.parallax ?? 0} aria-label="Parallax amount" onChange={(e) => set({ parallax: Number(e.target.value) })} />
+            <input
+              className="ed-range"
+              type="range"
+              min={-0.5}
+              max={0.5}
+              step={0.05}
+              value={fx.parallax ?? 0}
+              aria-label="Parallax amount"
+              title="Pictures slide inside their frame as the page scrolls; other blocks drift. Plays on the live page; here you get a quick preview."
+              onChange={(e) => {
+                const f = Number(e.target.value);
+                set({ parallax: f });
+                previewDrift(f);
+              }}
+            />
+            <span className="ed-range-value">{fx.parallax ? (fx.parallax > 0 ? "+" : "") + fx.parallax.toFixed(2) : "Off"}</span>
           </div>
         </div>
         <div className="ed-row">
@@ -245,7 +261,7 @@ export const effectsField: CustomField<Node["effects"]> = {
             <Toggle label="Sticky" checked={!!fx.sticky} onChange={(v) => set({ sticky: v })} />
           </div>
         </div>
-        <p className="ed-hint">Effects are skipped for visitors who prefer reduced motion.</p>
+        <p className="ed-hint">Scroll effects play on the live page and in Preview, not while editing (moving the Parallax slider plays a short preview). They're skipped for visitors who prefer reduced motion.</p>
       </div>
       </InspectorGroup>
     );

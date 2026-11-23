@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isExternal } from "../../render/links";
 import { imageSources } from "../../render/media";
 import { LinkTarget, type Node } from "../../schema/content";
 import { defineComponent } from "../types";
@@ -16,6 +17,8 @@ export const ImageContent = z.object({
   width: z.number().optional(),
   height: z.number().optional(),
   link: LinkTarget.optional(),
+  /** With a link: how the picture answers a press ("press": it sinks a little while held). */
+  press: z.enum(["press", "none"]).optional(),
 });
 export type ImageContent = z.infer<typeof ImageContent>;
 
@@ -56,10 +59,21 @@ export const Image = defineComponent<ImageContent>({
         fetchPriority={content.eager ? "high" : undefined}
         decoding="async"
         draggable={false}
+        data-parallax-inner=""
       />
     );
-    const href = content.link ? ctx.href(content.link) : undefined;
-    const inner = href && !ctx.editing ? <a href={href}>{img}</a> : img;
+    const l = content.link;
+    // A link field opened but left empty is no link (the picture keeps its full-screen tap).
+    const linked = l && !(l.kind === "url" && !l.url.trim()) && !(l.kind === "email" && !l.email.trim());
+    const href = linked ? ctx.href(l) : undefined;
+    const press = content.press !== "none";
+    const inner = href && !ctx.editing ? (
+      <a href={href} className={press ? "press" : undefined} {...(isExternal(href) ? { target: "_blank", rel: "noopener" } : {})}>
+        {img}
+      </a>
+    ) : (
+      img
+    );
     return (
       <figure className="frame" {...(content.lightbox && !href ? { "data-lightbox": content.src, "data-caption": content.caption ?? content.alt } : {})}>
         {inner}
