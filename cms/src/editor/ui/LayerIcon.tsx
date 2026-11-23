@@ -22,6 +22,7 @@ export function resolveLayerIconType(typeOrKind: string): LayerIconType {
     case "Video":
     case "Audio":
     case "GalleryGrid":
+    case "Cards":
     case "Lottie":
     case "Model3D":
     case "PlaylistCard":

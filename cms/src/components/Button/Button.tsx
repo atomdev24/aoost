@@ -1,5 +1,7 @@
 import { z } from "zod";
+import type { CSSProperties } from "react";
 import { isExternal } from "../../render/links";
+import { colorValue } from "../../responsive/css";
 import { LinkTarget } from "../../schema/content";
 import { defineComponent } from "../types";
 import { css } from "./Button.styles";
@@ -9,6 +11,8 @@ export const ButtonContent = z.object({
   target: LinkTarget,
   variant: z.enum(["filled", "outline", "text"]),
   newTab: z.boolean().optional(),
+  /** A colour of its own (e.g. a brand blue) instead of the theme's ink. */
+  color: z.string().optional(),
 });
 export type ButtonContent = z.infer<typeof ButtonContent>;
 
@@ -22,8 +26,10 @@ export const Button = defineComponent<ButtonContent>({
   Render: ({ content, ctx }) => {
     const href = ctx.href(content.target);
     const blank = content.newTab || (content.newTab === undefined && isExternal(href));
+    const c = content.color?.trim() ? colorValue(content.color.trim()) : null;
+    const tint = c ? ({ "--c-ink": c, "--c-rust": c, "--c-bone": "#fff" } as CSSProperties) : undefined;
     return (
-      <a className={`btn btn-${content.variant}`} href={ctx.editing ? undefined : href} {...(blank ? { target: "_blank", rel: "noopener" } : {})}>
+      <a className={`btn btn-${content.variant}${c ? " btn-tint" : ""}`} style={tint} href={ctx.editing ? undefined : href} {...(blank ? { target: "_blank", rel: "noopener" } : {})}>
         {content.label}
         {isExternal(href) ? (
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">

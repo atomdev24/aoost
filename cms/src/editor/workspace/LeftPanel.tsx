@@ -5,7 +5,8 @@ import type { Section } from "../../schema";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage, useEditor } from "../store";
 import { LayersPanel } from "../ui/LayersPanel";
-import { CommentsPanel, FontsPanel, HistoryPanel, InsertPanel, LibraryPanel, MediaLibrary, NavPanel, PagesPanel, ThemePanel } from "../parts";
+import { CommentsPanel, FontsPanel, HistoryPanel, InsertPanel, LibraryPanel, MediaLibrary, NavPanel, PagesPanel, TemplatesPanel, ThemePanel } from "../parts";
+import { DEMO } from "../demo";
 import type { Part } from "../lazy";
 import {
   closeFlyout,
@@ -30,6 +31,7 @@ const PANEL_TITLES: Record<PanelId, string> = {
   theme: "Theme",
   fonts: "Fonts",
   global: "Global",
+  templates: "Templates",
 };
 
 const KINDS: { kind: Section["kind"]; label: string; hint: string }[] = [
@@ -141,6 +143,14 @@ const RailIcon = ({ id }: { id: PanelId }) => {
           <path d="M2.2 2.5v2.6h2.6M8 5v3.2l2.2 1.4" />
         </svg>
       );
+    case "templates":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true">
+          <rect x="2" y="2" width="12" height="4.5" rx="1" />
+          <rect x="2" y="8.5" width="5" height="5.5" rx="1" />
+          <rect x="9" y="8.5" width="5" height="5.5" rx="1" />
+        </svg>
+      );
     case "global":
       return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
@@ -186,10 +196,12 @@ const PANEL_PARTS: Partial<Record<PanelId, Part<never>>> = {
   theme: ThemePanel as Part<never>,
   fonts: FontsPanel as Part<never>,
   global: LibraryPanel as Part<never>,
+  templates: TemplatesPanel as Part<never>,
 };
 
 /* Build (what is on this page) above the line, Site (what every page shares) below it. */
-const TOP_PANELS: PanelId[] = ["layers", "insert", "media", "comments", "history"];
+// The demo gets ready-made page designs to try (Templates), right under Insert.
+const TOP_PANELS: PanelId[] = DEMO ? ["layers", "insert", "templates", "media", "comments", "history"] : ["layers", "insert", "media", "comments", "history"];
 const BOTTOM_PANELS: PanelId[] = ["pages", "nav", "theme", "fonts", "global"];
 
 /**
@@ -370,6 +382,7 @@ export function LeftPanel() {
             {active === "global" ? (
               <LibraryPanel mode="globals" />
             ) : null}
+            {active === "templates" ? <TemplatesPanel /> : null}
           </div>
         </aside>
       ) : null}

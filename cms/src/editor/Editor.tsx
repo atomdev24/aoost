@@ -23,7 +23,8 @@ import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { UploadTrayHost } from "./ui/UploadTrayHost";
-import { CompareView, BrowserZoomNotice, VariantBand } from "./parts";
+import { CompareView, BrowserZoomNotice, DesignsBoard, VariantBand } from "./parts";
+import { useDesignsOpen } from "./templates/designs-open";
 import { useCompare } from "./workspace/compare";
 import { TopBar } from "./workspace/TopBar";
 import { warmUp } from "./warmup";
@@ -65,6 +66,7 @@ export function Editor() {
   const moving = useBoard((s) => s.moving);
   const onVariant = useEditor((s) => !!currentPage(s).variantOf);
   const comparing = !!useCompare();
+  const designsOpen = !!useDesignsOpen();
   useEffect(() => attachKeys(document), []);
   useEffect(() => warmUp(), []);
   useEffect(() => void performance.mark("aoost:shell"), []);
@@ -107,6 +109,7 @@ export function Editor() {
           <SyncNotice />
           <VariantBand />
           {comparing ? <CompareView /> : null}
+          {designsOpen ? <DesignsBoard /> : null}
           <LeftPanel />
           <Board />
           <Inspector />

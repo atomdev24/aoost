@@ -92,6 +92,13 @@ const SHAPES: Record<string, React.ReactNode> = {
       {lines(46, 26, [30, 22])}
     </>
   ),
+  Cards: (
+    <>
+      <rect x="10" y="14" width="24" height="36" rx="3" fill={F} />
+      <rect x="38" y="14" width="24" height="36" rx="3" fill={F} />
+      <rect x="66" y="14" width="24" height="36" rx="3" fill={F} />
+    </>
+  ),
   FileDownload: (
     <>
       <rect x="34" y="10" width="32" height="40" rx="3" fill={F} />

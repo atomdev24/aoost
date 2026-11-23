@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import type { RenderCtx } from "../components/types";
-import type { Overlay, Section } from "../schema";
+import { DESKTOP_MIN, type Overlay, type Section } from "../schema";
 import { imageSources } from "./media";
 import { NodeView } from "./NodeView";
 
@@ -14,11 +14,28 @@ export function SectionBackground({ section }: { section: Section }): ReactEleme
   if (!image && !video) return null;
   return (
     <div className="s-bg" aria-hidden="true">
-      {image || poster ? <img {...imageSources((poster ?? image)!)} alt="" loading="lazy" decoding="async" /> : null}
+      {image || poster ? <BackgroundImage mobile={bg?.poster ?? bg?.image} desktop={(poster ?? image)!} /> : null}
       {/* Phones get the still; the video only loads on desktop (see runtime/video.ts). */}
       {video ? <video data-bg-src={video} muted loop playsInline preload="none" poster={poster} /> : null}
       {overlay ? <span className="s-bg-tint" /> : null}
     </div>
+  );
+}
+
+/**
+ * A section's background picture. A phone-sized picture of its own (set on the
+ * mobile size, different from the desktop one) is used below the desktop width;
+ * otherwise the desktop picture shows everywhere.
+ */
+function BackgroundImage({ mobile, desktop }: { mobile?: string; desktop: string }): ReactElement {
+  const img = { alt: "", loading: "lazy" as const, decoding: "async" as const, sizes: "100vw" };
+  if (!mobile || mobile === desktop) return <img {...imageSources(desktop)} {...img} />;
+  const wide = imageSources(desktop);
+  return (
+    <picture>
+      <source media={`(min-width:${DESKTOP_MIN}px)`} srcSet={wide.srcSet ?? wide.src} sizes="100vw" />
+      <img {...imageSources(mobile)} {...img} />
+    </picture>
   );
 }
 
