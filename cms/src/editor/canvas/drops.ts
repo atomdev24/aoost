@@ -6,6 +6,7 @@ import { adjustable, startAdjust } from "./adjust-state";
 import { slotAtPoint } from "./slots";
 import { selectPiece } from "./ResizePiece";
 import { attachDoubleTap } from "../touch/longpress";
+import { addMark, ANNOTATION_MIME, framePoint } from "./annotations";
 
 /** What a media library item carries when it is dragged (see MediaLibrary). */
 export const MEDIA_MIME = "application/x-aoost-media";
@@ -88,7 +89,7 @@ export function attachCanvasDrops(doc: Document) {
     e.stopPropagation();
     startAdjust(id);
   };
-  const wanted = (e: DragEvent) => !!e.dataTransfer && (e.dataTransfer.types.includes("Files") || e.dataTransfer.types.includes(MEDIA_MIME));
+  const wanted = (e: DragEvent) => !!e.dataTransfer && (e.dataTransfer.types.includes("Files") || e.dataTransfer.types.includes(MEDIA_MIME) || e.dataTransfer.types.includes(ANNOTATION_MIME));
   let marked: Element | null = null;
   const mark = (el: Element | null) => {
     if (marked === el) return;
@@ -111,6 +112,12 @@ export function attachCanvasDrops(doc: Document) {
     e.stopPropagation();
     const id = imageBlockAt(e.target);
     const target = e.target;
+    // A fruit reading dropped on a picture: a mark where it landed.
+    if (e.dataTransfer!.types.includes(ANNOTATION_MIME)) {
+      const el = id ? (target as Element).closest("[data-node-id]") : null;
+      if (id && el) addMark(id, framePoint(el, e.clientX, e.clientY));
+      return;
+    }
     const media = e.dataTransfer!.getData(MEDIA_MIME);
     if (media) {
       const m = JSON.parse(media) as DraggedMedia;

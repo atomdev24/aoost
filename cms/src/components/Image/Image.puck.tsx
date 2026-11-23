@@ -33,4 +33,36 @@ export const fields: Partial<Fields<ImageContent>> = {
       { label: "Right away", value: true },
     ],
   },
+  markStyle: {
+    type: "select",
+    label: "Fruit readings: how they appear",
+    options: [
+      { label: "Scan ring", value: "ring" },
+      { label: "Corner brackets", value: "brackets" },
+      { label: "Pulse", value: "pulse" },
+    ],
+  },
+  marks: {
+    type: "array",
+    label: "Fruit readings (drag a mark on the picture to move it)",
+    arrayFields: {
+      size: { type: "number", label: "Size (mm)", min: 0, max: 999 },
+      colour: {
+        type: "select",
+        label: "Colour",
+        options: [
+          { label: "Green", value: "green" },
+          { label: "Colour break", value: "break" },
+          { label: "Mostly orange", value: "mostly" },
+          { label: "Orange", value: "orange" },
+        ],
+      },
+      side: { type: "radio", label: "Label", options: [{ label: "Right", value: "right" }, { label: "Left", value: "left" }] },
+      r: { type: "number", label: "Ring size (% of width)", min: 1, max: 40 },
+      x: { type: "number", label: "Across (%)", min: 0, max: 100 },
+      y: { type: "number", label: "Down (%)", min: 0, max: 100 },
+    },
+    defaultItemProps: { x: 50, y: 50, r: 8, size: 68, colour: "break", side: "right" },
+    getItemSummary: (m, i) => `${(i ?? 0) + 1}: ${m.size} mm`,
+  },
 };

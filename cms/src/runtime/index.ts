@@ -6,6 +6,7 @@ import { initLightbox } from "./lightbox";
 import { initNav } from "./nav";
 import { initSearch } from "./search";
 import { initVideo } from "./video";
+import { initAnnotations } from "./annotations";
 
 const start = () => {
   initNav();
@@ -14,6 +15,7 @@ const start = () => {
   initFrames();
   initSearch();
   initVideo();
+  initAnnotations();
   initLazy();
 };
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);

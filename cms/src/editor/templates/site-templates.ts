@@ -144,7 +144,17 @@ export const SITE_TEMPLATES: SiteTemplate[] = [
       linkCatalogues([
         topBar(),
         section("grid", "Hero", { columns: 1, gap: 24, padding: "40px 20px 40px", align: "center", background: { color: PALE } }, { columns: 2, gap: 56, padding: "72px 40px", maxWidth: 1240 }, [
-          image(A + "tpl_aero_hero_tall.webp", "A phone scanning fruit on the tree", { base: { aspectRatio: "4/5", radius: [20, 20, 20, 20] }, desktop: { aspectRatio: "4/5", radius: [24, 24, 24, 24], rowSpan: 4 } }, { width: 1200, height: 1791 }),
+          image(A + "tpl_aero_hero_tall.webp", "A phone scanning fruit on the tree", { base: { aspectRatio: "4/5", radius: [20, 20, 20, 20] }, desktop: { aspectRatio: "4/5", radius: [24, 24, 24, 24], rowSpan: 4 } }, {
+            width: 1200,
+            height: 1791,
+            // Fruit readings on the citrus behind the phone (drag them in the editor to move them).
+            markStyle: "ring",
+            marks: [
+              { x: 18, y: 17, r: 8, size: 68, colour: "break", side: "right" },
+              { x: 53, y: 37, r: 7.5, size: 72, colour: "green", side: "left" },
+              { x: 70.5, y: 35.5, r: 7, size: 64, colour: "mostly", side: "right" },
+            ],
+          }),
           text("Product catalogues", "label", "p", { base: { color: BLUE } }),
           text("See what TrueFruit can do for your crop this season", "h1", "h1", { base: { color: INK } }),
           text("View or download the latest product catalogue for your crop, in your language.", "body", "p", { base: { color: MUTED } }),

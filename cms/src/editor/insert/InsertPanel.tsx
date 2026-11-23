@@ -5,6 +5,7 @@ import { locate } from "../../model/page-ops";
 import { currentPage, getState, update, useEditor } from "../store";
 import { filterCatalog, insertAnchorName, insertBlock, type Chip } from "./catalog";
 import { Thumb } from "./thumbs";
+import { addMark, ANNOTATION_MIME } from "../canvas/annotations";
 
 const CHIPS: { id: Chip; label: string }[] = [
   { id: "all", label: "All" },
@@ -60,6 +61,7 @@ function Card({ type, label, hint }: { type: string; label: string; hint: string
 export function InsertPanel() {
   const [query, setQuery] = useState("");
   const [chip, setChip] = useState<Chip>("all");
+  const [annHint, setAnnHint] = useState(false);
   const page = useEditor(currentPage);
   const selected = useEditor((s) => s.selection[0]);
   const below = insertAnchorName(page, selected);
@@ -88,6 +90,36 @@ export function InsertPanel() {
           </div>
           {!entries.length ? <p className="ed-empty">No blocks match "{query}".</p> : null}
         </Drawer>
+      )}
+      {chip === "saved" || (query && !"fruit reading annotation".includes(query.toLowerCase())) ? null : (
+        <div className="ed-overlay-cards">
+          <p className="ed-hint">On a picture</p>
+          <div
+            className="ed-card ed-card-overlay"
+            draggable
+            role="button"
+            tabIndex={0}
+            title="Drag onto a picture to mark a fruit with its size and colour, or click to add one to the selected picture."
+            onDragStart={(e) => {
+              e.dataTransfer.setData(ANNOTATION_MIME, "1");
+              e.dataTransfer.effectAllowed = "copy";
+            }}
+            onClick={() => {
+              const id = getState().selection[0];
+              setAnnHint(!id || !addMark(id));
+            }}
+          >
+            <span className="ed-card-thumb-ann" aria-hidden="true">
+              <svg viewBox="0 0 100 64" width="100%" height="100%">
+                <rect x="6" y="6" width="88" height="52" rx="6" fill="#26412a" />
+                <circle cx="38" cy="38" r="12" fill="none" stroke="#fff" strokeWidth="2.5" />
+                <rect x="52" y="12" width="34" height="18" rx="4" fill="rgba(255,255,255,.3)" stroke="#fff" strokeWidth="1" />
+              </svg>
+            </span>
+            <span className="ed-card-name">Fruit reading</span>
+          </div>
+          {annHint ? <p className="ed-hint">Select a picture first, or drag the reading onto one.</p> : null}
+        </div>
       )}
     </div>
   );

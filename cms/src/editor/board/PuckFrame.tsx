@@ -2,6 +2,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import { components } from "../../components/registry";
 import { getState, useEditor } from "../store";
 import { attachCanvasDrops } from "../canvas/drops";
+import { attachAnnotationDrag } from "../canvas/annotations";
 import { attachPieceSelect } from "../canvas/ResizePiece";
 import { attachKeys } from "./keys";
 import { frameOrigin, getBoard, setHeight, setReady, useBoard } from "./store";
@@ -39,6 +40,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     const detachComments = attachCommentClicks(doc);
     const detach = attachKeys(doc);
     const detachDrops = attachCanvasDrops(doc);
+    const detachMarks = attachAnnotationDrag(doc);
     const detachPieces = attachPieceSelect(doc);
     const unwatch = watchWindow(doc.defaultView!, "editable frame");
     const unguard = guardPinch(doc.defaultView);
@@ -77,6 +79,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       detachComments();
       detach();
       detachDrops();
+      detachMarks();
       detachPieces();
       unwatch();
       unguard();
