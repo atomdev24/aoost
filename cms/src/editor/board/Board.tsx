@@ -17,6 +17,7 @@ import { FRAME_GAP, isVisible, shortLabels, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
 import { ZoomBar } from "./ZoomBar";
 import { RefLayer, RefNotice } from "./RefLayer";
+import { OverflowLayer } from "./OverflowLayer";
 import { attachRefDrops } from "./refs-store";
 import { attachGestures } from "../touch/gestures";
 import { LONG_PRESS_MS } from "../touch/longpress";
@@ -214,7 +215,7 @@ export function Board() {
       }}
       data-zoom={view.zoom.toFixed(3)}
     >
-      <div className="bd-world" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})` }}>
+      <div className="bd-world" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`, ["--bd-zoom" as string]: String(view.zoom) }}>
         {/* Reference images: behind the frames, never on the site. */}
         <RefLayer pageId={pageId} zoom={view.zoom} />
         {/* Puck's editable frame. It stays the same element (moving an iframe reloads it) and slides to the active slot. */}
@@ -223,6 +224,8 @@ export function Board() {
           <FrameStill bp={bp} pageId={pageId} active />
           <LoadingCover bp={bp} pageId={pageId} slug={page.slug} ready={ready[bp] && !hold} />
         </div>
+        {/* Layers reaching past the frame's edge: their handles, and with W what's outside. */}
+        {!hidden[bp] ? <OverflowLayer frame={{ x: active.x, y: active.y, w: active.w, h: active.h }} /> : null}
         {frames
           .filter((f) => f.bp !== bp)
           .map((f) => (

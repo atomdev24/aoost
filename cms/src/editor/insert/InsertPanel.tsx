@@ -6,6 +6,7 @@ import { currentPage, getState, update, useEditor } from "../store";
 import { filterCatalog, insertAnchorName, insertBlock, type Chip } from "./catalog";
 import { Thumb } from "./thumbs";
 import { addMark, ANNOTATION_MIME } from "../canvas/annotations";
+import { addReadingOnPicture } from "../canvas/reading-anchor";
 
 const CHIPS: { id: Chip; label: string }[] = [
   { id: "all", label: "All" },
@@ -106,7 +107,7 @@ export function InsertPanel() {
             }}
             onClick={() => {
               const id = getState().selection[0];
-              setAnnHint(!id || !addMark(id));
+              setAnnHint(!id || !(addReadingOnPicture(id) || addMark(id)));
             }}
           >
             <span className="ed-card-thumb-ann" aria-hidden="true">

@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { canvasSize, layerBox } from "../../responsive/canvas";
 import { currentPage, getState, setSelection } from "../store";
 import { keepsRatio } from "./ratio";
+import { reanchor } from "./reading-anchor";
 import { nudgeSelection, setLayerBoxes } from "./actions";
 import { axisLock, resize, snapMove, type Guide, type Handle, type Rect } from "./geometry";
 
@@ -123,6 +124,9 @@ export function CanvasController() {
         finish();
         if (!dragging || !result.size) return;
         setLayerBoxes(section.id, Object.fromEntries(result), handle ? "Resize layer" : result.size > 1 ? "Move layers" : "Move layer");
+        // A fruit reading moved or resized: anchor it to the spot of the picture under its centre.
+        const moved = [...result.keys()];
+        if (section.children.some((n) => moved.includes(n.id) && n.type === "FruitReading")) setTimeout(() => reanchor(moved), 120);
         // The generated CSS now holds these values; drop the temporary inline ones once it has rendered.
         const kept = getState().selection;
         setTimeout(() => {

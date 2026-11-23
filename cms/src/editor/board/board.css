@@ -423,3 +423,16 @@
 .bd-frame.is-still .bd-live {
   visibility: hidden;
 }
+
+/* What hangs off the edge of the active frame (OverflowLayer) */
+.bd-over { position: absolute; width: 0; height: 0; pointer-events: none; }
+/* Behind the frames: only the part outside them shows. */
+.bd-over-ghost { position: absolute; z-index: -1; overflow: hidden; opacity: 0.45; outline: 1px dashed rgba(10, 132, 255, 0.8); }
+.bd-over-ghost img { display: block; width: 100%; height: 100%; }
+.bd-over-sel { position: absolute; z-index: 3; outline: calc(1px / var(--z, 1)) solid #0a84ff; }
+.bd-over-h { position: absolute; width: 10px; height: 10px; margin: -5px; background: #fff; border: 1px solid #0a84ff; pointer-events: auto; transform: scale(calc(1 / var(--bd-zoom, 1))); }
+.bd-over-h[data-h="nw"] { left: 0; top: 0; cursor: nwse-resize; } .bd-over-h[data-h="n"] { left: 50%; top: 0; cursor: ns-resize; }
+.bd-over-h[data-h="ne"] { left: 100%; top: 0; cursor: nesw-resize; } .bd-over-h[data-h="e"] { left: 100%; top: 50%; cursor: ew-resize; }
+.bd-over-h[data-h="se"] { left: 100%; top: 100%; cursor: nwse-resize; } .bd-over-h[data-h="s"] { left: 50%; top: 100%; cursor: ns-resize; }
+.bd-over-h[data-h="sw"] { left: 0; top: 100%; cursor: nesw-resize; } .bd-over-h[data-h="w"] { left: 0; top: 50%; cursor: ew-resize; }
+.bd-over-tip { position: absolute; left: 0; bottom: 100%; margin-bottom: 6px; padding: 2px 7px; border-radius: 5px; background: #0a84ff; color: #fff; font: 600 11px/1.4 -apple-system, system-ui, sans-serif; white-space: nowrap; transform: scale(calc(1 / var(--bd-zoom, 1))); transform-origin: 0 100%; }

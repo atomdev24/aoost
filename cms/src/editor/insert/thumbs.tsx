@@ -92,6 +92,12 @@ const SHAPES: Record<string, React.ReactNode> = {
       {lines(46, 26, [30, 22])}
     </>
   ),
+  FruitReading: (
+    <>
+      <circle cx="40" cy="38" r="14" fill="none" stroke={L} strokeWidth="2.5" />
+      <rect x="52" y="12" width="34" height="18" rx="4" fill={F} />
+    </>
+  ),
   Cards: (
     <>
       <rect x="10" y="14" width="24" height="36" rx="3" fill={F} />

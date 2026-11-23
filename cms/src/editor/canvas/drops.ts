@@ -7,6 +7,7 @@ import { slotAtPoint } from "./slots";
 import { selectPiece } from "./ResizePiece";
 import { attachDoubleTap } from "../touch/longpress";
 import { addMark, ANNOTATION_MIME, framePoint } from "./annotations";
+import { addReadingLayer, pictureAt } from "./reading-anchor";
 
 /** What a media library item carries when it is dragged (see MediaLibrary). */
 export const MEDIA_MIME = "application/x-aoost-media";
@@ -102,6 +103,7 @@ export function attachCanvasDrops(doc: Document) {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer!.dropEffect = "copy";
+    if (e.dataTransfer!.types.includes(ANNOTATION_MIME)) return mark(pictureAt(doc, e.clientX, e.clientY)?.el ?? null);
     const id = imageBlockAt(e.target);
     mark(id ? (e.target as Element).closest("[data-node-id]") : null);
   };
@@ -114,8 +116,14 @@ export function attachCanvasDrops(doc: Document) {
     const target = e.target;
     // A fruit reading dropped on a picture: a mark where it landed.
     if (e.dataTransfer!.types.includes(ANNOTATION_MIME)) {
-      const el = id ? (target as Element).closest("[data-node-id]") : null;
-      if (id && el) addMark(id, framePoint(el, e.clientX, e.clientY));
+      // Found by position, so a locked picture (which ignores the pointer) counts too.
+      const pic = pictureAt(doc, e.clientX, e.clientY);
+      const el = pic?.el ?? null;
+      const id = pic?.id ?? null;
+      const at = id ? locate(currentPage(getState()), id) : null;
+      // On a picture in a free-layout section: a reading layer of its own, anchored where it landed.
+      if (el && at?.kind === "node" && at.section.kind === "canvas") addReadingLayer(at.section, el, e.clientX, e.clientY);
+      else if (id && el) addMark(id, framePoint(el, e.clientX, e.clientY));
       return;
     }
     const media = e.dataTransfer!.getData(MEDIA_MIME);
