@@ -123,6 +123,14 @@ export const SITE_TEMPLATES: SiteTemplate[] = [
           text("Product catalogues", "h2", "h2", { base: { color: INK } }),
           cards(3),
         ]),
+        section("flow", "Video", { columns: 1, gap: 20, padding: "8px 16px 56px", background: { color: PALE } }, { padding: "0px 24px 88px", maxWidth: 1040 }, [
+          text("See TrueFruit at work", "h2", "h2", { base: { color: INK } }),
+          node(
+            "Video",
+            { source: "link", src: "", url: "https://www.youtube.com/watch?v=27Aj5-LUDUU", poster: A + "tpl_aero_hero_wide.webp", alt: "TrueFruit at work", autoplay: false, loop: false, controls: true, play: "disc", title: "TrueFruit: from the tree to the report", channel: "Aerobotics", avatar: A + "tpl_aero_mark.svg", duration: "" },
+            { base: { aspectRatio: "16/9", radius: [16, 16, 16, 16] } },
+          ),
+        ]),
         footer(),
       ]),
   },
