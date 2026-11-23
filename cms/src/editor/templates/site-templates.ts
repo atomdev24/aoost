@@ -150,9 +150,10 @@ export const SITE_TEMPLATES: SiteTemplate[] = [
             // Fruit readings on the citrus behind the phone (drag them in the editor to move them).
             markStyle: "ring",
             marks: [
-              { x: 18, y: 17, r: 8, size: 68, colour: "break", side: "right" },
-              { x: 53, y: 37, r: 7.5, size: 72, colour: "green", side: "left" },
-              { x: 70.5, y: 35.5, r: 7, size: 64, colour: "mostly", side: "right" },
+              // On the picture itself (percent of the whole photo), so they stay on the fruit at any crop.
+              { x: 18, y: 22.4, r: 8, size: 68, colour: "break", side: "right" },
+              { x: 53, y: 39.1, r: 7.5, size: 72, colour: "green", side: "left" },
+              { x: 70.5, y: 37.9, r: 7, size: 64, colour: "mostly", side: "right" },
             ],
           }),
           text("Product catalogues", "label", "p", { base: { color: BLUE } }),

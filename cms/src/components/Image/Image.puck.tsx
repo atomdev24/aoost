@@ -50,6 +50,7 @@ export const fields: Partial<Fields<ImageContent>> = {
       { label: "Scales with the ring", value: "scale" },
     ],
   },
+  markDelay: { type: "number", label: "Fruit readings: start after (seconds)", min: 0, max: 20 },
   marks: {
     type: "array",
     label: "Fruit readings (drag a mark on the picture to move it)",

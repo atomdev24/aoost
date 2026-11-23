@@ -1,6 +1,7 @@
 import { locate, updateNode } from "../../model/page-ops";
 import { labelScale, NEW_MARK, type Mark } from "../../components/Image/annotations";
 import type { Node } from "../../schema";
+import { layoutAnn } from "../../components/Image/ann-layout";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage } from "../store";
 
@@ -14,9 +15,27 @@ const imageNode = (id: string): Node | null => {
 };
 const pct = (v: number) => Math.round(Math.min(100, Math.max(0, v)) * 10) / 10;
 
-/** Where a point sits in an Image block's frame, in percent. */
+/** The picture content's box on screen (what the readings are placed on), or the frame's when the picture hasn't loaded. */
+export function contentRect(blockEl: Element): DOMRect {
+  const layer = blockEl.querySelector<HTMLElement>("[data-ann]");
+  if (layer) return layer.getBoundingClientRect();
+  const img = blockEl.querySelector("img.media");
+  if (img?.parentElement) {
+    // No readings yet: lay out a stand-in layer to measure where the content sits.
+    const probe = blockEl.ownerDocument.createElement("div");
+    probe.style.position = "absolute";
+    img.parentElement.appendChild(probe);
+    const ok = layoutAnn(probe);
+    const r = probe.getBoundingClientRect();
+    probe.remove();
+    if (ok) return r;
+  }
+  return (blockEl.querySelector(".frame") ?? blockEl).getBoundingClientRect();
+}
+
+/** Where a point sits on the picture's content, in percent. */
 export function framePoint(blockEl: Element, clientX: number, clientY: number) {
-  const r = (blockEl.querySelector(".frame") ?? blockEl).getBoundingClientRect();
+  const r = contentRect(blockEl);
   return { x: pct(((clientX - r.left) / r.width) * 100), y: pct(((clientY - r.top) / r.height) * 100) };
 }
 
@@ -44,7 +63,7 @@ function resizeRing(e: PointerEvent): boolean {
   const i = Number(markEl.dataset.annI);
   const node = imageNode(id);
   const grow = node?.content.markLabels === "scale";
-  const frame = (block.querySelector(".frame") ?? block).getBoundingClientRect();
+  const frame = contentRect(block);
   const c = markEl.getBoundingClientRect();
   const cx = c.left + c.width / 2;
   const cy = c.top + c.height / 2;
