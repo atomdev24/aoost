@@ -31,6 +31,9 @@ export function initAnnotations() {
     });
   };
   if (!("IntersectionObserver" in window)) return sets.forEach(play);
+  // Play once the visible part of the layer is past the bottom fifth of the screen. Not a share of the
+  // layer: it covers the whole picture inside its frame, so a zoomed picture's layer can be several
+  // screens big and would never reach a share like 35%.
   const io = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {
@@ -39,7 +42,7 @@ export function initAnnotations() {
         play(e.target as HTMLElement);
       }
     },
-    { threshold: 0.35 },
+    { rootMargin: "0px 0px -20% 0px" },
   );
   sets.forEach((s) => io.observe(s));
 }

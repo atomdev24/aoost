@@ -56,4 +56,22 @@ test.describe("fruit readings", () => {
     await expect(view.locator("[data-count]").first()).not.toHaveText("0");
     await set.screenshot({ path: "test-results/ann-page.png" });
   });
+
+  test("readings on a zoomed picture still play", async ({ page, request }) => {
+    const { site } = await (await request.get("/demo/api/editor/site")).json();
+    const home = site.pages.find((p: { isHome?: boolean }) => p.isHome) ?? site.pages[0];
+    type N = { type: string; content: Record<string, unknown>; frame?: Record<string, unknown> };
+    const img = (home.sections as { children: N[] }[]).flatMap((s) => s.children).find((n) => n.type === "Image")!;
+    img.content.marks = [{ x: 50, y: 50, r: 4, size: 68, colour: "break", side: "left" }];
+    // zoomed in a long way, so the reading layer is several screens big
+    img.frame = { base: { fit: "free", focalX: 50, focalY: 50, zoom: 3, panX: 0, panY: 0 } };
+    const res = await request.post("/demo/api/editor/ops", { data: { ops: [{ op: "putPage", page: home }] } });
+    expect(res.ok()).toBe(true);
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/demo/preview${home.slug === "/" ? "" : home.slug}/`);
+    const set = page.locator("[data-ann]").first();
+    await set.scrollIntoViewIfNeeded();
+    await expect(set).toHaveClass(/\bin\b/, { timeout: 5_000 });
+  });
 });
