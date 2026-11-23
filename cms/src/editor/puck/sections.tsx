@@ -67,6 +67,7 @@ function EditorSection({ kind, ...props }: SectionProps & { kind: Section["kind"
         .map((o) => (
           <EditorOverlay key={o.id} overlay={o} />
         ))}
+      {props.locked ? null : <span className="ed-sh" data-ed-section-handle="" title="Drag to change the height" aria-hidden="true" />}
     </section>
   );
 }

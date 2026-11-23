@@ -4,6 +4,7 @@ import { getState, useEditor } from "../store";
 import { attachCanvasDrops } from "../canvas/drops";
 import { attachAnnotationDrag } from "../canvas/annotations";
 import { attachFlowResize } from "../canvas/flow-resize";
+import { attachSectionResize } from "../canvas/section-handle";
 import { watchAnn } from "../../components/Image/ann-layout";
 import { watchAnchors } from "../../components/FruitReading/follow";
 import { attachPieceSelect } from "../canvas/ResizePiece";
@@ -45,6 +46,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     const detachDrops = attachCanvasDrops(doc);
     const detachMarks = attachAnnotationDrag(doc);
     const detachFlowResize = attachFlowResize(doc);
+    const detachSectionResize = attachSectionResize(doc);
     const unwatchAnn = watchAnn(doc);
     const unwatchAnchors = watchAnchors(doc, { editing: true });
     const detachPieces = attachPieceSelect(doc);
@@ -87,6 +89,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       detachDrops();
       detachMarks();
       detachFlowResize();
+      detachSectionResize();
       unwatchAnn();
       unwatchAnchors();
       detachPieces();

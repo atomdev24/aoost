@@ -5,7 +5,8 @@ html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!imp
 .ed-nav-preview .sheet,.ed-nav-preview .search{display:none}
 .ed-nav-preview .pill{cursor:pointer}
 .ed-nav-preview .pill:hover{outline:1.5px solid #2F6BFF;outline-offset:3px}
-.s{min-height:48px}
+/* Empty sections stay grabbable; :where() so a section's own Min height still wins. */
+:where(.s){min-height:48px}
 /* Puck puts position:relative inline on draggable items; canvas layers must stay absolute. */
 .s[data-kind="canvas"]>.si>.n{position:absolute!important}
 .s[data-kind="canvas"]>.si{outline:1px dashed rgba(10,132,255,.4);outline-offset:-1px}
@@ -30,6 +31,12 @@ html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!imp
 /* Resize handle for a picture in a stacked or grid section: bottom-right corner. */
 .n>.ed-fh{position:absolute;right:0;bottom:0;z-index:11;width:calc(14px * var(--ed-px,1));height:calc(14px * var(--ed-px,1));margin:calc(-7px * var(--ed-px,1));background:#fff;border:calc(1.5px * var(--ed-px,1)) solid #0A84FF;box-sizing:border-box;cursor:nwse-resize;pointer-events:auto!important}
 .n:has(>.ed-fh){position:relative}
+/* Section height handle: the middle of the bottom edge, on hover (editor/canvas/section-resize.ts). */
+.s>.ed-sh{position:absolute;left:50%;bottom:0;z-index:12;width:calc(44px * var(--ed-px,1));height:calc(16px * var(--ed-px,1));translate:-50% 50%;display:flex;align-items:center;justify-content:center;cursor:ns-resize;opacity:0;transition:opacity .15s;pointer-events:auto!important;touch-action:none}
+.s>.ed-sh::before{content:"";width:calc(36px * var(--ed-px,1));height:calc(6px * var(--ed-px,1));border-radius:99px;background:#fff;border:calc(1.5px * var(--ed-px,1)) solid #0A84FF;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.s:hover>.ed-sh,.s>.ed-sh[data-h]{opacity:1}
+.s>.ed-sh[data-h]::after{content:attr(data-h);position:absolute;top:100%;margin-top:calc(4px * var(--ed-px,1));padding:calc(2px * var(--ed-px,1)) calc(7px * var(--ed-px,1));border-radius:calc(5px * var(--ed-px,1));background:#0A84FF;color:#fff;font:600 calc(11px * var(--ed-px,1))/1.4 -apple-system,system-ui,sans-serif;white-space:nowrap}
+html.ed-sizing *{cursor:ns-resize!important;user-select:none}
 .ed-guides i{position:absolute;display:block;background:#0A84FF}
 html.ed-dragging *{cursor:grabbing!important}
 html.ed-dragging [data-puck-overlay-portal],html.ed-dragging [class*="DraggableComponent"]{opacity:0}
