@@ -66,7 +66,7 @@ function EditingTable({ shown }: { shown: { image?: string; title?: string; stic
         <div key={i} className={p.sticker ? "piece stk" : "piece"}>
           <span className="tape" />
           {/* the same right-sized copy the site loads (runtime/sources.js), so both lay out the same shapes */}
-          <img {...imageSources(p.image ?? "")} sizes="(max-width: 640px) 45vw, 260px" alt={p.title ?? ""} draggable={false} />
+          <img {...imageSources(p.image ?? "")} sizes="(max-width: 640px) 60vw, 520px" alt={p.title ?? ""} draggable={false} />
         </div>
       ))}
     </div>

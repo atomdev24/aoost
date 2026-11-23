@@ -5,7 +5,8 @@ import { BREAKPOINT_LABEL, DEFAULT_FRAME_FIT } from "../../schema";
 import { FocalPicker } from "../fields/FocalPicker";
 import { ResponsiveEditor } from "../fields/ResponsiveEditor";
 import { FRAME_ROWS, SECTION_ROWS, STYLE_ROWS } from "../fields/rows";
-import { isHidden, locate, setHidden } from "../../model/page-ops";
+import { isHidden, locate, setHidden, updateNode } from "../../model/page-ops";
+import { isEdgeToEdge, setEdgeToEdge } from "../../model/edge";
 import { currentPage, updatePage, useEditor } from "../store";
 import { alignSelection, distributeSelection } from "../canvas/actions";
 import type { AlignMode } from "../canvas/geometry";
@@ -144,6 +145,26 @@ export const visibleOnField: CustomField<undefined> = {
  * InDesign-style frame vs content: the frame's size, ratio, corners, border
  * and shadow live in "Layout and look"; this panel fits the content inside it.
  */
+/** "Edge to edge": the picture fills the screen's width, past the section's padding and content width. */
+function EdgeToEdge() {
+  const id = usePuck((s) => s.selectedItem?.props.id as string | undefined);
+  const kind = useParentKind();
+  const page = useEditor(currentPage);
+  const at = id ? locate(page, id) : null;
+  if (!id || kind !== "flow" || at?.kind !== "node") return null;
+  const on = isEdgeToEdge(at.node);
+  return (
+    <div className="ed-row">
+      <span className="ed-label" title="Fill the whole width of the screen, past the section's padding and content width, on every size">
+        Edge to edge
+      </span>
+      <div className="ed-control">
+        <Toggle checked={on} label="Edge to edge" onChange={(v: boolean) => updatePage(page.id, (p) => updateNode(p, id, (n) => setEdgeToEdge(n, v)), v ? "Edge to edge" : "Back inside the section")} />
+      </div>
+    </div>
+  );
+}
+
 function FramePanel({ value, onChange }: { value: Responsive<FrameFit> | undefined; onChange: (v: Responsive<FrameFit>) => void }) {
   const bp = useEditor((s) => s.bp);
   // The picture to aim at: the image itself, or a video's poster frame.
@@ -153,6 +174,7 @@ function FramePanel({ value, onChange }: { value: Responsive<FrameFit> | undefin
   const preview = src && /\.(jpe?g|png|webp|avif|gif|svg)(\?|$)/i.test(src) ? src : "";
   return (
     <>
+      <EdgeToEdge />
       <div className="ed-seg ed-seg-fill" role="group" aria-label="Content fit">
         {(["fill", "fit", "free"] as const).map((fit) => (
           <button key={fit} type="button" aria-pressed={now.fit === fit} title={fit === "free" ? "Pan and zoom the content freely" : undefined} onClick={() => onChange(setOnly(v, bp, { fit }))}>

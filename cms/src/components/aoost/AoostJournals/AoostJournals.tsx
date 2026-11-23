@@ -103,7 +103,7 @@ function ShelfBook({ j, i }: { j: AoostJournal; i: number }) {
     return (
       <button type="button" className="jr jr-hasmock" aria-label={`Open journal: ${j.title}`} style={{ "--r": `${j.tilt ?? 0}deg`, "--i": i } as CSSProperties}>
         <span className="jr-cv jr-mock">
-          <img {...imageSources(j.mockup)} sizes="(max-width: 640px) 45vw, 220px" alt="" draggable={false} ref={fitMock} onLoad={(e) => fitMock(e.currentTarget)} />
+          <img {...imageSources(j.mockup)} sizes="(max-width: 640px) 60vw, 480px" alt="" draggable={false} ref={fitMock} onLoad={(e) => fitMock(e.currentTarget)} />
         </span>
         <span className="jr-n">0{i + 1}</span>
         <span className="jr-cap">
