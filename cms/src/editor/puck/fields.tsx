@@ -276,8 +276,8 @@ export const effectsField: CustomField<Node["effects"]> = {
           <div className="ed-row">
             <span className="ed-label">Pan speed</span>
             <div className="ed-control">
-              <input className="ed-range" type="range" min={10} max={240} step={5} value={fx.panSeconds ?? 60} aria-label="Seconds per sweep" onChange={(e) => set({ panSeconds: Number(e.target.value) })} />
-              <span className="ed-range-value">{fx.panSeconds ?? 60}s</span>
+              <input className="ed-range" type="range" min={60} max={3600} step={30} value={fx.panSeconds ?? 600} aria-label="Seconds per sweep" onChange={(e) => set({ panSeconds: Number(e.target.value) })} />
+              <span className="ed-range-value">{(() => { const t = fx.panSeconds ?? 600; return t < 120 ? `${t}s` : `${Math.round(t / 6) / 10} min`; })()}</span>
             </div>
           </div>
         ) : null}

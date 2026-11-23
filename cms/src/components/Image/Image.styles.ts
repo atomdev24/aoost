@@ -17,7 +17,7 @@ export const css = `
 .drift>.media,.drift>a>.media{display:block;width:100%;height:100%;object-fit:cover}
 .drift>a{display:block;width:100%;height:100%}
 /* Slow pan (Ken Burns): a gentle, endless sweep, enlarged just enough to never show an edge. */
-.drift.kb{animation:kb-left var(--kb,60s) ease-in-out infinite alternate;will-change:transform}
+.drift.kb{animation:kb-left var(--kb,600s) ease-in-out infinite alternate;will-change:transform}
 .drift.kb-right{animation-name:kb-right}.drift.kb-in{animation-name:kb-in}.drift.kb-out{animation-name:kb-out}
 @keyframes kb-left{from{transform:scale(1.12) translateX(4.5%)}to{transform:scale(1.12) translateX(-4.5%)}}
 @keyframes kb-right{from{transform:scale(1.12) translateX(-4.5%)}to{transform:scale(1.12) translateX(4.5%)}}
