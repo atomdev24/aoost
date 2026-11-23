@@ -34,7 +34,10 @@ const brackets = (
   </svg>
 );
 
-export function Annotations({ marks, style, editing }: { marks: Mark[]; style: (typeof MARK_STYLES)[number]; editing: boolean }): ReactElement | null {
+/** A label's size: fixed, or growing and shrinking with its ring (the default ring is 8% of the width). */
+export const labelScale = (r: number, grow: boolean) => (grow ? Math.round(Math.min(2.2, Math.max(0.6, r / 8)) * 100) / 100 : 1);
+
+export function Annotations({ marks, style, editing, grow = false }: { marks: Mark[]; style: (typeof MARK_STYLES)[number]; editing: boolean; grow?: boolean }): ReactElement | null {
   if (!marks.length) return null;
   const sorted = marks.map((m, i) => ({ m, i }));
   return (
@@ -42,7 +45,7 @@ export function Annotations({ marks, style, editing }: { marks: Mark[]; style: (
       {sorted.map(({ m, i }) => {
         const c = FRUIT_COLOURS[m.colour];
         return (
-          <span key={i} className={`ann-m ann-${m.side === "left" || m.x > 74 ? "left" : "right"}`} data-ann-i={i} style={{ left: `${m.x}%`, top: `${m.y}%`, "--r": `${m.r}cqw`, "--d": `${i * 0.65}s` } as CSSProperties}>
+          <span key={i} className={`ann-m ann-${m.side === "left" || m.x > 74 ? "left" : "right"}`} data-ann-i={i} style={{ left: `${m.x}%`, top: `${m.y}%`, "--r": `${m.r}cqw`, "--d": `${i * 0.65}s`, "--ls": labelScale(m.r, grow) } as CSSProperties}>
             {style === "ring" ? ring : style === "brackets" ? brackets : <span className="ann-dot" />}
             {style === "brackets" ? <span className="ann-scan" /> : null}
             <span className="ann-chip">
@@ -52,6 +55,7 @@ export function Annotations({ marks, style, editing }: { marks: Mark[]; style: (
               <span className="ann-sw" style={{ background: c.swatch }} />
               <b>{c.label}</b>
             </span>
+            {editing ? <i className="ann-h" data-ann-h="" title="Drag to resize" /> : null}
           </span>
         );
       })}
@@ -68,7 +72,8 @@ export const annotationCss = `
 .ann-scan{position:absolute;left:0;right:0;top:0;height:3px;border-radius:2px;background:rgba(255,255,255,.85);opacity:0}
 .ann-dot{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px;border-radius:50%;background:#fff;box-shadow:0 0 0 0 rgba(255,255,255,.7);opacity:0}
 .ann-chip{position:absolute;bottom:calc(100% + 6px);left:calc(100% - 6px);padding:6px 10px 7px;border:1px solid rgba(255,255,255,.35);border-radius:10px;background:rgba(16,24,20,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;font-size:11px;line-height:1.25;white-space:nowrap;opacity:0;translate:0 6px;transition:opacity .35s ease,translate .35s cubic-bezier(.2,.8,.2,1)}
-.ann-left .ann-chip{left:auto;right:calc(100% - 6px)}
+.ann-left .ann-chip{left:auto;right:calc(100% - 6px);transform-origin:100% 100%}
+.ann-chip{scale:var(--ls,1);transform-origin:0 100%}
 .ann-chip small{display:block;font-size:9.5px;opacity:.7}
 .ann-chip .ann-gap{margin-top:4px}
 .ann-chip b{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -80,7 +85,8 @@ export const annotationCss = `
 .ann.in .ann-chip{opacity:1;translate:0 0;transition-delay:calc(var(--d) + .6s)}
 @keyframes ann-scan{0%{opacity:1;top:0}90%{opacity:1}100%{opacity:0;top:calc(100% - 3px)}}
 @keyframes ann-pulse{to{box-shadow:0 0 0 calc(var(--r) - 6px) rgba(255,255,255,0)}}
-.ann-edit .ann-m{pointer-events:auto;cursor:grab}
+.ann-edit .ann-m{pointer-events:auto!important;cursor:grab}
+.ann-h{pointer-events:auto!important;position:absolute;left:100%;top:50%;width:calc(14px * var(--ed-px,1));height:calc(14px * var(--ed-px,1));margin:calc(-7px * var(--ed-px,1));border:calc(2px * var(--ed-px,1)) solid #0A84FF;border-radius:50%;background:#fff;cursor:ew-resize;box-shadow:0 1px 4px rgba(0,0,0,.35)}
 .ann-edit .ann-m:active{cursor:grabbing}
 @media (prefers-reduced-motion:reduce){.ann *{transition:none!important;animation:none!important}}
 `;

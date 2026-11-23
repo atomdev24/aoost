@@ -42,6 +42,14 @@ export const fields: Partial<Fields<ImageContent>> = {
       { label: "Pulse", value: "pulse" },
     ],
   },
+  markLabels: {
+    type: "radio",
+    label: "Fruit readings: label size",
+    options: [
+      { label: "Fixed", value: "fixed" },
+      { label: "Scales with the ring", value: "scale" },
+    ],
+  },
   marks: {
     type: "array",
     label: "Fruit readings (drag a mark on the picture to move it)",

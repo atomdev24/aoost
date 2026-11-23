@@ -1,5 +1,5 @@
 import { locate, updateNode } from "../../model/page-ops";
-import { NEW_MARK, type Mark } from "../../components/Image/annotations";
+import { labelScale, NEW_MARK, type Mark } from "../../components/Image/annotations";
 import type { Node } from "../../schema";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage } from "../store";
@@ -31,9 +31,47 @@ export function addMark(id: string, at?: { x: number; y: number }) {
   return true;
 }
 
+/** Drag a ring's handle: the ring grows or shrinks around its centre (and its label with it, when labels scale). */
+function resizeRing(e: PointerEvent): boolean {
+  const h = (e.target as Element | null)?.closest?.("[data-ann-h]");
+  const markEl = h?.closest<HTMLElement>(".ann-m[data-ann-i]");
+  const block = markEl?.closest("[data-node-id]");
+  const id = block?.getAttribute("data-node-id");
+  if (!h || !markEl || !block || !id || e.button !== 0) return false;
+  e.preventDefault();
+  e.stopPropagation();
+  const doc = markEl.ownerDocument;
+  const i = Number(markEl.dataset.annI);
+  const node = imageNode(id);
+  const grow = node?.content.markLabels === "scale";
+  const frame = (block.querySelector(".frame") ?? block).getBoundingClientRect();
+  const c = markEl.getBoundingClientRect();
+  const cx = c.left + c.width / 2;
+  const cy = c.top + c.height / 2;
+  let r: number | null = null;
+  const move = (m: PointerEvent) => {
+    r = Math.round(Math.min(40, Math.max(1, (Math.hypot(m.clientX - cx, m.clientY - cy) / frame.width) * 100)) * 10) / 10;
+    markEl.style.setProperty("--r", `${r}cqw`);
+    if (grow) markEl.style.setProperty("--ls", String(labelScale(r, true)));
+  };
+  const up = () => {
+    doc.removeEventListener("pointermove", move, true);
+    doc.removeEventListener("pointerup", up, true);
+    if (r === null) return;
+    const to = r;
+    updatePage(getState().pageId, (p) => updateNode(p, id, (n) => ({ ...n, content: { ...n.content, marks: ((n.content.marks as Mark[]) ?? []).map((mk, j) => (j === i ? { ...mk, r: to } : mk)) } })), "Resize fruit reading");
+    selectBlock(id);
+    doc.addEventListener("click", (k) => k.stopPropagation(), { capture: true, once: true });
+  };
+  doc.addEventListener("pointermove", move, true);
+  doc.addEventListener("pointerup", up, true);
+  return true;
+}
+
 /** Drag a fruit reading's mark around its picture in the canvas (one undo step per drag). */
 export function attachAnnotationDrag(doc: Document) {
   const down = (e: PointerEvent) => {
+    if (resizeRing(e)) return;
     const markEl = (e.target as Element | null)?.closest?.<HTMLElement>(".ann-m[data-ann-i]");
     const block = markEl?.closest("[data-node-id]");
     const id = block?.getAttribute("data-node-id");

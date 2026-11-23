@@ -40,6 +40,8 @@ export const Style = z.object({
   h: z.number().min(1).optional(),
   rotation: z.number().min(-360).max(360).optional(),
   z: z.number().int().optional(),
+  /** Editor: corner handles keep the box's proportions (pictures and video do unless set to false; Shift flips it). */
+  keepRatio: z.boolean().optional(),
   /** Corner radii in px: top-left, top-right, bottom-right, bottom-left. */
   radius: z.tuple([z.number().min(0), z.number().min(0), z.number().min(0), z.number().min(0)]).optional(),
   border: Border.optional(),

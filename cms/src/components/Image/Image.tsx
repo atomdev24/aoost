@@ -23,6 +23,8 @@ export const ImageContent = z.object({
   /** Fruit readings drawn on top (see ./annotations). */
   marks: z.array(Mark).optional(),
   markStyle: z.enum(MARK_STYLES).optional(),
+  /** Labels grow and shrink with their rings ("scale"), or stay one size. */
+  markLabels: z.enum(["fixed", "scale"]).optional(),
 });
 export type ImageContent = z.infer<typeof ImageContent>;
 
@@ -81,7 +83,7 @@ export const Image = defineComponent<ImageContent>({
     return (
       <figure className="frame" {...(content.lightbox && !href ? { "data-lightbox": content.src, "data-caption": content.caption ?? content.alt } : {})}>
         {inner}
-        {content.marks?.length ? <Annotations marks={content.marks} style={content.markStyle ?? "ring"} editing={ctx.editing} /> : null}
+        {content.marks?.length ? <Annotations marks={content.marks} style={content.markStyle ?? "ring"} editing={ctx.editing} grow={content.markLabels === "scale"} /> : null}
         {content.caption ? <figcaption className="t-small">{content.caption}</figcaption> : null}
       </figure>
     );
