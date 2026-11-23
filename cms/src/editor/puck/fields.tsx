@@ -256,12 +256,38 @@ export const effectsField: CustomField<Node["effects"]> = {
           </div>
         </div>
         <div className="ed-row">
+          <span className="ed-label" title="The Ken Burns effect: the picture keeps drifting slowly, back and forth (pictures only)">Slow pan</span>
+          <div className="ed-control">
+            <Select
+              ariaLabel="Slow pan"
+              value={fx.pan ?? "none"}
+              options={[
+                { value: "none", label: "None" },
+                { value: "left", label: "Drift left" },
+                { value: "right", label: "Drift right" },
+                { value: "in", label: "Slow zoom in" },
+                { value: "out", label: "Slow zoom out" },
+              ]}
+              onChange={(v) => set({ pan: v === "none" ? undefined : (v as "left") })}
+            />
+          </div>
+        </div>
+        {fx.pan ? (
+          <div className="ed-row">
+            <span className="ed-label">Pan speed</span>
+            <div className="ed-control">
+              <input className="ed-range" type="range" min={6} max={60} step={1} value={fx.panSeconds ?? 24} aria-label="Seconds per sweep" onChange={(e) => set({ panSeconds: Number(e.target.value) })} />
+              <span className="ed-range-value">{fx.panSeconds ?? 24}s</span>
+            </div>
+          </div>
+        ) : null}
+        <div className="ed-row">
           <span className="ed-label">Sticky</span>
           <div className="ed-control">
             <Toggle label="Sticky" checked={!!fx.sticky} onChange={(v) => set({ sticky: v })} />
           </div>
         </div>
-        <p className="ed-hint">Scroll effects play on the live page and in Preview, not while editing (moving the Parallax slider plays a short preview). They're skipped for visitors who prefer reduced motion.</p>
+        <p className="ed-hint">Scroll effects and the slow pan play on the live page and in Preview, not while editing (moving the Parallax slider plays a short preview). They're skipped for visitors who prefer reduced motion.</p>
       </div>
       </InspectorGroup>
     );

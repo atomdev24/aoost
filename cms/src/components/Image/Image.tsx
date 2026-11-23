@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { z } from "zod";
 import { isExternal } from "../../render/links";
 import { imageSources } from "../../render/media";
@@ -40,6 +41,23 @@ export function imageSizes(node: Node): string {
   const zooms = Object.values(node.frame ?? {}).map((f) => (f && f.fit === "free" ? f.zoom : 1));
   const zoom = Math.min(3, Math.max(1, ...zooms));
   return `${Math.round(100 * zoom)}vw`;
+}
+
+/**
+ * The slide wrapper's look. The slow pan's speed; and in the editor (which keeps scroll effects
+ * still) the enlargement parallax gives the picture on the page, so the crop you set is the one
+ * the page shows at first.
+ */
+function driftStyle(node: Node, editing: boolean): CSSProperties | undefined {
+  const fx = node.effects;
+  const s: Record<string, string> = {};
+  if (fx?.pan) s["--kb"] = `${fx.panSeconds ?? 24}s`;
+  if (editing && fx?.parallax) {
+    const f = fx.parallax;
+    s.scale = String(Math.round((1 + Math.abs(f) * 0.45) * 1000) / 1000);
+    s.transformOrigin = f > 0 ? "50% 100%" : "50% 0%";
+  }
+  return Object.keys(s).length ? (s as CSSProperties) : undefined;
 }
 
 export const Image = defineComponent<ImageContent>({
@@ -88,8 +106,12 @@ export const Image = defineComponent<ImageContent>({
     return (
       <figure className="frame" {...(content.lightbox && !href ? { "data-lightbox": content.src, "data-caption": content.caption ?? content.alt } : {})}>
         {/* With parallax, the picture and its readings slide together inside the frame (runtime/effects.ts). */}
-        {node.effects?.parallax ? (
-          <div className="drift" data-parallax-inner="">
+        {node.effects?.parallax || node.effects?.pan ? (
+          <div
+            className={`drift${node.effects.pan ? ` kb kb-${node.effects.pan}` : ""}`}
+            data-parallax-inner={node.effects.parallax ? "" : undefined}
+            style={driftStyle(node, ctx.editing)}
+          >
             {inner}
             <Shade node={node} />
             {marks}

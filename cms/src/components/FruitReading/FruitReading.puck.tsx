@@ -13,6 +13,7 @@ export const fields: Partial<Fields<FruitReadingContent>> = {
       { label: "Orange", value: "orange" },
     ],
   },
+  swatch: { type: "text", label: "Colour block (optional, e.g. #E2C12F)" },
   look: {
     type: "select",
     label: "How it appears",

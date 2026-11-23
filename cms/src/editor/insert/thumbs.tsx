@@ -98,6 +98,12 @@ const SHAPES: Record<string, React.ReactNode> = {
       <rect x="52" y="12" width="34" height="18" rx="4" fill={F} />
     </>
   ),
+  Shape: (
+    <>
+      <rect x="16" y="16" width="34" height="30" rx="4" fill={F} />
+      <circle cx="66" cy="31" r="15" fill={A} />
+    </>
+  ),
   Cards: (
     <>
       <rect x="10" y="14" width="24" height="36" rx="3" fill={F} />

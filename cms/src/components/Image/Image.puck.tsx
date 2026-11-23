@@ -66,6 +66,7 @@ export const fields: Partial<Fields<ImageContent>> = {
           { label: "Orange", value: "orange" },
         ],
       },
+      swatch: { type: "text", label: "Colour block (optional, e.g. #E2C12F)" },
       side: { type: "radio", label: "Label", options: [{ label: "Right", value: "right" }, { label: "Left", value: "left" }] },
       r: { type: "number", label: "Ring size (% of width)", min: 1, max: 40 },
       x: { type: "number", label: "Across (%)", min: 0, max: 100 },
