@@ -105,6 +105,13 @@ const SHAPES: Record<string, React.ReactNode> = {
       <path d="M50 20v16M43 30l7 7 7-7" stroke="#fff" strokeOpacity=".7" strokeWidth="2.5" fill="none" strokeLinecap="round" />
     </>
   ),
+  TrueFruitSeason: (
+    <>
+      <path d="M14 22H86" stroke={L} strokeWidth="2" strokeDasharray="3 4" />
+      <circle cx="30" cy="22" r="5" fill={A} />
+      <rect x="14" y="32" width="72" height="22" rx="4" fill={F} />
+    </>
+  ),
   Lottie: <path d="M20 44c10-30 20-30 30 0s20 30 30 0" stroke={A} strokeWidth="3" fill="none" strokeLinecap="round" />,
   Model3D: <path d="M50 12l26 14v24L50 62 24 50V26zM24 26l26 12 26-12M50 38v24" stroke={L} strokeWidth="2" fill={F} strokeLinejoin="round" />,
   Spacer: <path d="M50 14v36M42 20l8-8 8 8M42 44l8 8 8-8" stroke={L} strokeWidth="2.5" fill="none" strokeLinecap="round" />,

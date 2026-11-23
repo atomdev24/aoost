@@ -17,6 +17,7 @@ import { PlaylistCard } from "./PlaylistCard/PlaylistCard";
 import { Spacer } from "./Spacer/Spacer";
 import { SpotifyEmbed } from "./SpotifyEmbed/SpotifyEmbed";
 import { Text } from "./Text/Text";
+import { TrueFruitSeason } from "./TrueFruitSeason/TrueFruitSeason";
 import { Video } from "./Video/Video";
 import { AoostHero } from "./aoost/AoostHero/AoostHero";
 import { AoostProjects } from "./aoost/AoostProjects/AoostProjects";
@@ -32,7 +33,7 @@ import type { ComponentDef } from "./types";
 
 /** Every component the renderer and the editor know about. Add new ones here (and in fields.ts). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, Cards, DiaryList, PlaylistCard, Footer, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout];
+export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, Cards, DiaryList, PlaylistCard, Footer, TrueFruitSeason, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout];
 
 export const componentMap = new Map(components.map((c) => [c.type, c]));
 for (const c of components) registerContentSchema(c.type, c.schema);
