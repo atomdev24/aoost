@@ -15,7 +15,7 @@ export const ScrollEffects = z.object({
   /** Slow pan (the Ken Burns effect): the picture keeps drifting this way, back and forth. */
   pan: z.enum(["left", "right", "in", "out"]).optional(),
   /** Seconds for one sweep of the slow pan. */
-  panSeconds: z.number().min(4).max(120).optional(),
+  panSeconds: z.number().min(4).max(240).optional(),
   sticky: z.boolean().optional(),
   stickyTop: z.number().optional(),
 });

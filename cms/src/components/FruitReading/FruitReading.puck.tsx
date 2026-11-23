@@ -1,4 +1,5 @@
 import type { Fields } from "@puckeditor/core";
+import { colorField } from "../../editor/fields/color";
 import type { FruitReadingContent } from "./FruitReading";
 
 export const fields: Partial<Fields<FruitReadingContent>> = {
@@ -13,7 +14,8 @@ export const fields: Partial<Fields<FruitReadingContent>> = {
       { label: "Orange", value: "orange" },
     ],
   },
-  swatch: { type: "text", label: "Colour block (optional, e.g. #E2C12F)" },
+  colourText: { type: "text", label: "Colour words (optional, replaces the stage name)" },
+  swatch: colorField("Colour block") as never,
   look: {
     type: "select",
     label: "How it appears",

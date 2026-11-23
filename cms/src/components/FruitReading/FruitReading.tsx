@@ -16,6 +16,8 @@ export const FruitReadingContent = z.object({
   colour: z.enum(["green", "break", "mostly", "orange"]),
   /** The colour callout's block, when it should differ from the stage's usual colour. */
   swatch: z.string().optional(),
+  /** The colour callout's words, when they should differ from the stage's name. */
+  colourText: z.string().optional(),
   look: z.enum(MARK_STYLES),
   side: z.enum(["right", "left"]),
   labels: z.enum(["fixed", "scale"]),
@@ -55,7 +57,7 @@ export const FruitReading = defineComponent<FruitReadingContent>({
               <span className="ann-dot" />
             )}
             {content.look === "brackets" ? <span className="ann-scan" /> : null}
-            <ReadingChips size={content.size} colour={content.colour} swatch={content.swatch} />
+            <ReadingChips size={content.size} colour={content.colour} swatch={content.swatch} text={content.colourText} />
           </span>
         </div>
       </div>
