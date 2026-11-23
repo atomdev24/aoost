@@ -53,8 +53,15 @@ function MenuEntry({ item, ctx, menu }: { item: ResolvedItem; ctx: RenderCtx; me
   if (item.type === "social") return <span className="menu-social"><Socials ctx={ctx} /></span>;
   if (!item.href) return null;
   return (
-    <a className="menu-link" role={menu ? "menuitem" : undefined} {...linkProps(item, ctx)}>
-      <Label item={item} />
+    <a className={`menu-link${item.description ? " has-desc" : ""}`} role={menu ? "menuitem" : undefined} {...linkProps(item, ctx)}>
+      {item.description ? (
+        <span className="menu-text">
+          <Label item={item} />
+          <small className="menu-desc">{item.description}</small>
+        </span>
+      ) : (
+        <Label item={item} />
+      )}
     </a>
   );
 }
@@ -226,9 +233,15 @@ function Logo({ ctx }: { ctx: RenderCtx }): ReactElement {
       aria-label={text ? `${text} home` : "Home"}
       aria-current={ctx.page?.isHome ? "page" : undefined}
     >
-      {/* With no logo text the symbol is the whole logo, so it always shows then. */}
-      {ctx.site.nav.showLogoMark || !text ? <Icon name="sun" size={20} /> : null}
-      {text ? <span>{text}</span> : null}
+      {ctx.site.nav.logoImage ? (
+        <img className="pill-logo-img" src={ctx.site.nav.logoImage} alt={text || "Home"} />
+      ) : (
+        <>
+          {/* With no logo text the symbol is the whole logo, so it always shows then. */}
+          {ctx.site.nav.showLogoMark || !text ? <Icon name="sun" size={20} /> : null}
+          {text ? <span>{text}</span> : null}
+        </>
+      )}
     </a>
   );
 }
@@ -243,7 +256,7 @@ function PillNav({ ctx }: { ctx: RenderCtx }): ReactElement {
   const hasMenu = hasMenuLinks(mobile);
   return (
     <>
-      <header className="nav" data-nav="pill" data-hide={nav.hideOnScroll ? "" : undefined} data-marker={nav.currentMarker}>
+      <header className="nav" data-nav={nav.style === "bar" ? "bar" : "pill"} data-hide={nav.hideOnScroll ? "" : undefined} data-marker={nav.currentMarker} style={nav.accent ? ({ "--nav-accent": nav.accent } as React.CSSProperties) : undefined}>
         <div className="pill">
           <Logo ctx={ctx} />
           <nav className="pill-links" aria-label="Main">
@@ -259,7 +272,7 @@ function PillNav({ ctx }: { ctx: RenderCtx }): ReactElement {
         </div>
       </header>
       {hasMenu ? (
-        <div className="sheet" id="nav-sheet" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+        <div className="sheet" data-nav-sheet={nav.style === "bar" ? "bar" : "pill"} id="nav-sheet" role="dialog" aria-modal="true" aria-label="Menu" hidden>
           <div className="sheet-top">
             <Logo ctx={ctx} />
             <button type="button" className="sheet-close" aria-label="Close menu">

@@ -158,6 +158,8 @@ export interface NavItem {
   showOn: "both" | "desktop" | "mobile";
   hover: "tint" | "underline" | "none";
   newTab?: boolean;
+  /** A line under the label in a dropdown ("Precise fruit sizing & size forecasting"). */
+  description?: string;
   ariaLabel?: string;
   /** dropdown: "auto" lists the sub-pages of `target` (a page); "manual" uses `children`. */
   source?: "auto" | "manual";
@@ -182,6 +184,7 @@ export const NavItem: z.ZodType<NavItem> = z.object({
   showOn: z.enum(["both", "desktop", "mobile"]),
   hover: z.enum(["tint", "underline", "none"]),
   newTab: z.boolean().optional(),
+  description: z.string().optional(),
   ariaLabel: z.string().optional(),
   source: z.enum(["auto", "manual"]).optional(),
   get children() {
@@ -198,6 +201,10 @@ export const NavConfig = z.object({
   style: z.string(),
   logoText: z.string(),
   showLogoMark: z.boolean(),
+  /** A logo picture in place of the symbol and text. */
+  logoImage: z.string().optional(),
+  /** The bar style's accent: links on hover, buttons. */
+  accent: z.string().optional(),
   hideOnScroll: z.boolean(),
   currentMarker: z.enum(["pill", "underline", "none"]),
   items: z.array(NavItem),
