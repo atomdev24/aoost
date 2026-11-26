@@ -1,3 +1,4 @@
+import { resetTips } from "../tips/tips";
 import { nodeToBoard } from "../board/ref-page";
 import { openProblemLog, openReport } from "../problems";
 import { locate } from "../../model/page-ops";
@@ -86,6 +87,7 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
   "help.shortcuts": toggleCheatSheet,
   "help.report": openReport,
   "help.problems": openProblemLog,
+  "help.tips": resetTips,
   "tool.select": () => applyTool("select"),
   "tool.frame": () => applyTool("frame"),
   "tool.text": () => applyTool("text"),

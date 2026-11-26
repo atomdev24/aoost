@@ -4,6 +4,7 @@ import { api } from "../api";
 import { isCancelled, uploadFile } from "../media";
 import { MEDIA_MIME, type DraggedMedia } from "../canvas/drops";
 import { setExtraFitRects } from "./store";
+import { showTip } from "../tips/tips";
 
 /**
  * Reference images on the board, for the page that is open. They sit beside (behind) the frames,
@@ -79,6 +80,7 @@ export const removeRef = (id: string) => {
 };
 export function addRef(item: RefItem) {
   update((items) => [...items, item]);
+  showTip("ref");
   set({ selected: item.id });
 }
 

@@ -8,6 +8,7 @@ export const ACTION_IDS = [
   "help.shortcuts",
   "help.report",
   "help.problems",
+  "help.tips",
   "tool.select",
   "tool.frame",
   "tool.text",
@@ -78,6 +79,7 @@ export const ACTIONS: ActionMeta[] = [
   { id: "help.shortcuts", title: "Show keyboard shortcuts", group: "Palette and help", keywords: "cheat sheet keys help", common: true },
   { id: "help.report", title: "Report a problem", group: "Palette and help", keywords: "bug issue broken flicker feedback" },
   { id: "help.problems", title: "Problem log", group: "Palette and help", keywords: "errors issues diagnostics log bugs" },
+  { id: "help.tips", title: "Show tips again", group: "Palette and help", keywords: "helper hints onboarding first time" },
 
   { id: "tool.select", title: "Select tool", group: "Tools", keywords: "pointer move" },
   { id: "tool.frame", title: "Add a free-layout section (Frame)", group: "Tools", keywords: "frame canvas" },

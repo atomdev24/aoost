@@ -1,3 +1,4 @@
+import { showTip } from "../tips/tips";
 import { components, getComponent } from "../../components/registry";
 import { addNode, addSection, createNode, createSection, locate } from "../../model/page-ops";
 import type { Page, Section } from "../../schema";
@@ -94,5 +95,7 @@ export function insertBlock(type: string) {
     `Add ${entryFor(type)?.label ?? type}`,
   );
   if (id) selectBlock(id);
+  if (type === "Image") showTip("imageEmpty");
+  else if (type === "Video") showTip("video");
   return id;
 }

@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { beginGesture, endGesture } from "../store";
 import type { SlotPath } from "./slots";
+import { showTip } from "../tips/tips";
 
 /** Which picture is being adjusted (the overlay itself, AdjustImage.tsx, loads after the board). */
 // ------------------------------------------------------------ which image is being adjusted
@@ -15,6 +16,7 @@ export const startAdjust = (id: string, path?: SlotPath) => {
   if (adjusting) endGesture();
   adjusting = { id, path };
   beginGesture();
+  showTip("adjust");
   listeners.forEach((l) => l());
 };
 export const stopAdjust = () => {

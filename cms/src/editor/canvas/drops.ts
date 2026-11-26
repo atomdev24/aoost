@@ -1,6 +1,7 @@
 import { addNode, addSection, createNode, createSection, locate, updateNode } from "../../model/page-ops";
 import { isCancelled, uploadFile } from "../media";
 import { pickMedia } from "../fields/media";
+import { showTip } from "../tips/tips";
 import { embedFor } from "../../components/Embed/providers";
 import { currentPage, getState, updatePage } from "../store";
 import { selectBlock } from "../board/bridge";
@@ -31,6 +32,7 @@ function imageBlockAt(target: EventTarget | null): string | null {
 export function replaceImage(id: string, media: { url: string; width?: number; height?: number }, label = "Replace image") {
   const { pageId } = getState();
   updatePage(pageId, (p) => updateNode(p, id, (n) => ({ ...n, content: { ...n.content, src: media.url, width: media.width, height: media.height } })), label);
+  showTip("image");
 }
 
 /**
@@ -48,6 +50,7 @@ export async function chooseMedia(id: string, kind: "image" | "video") {
     (p) => updateNode(p, id, (n) => ({ ...n, content: link ? { ...n.content, source: "link", url } : { ...n.content, source: "upload", src: url } })),
     "Choose video",
   );
+  showTip("video");
 }
 
 /**
@@ -76,6 +79,7 @@ export function placeMedia(target: EventTarget | null, media: { url: string; kin
     media.kind === "video" ? "Add video" : "Add image",
   );
   selectBlock(node.id);
+  showTip(media.kind === "video" ? "video" : "image");
   return node.id;
 }
 

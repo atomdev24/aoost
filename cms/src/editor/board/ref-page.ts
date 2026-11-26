@@ -7,6 +7,7 @@ import { activateBreakpoint, selectBlock } from "./bridge";
 import { addRef, removeRef } from "./refs-store";
 import { frameOrigin, getBoard } from "./store";
 import { currentPage, getState, updatePage } from "../store";
+import { showTip } from "../tips/tips";
 
 /**
  * Moving pictures between the board and the page: a reference dragged onto the editable frame
@@ -68,6 +69,7 @@ export function refToPage(ref: RefItem, clientX: number, clientY: number): boole
   }
   removeRef(ref.id);
   selectBlock(node.id);
+  showTip("image");
   return true;
 }
 

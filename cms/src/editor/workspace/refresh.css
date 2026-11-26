@@ -1099,3 +1099,26 @@ select.ed-input option {
 .ed-mini.ed-mini-demo { width: auto; padding: 0 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.02em; }
 .ed-mini.ed-mini-demo.is-on { background: color-mix(in srgb, var(--ed-attn) 30%, #1c1c1f); color: color-mix(in srgb, var(--ed-attn) 75%, #fff); opacity: 1; }
 .ed-masonry-item:has(.ed-mini-demo.is-on) .ed-asset-tools, .ed-medialist li:has(.ed-mini-demo.is-on) .ed-asset-tools { opacity: 1; }
+/* First-time tips (tips/TipBar.tsx): one quiet line at the bottom centre. */
+.ed-tip {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 62;
+  display: flex; align-items: center; gap: 10px; max-width: min(640px, calc(100vw - 24px));
+  padding: 8px 6px 8px 14px; border-radius: 12px;
+  background: rgba(38, 38, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  color: #d1d1d6; font: 400 13px/1.4 var(--ed-font, system-ui, sans-serif);
+  animation: ed-tip-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.ed-tip b { flex: none; color: #fff; font-weight: 600; }
+.ed-tip span { min-width: 0; }
+.ed-tip button { flex: none; width: 26px; height: 26px; border: 0; border-radius: 8px; background: transparent; color: #8e8e93; font-size: 16px; cursor: pointer; }
+.ed-tip button:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+@keyframes ed-tip-in { from { opacity: 0; transform: translate(-50%, 6px); } }
+@media (prefers-reduced-motion: reduce) { .ed-tip { animation: none; } }
+/* Above the demo strip when both show. */
+body:has(.ed-demo-strip) .ed-tip { bottom: 56px; }
+/* Phones: under the toolbars, so the settings sheet rising from the bottom never hides it. */
+@media (max-width: 720px) {
+  .ed-tip, body:has(.ed-demo-strip) .ed-tip { top: 118px; bottom: auto; left: 12px; right: 12px; max-width: none; transform: none; animation: none; z-index: 300; font-size: 12px; }
+}
