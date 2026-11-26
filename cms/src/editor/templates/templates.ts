@@ -1,3 +1,4 @@
+import { applyAeroboticsNav } from "../../model/nav-presets";
 import { createPage, deletePage } from "../../model/pages";
 import { createVariant, electVariant, ownerPage, variantsOf } from "../../model/variants";
 import type { Page, Site } from "../../schema";
@@ -19,13 +20,16 @@ const withTemplate = (page: Page, t: SiteTemplate): Page => {
   return next;
 };
 
+/** The template's nav on the site, unless the site already uses it (keeps any edits made to it). */
+const withNav = (site: Site, t: SiteTemplate): Site => (t.nav === "aerobotics" && site.nav.logoImage !== "/art/tpl_aero_logo.svg" ? applyAeroboticsNav(site) : site);
+
 /** A new page made from the template; opens it. */
 export function newPageFrom(t: SiteTemplate) {
   let made = "";
   update((site) => {
     const { site: next, pageId } = createPage(site, { name: t.name.split(",")[0]!, showInNav: false });
     made = pageId;
-    return { ...next, pages: next.pages.map((p) => (p.id === pageId ? { ...withTemplate(p, t), variantIds: undefined } : p)) };
+    return withNav({ ...next, pages: next.pages.map((p) => (p.id === pageId ? { ...withTemplate(p, t), variantIds: undefined } : p)) }, t);
   }, `New page from ${t.name}`);
   if (made) setPage(made);
 }
@@ -38,7 +42,7 @@ export function tryOnPage(t: SiteTemplate) {
     const v = createVariant(site, page.id, t.name);
     if (!v) return site;
     made = v.pageId;
-    return { ...v.site, pages: v.site.pages.map((p) => (p.id === v.pageId ? withTemplate(p, t) : p)) };
+    return withNav({ ...v.site, pages: v.site.pages.map((p) => (p.id === v.pageId ? withTemplate(p, t) : p)) }, t);
   }, `Try ${t.name}`);
   if (made) setPage(made);
 }
