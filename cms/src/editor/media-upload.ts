@@ -1,4 +1,5 @@
 import { IMAGE_WIDTHS } from "../render/media";
+import { DEMO } from "./demo";
 import { MAX_UPLOAD, type MediaItem } from "./media";
 import { startUpload, updateUpload, UploadCancelled } from "./uploads";
 
@@ -36,6 +37,7 @@ export async function uploadFile(file: File): Promise<MediaItem> {
     updateUpload(id, { status: "failed", error: message });
     return new Error(message);
   };
+  if (DEMO) throw fail("Uploads are off in the demo. Pick a placeholder picture, or upload in the real editor at /admin/.");
   if (file.size > MAX_UPLOAD) throw fail(`${file.name} is over 95 MB. Use a YouTube or Vimeo link for long video.`);
   const form = new FormData();
   form.set("file", file, file.name);

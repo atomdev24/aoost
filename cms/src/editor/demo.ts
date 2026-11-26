@@ -31,6 +31,11 @@ if (DEMO) {
     const moved = demoPath(input.url);
     return realFetch(moved === input.url ? input : new Request(moved, input), init);
   };
+  // Uploads use XMLHttpRequest (for progress), so they need moving too.
+  const realXhrOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function (this: XMLHttpRequest, method: string, url: string | URL, ...rest: unknown[]) {
+    return (realXhrOpen as (...a: unknown[]) => void).call(this, method, demoPath(url.toString()), ...rest);
+  } as typeof XMLHttpRequest.prototype.open;
   const RealSocket = window.WebSocket;
   window.WebSocket = class extends RealSocket {
     constructor(url: string | URL, protocols?: string | string[]) {
