@@ -39,6 +39,21 @@ describe("placeBeside", () => {
     expect(p.sections[0]!.layout.desktop?.colWidths).toEqual([62, 38]);
     expect(p.sections[0]!.children[0]!.style.desktop?.width).toBe("100%");
   });
+  it("makes a row of two column stacks, each block in its column", () => {
+    const p = placeBeside(pageWith("img"), "img", createNode("Text", { id: "t" }), "right");
+    expect(p.sections[0]!.stacks).toBe(2);
+    expect(p.sections[0]!.children.map((n) => [n.id, n.col])).toEqual([["img", 0], ["t", 1]]);
+  });
+  it("in a stacks row, goes into the column on that side, or opens a new column", () => {
+    const row = placeBeside(pageWith("img"), "img", createNode("Text", { id: "t" }), "right");
+    const left = placeBeside(row, "t", createNode("Text", { id: "x" }), "left");
+    expect(left.sections[0]!.children.find((n) => n.id === "x")!.col).toBe(0);
+    expect(left.sections[0]!.stacks).toBe(2);
+    const third = placeBeside(row, "t", createNode("Text", { id: "y" }), "right");
+    expect(third.sections[0]!.stacks).toBe(3);
+    expect(third.sections[0]!.children.find((n) => n.id === "y")!.col).toBe(2);
+    expect(third.sections[0]!.layout.desktop?.colWidths?.length).toBe(3);
+  });
   it("does nothing when a block is dropped beside itself", () => {
     const page = pageWith("img");
     expect(placeBeside(page, "img", "img", "left")).toBe(page);

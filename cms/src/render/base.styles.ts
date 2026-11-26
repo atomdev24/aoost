@@ -14,6 +14,8 @@ main{display:block;overflow-x:clip}
 .frame:has(>.shade){position:relative}
 .s{position:relative}
 .si{position:relative;display:grid;margin:0 auto;width:100%}
+.sc{display:flex;flex-direction:column;gap:inherit;min-width:0}
+.sc>.n{max-width:100%}
 .n{min-width:0}
 .s[data-kind="canvas"]>.si{display:block;container-type:inline-size;overflow:visible}
 .s[data-kind="canvas"]>.si>.n{position:absolute;--cs:calc(100cqw / var(--cw))}

@@ -54,7 +54,7 @@ export function attachSideDrop(doc: Document) {
       const r = node.getBoundingClientRect();
       const rel = (x - r.left) / r.width;
       // How much of the section's width the target takes now (it keeps that beside the new block).
-      const inner = node.parentElement;
+      const inner = node.closest<HTMLElement>(".si");
       const cs = inner ? getComputedStyle(inner) : null;
       const room = inner && cs ? inner.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) : 0;
       const share = room ? r.width / room : undefined;

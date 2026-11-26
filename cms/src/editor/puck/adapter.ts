@@ -29,6 +29,9 @@ export function nodeToItem(node: Node): PuckItem {
   return { type: node.type, props: defined({ ...node.content, id: node.id, name: node.name, locked: node.locked, style: node.style, frame: node.frame, effects: node.effects }) };
 }
 
+/** Column stacks: each column is its own Puck slot (c0…c3), so blocks drop into a column. */
+export const STACK_SLOTS = ["c0", "c1", "c2", "c3"] as const;
+
 export function itemToNode(item: PuckItem): Node {
   const { id, name, locked, style, frame, effects, puck: _puck, editMode: _editMode, ...rest } = item.props as Record<string, unknown> & { id: string };
   // "__" props are inspector-only headings and switches, never content.
@@ -54,13 +57,21 @@ export function sectionToItem(section: Section): PuckItem {
       locked: section.locked,
       layout: section.layout,
       customDesktop: section.customDesktop,
-      items: section.children.map(nodeToItem),
+      stacks: section.stacks,
+      items: section.stacks ? [] : section.children.map(nodeToItem),
+      ...(section.kind === "grid" && !section.stacks ? Object.fromEntries(STACK_SLOTS.map((k) => [k, []])) : {}),
+      ...(section.stacks ? Object.fromEntries(STACK_SLOTS.map((k, i) => [k, i < section.stacks! ? section.children.filter((n) => Math.min(section.stacks! - 1, n.col ?? 0) === i).map(nodeToItem) : []])) : {}),
     }),
   };
 }
 
 export function itemToSection(item: PuckItem): Section {
-  const p = item.props as PuckItem["props"] & { items?: PuckItem[] };
+  const p = item.props as PuckItem["props"] & { items?: PuckItem[] } & Partial<Record<(typeof STACK_SLOTS)[number], PuckItem[]>>;
+  const stacks = (p.stacks as number | undefined) || undefined;
+  // A stacks section: its blocks column by column, each knowing its column.
+  const children = stacks
+    ? [...(p.items ?? []).map((i) => ({ ...itemToNode(i), col: 0 })), ...STACK_SLOTS.slice(0, stacks).flatMap((k, col) => (p[k] ?? []).map((i) => ({ ...itemToNode(i), col })))]
+    : (p.items ?? []).map(itemToNode);
   return defined({
     id: p.id,
     kind: KIND_OF[item.type] ?? "flow",
@@ -68,7 +79,8 @@ export function itemToSection(item: PuckItem): Section {
     locked: (p.locked as boolean) || undefined,
     layout: p.layout as Section["layout"],
     customDesktop: (p.customDesktop as boolean) || undefined,
-    children: (p.items ?? []).map(itemToNode),
+    stacks,
+    children,
   }) as Section;
 }
 
