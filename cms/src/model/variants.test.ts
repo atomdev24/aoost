@@ -3,6 +3,7 @@ import "../components/registry";
 import { builtPages } from "../render/build";
 import { Site, validateSite } from "../schema";
 import { fixtureSite as seedSite } from "../seed/fixture";
+import { pageAt } from "./i18n";
 import { deletePage, setStatus } from "./pages";
 import { createVariant, electVariant, renameVariant, variantsOf } from "./variants";
 
@@ -26,6 +27,15 @@ describe("variants", () => {
     // Sits right after its page.
     const ids = r.site.pages.map((p) => p.id);
     expect(ids.indexOf(v.id)).toBeGreaterThan(ids.indexOf(home.id));
+  });
+
+  it("shows in the draft preview (Compare, All designs) but never on the live site", () => {
+    const r = createVariant(site, home.id)!;
+    const v = r.site.pages.find((p) => p.id === r.pageId)!;
+    expect(pageAt(r.site, v.slug, false)?.id).toBe(v.id);
+    expect(pageAt(r.site, v.slug, true)).toBeUndefined();
+    // The page itself still answers at its own address.
+    expect(pageAt(r.site, home.slug, false)?.id).toBe(home.id);
   });
 
   it("numbers variants and makes a variant of a variant's page", () => {
