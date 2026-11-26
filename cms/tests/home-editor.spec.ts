@@ -104,7 +104,9 @@ test.describe("homepage in the editor", () => {
 
     // 4. skills above journals, 5. then hide the skills (on desktop and on mobile)
     await page.locator(".ed-rail").getByRole("button", { name: "Layers", exact: true }).click();
-    await page.getByRole("button", { name: "Move Skills up" }).click();
+    // Alt+↑ moves a layer up in the panel (dragging works too).
+    await page.locator(".ed-layer-name", { hasText: "Skills" }).first().focus();
+    await page.keyboard.press("Alt+ArrowUp");
     await expect.poll(async () => (await homeBlocks(request)).sections.map((s) => s.id).slice(1, 4)).toEqual(["home-projects", "home-tools", "home-journals"]);
     await page.screenshot({ path: `${shots}/editor-home-1440.png` });
     await page.getByRole("button", { name: "Hide Skills on desktop" }).click();

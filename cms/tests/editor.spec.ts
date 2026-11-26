@@ -126,7 +126,7 @@ test.describe("editor", () => {
     await page.locator(".ed-modal input").first().fill("Sketchbook");
     await page.locator(".ed-templates button", { hasText: "Gallery" }).click();
     await page.getByRole("button", { name: "Create page" }).click();
-    await expect(page.locator(".ed-page-row.is-selected")).toContainText("Sketchbook");
+    await expect(page.locator(".ed-prow.is-selected")).toContainText("Sketchbook");
     await page.getByRole("button", { name: "Page settings for Sketchbook" }).click();
     const slug = page.locator("#ps-slug:visible");
     await slug.fill("sketches");
