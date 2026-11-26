@@ -5,6 +5,7 @@ import type { Section } from "../../schema";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage, useEditor } from "../store";
 import { LayersPanel } from "../ui/LayersPanel";
+import { anchorOf, Popover, type Anchor } from "../ui/Popover";
 import { CommentsPanel, FontsPanel, HistoryPanel, InsertPanel, LibraryPanel, MediaLibrary, NavPanel, PagesPanel, TemplatesPanel, ThemePanel } from "../parts";
 import { DEMO } from "../demo";
 import type { Part } from "../lazy";
@@ -30,7 +31,7 @@ const PANEL_TITLES: Record<PanelId, string> = {
   nav: "Navigation",
   theme: "Theme",
   fonts: "Fonts",
-  global: "Global",
+  global: "Shared blocks",
   templates: "Templates",
 };
 
@@ -201,11 +202,76 @@ const PANEL_PARTS: Partial<Record<PanelId, Part<never>>> = {
 
 /* Build (what is on this page) above the line, Site (what every page shares) below it. */
 // The demo gets ready-made page designs to try (Templates), right under Insert.
-const TOP_PANELS: PanelId[] = DEMO ? ["layers", "insert", "templates", "media", "comments", "history"] : ["layers", "insert", "media", "comments", "history"];
-const BOTTOM_PANELS: PanelId[] = ["pages", "nav", "theme", "fonts", "global"];
+// Direction A (Nov 2026): the everyday panels with words under them; what the whole site shares
+// sits under one Site button.
+const TOP_PANELS: PanelId[] = DEMO ? ["insert", "templates", "layers", "pages", "media", "comments"] : ["insert", "layers", "pages", "media", "comments"];
+const SITE_PANELS: PanelId[] = ["nav", "theme", "fonts", "global", "history"];
+/** Short words under the rail's icons. */
+const RAIL_LABEL: Partial<Record<PanelId, string>> = { insert: "Add", templates: "Designs", global: "Shared" };
+const SITE_HINT: Partial<Record<PanelId, string>> = {
+  nav: "The menu bar on every page",
+  theme: "Colours and text styles",
+  fonts: "Uploaded and Google fonts",
+  global: "Blocks shared across pages",
+  history: "Earlier versions of the site",
+};
+
+/** Site: one rail button for what every page shares (menu bar, look, fonts, shared blocks, history). */
+function SiteButton({ active, pressed }: { active: PanelId | null; pressed: boolean }) {
+  const [at, setAt] = useState<Anchor | null>(null);
+  return (
+    <>
+      <button
+        type="button"
+        className={`ed-rail-btn${pressed ? " is-active" : ""}`}
+        aria-label="Site: settings every page shares"
+        aria-haspopup="menu"
+        aria-expanded={!!at}
+        aria-pressed={pressed}
+        title="Site: menu bar, look, fonts, shared blocks, history"
+        onClick={(e) => setAt(at ? null : anchorOf(e.currentTarget))}
+        onPointerEnter={() => SITE_PANELS.forEach((id) => void PANEL_PARTS[id]?.prefetch())}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" aria-hidden="true">
+          <circle cx="8" cy="8" r="2.2" />
+          <path d="M8 1.8v1.8M8 12.4v1.8M1.8 8h1.8M12.4 8h1.8M3.6 3.6l1.3 1.3M11.1 11.1l1.3 1.3M3.6 12.4l1.3-1.3M11.1 4.9l1.3-1.3" />
+        </svg>
+        <span className="ed-rail-label" aria-hidden="true">
+          Site
+        </span>
+      </button>
+      {at ? (
+        <Popover anchor={at} onClose={() => setAt(null)} label="Site" width={260} className="ed-site-menu" side="right">
+          <ul role="menu" aria-label="Site">
+            {SITE_PANELS.map((id) => (
+              <li key={id} role="none">
+                <button
+                  type="button"
+                  role="menuitem"
+                  aria-current={active === id || undefined}
+                  data-demo-off={DEMO && id === "history" ? "" : undefined}
+                  onClick={() => {
+                    setAt(null);
+                    if (active !== id) togglePanel(id);
+                  }}
+                >
+                  <RailIcon id={id} />
+                  <span>
+                    {PANEL_TITLES[id]}
+                    <small>{SITE_HINT[id]}</small>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Popover>
+      ) : null}
+    </>
+  );
+}
 
 /**
- * Direction B left panel: a slim 36px frosted rail and floating flyouts beside it.
+ * The left rail: labelled panel buttons and floating flyouts beside them.
  */
 export function LeftPanel() {
   const active = useRail((s) => s.active);
@@ -286,9 +352,13 @@ export function LeftPanel() {
         onPointerEnter={() => void PANEL_PARTS[id]?.prefetch()}
       >
         <RailIcon id={id} />
+        <span className="ed-rail-label" aria-hidden="true">
+          {RAIL_LABEL[id] ?? title}
+        </span>
       </button>
     );
   };
+  const siteActive = !!active && SITE_PANELS.includes(active);
 
   return (
     <>
@@ -313,7 +383,7 @@ export function LeftPanel() {
         </div>
         <span className="ed-rail-divider" aria-hidden="true" />
         <div className="ed-rail-group">
-          {BOTTOM_PANELS.map(renderPanelButton)}
+          <SiteButton active={active} pressed={siteActive} />
         </div>
       </nav>
 

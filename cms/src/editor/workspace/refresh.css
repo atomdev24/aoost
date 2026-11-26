@@ -18,9 +18,23 @@
   }
   .ed-rail-btn {
     position: relative;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 52px;
+    height: 46px;
+    border-radius: 9px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+  }
+  /* Labels under the icons: plain words beat ten look-alike icons (direction A). */
+  .ed-rail-label {
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: inherit;
+    opacity: 0.85;
+    white-space: nowrap;
   }
   .ed-rail-btn svg {
     width: 18px;
@@ -1024,6 +1038,18 @@ select.ed-input option {
 .ed-statechip.is-draft { background: rgba(255, 159, 10, 0.16); color: #ffb340; }
 .ed-statechip.is-live { background: rgba(48, 209, 88, 0.14); color: #5be37f; }
 .ed-statechip:hover { filter: brightness(1.15); }
+.ed-statechip.is-saving { background: rgba(255, 255, 255, 0.08); color: var(--ed-sub); }
+.ed-statechip.is-error { background: rgba(255, 69, 58, 0.16); color: #ff6961; }
+.ed-statechip.is-offline > span { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+/* The status pill's details (workspace/StatusPill.tsx). */
+.ed-status-pop dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin: 0; font-size: 13px; align-items: center; }
+.ed-status-pop dt { color: var(--ed-sub); }
+.ed-status-pop dd { margin: 0; text-align: right; }
+.ed-status-pop dd.is-bad { color: #ff6961; }
+.ed-status-pop dd button { border: 0; background: none; padding: 0; color: #8ac2ff; font: inherit; cursor: pointer; }
+.ed-status-pop dd .ed-pill { display: inline-flex; }
+/* Publish carries its count inside the button. */
+.ed-publish-n { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 6px; padding: 0 5px; border-radius: 9px; background: rgba(255, 255, 255, 0.24); font-size: 11px; font-weight: 700; }
 @media (max-width: 700px) { .ed-statechip { font-size: 0; gap: 0; padding: 0 8px; } }
 
 /* ---------------------------------------------- new page: kind choice */
@@ -1174,3 +1200,12 @@ body:has(.ed-demo-strip) .ed-tip { bottom: 56px; }
 .ed-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .ed-chips button { height: 28px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; background: transparent; color: var(--ed-sub); font: inherit; font-size: 12px; cursor: pointer; }
 .ed-chips button[aria-checked="true"], .ed-chips button[aria-pressed="true"] { background: var(--ed-accent, #0a84ff); border-color: transparent; color: #fff; }
+
+/* The rail's Site menu (workspace/LeftPanel.tsx). */
+.ed-site-menu { padding: 4px; }
+.ed-site-menu ul { list-style: none; margin: 0; padding: 0; }
+.ed-site-menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: inherit; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.ed-site-menu button:hover, .ed-site-menu button[aria-current] { background: rgba(255, 255, 255, 0.08); }
+.ed-site-menu button > span { display: flex; flex-direction: column; gap: 1px; }
+.ed-site-menu small { color: var(--ed-sub); font-size: 11.5px; }
+.ed-site-menu svg { flex: none; opacity: 0.85; }
