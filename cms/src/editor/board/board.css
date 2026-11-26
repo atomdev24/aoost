@@ -441,3 +441,5 @@
 /* A block parked on the board, drawn live (board/ParkedBlock.tsx). */
 .bd-parked { position: absolute; inset: 0; overflow: hidden; pointer-events: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); }
 .bd-parked iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; background: transparent; pointer-events: none; }
+/* A block held outside the page: let go to park it on the board. */
+html.ed-drag-out .bd { box-shadow: inset 0 0 0 3px var(--ed-accent, #0a84ff); }
