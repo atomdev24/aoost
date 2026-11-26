@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useEditor } from "../store";
+import { InDock } from "../workspace/Dock";
 import { hideTip, showTip, TIPS, useTip } from "./tips";
 
 /** The tip bar: one quiet line at the bottom, never over the page's middle. Fades after a while. */
@@ -16,6 +17,7 @@ export function TipBar() {
   }, [tip]);
   if (!tip) return null;
   return (
+    <InDock slot="bottom" name="tip">
     <div className="ed-tip" role="status">
       <b>Tip</b>
       <span>{TIPS[tip]}</span>
@@ -23,5 +25,6 @@ export function TipBar() {
         ×
       </button>
     </div>
+    </InDock>
   );
 }

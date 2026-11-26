@@ -821,7 +821,7 @@ html.ed-commenting #preview-frame {
   background: color-mix(in srgb, var(--ed-attn) 26%, transparent); color: inherit; font: inherit;
 }
 .ed-demo-strip button:hover { background: color-mix(in srgb, var(--ed-attn) 38%, transparent); }
-@media (max-width: 720px) { .ed-demo-strip { top: auto; bottom: calc(76px + env(safe-area-inset-bottom)); } }
+
 /* A control that's off in the demo keeps its place with a lock (C); pressing it says why. */
 .ed-demo-locked { opacity: 0.72; }
 .ed-demo-locked .ed-lock-icon { margin-left: 5px; vertical-align: -1px; }
@@ -1099,9 +1099,9 @@ select.ed-input option {
 .ed-mentions small { color: var(--ed-sub); }
 
 /* ---------------------------------------------- Claude at work */
-.ed-agent-dock { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 65; display: flex; width: max-content; max-width: calc(100vw - 32px); pointer-events: none; }
+.ed-agent-dock { display: flex; width: max-content; max-width: 100%; pointer-events: none; }
 .ed-agent-dock:empty { display: none; }
-@media (max-width: 720px) { .ed-agent-dock { top: auto; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 90; } }
+
 .ed-agent-pill { pointer-events: auto; backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); display: inline-flex; align-items: center; gap: 6px; height: 30px; max-width: min(420px, calc(100vw - 32px)); padding: 0 14px 0 10px; border-radius: 15px; flex: 0 1 auto; min-width: 0; font: 13px var(--ed-font); white-space: nowrap; overflow: hidden; }
 .ed-agent-pill b { font-weight: 600; }
 .ed-agent-pill .ed-agent-text { overflow: hidden; text-overflow: ellipsis; color: inherit; opacity: 0.85; }
@@ -1142,12 +1142,7 @@ select.ed-input option {
 .ed-tip button:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
 @keyframes ed-tip-in { from { opacity: 0; transform: translate(-50%, 6px); } }
 @media (prefers-reduced-motion: reduce) { .ed-tip { animation: none; } }
-/* Above the demo strip when both show. */
-body:has(.ed-demo-strip) .ed-tip { bottom: 56px; }
-/* Phones: under the toolbars, so the settings sheet rising from the bottom never hides it. */
-@media (max-width: 720px) {
-  .ed-tip, body:has(.ed-demo-strip) .ed-tip { top: 118px; bottom: auto; left: 12px; right: 12px; max-width: none; transform: none; animation: none; z-index: 300; font-size: 12px; }
-}
+@media (max-width: 767px) { .ed-tip { font-size: 12px; } }
 
 /* Demo editor settings (team/DemoModal.tsx). */
 .ed-demo-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }

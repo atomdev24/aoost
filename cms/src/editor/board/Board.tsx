@@ -1,4 +1,5 @@
 import { useSimple } from "../workspace/mode";
+import { InDock } from "../workspace/Dock";
 import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
@@ -303,6 +304,7 @@ export function Board() {
       ))}
 
       {hiddenBps.length ? (
+        <InDock slot="bottom" name="hidden">
         <div className="bd-hidden-chip" role="status">
           {hiddenBps.map((b) => (
             <span key={b}>
@@ -313,6 +315,7 @@ export function Board() {
             </span>
           ))}
         </div>
+        </InDock>
       ) : null}
 
       <RefNotice />
@@ -322,9 +325,11 @@ export function Board() {
       <AdjustImage />
       {!hidden[bp] ? <EmptyPage rect={{ ...screen(active.x, active.y), width: active.w * view.zoom, height: active.h * view.zoom }} /> : null}
       {loading ? (
-        <div className="bd-loading-chip" role="status">
-          <span className="ed-spinner" aria-hidden="true" /> Loading latest…
-        </div>
+        <InDock slot="bottom" name="loading">
+          <div className="bd-loading-chip" role="status">
+            <span className="ed-spinner" aria-hidden="true" /> Loading latest…
+          </div>
+        </InDock>
       ) : null}
       {spaceDown ? <div className="bd-shield" onPointerDown={startPan} /> : null}
       <ZoomBar />

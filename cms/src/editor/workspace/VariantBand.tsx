@@ -1,5 +1,6 @@
 import { useCan } from "../team/role";
 import { useState } from "react";
+import { InDock } from "./Dock";
 import { ownerPage, renameVariant, variantsOf } from "../../model/variants";
 import { openDesigns } from "../templates/designs-open";
 import { currentPage, setPage, update, useEditor } from "../store";
@@ -23,6 +24,7 @@ export function VariantBand() {
     setName(null);
   };
   return (
+    <InDock slot="bottom" name="variant">
     <div className="ed-variant-band" role="region" aria-label="Variant">
       <span className="ed-variant-dot" aria-hidden="true" />
       <span className="ed-variant-text">
@@ -67,5 +69,6 @@ export function VariantBand() {
         )}
       </button>
     </div>
+    </InDock>
   );
 }

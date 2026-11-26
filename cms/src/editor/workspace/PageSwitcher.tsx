@@ -37,8 +37,8 @@ export function PageSwitcher() {
   return (
     <div className="ed-switcher" ref={box}>
       <button type="button" className="ed-switcher-btn" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
-        {page.title}
-        {page.variantOf ? <span className="ed-switcher-variant">{page.variantName}</span> : null}
+        <span className="ed-switcher-title">{page.title}</span>
+        {page.variantOf ? <span className="ed-switcher-variant" title={`Variant: ${page.variantName}`}>{page.variantName}</span> : null}
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
           <path d="M2.500 4l2.500 2.500L7.500 4" />
         </svg>

@@ -1,4 +1,5 @@
 import { setMode, useMode, useSimple } from "./mode";
+import { InDock } from "./Dock";
 import { AgentPill } from "../agent/AgentPill";
 import { createPortal } from "react-dom";
 import { TeamModal } from "../team/TeamModal";
@@ -182,9 +183,11 @@ export function TopBar() {
       </div>
 
       {/* Claude at work: its own pill, centred under the top bar so it never crowds the controls. */}
-      <div className="ed-agent-dock">
-        <AgentPill />
-      </div>
+      <InDock slot="top" name="agent">
+        <div className="ed-agent-dock">
+          <AgentPill />
+        </div>
+      </InDock>
 
       {/* Right island: Claude status pill, Preview, Discard draft, Publish */}
       <div className="ed-island ed-island-right" role="toolbar" aria-label="Publishing and preview">
