@@ -211,6 +211,7 @@ const AERO: Record<string, React.ReactNode> = {
     </>
   ),
   AeroFeatures: <>{[12, 40, 68].map((x) => <g key={x}><rect x={x} y="14" width="20" height="1.5" fill={L} /><rect x={x} y="20" width="6" height="6" rx="1" fill={L} />{lines(x, 30, [18, 14, 16], 6)}</g>)}</>,
+  AeroText: <>{lines(16, 14, [40])}{lines(16, 26, [68, 64, 70, 52], 6)}</>,
   AeroTestimonial: (
     <>
       <rect x="12" y="16" width="26" height="30" rx="3" fill={F} />
