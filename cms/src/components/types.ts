@@ -18,7 +18,7 @@ export type RenderCtx = {
   href(target: LinkTarget): string;
 };
 
-export type ComponentCategory = "basic" | "media" | "embed" | "site" | "aoost";
+export type ComponentCategory = "basic" | "media" | "embed" | "site" | "aoost" | "aerobotics";
 
 /**
  * A kit is what a family of components shares and brings to any page that uses one of them:
@@ -91,6 +91,11 @@ export type ComponentDef<C = Record<string, unknown>> = {
    * in one <div class="..."> on the site, so they can share a continuous background.
    */
   band?: (content: C) => string | undefined;
+  /**
+   * The block paints its own full-width band (background and inner width), like the Aerobotics
+   * blocks: a section made for it has no padding and no maximum width.
+   */
+  fullBleed?: boolean;
 };
 
 export function defineComponent<C>(def: ComponentDef<C>): ComponentDef<C> {
