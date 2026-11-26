@@ -1,0 +1,571 @@
+{
+ "from": "demo page \"Home\" (home), draft version 1241",
+ "savedAt": "2026-11-26",
+ "hideNav": false,
+ "sections": [
+  {
+   "id": "s_fixtt3a1",
+   "kind": "flow",
+   "name": "Hero",
+   "layout": {
+    "base": {
+     "columns": 1,
+     "gap": 16,
+     "padding": "104px 20px 380px",
+     "minHeight": "640px",
+     "align": "start",
+     "background": {
+      "image": "/art/tpl_aero_hero_tall.webp",
+      "overlay": "rgba(10,22,36,0.22)"
+     }
+    },
+    "desktop": {
+     "columns": 1,
+     "gap": 16,
+     "padding": "150px 56px 150px",
+     "minHeight": "620px",
+     "maxWidth": 1240,
+     "align": "start",
+     "background": {
+      "image": "/art/tpl_aero_hero_wide.webp",
+      "overlay": "rgba(10,22,36,0.32)"
+     }
+    }
+   },
+   "children": [
+    {
+     "id": "n_v5vsehm2",
+     "type": "Text",
+     "content": {
+      "text": "See what TrueFruit can do for your crop this season",
+      "styleId": "h1",
+      "tag": "h1"
+     },
+     "style": {
+      "base": {
+       "maxWidth": "560px",
+       "color": "#FFFFFF"
+      }
+     }
+    },
+    {
+     "id": "n_trbaqstf",
+     "type": "Text",
+     "content": {
+      "text": "View or download the latest product catalogue for your crop, in your language.",
+      "styleId": "body",
+      "tag": "p"
+     },
+     "style": {
+      "base": {
+       "maxWidth": "420px",
+       "color": "rgba(255,255,255,.92)"
+      }
+     }
+    },
+    {
+     "id": "n_jd1c8v91",
+     "type": "Button",
+     "content": {
+      "label": "Browse catalogues",
+      "target": {
+       "kind": "url",
+       "url": "#s_2mwv4tpv"
+      },
+      "variant": "filled",
+      "color": "#0075E1"
+     },
+     "style": {
+      "base": {
+       "margin": "8px 0 0"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "FlowSection-b206677d-84c5-4e07-939d-a176bff2dfef",
+   "kind": "flow",
+   "layout": {
+    "base": {
+     "columns": 1,
+     "gap": 18,
+     "padding": "56px 20px",
+     "maxWidth": 1160,
+     "hidden": true
+    },
+    "desktop": {
+     "padding": "96px 56px",
+     "hidden": false
+    }
+   },
+   "children": []
+  },
+  {
+   "id": "FlowSection-5a6de812-fa64-404d-bd6b-2561accd1a54",
+   "kind": "grid",
+   "layout": {
+    "base": {
+     "columns": 1,
+     "gap": 24,
+     "padding": "56px 20px",
+     "maxWidth": 1160
+    },
+    "desktop": {
+     "columns": 2,
+     "colWidths": [
+      58,
+      42
+     ],
+     "padding": "96px 56px",
+     "background": {
+      "color": "#17293E"
+     }
+    },
+    "tablet": {
+     "columns": 2,
+     "colWidths": [
+      58,
+      42
+     ]
+    }
+   },
+   "children": [
+    {
+     "id": "n_u8amnmal",
+     "type": "Image",
+     "content": {
+      "src": "/media/2026/pexels-rojan-gurung-42711330-37462656-2r9q.jpg",
+      "alt": "",
+      "lightbox": true,
+      "width": 6000,
+      "height": 4000,
+      "marks": [
+       {
+        "x": 44.2,
+        "y": 47.9,
+        "r": 7.4,
+        "size": 68,
+        "colour": "break",
+        "side": "right"
+       },
+       {
+        "x": 82.6,
+        "y": 58,
+        "r": 6.5,
+        "size": 68,
+        "colour": "break",
+        "side": "left"
+       }
+      ],
+      "markLabels": "scale"
+     },
+     "style": {
+      "base": {
+       "keepRatio": true
+      },
+      "desktop": {
+       "width": "100%",
+       "aspectRatio": "686/565",
+       "radius": [
+        19,
+        19,
+        19,
+        19
+       ]
+      },
+      "tablet": {
+       "width": "100%"
+      }
+     },
+     "frame": {
+      "base": {
+       "fit": "fill",
+       "focalX": 50,
+       "focalY": 50,
+       "zoom": 1,
+       "panX": 0,
+       "panY": 0
+      },
+      "desktop": {
+       "fit": "free",
+       "focalX": 100,
+       "focalY": 48,
+       "zoom": 1.15
+      }
+     },
+     "effects": {
+      "panSeconds": 10
+     }
+    },
+    {
+     "id": "Text-a19dbc23-e201-44d0-b9a6-700aa4db9159",
+     "type": "Text",
+     "content": {
+      "text": "Improve your yield forecasting with accurate and standardized size, color, and quality measurements from smartphone imagery.\n\n\n",
+      "styleId": "body",
+      "tag": "p"
+     },
+     "style": {
+      "base": {},
+      "desktop": {
+       "minHeight": "238px",
+       "color": "#ffffff"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "s_2mwv4tpv",
+   "kind": "flow",
+   "name": "Catalogues",
+   "layout": {
+    "base": {
+     "columns": 1,
+     "gap": 24,
+     "padding": "40px 16px 56px",
+     "background": {
+      "color": "#F4F8FD"
+     }
+    },
+    "desktop": {
+     "columns": 1,
+     "gap": 24,
+     "padding": "48px 24px 80px",
+     "maxWidth": 1240,
+     "background": {
+      "color": "#F4F8FD"
+     }
+    }
+   },
+   "children": [
+    {
+     "id": "n_nc9ollzi",
+     "type": "Text",
+     "content": {
+      "text": "Product catalogues",
+      "styleId": "h2",
+      "tag": "h2"
+     },
+     "style": {
+      "base": {
+       "color": "#17293E"
+      }
+     }
+    },
+    {
+     "id": "n_g90jsee6",
+     "type": "Cards",
+     "content": {
+      "cards": [
+       {
+        "image": "/art/tpl_aero_citrus.webp",
+        "alt": "Citrus catalogue cover",
+        "eyebrow": "Citrus",
+        "title": "TrueFruit for citrus",
+        "tags": "Size, Grade, Bin Scan",
+        "text": "See exactly why fruit is falling out of spec in the field and at intake.",
+        "listLabel": "Available in",
+        "list": "English, English (AU), Español, Português, Italiano, Türkçe",
+        "primaryLabel": "View",
+        "primaryUrl": "https://drive.google.com/file/d/1ZmOKj64y90Z6umcRy18tpkk3epFOQXx1/view",
+        "secondaryLabel": "Download",
+        "secondaryUrl": "https://drive.google.com/uc?export=download&id=1ZmOKj64y90Z6umcRy18tpkk3epFOQXx1"
+       },
+       {
+        "image": "/art/tpl_aero_apples.webp",
+        "alt": "Apples catalogue cover",
+        "eyebrow": "Apples",
+        "title": "TrueFruit for apples",
+        "tags": "Size, Grade, Bin Scan",
+        "text": "Plan your harvest with starch in the Harvest Planner.",
+        "listLabel": "Available in",
+        "list": "English, Español",
+        "primaryLabel": "View",
+        "primaryUrl": "https://drive.google.com/file/d/1EzPWyj2wme9-na9i5No4voljSmuMFUJW/view",
+        "secondaryLabel": "Download",
+        "secondaryUrl": "https://drive.google.com/uc?export=download&id=1EzPWyj2wme9-na9i5No4voljSmuMFUJW"
+       },
+       {
+        "image": "/art/tpl_aero_grapes.webp",
+        "alt": "Table grapes catalogue cover",
+        "eyebrow": "Table grapes",
+        "title": "TrueFruit for table grapes",
+        "tags": "Size, Grade, Bin Scan",
+        "text": "Know which blocks are ready before you commit a picking team.",
+        "listLabel": "Available in",
+        "list": "English, Español, Türkçe",
+        "primaryLabel": "View",
+        "primaryUrl": "https://drive.google.com/file/d/1zc2qq1jtbNKsgFa2vCDouNxRRcL7Bbax/view",
+        "secondaryLabel": "Download",
+        "secondaryUrl": "https://drive.google.com/uc?export=download&id=1zc2qq1jtbNKsgFa2vCDouNxRRcL7Bbax"
+       },
+       {
+        "image": "/art/tpl_aero_cherries.webp",
+        "alt": "Cherries catalogue cover",
+        "eyebrow": "Cherries",
+        "title": "TrueFruit for cherries",
+        "tags": "Size, Grade",
+        "text": "Rank blocks on size and colour before you pick.",
+        "listLabel": "Available in",
+        "list": "English, Español",
+        "primaryLabel": "View",
+        "primaryUrl": "https://drive.google.com/file/d/1QY-OZKbxyrIfmXnkRfyPe7sX5epruSY3/view",
+        "secondaryLabel": "Download",
+        "secondaryUrl": "https://drive.google.com/uc?export=download&id=1QY-OZKbxyrIfmXnkRfyPe7sX5epruSY3"
+       },
+       {
+        "image": "/art/tpl_aero_avocado.webp",
+        "alt": "Avocado catalogue cover",
+        "eyebrow": "Avocado",
+        "title": "TrueFruit for avocado",
+        "tags": "Size",
+        "text": "More accurate mass estimates for Hass.",
+        "listLabel": "Available in",
+        "list": "English, Español",
+        "primaryLabel": "View",
+        "primaryUrl": "https://drive.google.com/file/d/1WTuDLWM983HMxzaIwVZ-qrBo5REtfep7/view",
+        "secondaryLabel": "Download",
+        "secondaryUrl": "https://drive.google.com/uc?export=download&id=1WTuDLWM983HMxzaIwVZ-qrBo5REtfep7"
+       }
+      ],
+      "columns": 3,
+      "accent": "#0075E1",
+      "ink": "#17293E",
+      "surface": "#FFFFFF"
+     },
+     "style": {
+      "base": {}
+     }
+    }
+   ]
+  },
+  {
+   "id": "s_3styjqrm",
+   "kind": "flow",
+   "name": "Video",
+   "layout": {
+    "base": {
+     "columns": 1,
+     "gap": 20,
+     "padding": "8px 16px 56px",
+     "background": {
+      "color": "#F4F8FD"
+     }
+    },
+    "desktop": {
+     "columns": 1,
+     "gap": 20,
+     "padding": "0px 24px 88px",
+     "maxWidth": 1040,
+     "background": {
+      "color": "#F4F8FD"
+     }
+    }
+   },
+   "children": [
+    {
+     "id": "n_g2gs5utb",
+     "type": "Text",
+     "content": {
+      "text": "See TrueFruit at work",
+      "styleId": "h2",
+      "tag": "h2"
+     },
+     "style": {
+      "base": {
+       "color": "#17293E"
+      }
+     }
+    },
+    {
+     "id": "n_i9elnzv9",
+     "type": "Video",
+     "content": {
+      "source": "link",
+      "src": "",
+      "autoplay": false,
+      "loop": false,
+      "controls": true,
+      "playInView": true,
+      "url": "https://www.youtube.com/watch?v=27Aj5-LUDUU",
+      "poster": "/art/tpl_aero_hero_wide.webp",
+      "alt": "TrueFruit at work",
+      "play": "disc",
+      "title": "TrueFruit: from the tree to the report",
+      "channel": "Aerobotics",
+      "avatar": "/art/tpl_aero_mark.svg",
+      "duration": ""
+     },
+     "style": {
+      "base": {
+       "aspectRatio": "16/9",
+       "radius": [
+        16,
+        16,
+        16,
+        16
+       ]
+      }
+     },
+     "frame": {
+      "base": {
+       "fit": "fill",
+       "focalX": 50,
+       "focalY": 50,
+       "zoom": 1,
+       "panX": 0,
+       "panY": 0
+      }
+     }
+    },
+    {
+     "id": "TrueFruitSeason-0977b00e-a2d2-4fb4-a0fd-a7f5eaa43506",
+     "type": "TrueFruitSeason",
+     "content": {
+      "showIntro": true,
+      "logo": "",
+      "heading": "Analyze fruit from 10mm through to the packhouse",
+      "intro": "One platform for fruit size, color and quality, measured from your phone at every stage of the season and post-harvest.",
+      "sizeTitle": "Precise fruit sizing and size forecasting",
+      "sizeLead": "Measure fruit on the tree with your phone, track growth through the season, and see the size you will pick at harvest.",
+      "sizePhoto": "/media/2026/product-size-lotd.webp",
+      "sizeLink": "/true-fruit-size",
+      "gradeTitle": "Automated size, color and blemish measurements",
+      "gradeLead": "Grade fruit on the tree before you pick, so you know what will make Class 1.",
+      "gradePhoto": "/media/2026/product-grade-2jz9.webp",
+      "gradeLink": "/true-fruit-grade",
+      "binScanTitle": "Post-harvest size and quality classification",
+      "binScanLead": "Scan harvested bins with your phone to check size, color, picking quality like pulled and long stems, and defects like thrips, sooty mold and fruit deformity.",
+      "binScanPhoto": "/media/2026/product-binscan-hyw0.webp",
+      "binScanLink": "/true-fruit-bin-scan",
+      "layout": "scale",
+      "designWidth": 1200,
+      "headerHeight": 64,
+      "previewStage": 0
+     },
+     "style": {
+      "base": {}
+     }
+    }
+   ]
+  },
+  {
+   "id": "s_6th3sdk9",
+   "kind": "grid",
+   "name": "Footer",
+   "layout": {
+    "base": {
+     "columns": 2,
+     "gap": 24,
+     "padding": "48px 20px 32px",
+     "background": {
+      "color": "#17293E"
+     }
+    },
+    "desktop": {
+     "columns": 4,
+     "gap": 32,
+     "padding": "72px 40px 40px",
+     "maxWidth": 1240,
+     "background": {
+      "color": "#17293E"
+     }
+    }
+   },
+   "children": [
+    {
+     "id": "n_g8zvii47",
+     "type": "Image",
+     "content": {
+      "src": "/art/tpl_aero_wordmark.webp",
+      "alt": "Aerobotics",
+      "lightbox": false
+     },
+     "style": {
+      "base": {
+       "aspectRatio": "1600/279",
+       "colSpan": 2
+      },
+      "desktop": {
+       "aspectRatio": "1600/279",
+       "colSpan": 4
+      }
+     },
+     "frame": {
+      "base": {
+       "fit": "fit",
+       "focalX": 0,
+       "focalY": 50,
+       "zoom": 1,
+       "panX": 0,
+       "panY": 0
+      }
+     }
+    },
+    {
+     "id": "n_0zz5ziht",
+     "type": "Text",
+     "content": {
+      "text": "**Products**\nTrueFruit Size\nTrueFruit Grade\nTrueFruit Bin Scan\nDrone Scan\nPest & Disease",
+      "styleId": "small",
+      "tag": "p"
+     },
+     "style": {
+      "base": {
+       "color": "#FFFFFF"
+      }
+     }
+    },
+    {
+     "id": "n_a52by74f",
+     "type": "Text",
+     "content": {
+      "text": "**Company**\nPricing\nSuccess stories\nAbout us\nBlog\nCareers\nContact us",
+      "styleId": "small",
+      "tag": "p"
+     },
+     "style": {
+      "base": {
+       "color": "#FFFFFF"
+      }
+     }
+    },
+    {
+     "id": "n_tdaq6f5u",
+     "type": "Text",
+     "content": {
+      "text": "**Partners**\nDrone partners",
+      "styleId": "small",
+      "tag": "p"
+     },
+     "style": {
+      "base": {
+       "color": "#FFFFFF"
+      }
+     }
+    },
+    {
+     "id": "n_n0c0xbzc",
+     "type": "Text",
+     "content": {
+      "text": "Legal · © 2026 Aerobotics, (Pty) LTD All rights reserved.",
+      "styleId": "small",
+      "tag": "p"
+     },
+     "style": {
+      "base": {
+       "colSpan": 2,
+       "color": "rgba(255,255,255,.6)"
+      },
+      "desktop": {
+       "colSpan": 4,
+       "color": "rgba(255,255,255,.6)"
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -1,5 +1,6 @@
 import { createNode, createSection } from "../../model/page-ops";
 import { AEROBOTICS_TEMPLATES } from "./aerobotics-templates";
+import { SNAPSHOT_TEMPLATES } from "./snapshot-templates";
 import type { Node, Section, Style } from "../../schema";
 
 /**
@@ -166,7 +167,7 @@ const BROCHURE_TEMPLATES: SiteTemplate[] = [
   },
 ];
 
-/** The Aerobotics pages first, then the brochure designs. */
-export const SITE_TEMPLATES: SiteTemplate[] = [...AEROBOTICS_TEMPLATES, ...BROCHURE_TEMPLATES];
+/** The saved homepage concept, the Aerobotics pages, then the brochure designs. */
+export const SITE_TEMPLATES: SiteTemplate[] = [...SNAPSHOT_TEMPLATES, ...AEROBOTICS_TEMPLATES, ...BROCHURE_TEMPLATES];
 
 export const siteTemplate = (id: string) => SITE_TEMPLATES.find((t) => t.id === id);
