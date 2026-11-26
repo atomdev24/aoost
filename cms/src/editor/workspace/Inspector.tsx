@@ -1,3 +1,4 @@
+import { setMode, useSimple } from "./mode";
 import { useSettingsShown } from "./settings-pref";
 import { Puck } from "@puckeditor/core";
 import { getComponent } from "../../components/registry";
@@ -100,6 +101,10 @@ function InspectorPanel() {
     setTab((t) => (present.includes(t) ? t : (present[0] ?? "content")));
   }, [present]);
   useEffect(() => setTab(present[0] ?? "content"), [target]);
+  const simple = useSimple();
+  // Simple mode: just the words and pictures (Content); the rest is one click away in Full.
+  const shownTabs = simple && !overlayId && !globalId ? present.filter((t) => t === "content") : present;
+  const shownTab = simple && !overlayId && !globalId ? "content" : tab;
   return (
     <aside className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
       {phone ? (
@@ -114,18 +119,27 @@ function InspectorPanel() {
         </div>
       </header>
       {selected || overlayId ? <ScopeBar /> : null}
-      {present.length > 1 ? (
+      {shownTabs.length > 1 ? (
         <div className="ed-itabs" role="tablist" aria-label="Settings">
-          {TABS.filter((t) => present.includes(t.id)).map((t) => (
+          {TABS.filter((t) => shownTabs.includes(t.id)).map((t) => (
             <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
               {t.label}
             </button>
           ))}
         </div>
       ) : null}
-      <div className="ed-inspector-body" ref={body} data-tab={present.length > 1 ? tab : undefined}>
+      <div className="ed-inspector-body" ref={body} data-tab={present.length > 1 || simple ? shownTab : undefined} data-simple={simple && !overlayId && !globalId ? "" : undefined}>
         {overlayId ? <OverlayPanel overlayId={overlayId} /> : globalId ? <GlobalPanel globalId={globalId} /> : <Puck.Fields />}
       </div>
+      {simple && !overlayId && !globalId ? (
+        <p className="ed-simple-note">
+          {present.includes("content") ? "Simple: words and pictures. " : "This block has no words or pictures to change. "}
+          <button type="button" onClick={() => setMode("full")}>
+            Switch to Full
+          </button>{" "}
+          for style and layout.
+        </p>
+      ) : null}
     </aside>
   );
 }

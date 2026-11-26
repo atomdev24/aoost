@@ -1,3 +1,4 @@
+import { setMode, useMode, useSimple } from "./mode";
 import { AgentPill } from "../agent/AgentPill";
 import { createPortal } from "react-dom";
 import { TeamModal } from "../team/TeamModal";
@@ -75,6 +76,7 @@ export function TopBar() {
   const returnPageId = useEditor((s) => s.returnPageId);
   const editingMenu = !!megaItemId(page.id);
   const [notice, setNotice] = useState<string | null>(null);
+  const simple = useSimple();
   const now = useNow(20_000);
   // Claude has its own pill (agent/AgentPill); this line is for edits from another window.
   const remote = lastLabel && /^Another window: /.test(lastLabel) ? lastLabel : null;
@@ -140,6 +142,7 @@ export function TopBar() {
             {notice ?? remote}
           </span>
         ) : null}
+        <ModeSwitch />
         <span className="ed-history">
           <button type="button" className="ed-icon" onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (⌘Z)">
             <Icon d="M5 3L2 6l3 3M2 6h7.5a4 4 0 0 1 0 8H7" />
@@ -155,7 +158,7 @@ export function TopBar() {
         <ToolGroup />
         <span className="ed-island-divider" aria-hidden="true" />
         <div className="ed-island-bps" role="group" aria-label="Breakpoints">
-          {ISLAND_ORDER.map((b) => (
+          {ISLAND_ORDER.filter((b) => !simple || b === "desktop" || b === "mobile" || b === bp).map((b) => (
             <button
               key={b}
               type="button"
@@ -211,6 +214,21 @@ export function TopBar() {
         {sheetOpen ? <PublishSheet /> : null}
       </div>
     </header>
+  );
+}
+
+/** Simple / Full (direction B): what this person sees. Remembered per person. */
+function ModeSwitch() {
+  const mode = useMode();
+  return (
+    <div className="ed-seg ed-mode-switch ed-desk-only" role="radiogroup" aria-label="Editing mode" title="Simple: words and pictures. Full: style, layout and screen sizes too.">
+      <button type="button" role="radio" aria-checked={mode === "simple"} onClick={() => setMode("simple")}>
+        Simple
+      </button>
+      <button type="button" role="radio" aria-checked={mode === "full"} onClick={() => setMode("full")}>
+        Full
+      </button>
+    </div>
   );
 }
 

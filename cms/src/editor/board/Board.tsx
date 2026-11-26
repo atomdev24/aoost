@@ -1,3 +1,4 @@
+import { useSimple } from "../workspace/mode";
 import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
@@ -69,6 +70,8 @@ function LoadingCover({ bp, pageId, slug, ready }: { bp: Breakpoint; pageId: str
  * views: an edit anywhere shows everywhere.
  */
 export function Board() {
+  // Simple mode works on Desktop and Mobile only.
+  const simple = useSimple();
   const host = useRef<HTMLDivElement>(null);
   const pageId = useEditor((s) => s.pageId);
   const bp = useEditor((s) => s.bp);
@@ -236,7 +239,7 @@ export function Board() {
               <LoadingCover bp={f.bp} pageId={pageId} slug={page.slug} ready={ready[f.bp] && !hold} />
             </div>
           ))}
-        {addable.length ? (
+        {addable.length && !simple ? (
           <div className="bd-slot" style={{ left: slot.x, top: slot.y, width: slot.w, height: slot.h }} role="group" aria-label="Add a breakpoint">
             <span className="bd-slot-plus">+</span>
             <span>Add a breakpoint</span>

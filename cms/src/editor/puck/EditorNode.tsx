@@ -1,3 +1,4 @@
+import { useSimple } from "../workspace/mode";
 import type { PuckContext } from "@puckeditor/core";
 import { useMemo } from "react";
 import { makeCtx } from "../../render/context";
@@ -43,6 +44,8 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
   const inCanvas = usePuck((s) => s.getParentById(props.id)?.type === "CanvasSection");
   const richEdit = useRichEdit();
   const editingText = type === "Text" && richEdit?.id === props.id && richEdit.bp === bp;
+  // Simple mode: no resize handles (the layout stays as designed).
+  const simple = useSimple();
   const node = savedKeysOnly(itemToNode({ type, props }), page);
   const ctx = useMemo(() => ({ ...makeCtx(site, page, { editing: true }), bp }), [site, page, bp]);
   const attrs = nodeAttrs(node);
@@ -57,7 +60,7 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
       style={node.fit ? ({ "--fit": String(node.fit) } as React.CSSProperties) : undefined}
     >
       {editingText ? <RichEditingPart node={node} fallback={<NodeContent node={node} ctx={ctx} />} /> : <NodeContent node={node} ctx={ctx} />}
-      {selected && inCanvas && !node.locked && !editingText ? HANDLES.map((h) => <span key={h} className="ed-h" data-ed-handle={h} />) : null}
+      {selected && inCanvas && !node.locked && !editingText && !simple ? HANDLES.map((h) => <span key={h} className="ed-h" data-ed-handle={h} />) : null}
       {selected && !node.locked && (inCanvas || getComponent(type)?.framed) ? (
         <button
           type="button"
@@ -74,7 +77,7 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
           {keepsRatio(node) ? "Proportions" : "Free"}
         </button>
       ) : null}
-      {selected && !inCanvas && !node.locked && !editingText ? FLOW_HANDLES.map((h) => <span key={h} className="ed-fh" data-ed-flow-handle={h} title={FLOW_HANDLE_TIP[h]} />) : null}
+      {selected && !inCanvas && !node.locked && !editingText && !simple ? FLOW_HANDLES.map((h) => <span key={h} className="ed-fh" data-ed-flow-handle={h} title={FLOW_HANDLE_TIP[h]} />) : null}
     </div>
   );
 }
