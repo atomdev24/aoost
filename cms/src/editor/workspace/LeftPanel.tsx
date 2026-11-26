@@ -1,3 +1,4 @@
+import { useSimple } from "./mode";
 import { Puck } from "@puckeditor/core";
 import { useEffect, useRef, useState } from "react";
 import { addSection, createSection, locate } from "../../model/page-ops";
@@ -359,6 +360,7 @@ export function LeftPanel() {
     );
   };
   const siteActive = !!active && SITE_PANELS.includes(active);
+  const simple = useSimple();
 
   return (
     <>
@@ -381,10 +383,14 @@ export function LeftPanel() {
         <div className="ed-rail-group">
           {TOP_PANELS.map(renderPanelButton)}
         </div>
-        <span className="ed-rail-divider" aria-hidden="true" />
-        <div className="ed-rail-group">
-          <SiteButton active={active} pressed={siteActive} />
-        </div>
+        {simple ? null : (
+          <>
+            <span className="ed-rail-divider" aria-hidden="true" />
+            <div className="ed-rail-group">
+              <SiteButton active={active} pressed={siteActive} />
+            </div>
+          </>
+        )}
       </nav>
 
       {active ? (

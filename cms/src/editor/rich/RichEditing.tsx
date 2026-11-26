@@ -1,3 +1,4 @@
+import { useSimple } from "../workspace/mode";
 import { Mark, mergeAttributes } from "@tiptap/core";
 import Bold from "@tiptap/extension-bold";
 import Document from "@tiptap/extension-document";
@@ -188,6 +189,7 @@ function RichBar({ editor, anchor, onDone }: { editor: Editor; anchor: React.Ref
   const rect = useAnchorRect(anchor);
   const colors = useStore((s) => s.site.theme.colors);
   const [pop, setPop] = useState<null | "colour" | "link">(null);
+  const simple = useSimple();
   const [href, setHref] = useState("");
   const st = useEditorState({
     editor,
@@ -295,6 +297,7 @@ function RichBar({ editor, anchor, onDone }: { editor: Editor; anchor: React.Ref
           </div>
           <div className="ed-richrow">
             <input
+              hidden={simple}
               className="ed-input"
               aria-label="Colour code"
               placeholder="#D97757"

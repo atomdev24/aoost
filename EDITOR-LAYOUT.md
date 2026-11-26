@@ -13,9 +13,10 @@ workspace** as the base, **B's Simple mode** for teammates, and **Phone 1 · bot
    actions: the main one in words (Edit text, Replace), move, duplicate, hide, delete and Settings.
    Settings shows or hides the side panel and is remembered per person; it starts shown, so nobody
    loses the panel they know (Figma's UI3 lesson).
-4. **Simple mode (B).** A Simple / Full switch: Simple shows content first in plain words, brand
-   colours and text styles only, no layout or screen-size controls; Full is today's editor.
-   Default Simple for Editor-role teammates, Full for Owners.
+4. ✓ **Simple mode (B).** A Simple / Full switch next to the status: Simple shows only Content in
+   the side panel (with "Switch to Full"), no resize handles, Desktop and Mobile only (no "Add a
+   breakpoint"), no Site button, brand colours only in the text bar. Full is the whole editor.
+   Remembered per person; until chosen, Owners start in Full and everyone else in Simple.
 5. **Phone 1.** One slim top row, bottom tabs (Add, Layers, Pages, Media, More), half-height
    sheets, block actions above the tabs.
 6. **Speed.** Redraw only the block that changed; side frames catch up after; lighter first load.
