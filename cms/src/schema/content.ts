@@ -31,6 +31,8 @@ export interface Node {
   style: z.infer<typeof ResponsiveStyle>;
   frame?: z.infer<typeof ResponsiveFrameFit>;
   effects?: z.infer<typeof ScrollEffects>;
+  /** Set only while rendering a translation: shrinks text that came out longer (0.82–1). Never saved. */
+  fit?: number;
 }
 
 export const Node: z.ZodType<Node> = z.object({
@@ -42,6 +44,7 @@ export const Node: z.ZodType<Node> = z.object({
   style: ResponsiveStyle,
   frame: ResponsiveFrameFit.optional(),
   effects: ScrollEffects.optional(),
+  fit: z.number().min(0.5).max(1).optional(),
 });
 
 // ------------------------------------------------------------- sections
@@ -137,6 +140,27 @@ export const Page = z.object({
   unpublishAt: z.string().date().optional(),
   /** Blog posts: the date shown and sorted by, a cover picture and a short summary for lists. */
   post: z.object({ date: z.string().date(), cover: z.string().optional(), coverAlt: z.string().optional(), excerpt: z.string().optional() }).optional(),
+  /**
+   * Linked translations of this page, by language code. Each holds only what differs from the main
+   * language: the title, address and share text, the changed values of each block (by block id),
+   * and per-language layout nudges (a block's whole style). Structure stays shared, so layout
+   * changes reach every language.
+   */
+  translations: z
+    .record(
+      z.string().regex(/^[a-z]{2}$/),
+      z.object({
+        title: z.string().optional(),
+        slug: Slug.optional(),
+        seo: Seo.optional(),
+        status: z.enum(["published", "draft"]),
+        content: z.record(z.string(), z.record(z.string(), z.unknown())),
+        style: z.record(z.string(), z.unknown()).optional(),
+      }),
+    )
+    .optional(),
+  /** A page written by hand in another language (a campaign copy): its language code. */
+  lang: z.string().regex(/^[a-z]{2}$/).optional(),
   /** The variant's name ("Variant 1", "Spring hero"). */
   variantName: z.string().min(1).max(60).optional(),
   /** Variant block id → the page's block id it was copied from, so electing gives blocks back their ids. */
@@ -261,6 +285,8 @@ export const Social = z.object({ network: z.string(), url: z.string().url(), lab
 
 export const SiteSettings = z.object({
   title: z.string(),
+  /** The site's languages, first is the main one (e.g. ["en", "es"]). Missing means English only. */
+  languages: z.array(z.string().regex(/^[a-z]{2}$/)).optional(),
   socials: z.array(Social),
   defaultSeo: Seo,
   favicon: z.string().optional(),

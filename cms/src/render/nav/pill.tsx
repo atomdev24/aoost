@@ -1,3 +1,4 @@
+import { mainLanguage, pageVersions } from "../../model/i18n";
 import type { ReactElement } from "react";
 import type { RenderCtx } from "../../components/types";
 import { Icon } from "../icons";
@@ -246,6 +247,30 @@ function Logo({ ctx }: { ctx: RenderCtx }): ReactElement {
   );
 }
 
+/** EN · ES: the open page in the site's other languages, when it has them. */
+function LangSwitch({ ctx }: { ctx: RenderCtx }): ReactElement | null {
+  if (!ctx.page) return null;
+  const versions = pageVersions(ctx.site, ctx.page.id, !ctx.editing);
+  if (!versions.length) return null;
+  const here = ctx.page.lang ?? mainLanguage(ctx.site);
+  const prefix = ctx.prefix ?? "";
+  return (
+    <span className="pill-lang" role="group" aria-label="Language">
+      {versions.map((v) =>
+        v.lang === here ? (
+          <span key={v.lang} aria-current="true" lang={v.lang}>
+            {v.lang.toUpperCase()}
+          </span>
+        ) : (
+          <a key={v.lang} href={ctx.editing ? undefined : prefix + v.slug} hrefLang={v.lang} lang={v.lang}>
+            {v.lang.toUpperCase()}
+          </a>
+        ),
+      )}
+    </span>
+  );
+}
+
 function PillNav({ ctx }: { ctx: RenderCtx }): ReactElement {
   const items = resolveNav(ctx);
   const nav = ctx.site.nav;
@@ -264,6 +289,7 @@ function PillNav({ ctx }: { ctx: RenderCtx }): ReactElement {
               <PillItem key={i.id} item={i} ctx={ctx} />
             ))}
           </nav>
+          <LangSwitch ctx={ctx} />
           {hasMenu ? (
             <button type="button" className="pill-menu" aria-expanded="false" aria-controls="nav-sheet">
               Menu

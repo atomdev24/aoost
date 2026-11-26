@@ -1,3 +1,4 @@
+import { mergeTranslatedEdit, withoutFit } from "../model/i18n";
 import { FeedbackToast } from "./workspace/FeedbackToast";
 import { BlogWriter } from "./writer/BlogWriter";
 import { Puck, useGetPuck } from "@puckeditor/core";
@@ -63,6 +64,7 @@ function PuckBridge() {
  */
 export function Editor() {
   const pageId = useEditor((s) => s.pageId);
+  const lang = useEditor((s) => s.lang);
   const bp = useEditor((s) => s.bp);
   const interacting = useBoard((s) => s.interacting);
   const moving = useBoard((s) => s.moving);
@@ -74,14 +76,14 @@ export function Editor() {
   useEffect(() => void performance.mark("aoost:shell"), []);
 
   // Initial data per page; later store changes reach Puck through <PuckSync>.
-  const initial = useMemo(() => pageToPuck(currentPage(getState())), [pageId]);
+  const initial = useMemo(() => pageToPuck(currentPage(getState())), [pageId, lang]);
   const pendingLabel = useRef<{ label: string; merge?: string } | null>(null);
 
   return (
     <>
       <MediaPickerHost />
       <Puck
-        key={pageId}
+        key={`${pageId}:${lang ?? ""}`}
         config={puckConfig}
         data={initial as never}
         viewports={VIEWPORTS}
@@ -98,11 +100,14 @@ export function Editor() {
         onChange={(data) => {
           const page = currentPage(getState());
           const next = puckToPage(data as unknown as PuckData, page);
-          if (deepEqual(next.sections, page.sections)) return;
+          // A translation's text-fit factor is drawn only; it never counts as a change.
+          if (deepEqual(next.sections, withoutFit(page.sections))) return;
           const step = pendingLabel.current ?? { label: "Edit" };
           pendingLabel.current = null;
           markFromPuck(next);
-          updatePage(page.id, () => next, step.label, { merge: step.merge });
+          const editing = getState().lang;
+          // In another language, changed values go to that language; structure stays shared.
+          updatePage(page.id, editing && page.lang === editing ? (base) => mergeTranslatedEdit(base, next, editing) : () => next, step.label, { merge: step.merge });
         }}
       >
         <PuckBridge />

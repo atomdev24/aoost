@@ -3,6 +3,7 @@ import { renderPage, type RenderOptions } from "./document";
 import { renderNotFound } from "./not-found";
 import { redirectsFile } from "./redirects";
 import { expiries, isCampaign } from "../model/page-kinds";
+import { applyTranslation, translatable } from "../model/i18n";
 
 export type SearchEntry = { title: string; url: string; kind: string; text: string };
 
@@ -44,7 +45,15 @@ export function searchIndex(site: Site): SearchEntry[] {
 /** Render the whole site to a map of output path → file contents. Pure: no fs, no network. */
 export function buildSite(site: Site, opts: RenderOptions = {}): Record<string, string> {
   const files: Record<string, string> = {};
-  for (const page of builtPages(site)) files[outputPath(page.slug)] = renderPage(site, page, opts);
+  for (const page of builtPages(site)) {
+    files[outputPath(page.slug)] = renderPage(site, page, opts);
+    // Live translations get their own address: /es/… (or the translation's own slug).
+    if (!translatable(page)) continue;
+    for (const [lang, t] of Object.entries(page.translations ?? {})) if (t.status === "published") {
+      const tp = applyTranslation(page, lang);
+      files[outputPath(tp.slug)] = renderPage(site, tp, opts);
+    }
+  }
   files["404.html"] = renderNotFound(site, opts);
   files["_redirects"] = redirectsFile(site);
   files["search.json"] = JSON.stringify(searchIndex(site));
@@ -53,7 +62,10 @@ export function buildSite(site: Site, opts: RenderOptions = {}): Record<string, 
   files["robots.txt"] = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\nDisallow: /preview\nDisallow: /staging\n${opts.siteUrl ? `Sitemap: ${opts.siteUrl.replace(/\/$/, "")}/sitemap.xml\n` : ""}`;
   if (opts.siteUrl) {
     const base = opts.siteUrl.replace(/\/$/, "");
-    const urls = site.pages.filter((p) => p.status === "published" && !isCampaign(p)).map((p) => `<url><loc>${base}${p.slug === "/" ? "/" : p.slug}</loc></url>`);
+    const urls = site.pages
+      .filter((p) => p.status === "published" && !isCampaign(p))
+      .flatMap((p) => [p.slug, ...(translatable(p) ? Object.entries(p.translations ?? {}).filter(([, t]) => t.status === "published").map(([lang]) => applyTranslation(p, lang).slug) : [])])
+      .map((slug) => `<url><loc>${base}${slug === "/" ? "/" : slug}</loc></url>`);
     files["sitemap.xml"] = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join("")}</urlset>\n`;
   }
   return files;

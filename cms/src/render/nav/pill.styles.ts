@@ -121,4 +121,8 @@ body.is-locked{overflow:hidden}
 .sheet[data-nav-sheet="bar"] .sheet-cta{border-color:#0075e1;color:#0075e1}
 .sheet[data-nav-sheet="bar"] .sheet-cta.pill-cta-filled{background:#0075e1;color:#fff}
 @media (max-width:899px){.nav[data-nav="bar"]{top:12px;padding:0 12px}}
+.pill-lang{display:inline-flex;align-items:center;gap:2px;margin-left:6px;font-size:12px;font-weight:600;letter-spacing:.02em}
+.pill-lang>*{padding:4px 6px;border-radius:999px;color:inherit;text-decoration:none;opacity:.6}
+.pill-lang>[aria-current]{opacity:1;background:rgba(127,127,127,.18)}
+.pill-lang>a:hover{opacity:1}
 `;

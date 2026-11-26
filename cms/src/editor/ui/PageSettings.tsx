@@ -1,8 +1,9 @@
+import { LANGUAGE_NAMES, languageCopy, languageName, siteLanguages, translatable, translatedSlug, type Translation } from "../../model/i18n";
 import { useEffect, useRef, useState } from "react";
 import { deletePage, duplicatePage, renamePage, reorderPage, setParent, setSeo, setSlug, setStatus } from "../../model/pages";
 import type { Page } from "../../schema";
 import { MediaInput } from "../fields/media";
-import { currentPage, getState, megaItemId, setPage, update, useEditor } from "../store";
+import { currentPage, getState, megaItemId, setLang, setPage, update, useEditor } from "../store";
 import { Button, Select, TextInput, Toggle } from "./kit";
 import { NavPanel } from "./NavPanel";
 
@@ -160,6 +161,8 @@ export function PageSettings({ targetPageId, onBack }: { targetPageId?: string; 
           </label>
         )}
 
+        <Languages page={page} />
+
         <div className="ed-row">
           <span className="ed-label">Site navigation on this page</span>
           <div className="ed-control">
@@ -236,6 +239,103 @@ export function PageSettings({ targetPageId, onBack }: { targetPageId?: string; 
         ) : null}
       </div>
       <NavPanel />
+    </div>
+  );
+}
+
+
+/**
+ * Languages: the site's languages, and this page's versions in them. Permanent pages get linked
+ * translations (same layout, own words); campaign pages get a hand-made copy per language.
+ */
+function Languages({ page }: { page: Page }) {
+  const site = useEditor((s) => s.site);
+  const langs = siteLanguages(site);
+  const main = langs[0]!;
+  const others = langs.slice(1);
+  const setPageT = (lang: string, patch: Partial<Translation> | null, label: string) =>
+    update(
+      (s) => ({
+        ...s,
+        pages: s.pages.map((p) => {
+          if (p.id !== page.id) return p;
+          const all = { ...(p.translations ?? {}) };
+          if (patch === null) delete all[lang];
+          else all[lang] = { ...(all[lang] ?? { status: "draft", content: {} }), ...patch } as Translation;
+          const next = { ...p, translations: all };
+          if (!Object.keys(all).length) delete (next as Partial<Page>).translations;
+          return next;
+        }),
+      }),
+      label,
+    );
+  const addLanguage = (code: string) => code && update((s) => ({ ...s, settings: { ...s.settings, languages: [...siteLanguages(s), code] } }), `Add ${languageName(code)} to the site`);
+  return (
+    <div className="ed-langbox">
+      <span className="ed-field-label">Languages</span>
+      <span className="ed-hint">
+        {languageName(main)} is the main language{others.length ? `; also ${others.map(languageName).join(", ")}.` : "."}
+      </span>
+      {page.lang ? <span className="ed-hint">This page is the {languageName(page.lang)} copy.</span> : null}
+      {translatable(page) && !page.isHome
+        ? others.map((l) => {
+            const t = page.translations?.[l];
+            return (
+              <div key={l} className="ed-langrow">
+                <strong>{languageName(l)}</strong>
+                {t ? (
+                  <>
+                    <Select<"published" | "draft">
+                      value={t.status}
+                      options={[
+                        { value: "draft", label: "Draft" },
+                        { value: "published", label: "Live" },
+                      ]}
+                      onChange={(status) => status && setPageT(l, { status }, `${status === "published" ? "Put the" : "Take the"} ${languageName(l)} version ${status === "published" ? "live" : "down"}`)}
+                    />
+                    <TextInput value={t.title ?? ""} placeholder={`${languageName(l)} name`} onCommit={(title) => setPageT(l, { title: title || undefined }, `Name the ${languageName(l)} version`)} />
+                    <span className="ed-hint">Address: {translatedSlug(page, l)}</span>
+                    <button type="button" className="ed-btn ed-btn-sm" onClick={() => window.confirm(`Remove the ${languageName(l)} version of ${page.title}?`) && setPageT(l, null, `Remove the ${languageName(l)} version`)}>
+                      Remove
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="ed-btn ed-btn-sm" onClick={() => (setPageT(l, {}, `Start the ${languageName(l)} version of ${page.title}`), setLang(l))}>
+                    Start the {languageName(l)} version
+                  </button>
+                )}
+              </div>
+            );
+          })
+        : null}
+      {page.isHome && others.length ? <span className="ed-hint">Use the {others.map((l) => l.toUpperCase()).join(" / ")} switch in the top bar to translate the home page.</span> : null}
+      {page.kind === "campaign" && !page.lang
+        ? others.map((l) => (
+            <button
+              key={l}
+              type="button"
+              className="ed-btn ed-btn-sm"
+              onClick={() => {
+                let made = "";
+                update((s) => {
+                  const r = languageCopy(s, page.id, l);
+                  if (!r) return s;
+                  made = r.pageId;
+                  return r.site;
+                }, `Make a ${languageName(l)} copy of ${page.title}`);
+                if (made) setPage(made);
+              }}
+            >
+              Make a {languageName(l)} copy
+            </button>
+          ))
+        : null}
+      <Select
+        ariaLabel="Add a language to the site"
+        value=""
+        options={[{ value: "", label: "Add a language to the site…" }, ...Object.keys(LANGUAGE_NAMES).filter((c) => !langs.includes(c)).map((c) => ({ value: c, label: languageName(c) }))]}
+        onChange={(c) => addLanguage(c)}
+      />
     </div>
   );
 }

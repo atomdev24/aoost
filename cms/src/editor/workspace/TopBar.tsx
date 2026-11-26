@@ -1,10 +1,11 @@
+import { addTranslation, languageName, siteLanguages, translatable } from "../../model/i18n";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "../api";
 import { activateBreakpoint } from "../board/bridge";
 import { setFrameHidden, toggleFrameHidden, useBoard } from "../board/store";
 import { PuckSync } from "../puck/PuckSync";
 import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
-import { currentPage, flush, megaItemId, redo, setPage, undo, useEditor } from "../store";
+import { currentPage, flush, megaItemId, redo, setLang, setPage, undo, update, useEditor } from "../store";
 import { loadPublished, openSheet, publish, usePublish } from "./publish";
 import { loadStaging, useStaging } from "./staging";
 import { useChanges } from "./changes-count";
@@ -107,6 +108,7 @@ export function TopBar() {
           <Icon d="M7 2.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zM10.5 10.5L14 14" />
         </button>
         <PageSwitcher />
+        <LangSwitch />
         {editingMenu ? (
           <button type="button" className="ed-btn ed-btn-accent ed-btn-sm" onClick={() => returnPageId && setPage(returnPageId)}>
             Done editing menu panel
@@ -302,6 +304,43 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
           </li>
         </ul>
       ) : null}
+    </div>
+  );
+}
+
+
+/**
+ * EN · ES: which language the open page is edited in (only when the site has more than one).
+ * Picking a language the page doesn't have yet starts a draft of it.
+ */
+function LangSwitch() {
+  const site = useEditor((s) => s.site);
+  const lang = useEditor((s) => s.lang);
+  const page = useEditor((s) => s.site.pages.find((p) => p.id === s.pageId));
+  const langs = siteLanguages(site);
+  if (langs.length < 2 || !page || !translatable(page)) return null;
+  const main = langs[0]!;
+  const active = lang && page.translations?.[lang] ? lang : main;
+  return (
+    <div className="ed-langs" role="group" aria-label="Language">
+      {langs.map((l) => {
+        const t = l === main ? null : page.translations?.[l];
+        return (
+          <button
+            key={l}
+            type="button"
+            aria-pressed={active === l}
+            title={l === main ? `Edit in ${languageName(l)}` : t ? `Edit the ${languageName(l)} version (${t.status === "published" ? "live" : "draft"})` : `Start a ${languageName(l)} version of this page`}
+            onClick={() => {
+              if (l !== main && !t) update((s) => ({ ...s, pages: s.pages.map((p) => (p.id === page.id ? addTranslation(p, l) : p)) }), `Start the ${languageName(l)} version of ${page.title}`);
+              setLang(l === main ? null : l);
+            }}
+          >
+            {l.toUpperCase()}
+            {t && t.status !== "published" ? <i aria-label="draft" /> : null}
+          </button>
+        );
+      })}
     </div>
   );
 }

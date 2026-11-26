@@ -26,6 +26,7 @@ function savedKeysOnly(node: Node, page: Page): Node {
     if (saved) break;
   }
   if (!saved) return node;
+  if (saved.fit) node = { ...node, fit: saved.fit };
   const content = Object.fromEntries(Object.entries(node.content).filter(([k]) => k in saved!.content));
   return Object.keys(content).length === Object.keys(node.content).length ? node : { ...node, content };
 }
@@ -48,6 +49,7 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
       data-enter={undefined}
       data-parallax={undefined}
       data-node-id={node.id}
+      style={node.fit ? ({ "--fit": String(node.fit) } as React.CSSProperties) : undefined}
     >
       <NodeContent node={node} ctx={ctx} />
       {selected && inCanvas && !node.locked ? HANDLES.map((h) => <span key={h} className="ed-h" data-ed-handle={h} />) : null}

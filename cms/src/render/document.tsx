@@ -1,3 +1,4 @@
+import { mainLanguage, pageVersions } from "../model/i18n";
 import { renderToStaticMarkup } from "react-dom/server";
 import { getComponent } from "../components/registry";
 import type { ComponentKit } from "../components/types";
@@ -211,6 +212,8 @@ export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): st
     `<title>${esc(title)}</title>`,
     noindex ? `<meta name="robots" content="noindex">` : "",
     opts.siteUrl && !noindex ? `<link rel="canonical" href="${esc(abs(page.slug))}">` : "",
+    // The same page in its other languages.
+    ...(noindex ? [] : pageVersions(site, page.id, true).map((v) => `<link rel="alternate" hreflang="${esc(v.lang)}" href="${esc(abs(v.slug))}">`)),
     shareTags(site, page, title, opts),
     `<meta name="theme-color" content="${esc(site.theme.colors.bone ?? "#F3EFE6")}">`,
     iconLinks(site),
@@ -225,7 +228,8 @@ export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): st
     .join("\n");
 
   const body = renderToStaticMarkup(<PageBody site={site} page={page} opts={opts} />);
+  const lang = page.lang ?? mainLanguage(site);
   const search = opts.preview ? ` data-search="${esc(opts.preview.prefix)}/search.json"` : "";
   const previewFlag = opts.preview ? ' data-preview=""' : "";
-  return `<!doctype html>\n<html lang="en"${search}${previewFlag}>\n<head>\n${head}\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
+  return `<!doctype html>\n<html lang="${esc(lang)}"${search}${previewFlag}>\n<head>\n${head}\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
 }

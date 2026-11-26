@@ -198,8 +198,8 @@ describe("css generation", () => {
   it("emits theme variables and text style classes", () => {
     const css = themeCss(seedTheme);
     expect(css).toContain("--c-bone:#F3EFE6");
-    expect(css).toContain(".t-h1{font-family:var(--font-display);font-size:calc(var(--cs, 1px) * 36)");
-    expect(css).toMatch(/@media \(min-width:900px\)\{[^]*\.t-h1\{font-size:calc\(var\(--cs, 1px\) \* 64\)\}/);
+    expect(css).toContain(".t-h1{font-family:var(--font-display);font-size:calc(var(--cs, 1px) * var(--fit, 1) * 36)");
+    expect(css).toMatch(/@media \(min-width:900px\)\{[^]*\.t-h1\{font-size:calc\(var\(--cs, 1px\) \* var\(--fit, 1\) \* 64\)\}/);
   });
 });
 

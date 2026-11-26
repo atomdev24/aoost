@@ -65,7 +65,7 @@ export function resolveItem(item: NavItem, ctx: RenderCtx, today: string): Resol
   const base: ResolvedItem = {
     id: item.id,
     type: item.type,
-    label: item.label?.trim() || targetPage?.title || "",
+    label: item.label?.trim() || (ctx.lang ? targetPage?.translations?.[ctx.lang]?.title : undefined) || targetPage?.title || "",
     ariaLabel: item.ariaLabel?.trim() || undefined,
     description: item.description?.trim() || undefined,
     href,

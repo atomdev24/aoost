@@ -2,6 +2,7 @@ import { useGetPuck } from "@puckeditor/core";
 import { useEffect } from "react";
 import { deepEqual } from "../../responsive/resolve";
 import { BREAKPOINTS, DESIGN_WIDTH } from "../../schema";
+import { withoutFit } from "../../model/i18n";
 import { currentPage, getState, setBreakpoint, setGlobalEdit, setOverlay, setSelection, subscribe } from "../store";
 import { pageToPuck, puckToPage, type PuckData } from "./adapter";
 import { usePuck } from "./usePuck";
@@ -17,6 +18,7 @@ let fromPuck: unknown = null;
 export const markFromPuck = (page: unknown) => {
   fromPuck = page;
 };
+
 
 export function PuckSync() {
   const getPuck = useGetPuck();
@@ -51,7 +53,8 @@ export function PuckSync() {
       }
       const puck = getPuck();
       const shown = puckToPage(puck.appState.data as unknown as PuckData, page);
-      if (!deepEqual(shown.sections, page.sections)) {
+      // A translation's text-fit factor is drawn, never edited: leave it out of the comparison.
+      if (!deepEqual(withoutFit(shown.sections), withoutFit(page.sections))) {
         puck.dispatch({ type: "setData", data: pageToPuck(page) as never, recordHistory: false });
       }
     });

@@ -34,7 +34,8 @@ export function nodeAttrs(node: Node): Record<string, string | undefined> {
 /** A node on the public site: wrapper (layout, look, scroll effects) plus content. */
 export function NodeView({ node, ctx }: { node: Node; ctx: RenderCtx }): ReactElement {
   const attrs = nodeAttrs(node);
-  const style = node.effects?.sticky ? ({ "--sticky-top": `${node.effects.stickyTop ?? 16}px` } as React.CSSProperties) : undefined;
+  const vars = { ...(node.effects?.sticky ? { "--sticky-top": `${node.effects.stickyTop ?? 16}px` } : {}), ...(node.fit && node.fit < 1 ? { "--fit": String(node.fit) } : {}) };
+  const style = Object.keys(vars).length ? (vars as React.CSSProperties) : undefined;
   return (
     <div {...attrs} style={style}>
       <NodeContent node={node} ctx={ctx} />

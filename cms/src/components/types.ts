@@ -11,6 +11,10 @@ export type RenderCtx = {
   editing: boolean;
   /** The editor's active breakpoint. Undefined on the public site (CSS decides). */
   bp?: Breakpoint;
+  /** The language the page is read in, when it isn't the site's main one. */
+  lang?: string;
+  /** Address prefix for draft previews and staging ("/preview"); empty on the live site. */
+  prefix?: string;
   href(target: LinkTarget): string;
 };
 

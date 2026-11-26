@@ -1,3 +1,4 @@
+import { applyTranslation, translatable } from "../model/i18n";
 import { useSyncExternalStore } from "react";
 import { applyOps, diffSite, type Op } from "../model/ops";
 import { findNavItem, updateNavItem } from "../model/nav";
@@ -16,6 +17,8 @@ export type EditorState = {
   site: Site;
   pageId: string;
   bp: Breakpoint;
+  /** The language being edited, when it isn't the site's main one (null = main language). */
+  lang: string | null;
   save: SaveStatus;
   saveError: string | null;
   /** When the draft last reached the server (for "saved just now"). */
@@ -79,6 +82,7 @@ export function initStore(site: Site, unpublished: boolean) {
     site,
     pageId: site.pages.some((p) => p.id === wanted) ? wanted! : home.id,
     bp: window.innerWidth < 900 ? "mobile" : "desktop",
+    lang: null,
     save: "idle",
     saveError: null,
     savedAt: null,
@@ -139,8 +143,17 @@ export const currentPage = (s: EditorState = state): Page => {
       return page;
     }
   }
-  return s.site.pages.find((p) => p.id === s.pageId) ?? s.site.pages[0]!;
+  const page = s.site.pages.find((p) => p.id === s.pageId) ?? s.site.pages[0]!;
+  // In another language the canvas shows the page as it reads there (same object while unchanged).
+  if (s.lang && page.translations?.[s.lang] && translatable(page)) {
+    if (langCache && langCache.page === page && langCache.lang === s.lang) return langCache.view;
+    const view = applyTranslation(page, s.lang);
+    langCache = { page, lang: s.lang, view };
+    return view;
+  }
+  return page;
 };
+let langCache: { page: Page; lang: string; view: Page } | null = null;
 
 // ------------------------------------------------------------ editing
 
@@ -233,6 +246,8 @@ export function setPage(pageId: string) {
   set({ pageId, returnPageId: mega ? (megaItemId(state.pageId) ? state.returnPageId : state.pageId) : null, selection: [], overlayId: null, globalId: null });
 }
 export const setBreakpoint = (bp: Breakpoint) => bp !== state.bp && set({ bp });
+/** Edit the open page in a language (null: the main language). Selection doesn't carry over. */
+export const setLang = (lang: string | null) => lang !== state.lang && set({ lang, selection: [], overlayId: null });
 export const setSelection = (ids: string[]) => {
   if (ids.length !== state.selection.length || ids.some((id, i) => id !== state.selection[i])) set({ selection: ids });
 };
