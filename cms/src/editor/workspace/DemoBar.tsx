@@ -1,30 +1,20 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { DEMO_LIMITS, DEMO_STRIP } from "../demo/limits";
 
 /**
- * The demo editor's chip in the top bar: says this is a sample site, what's real and what isn't,
- * and puts everything back with "Reset demo". Opens once by itself on a first visit.
+ * The demo editor's chip in the top bar and a thin strip under it: the strip always says what's
+ * off, and the chip (or Details on the strip) opens the full list and "Reset demo". Controls that
+ * are off carry their own lock (demo/DemoLock.tsx).
  */
-const SEEN = "ed-demo-seen";
-
 export function DemoBar() {
-  const [open, setOpen] = useState(() => {
-    try {
-      return !sessionStorage.getItem(SEEN);
-    } catch {
-      return false;
-    }
-  });
+  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    try {
-      sessionStorage.setItem(SEEN, "1");
-    } catch {
-      /* private mode */
-    }
     const away = (e: PointerEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
     const esc = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     // a click on the canvas (its own frame) takes the focus away from this window
@@ -55,18 +45,33 @@ export function DemoBar() {
 
   return (
     <div className="ed-demo" ref={box}>
+      {/* On the page itself: the top bar's frosted glass would otherwise hold a fixed strip inside it. */}
+      {createPortal(
+        <div className="ed-demo-strip" role="note">
+          <span>{DEMO_STRIP}</span>
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => setOpen(true)}
+          >
+            Details
+          </button>
+        </div>,
+        document.body,
+      )}
       <button type="button" className="ed-demo-chip" aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen((o) => !o)}>
         Demo
       </button>
       {open ? (
         <div className="ed-demo-card" role="dialog" aria-label="About this demo">
           <h2>This is a demo editor</h2>
-          <p>Everything works on a sample site, so you can try it freely. Nothing here touches a real website.</p>
-          <ul>
-            <li>Anyone with the link can edit this demo at the same time.</li>
-            <li>Publish and Push to production only pretend.</li>
-            <li>Uploads are off: use the placeholder pictures.</li>
-            <li>It goes back to the sample site every night.</li>
+          <p>Everything else works on a sample site, so try it freely. Nothing here touches a real website.</p>
+          <ul className="ed-demo-limits">
+            {Object.values(DEMO_LIMITS).map((l) => (
+              <li key={l.title}>
+                <b>{l.title}</b> {l.why}
+              </li>
+            ))}
           </ul>
           <div className="ed-demo-actions">
             <button type="button" className="ed-btn ed-btn-sm" disabled={busy} onClick={() => void reset()}>

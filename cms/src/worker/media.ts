@@ -65,7 +65,7 @@ export function pickVariant(requested: number, variants: number[]): number | nul
   return fit ?? null;
 }
 
-const toItem = (o: R2Object): MediaItem => ({
+export const toItem = (o: R2Object): MediaItem => ({
   key: o.key,
   url: `/media/${o.key}`,
   name: o.customMetadata?.name ?? o.key.split("/").pop()!,
