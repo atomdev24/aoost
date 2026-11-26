@@ -438,3 +438,6 @@
 .bd-over-tip { position: absolute; left: 0; bottom: 100%; margin-bottom: 6px; padding: 2px 7px; border-radius: 5px; background: #0a84ff; color: #fff; font: 600 11px/1.4 -apple-system, system-ui, sans-serif; white-space: nowrap; transform: scale(calc(1 / var(--bd-zoom, 1))); transform-origin: 0 100%; }
 /* A reference held over the page: it becomes a picture there when let go (board/ref-page.ts). */
 .bd-ref.is-into-page { z-index: 50; opacity: 0.75; outline: 3px dashed var(--ed-accent, #0a84ff) !important; outline-offset: 0 !important; }
+/* A block parked on the board, drawn live (board/ParkedBlock.tsx). */
+.bd-parked { position: absolute; inset: 0; overflow: hidden; pointer-events: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); }
+.bd-parked iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; background: transparent; pointer-events: none; }

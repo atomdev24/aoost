@@ -1,7 +1,7 @@
 import { addNode, addSection, createNode, createSection, locate, remove } from "../../model/page-ops";
 import { placeRef, type RefItem } from "../../model/refs";
 import { canvasSize } from "../../responsive/canvas";
-import type { Section } from "../../schema";
+import type { Node, Section } from "../../schema";
 import { withBox } from "../canvas/actions";
 import { activateBreakpoint, selectBlock } from "./bridge";
 import { addRef, removeRef } from "./refs-store";
@@ -42,7 +42,9 @@ export function refToPage(ref: RefItem, clientX: number, clientY: number): boole
   const section: Section | null = loc?.kind === "section" ? loc.section : null;
   const content = { src: ref.src, width: Math.round(ref.w), height: Math.round(ref.h), alt: "" };
   const { bp } = getState();
-  let node = createNode("Image", { content });
+  // A parked block goes back as itself (a fresh id if the page already has its old one).
+  const parked = ref.node as unknown as Node | undefined;
+  let node: Node = parked ? (locate(page, parked.id) ? { ...parked, id: createNode(parked.type).id } : parked) : createNode("Image", { content });
 
   if (section?.kind === "canvas" && sectionEl) {
     // Free layout: where it was dropped, at the size it had on the board (kept inside the section).
@@ -56,35 +58,36 @@ export function refToPage(ref: RefItem, clientX: number, clientY: number): boole
     const box = { x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h) };
     node = bp === "mobile" ? { ...node, style: { ...node.style, base: { ...node.style.base, ...box } } } : withBox(section, node, bp, box);
     const sid = section.id;
-    updatePage(page.id, (p) => addNode(p, sid, node), "Move reference into the page");
+    updatePage(page.id, (p) => addNode(p, sid, node), parked ? "Put block back on the page" : "Move reference into the page");
   } else if (section) {
     // Stacked or grid: after the block it was dropped on, or at the end of the section.
     const nodeEl = hit?.closest<HTMLElement>("[data-node-id]");
     const index = nodeEl ? section.children.findIndex((n) => n.id === nodeEl.dataset.nodeId) + 1 : undefined;
     const sid = section.id;
-    updatePage(page.id, (p) => addNode(p, sid, node, index && index > 0 ? index : undefined), "Move reference into the page");
+    updatePage(page.id, (p) => addNode(p, sid, node, index && index > 0 ? index : undefined), parked ? "Put block back on the page" : "Move reference into the page");
   } else {
     const n = node;
-    updatePage(page.id, (p) => addSection(p, createSection("flow", { children: [n] })), "Move reference into the page");
+    updatePage(page.id, (p) => addSection(p, createSection("flow", { children: [n] })), parked ? "Put block back on the page" : "Move reference into the page");
   }
   removeRef(ref.id);
   selectBlock(node.id);
-  showTip("image");
+  if (!parked) showTip("image");
   return true;
 }
 
 const newRefId = () => `ref-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 
 /**
- * Take a picture off the page and put it on the board as a reference, centred on a point in the
- * frame's own pixels (it can be outside the frame). Only Image blocks with a picture can go.
+ * Take a block off the page and put it on the board, centred on a point in the frame's own pixels
+ * (it can be outside the frame). A picture becomes a reference; any other block is parked and
+ * drawn live (ParkedBlock.tsx) until it's dragged back onto a frame.
  */
 export function nodeToBoard(id: string, frameX?: number, frameY?: number): boolean {
   const page = currentPage(getState());
   const loc = locate(page, id);
   const node = loc?.kind === "node" ? loc.node : null;
-  const src = node?.type === "Image" ? (node.content.src as string | undefined) : undefined;
-  if (!node || !src) return false;
+  if (!node || node.locked || loc?.kind !== "node") return false;
+  const src = node.type === "Image" ? ((node.content.src as string | undefined) ?? "") : "";
   const { bp } = getState();
   const o = frameOrigin(bp);
   const el = frame()?.contentDocument?.querySelector(`[data-node-id="${CSS.escape(id)}"]`);
@@ -95,7 +98,15 @@ export function nodeToBoard(id: string, frameX?: number, frameY?: number): boole
   const w = (node.content.width as number | undefined) ?? r?.width ?? 600;
   const h = (node.content.height as number | undefined) ?? r?.height ?? 400;
   activateBreakpoint(bp, null);
-  updatePage(page.id, (p) => remove(p, id), "Move picture to the board");
-  addRef(placeRef(newRefId(), src, cx, cy, w, h, Math.max(r?.width ?? 0, r?.height ?? 0) || 600));
+  updatePage(page.id, (p) => remove(p, id), src ? "Move picture to the board" : "Park block on the board");
+  if (src) {
+    addRef(placeRef(newRefId(), src, cx, cy, w, h, Math.max(r?.width ?? 0, r?.height ?? 0) || 600));
+    return true;
+  }
+  // Parked: the block, its section's kind and layout (no other blocks), and the size it left from.
+  const bw = r?.width ?? 400;
+  const bh = r?.height ?? 200;
+  const { children: _others, ...section } = loc.section;
+  addRef({ id: newRefId(), src: "", x: Math.round(cx - bw / 2), y: Math.round(cy - bh / 2), w: Math.max(8, Math.round(bw)), h: Math.max(8, Math.round(bh)), node: node as unknown as Record<string, unknown>, section: { ...section, children: [] } as unknown as Record<string, unknown>, bp });
   return true;
 }

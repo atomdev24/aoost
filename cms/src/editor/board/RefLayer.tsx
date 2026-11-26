@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { activateBreakpoint } from "./bridge";
 import { framePointAt, refToPage } from "./ref-page";
+// Parked blocks render the page's own code, so they load only when one is on the board.
+const ParkedBlock = lazy(() => import("./ParkedBlock").then((m) => ({ default: m.ParkedBlock })));
 import { getRefs, loadRefs, moveRef, raiseRef, removeRef, selectRef, sizeRef, useRefs } from "./refs-store";
 import { getBoard, setInteracting } from "./store";
 import { getState } from "../store";
@@ -105,12 +107,17 @@ export function RefLayer({ pageId, zoom }: { pageId: string; zoom: number }) {
               );
             }}
           >
-            <img src={r.src} alt="" draggable={false} />
+            {r.node ? (
+              <Suspense fallback={null}>
+                <ParkedBlock item={r} />
+              </Suspense>
+            ) : <img src={r.src} alt="" draggable={false} />}
             {on ? (
               <>
                 <span className="bd-ref-tag" style={{ fontSize: 11 / zoom, top: -22 / zoom, padding: `${2 / zoom}px ${6 / zoom}px`, borderRadius: 5 / zoom }}>
-                  Reference · not on the site
+                  {r.node ? "Parked block · not on the site · drag onto the page to use it" : "Reference · not on the site"}
                 </span>
+                {r.node ? null : (
                 <span
                   className="bd-ref-handle"
                   aria-label="Resize"
@@ -123,6 +130,7 @@ export function RefLayer({ pageId, zoom }: { pageId: string; zoom: number }) {
                     });
                   }}
                 />
+                )}
               </>
             ) : null}
           </div>
