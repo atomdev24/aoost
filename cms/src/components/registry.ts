@@ -34,11 +34,12 @@ import { AoostDrawingWall } from "./aoost/AoostDrawingWall/AoostDrawingWall";
 import { AoostRodeo } from "./aoost/AoostRodeo/AoostRodeo";
 import { AoostFooter } from "./aoost/AoostFooter/AoostFooter";
 import { AoostAbout } from "./aoost/AoostAbout/AoostAbout";
+import { aeroboticsComponents } from "./aerobotics";
 import type { ComponentDef } from "./types";
 
 /** Every component the renderer and the editor know about. Add new ones here (and in fields.ts). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Shape, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, FruitReading, Cards, DiaryList, PlaylistCard, Footer, TrueFruitSeason, HubSpotForm, PostBody, PostList, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout];
+export const components: ComponentDef<any>[] = [Text, Image, Video, Audio, Button, Shape, Spacer, Divider, GalleryGrid, Embed, SpotifyEmbed, Code, Lottie, Model3D, FileDownload, FruitReading, Cards, DiaryList, PlaylistCard, Footer, TrueFruitSeason, HubSpotForm, PostBody, PostList, Global, AoostHero, AoostProjects, AoostViewer, AoostJournals, AoostTools, AoostPlaylistBand, AoostDrawingWall, AoostRodeo, AoostFooter, AoostAbout, ...aeroboticsComponents];
 
 export const componentMap = new Map(components.map((c) => [c.type, c]));
 for (const c of components) registerContentSchema(c.type, c.schema);

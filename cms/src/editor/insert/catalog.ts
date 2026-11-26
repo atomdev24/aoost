@@ -1,8 +1,9 @@
 import { showTip } from "../tips/tips";
 import { components, getComponent } from "../../components/registry";
-import { addNode, addSection, createNode, createSection, locate } from "../../model/page-ops";
+import { addNode, addSection, createNode, createSection, locate, sectionForBlock } from "../../model/page-ops";
 import type { Page, Section } from "../../schema";
 import { selectBlock } from "../board/bridge";
+import { DEMO } from "../demo";
 import { currentPage, getState, updatePage } from "../store";
 
 /**
@@ -34,14 +35,17 @@ function place(type: string, category: string): Pick<Entry, "chip" | "group"> {
   if (BASIC_LAYOUT.has(type)) return { chip: "basics", group: "layout" };
   if (BASIC_GLOBAL.has(type)) return { chip: "basics", group: "global" };
   if (MOTION.has(type)) return { chip: "motion" };
-  if (BRAND.has(type) || category === "aoost") return { chip: "brand" };
+  if (BRAND.has(type) || category === "aoost" || category === "aerobotics") return { chip: "brand" };
   return { chip: "more" };
 }
+
+/** Each site sees its own pack under Brand: the demo (the Aerobotics site) the Aerobotics blocks, the real editor the aoost ones. */
+const OTHER_PACK = DEMO ? "aoost" : "aerobotics";
 
 /** Every block that can be added (sections first). */
 export const CATALOG: Entry[] = [
   ...SECTIONS,
-  ...components.filter((c) => c.type !== "FruitReading").map((c) => ({ type: c.type, label: short(c.label), hint: c.label, ...place(c.type, c.category) })),
+  ...components.filter((c) => c.type !== "FruitReading" && c.category !== OTHER_PACK).map((c) => ({ type: c.type, label: short(c.label), hint: c.label, ...place(c.type, c.category) })),
 ];
 
 export const entryFor = (type: string) => CATALOG.find((e) => e.type === type);
@@ -73,11 +77,12 @@ export function placeBlock(page: Page, selected: string | undefined, type: strin
     return { page: addSection(page, section, sectionIndex), id: section.id };
   }
   const node = createNode(type);
+  // A full-bleed block (an Aerobotics band) gets a section of its own, edge to edge.
+  if (getComponent(type)?.fullBleed) return { page: addSection(page, sectionForBlock(node), sectionIndex), id: node.id };
   if (at?.kind === "node" && at.section.kind !== "canvas") {
     return { page: addNode(page, at.section.id, node, at.section.children.indexOf(at.node) + 1), id: node.id };
   }
-  const section = createSection("flow", { children: [node] });
-  return { page: addSection(page, section, sectionIndex), id: node.id };
+  return { page: addSection(page, sectionForBlock(node), sectionIndex), id: node.id };
 }
 
 /** Add a block below the selection (one undo step) and select it. */

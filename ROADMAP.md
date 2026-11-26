@@ -41,7 +41,7 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 5. Teammates: presence (cursors and names), comments with threads and resolve, notifications
    (email, Slack provision) and a settings page.
 6. Masks and colour adjustments for board images; video and link references; shared scrapbook board.
-7. Engine / site-pack split for the Aerobotics website (see HANDBOOK.md §7).
+7. Engine / site-pack split for the Aerobotics website (see HANDBOOK.md §7). Started: the Aerobotics block pack (`components/aerobotics/`) is in the demo's Brand tab.
 
 ## Done (26 Nov 2026): editor UI spec for the Aerobotics team
 

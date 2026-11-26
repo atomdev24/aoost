@@ -160,6 +160,110 @@ const SHAPES: Record<string, React.ReactNode> = {
   ),
 };
 
+/** The Aerobotics pack (the demo's Brand tab): navy and blue, like the site. */
+const N = "#17293E";
+const AERO: Record<string, React.ReactNode> = {
+  AeroHero: (
+    <>
+      <rect x="8" y="8" width="84" height="48" rx="3" fill="#2d4a2a" />
+      <rect x="14" y="20" width="34" height="5" rx="2.5" fill="#fff" />
+      <rect x="14" y="28" width="26" height="3" rx="1.5" fill={L} />
+      <rect x="14" y="36" width="14" height="6" rx="3" fill={A} />
+      <rect x="30" y="36" width="14" height="6" rx="3" fill="#fff" />
+      {[14, 28, 42, 56].map((x) => <rect key={x} x={x} y="48" width="10" height="3" rx="1.5" fill={L} />)}
+    </>
+  ),
+  AeroLogos: <>{[12, 32, 52, 72].map((x) => <rect key={x} x={x} y="28" width="16" height="8" rx="2" fill={L} />)}</>,
+  AeroSplit: (
+    <>
+      {lines(12, 18, [30, 34, 26])}
+      <rect x="12" y="40" width="34" height="10" rx="2" fill={F} />
+      <rect x="54" y="12" width="22" height="40" rx="2" fill={F} />
+      <rect x="66" y="22" width="22" height="16" rx="2" fill="#fff" opacity=".85" />
+    </>
+  ),
+  AeroChart: (
+    <>
+      <rect x="22" y="8" width="56" height="48" rx="4" fill="#fff" opacity=".9" />
+      {[30, 38, 46, 54, 62].map((x, i) => <rect key={x} x={x} y={46 - [8, 16, 28, 22, 12][i]!} width="5" height={[8, 16, 28, 22, 12][i]} fill={["#F5A623", "#F5A623", "#F5A623", "#F5A623", "#F5A623"][i]} />)}
+    </>
+  ),
+  AeroReadings: <>{[12, 26, 40].map((y) => <rect key={y} x="30" y={y} width="40" height="11" rx="3" fill={F} stroke={L} />)}</>,
+  AeroCrops: (
+    <>
+      <rect x="10" y="20" width="80" height="24" rx="4" fill={F} />
+      {[18, 30, 42, 54, 66, 78].map((x, i) => <circle key={x} cx={x} cy="32" r="4.5" fill={["#F39C2A", "#F2D648", "#D9352B", "#7B3F8C", "#B5122E", "#3B5BA9"][i]} />)}
+    </>
+  ),
+  AeroShowcase: (
+    <>
+      <rect x="8" y="8" width="84" height="48" rx="3" fill="#3a3a2a" />
+      <rect x="30" y="13" width="40" height="4" rx="2" fill="#fff" />
+      <rect x="20" y="24" width="60" height="28" rx="3" fill="#fff" opacity=".9" />
+    </>
+  ),
+  AeroProductCard: (
+    <>
+      <rect x="8" y="10" width="84" height="44" rx="6" fill="#3d5a2d" />
+      <rect x="14" y="22" width="34" height="22" rx="4" fill="#14210a" />
+      <rect x="18" y="27" width="20" height="3" rx="1.5" fill="#fff" />
+      <rect x="18" y="36" width="12" height="5" rx="2.5" fill={A} />
+    </>
+  ),
+  AeroFeatures: <>{[12, 40, 68].map((x) => <g key={x}><rect x={x} y="14" width="20" height="1.5" fill={L} /><rect x={x} y="20" width="6" height="6" rx="1" fill={L} />{lines(x, 30, [18, 14, 16], 6)}</g>)}</>,
+  AeroTestimonial: (
+    <>
+      <rect x="12" y="16" width="26" height="30" rx="3" fill={F} />
+      {lines(44, 20, [42, 38, 30])}
+      <rect x="44" y="42" width="18" height="3" rx="1.5" fill={A} />
+    </>
+  ),
+  AeroStories: <>{[10, 31, 52, 73].map((x) => <g key={x}><rect x={x} y="16" width="18" height="28" rx="3" fill={F} /><rect x={x + 2} y="36" width="12" height="2.5" rx="1" fill={L} /></g>)}</>,
+  AeroStats: <>{[10, 32, 54, 76].map((x) => <g key={x}><rect x={x} y="26" width="14" height="5" rx="2" fill={L} /><rect x={x} y="34" width="10" height="2.5" rx="1" fill={F} /></g>)}</>,
+  AeroPhotoGrid: <>{[[12, 12], [40, 12], [68, 12], [12, 36], [40, 36], [68, 36]].map(([x, y]) => <rect key={`${x}${y}`} x={x} y={y} width="22" height="18" rx="3" fill={F} />)}</>,
+  AeroPricing: (
+    <>
+      <rect x="30" y="8" width="40" height="50" rx="5" fill={N} stroke={L} />
+      <rect x="30" y="8" width="40" height="16" rx="5" fill={F} />
+      {lines(36, 30, [22, 18, 20])}
+      <rect x="36" y="48" width="14" height="5" rx="2.5" fill={A} />
+    </>
+  ),
+  AeroFaq: <>{[14, 26, 38, 50].map((y) => <g key={y}><rect x="16" y={y} width="56" height="3" rx="1.5" fill={L} /><path d={`M80 ${y - 1}l3 3 3-3`} stroke={L} fill="none" /></g>)}</>,
+  AeroSteps: (
+    <>
+      <rect x="10" y="12" width="40" height="40" rx="3" fill={F} />
+      {[18, 26, 34, 42].map((y, i) => <g key={y}><rect x="14" y={y} width="3" height="3" fill={A} /><rect x="20" y={y} width={[24, 20, 26, 18][i]} height="3" rx="1.5" fill={L} /></g>)}
+      <rect x="56" y="12" width="34" height="40" rx="3" fill={F} stroke={L} />
+    </>
+  ),
+  AeroEvents: <>{[12, 40, 68].map((x) => <g key={x}><rect x={x} y="14" width="20" height="14" rx="2" fill="#fff" opacity=".85" /><rect x={x + 3} y="32" width="14" height="3" rx="1.5" fill={L} /><rect x={x + 4} y="40" width="12" height="5" rx="2.5" fill={A} /></g>)}</>,
+  AeroOffices: <>{lines(16, 12, [20, 44])}{lines(16, 30, [30, 40, 26], 5)}{lines(16, 48, [30, 34], 5)}</>,
+  AeroPageHeader: (
+    <>
+      <rect x="8" y="8" width="84" height="48" rx="3" fill={F} />
+      <rect x="28" y="24" width="44" height="6" rx="3" fill={L} />
+      <rect x="22" y="35" width="56" height="3" rx="1.5" fill={L} opacity=".6" />
+    </>
+  ),
+  AeroCta: (
+    <>
+      <rect x="8" y="18" width="84" height="28" rx="3" fill={N} stroke={L} />
+      <rect x="14" y="26" width="36" height="4" rx="2" fill="#fff" />
+      <rect x="14" y="34" width="26" height="4" rx="2" fill="#fff" />
+      <rect x="60" y="29" width="13" height="6" rx="3" fill="#fff" />
+      <rect x="75" y="29" width="13" height="6" rx="3" fill={A} />
+    </>
+  ),
+  AeroFooter: (
+    <>
+      <rect x="8" y="10" width="84" height="44" rx="3" fill={N} stroke={L} />
+      {[14, 34, 54].map((x) => <g key={x}>{lines(x, 16, [12, 10, 12, 8], 5)}</g>)}
+      <text x="50" y="50" textAnchor="middle" fontSize="11" fontWeight="700" fill="rgba(255,255,255,.12)">aerobotics</text>
+    </>
+  ),
+};
+
 /** aoost homepage blocks share one look: a wide band with a title line. */
 const band = (
   <>
@@ -183,7 +287,7 @@ const SAVED = (
 export function Thumb({ type, saved }: { type?: string; saved?: boolean }) {
   return (
     <svg className="ed-thumb" viewBox="0 0 100 64" aria-hidden="true">
-      {saved ? SAVED : (SHAPES[type ?? ""] ?? band)}
+      {saved ? SAVED : (SHAPES[type ?? ""] ?? AERO[type ?? ""] ?? band)}
     </svg>
   );
 }

@@ -53,6 +53,70 @@ const DEMO_MEDIA = ["wide", "square", "tall", "wide-dark", "square-dark", "tall-
   height: n.startsWith("wide") ? 900 : 1200,
   variants: [],
 }));
+/** The Aerobotics pictures in the repo (art/aero_*), so the demo's Aerobotics blocks can swap photos. */
+const AERO_ART: [string, number, number][] = [
+  ["badge_truefruit_size", 480, 92],
+  ["crop_apple", 160, 160],
+  ["crop_avocado", 160, 160],
+  ["crop_blueberry", 160, 160],
+  ["crop_cherry", 160, 160],
+  ["crop_grapes", 160, 160],
+  ["crop_kiwi", 160, 160],
+  ["crop_lemon", 160, 147],
+  ["crop_orange", 160, 160],
+  ["crop_peach", 160, 160],
+  ["crop_pomegranate", 160, 160],
+  ["dash_size", 1800, 984],
+  ["dash_yield", 1800, 915],
+  ["event_fruit_attraction", 480, 240],
+  ["event_fruit_logistica", 480, 240],
+  ["event_interpoma", 480, 92],
+  ["feature_tree", 642, 665],
+  ["hero_drone", 2400, 1350],
+  ["hero_home", 2400, 1299],
+  ["hero_orchard", 2400, 1246],
+  ["hero_size", 2400, 1601],
+  ["icon_chart", 160, 160],
+  ["icon_ruler", 160, 160],
+  ["icon_timer", 160, 160],
+  ["logo_ac_foods", 480, 113],
+  ["logo_anecoop", 480, 335],
+  ["logo_bagu", 480, 180],
+  ["logo_daltex", 480, 480],
+  ["logo_guadex", 288, 283],
+  ["logo_mouton_citrus", 480, 282],
+  ["logo_redland", 480, 93],
+  ["logo_unifrutti", 480, 649],
+  ["person_claude", 253, 253],
+  ["pricing_laptop", 1800, 940],
+  ["product_binscan", 1800, 874],
+  ["product_grade", 1800, 874],
+  ["product_size", 1800, 874],
+  ["showcase_bins", 1400, 787],
+  ["showcase_orchard", 1436, 805],
+  ["story_1", 900, 506],
+  ["story_2", 900, 1125],
+  ["story_3", 900, 506],
+  ["story_4", 900, 850],
+  ["team_1", 900, 675],
+  ["team_2", 900, 1599],
+  ["team_3", 900, 675],
+  ["team_4", 900, 1200],
+  ["team_5", 900, 675],
+  ["team_6", 900, 662],
+  ["world_map", 1800, 881],
+];
+const AERO_MEDIA = AERO_ART.map(([n, width, height], i) => ({
+  key: `aero/${n}.webp`,
+  url: `/art/aero_${n}.webp`,
+  name: `aerobotics-${n.replace(/_/g, "-")}.webp`,
+  kind: "image",
+  size: 0,
+  uploaded: new Date(Date.UTC(2026, 10, 2, 12, i)).toISOString(),
+  width,
+  height,
+  variants: [],
+}));
 const DEMO_COMMIT = "de0000000000";
 
 /**
@@ -79,7 +143,7 @@ async function demoRoute(request: Request, env: Env, url: URL): Promise<Response
   const draft = draftStub(env);
   switch (route) {
     case "GET /media":
-      return json({ ok: true, items: [...(await demoPickItems(env)), ...DEMO_MEDIA], cursor: null });
+      return json({ ok: true, items: [...(await demoPickItems(env)), ...AERO_MEDIA, ...DEMO_MEDIA], cursor: null });
     case "GET /media/demo":
     case "PUT /media/demo":
       return error(403, "Choose the demo's pictures from the real editor.");

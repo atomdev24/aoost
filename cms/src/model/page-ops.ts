@@ -169,6 +169,11 @@ export function createSection(kind: Section["kind"], overrides: Partial<Section>
   return { id: newId("s"), kind, layout: SECTION_DEFAULTS[kind], children: [], ...overrides };
 }
 
+/** A new section holding one block: edge to edge (no padding, no maximum width) for a full-bleed block. */
+export function sectionForBlock(node: Node): Section {
+  return createSection("flow", { children: [node], ...(getComponent(node.type)?.fullBleed ? { layout: { base: { columns: 1, gap: 0, padding: "0px" } } } : {}) });
+}
+
 export function addSection(page: Page, section: Section, index = page.sections.length): Page {
   const sections = [...page.sections];
   sections.splice(clamp(index, sections.length), 0, section);
