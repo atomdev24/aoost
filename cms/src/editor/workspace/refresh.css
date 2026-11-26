@@ -1133,3 +1133,22 @@ body:has(.ed-demo-strip) .ed-tip { bottom: 56px; }
 .ed-seg button { height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--ed-sub); font: inherit; font-size: 12px; cursor: pointer; }
 .ed-seg button[aria-checked="true"] { background: rgba(255, 255, 255, 0.14); color: #fff; }
 @media (max-width: 520px) { .ed-demo-row { flex-direction: column; align-items: stretch; } }
+
+/* Releases (workspace/Release.tsx): Publish's menu button, the release chip and its popover. */
+.ed-publish-group { display: inline-flex; align-items: center; gap: 2px; }
+.ed-publish-more { width: 26px; min-width: 26px; padding: 0 !important; display: inline-grid; place-items: center; }
+.ed-release-menu { list-style: none; margin: 0; padding: 4px; }
+.ed-release-menu button { width: 100%; text-align: left; padding: 8px 10px; border: 0; border-radius: 7px; background: transparent; color: inherit; font: inherit; font-size: 13px; cursor: pointer; }
+.ed-release-menu button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
+.ed-release-menu button:disabled { opacity: 0.45; cursor: default; }
+.ed-release-chip { height: 28px; padding: 0 12px; border-radius: 14px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.ed-release-chip.is-scheduled { background: rgba(10, 132, 255, 0.16); color: #8ac2ff; }
+.ed-release-chip.is-live { background: rgba(48, 209, 88, 0.16); color: #5be37f; }
+.ed-release-chip.is-blocked { background: color-mix(in srgb, var(--ed-attn) 20%, transparent); color: var(--ed-attn); }
+.ed-release-pop { padding: 12px; font-size: 13px; line-height: 1.45; }
+.ed-release-pop p { margin: 4px 0 8px; color: var(--ed-sub); }
+.ed-release-pop a { color: #8ac2ff; font-size: 12px; }
+.ed-release-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+.ed-release-form .ed-field { display: flex; flex-direction: column; gap: 4px; }
+.ed-release-short { display: none; }
+@media (max-width: 720px) { .ed-release-chip { padding: 0 8px; font-size: 11px; } .ed-release-long { display: none; } .ed-release-short { display: inline; } }
