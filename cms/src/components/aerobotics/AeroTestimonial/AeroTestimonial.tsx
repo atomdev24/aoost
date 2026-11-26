@@ -3,7 +3,11 @@ import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
 import { art, Band, Pic, BACKGROUNDS } from "../shared";
 
-export const AeroTestimonialContent = z.object({ photo: z.string(), quote: z.string(), name: z.string(), role: z.string(), bg: z.enum(BACKGROUNDS) });
+/**
+ * `person` (not "name": the editor keeps "name" for a block's layer name, so a setting called name
+ * was lost on every edit). `name` is still read from blocks made before the change.
+ */
+export const AeroTestimonialContent = z.object({ photo: z.string(), quote: z.string(), person: z.string().optional(), name: z.string().optional(), role: z.string(), bg: z.enum(BACKGROUNDS) });
 export type AeroTestimonialContent = z.infer<typeof AeroTestimonialContent>;
 
 /** A customer quote with their photo, name and company. */
@@ -16,7 +20,7 @@ export const AeroTestimonial = defineComponent<AeroTestimonialContent>({
     content: {
       photo: art("person_claude"),
       quote: "Previously we were measuring hundreds of fruit, now, with TrueFruit, we’re measuring thousands in the same amount of time",
-      name: "Claude, Unifrutti",
+      person: "Claude, Unifrutti",
       role: "South African citrus producer and packhouse",
       bg: "pale",
     },
@@ -32,16 +36,19 @@ export const AeroTestimonial = defineComponent<AeroTestimonialContent>({
 .abt.ab-bg-navy .abt-role{color:rgba(255,255,255,.7)}
 @media (min-width:810px){.abt .ab-in{flex-direction:row;align-items:center;gap:40px}.abt-photo{width:250px;height:250px}.abt-quote blockquote{font-size:28px}}
 `,
-  Render: ({ content: c, ctx }) => (
+  Render: ({ content: c, ctx }) => {
+    const person = c.person ?? c.name ?? "";
+    return (
     <Band bg={c.bg} className="abt">
-      <Pic className="abt-photo" src={c.photo} alt={c.name} sizes="250px" ctx={ctx} />
+      <Pic className="abt-photo" src={c.photo} alt={person} sizes="250px" ctx={ctx} />
       <figure className="abt-quote">
         <blockquote>“{c.quote.replace(/^[“"]|[”"]$/g, "")}”</blockquote>
         <figcaption>
-          <p className="abt-name">{c.name}</p>
+          <p className="abt-name">{person}</p>
           {c.role ? <p className="abt-role">{c.role}</p> : null}
         </figcaption>
       </figure>
     </Band>
-  ),
+    );
+  },
 });
