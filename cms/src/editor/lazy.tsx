@@ -43,6 +43,11 @@ class PartBoundary extends Component<{ name: string; children: ReactNode }, { fa
   static getDerivedStateFromError() {
     return { failed: true };
   }
+  componentDidCatch(error: unknown) {
+    // Kept in the problem log so a part that breaks while drawing can be traced.
+    noteProblem("request", `The ${this.props.name} broke while drawing`, error instanceof Error ? `${error.message}\n${error.stack ?? ""}`.slice(0, 2000) : String(error));
+    console.error(error);
+  }
   render() {
     if (!this.state.failed) return this.props.children;
     return (

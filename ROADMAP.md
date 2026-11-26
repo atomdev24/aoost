@@ -155,3 +155,4 @@ campaigns); roles with a Team panel and @mention suggestions. Waiting on Alex: B
 
 - Done (Nov 2026): Releases with a schedule (research item 1): Publish ▾ → Schedule…, a release chip with Cancel and Undo, a 15-minute cron on the server (EDITOR-RELEASES.md). 
 - Done (Nov 2026): Pre-flight checks (research item 2), left of Preview (EDITOR-CHECKS.md). Next from the research: campaign pages from a brief, by Claude.
+- Done (Nov 2026): Campaign pages from a brief, with Claude polishing the words through an @Claude comment (EDITOR-CAMPAIGN-BRIEF.md). Next from the research: A/B tests from variants, then brand guardrails with a Simple mode.
