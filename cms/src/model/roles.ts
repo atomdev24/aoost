@@ -28,6 +28,8 @@ export function actionFor(route: string): Action | null {
   if (path === "/comments") return "comment";
   if (path === "/publish") return "publish";
   if (path === "/staging" || path === "/staging/push") return "promote";
+  // Scheduling a release, cancelling it or undoing it: the same as pushing live.
+  if (path === "/release" || path === "/release/undo") return "promote";
   if (path === "/team") return "team";
   // The demo's settings: Managers and Owners.
   if (path === "/demo/settings" || path === "/demo/reset-now") return "promote";

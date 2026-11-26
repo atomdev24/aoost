@@ -13,6 +13,7 @@ import { cleanDemoSettings, DEMO_SETTINGS_KEY } from "../model/demo-settings";
 import { problemsReport } from "../model/problems";
 import { buildStatus, publishToGitHub } from "./publish";
 import { cachedVersionFiles, listVersions } from "./history";
+import { cancelRelease, getRelease, scheduleRelease, undoRelease } from "./release";
 import { CommentOp } from "../model/comments";
 import { filesToSite } from "../schema";
 
@@ -85,6 +86,20 @@ async function demoRoute(request: Request, env: Env, url: URL): Promise<Response
     case "GET /demo/settings":
     case "PUT /demo/settings":
       return error(403, "The demo's settings are in the real editor.");
+    case "GET /release":
+      return json({ ok: true, release: await getRelease(draftStub(env)) });
+    case "PUT /release": {
+      const r = await scheduleRelease(env, await readJson<{ label?: string; goLiveAt?: unknown; endAt?: unknown }>(request), "demo");
+      return typeof r === "string" ? error(409, r) : json({ ok: true, release: r });
+    }
+    case "DELETE /release":
+      await cancelRelease(env);
+      return json({ ok: true, release: await getRelease(draftStub(env)) });
+    case "POST /release/undo": {
+      const r = await undoRelease(env, env.IS_DEMO ? null : null);
+      return typeof r === "string" ? error(409, r) : json({ ok: true, release: r });
+    }
+
     case "POST /media":
     case "DELETE /media":
       return error(403, "Uploads are off in the demo. Pick a placeholder picture, or upload in the real editor at /admin/.");
@@ -133,6 +148,19 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
   if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
 
   switch (route) {
+    case "GET /release":
+      return json({ ok: true, release: await getRelease(draftStub(env)) });
+    case "PUT /release": {
+      const r = await scheduleRelease(env, await readJson<{ label?: string; goLiveAt?: unknown; endAt?: unknown }>(request), who.who);
+      return typeof r === "string" ? error(409, r) : json({ ok: true, release: r });
+    }
+    case "DELETE /release":
+      await cancelRelease(env);
+      return json({ ok: true, release: await getRelease(draftStub(env)) });
+    case "POST /release/undo": {
+      const r = await undoRelease(env, env.IS_DEMO ? null : byline(who));
+      return typeof r === "string" ? error(409, r) : json({ ok: true, release: r });
+    }
     case "GET /demo/settings":
       return json({ ok: true, settings: cleanDemoSettings(await realDraft(env).kvGet(DEMO_SETTINGS_KEY)) });
     case "PUT /demo/settings": {

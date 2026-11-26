@@ -42,7 +42,8 @@ new_sqlite_classes = ["DemoStore"]
 
 # 01:00 UTC = 03:00 in Cape Town: the demo editor goes back to its wireframe site.
 [triggers]
-crons = ["0 1 * * *"]
+# 01:00 UTC (03:00 Cape Town): the demo reset. Every 15 minutes: scheduled releases (EDITOR-RELEASES.md).
+crons = ["0 1 * * *", "*/15 * * * *"]
 
 [vars]
 # "password" (EDITOR_PASSWORD secret) or "access" (Cloudflare Access JWT). See docs/auth.md.

@@ -4,6 +4,7 @@ import { authenticate, login, logout } from "./auth";
 import { editorApi, historyPage, livePage, preview, staging } from "./api";
 import { demoEnv, demoStub, draftStub, type Env } from "./env";
 import { cleanDemoSettings, DEMO_SETTINGS_KEY, resetsTonight } from "../model/demo-settings";
+import { releaseTick } from "./release";
 import { error, html, json } from "./http";
 import { loginPage } from "./login-page";
 import { mcp } from "./mcp";
@@ -35,8 +36,10 @@ export default {
   },
   // At 03:00 in Cape Town the demo editor goes back to its sample site: every night, on Mondays or
   // never, as set from the real editor (Demo editor in the ⋯ menu).
-  async scheduled(_event: ScheduledController, env: Env): Promise<void> {
-    if (resetsTonight(await demoSettings(env), new Date())) await demoStub(env).wipe();
+  // Every 15 minutes: releases that are due go live or end (worker/release.ts).
+  async scheduled(event: ScheduledController, env: Env): Promise<void> {
+    if (event.cron === "0 1 * * *" && resetsTonight(await demoSettings(env), new Date())) await demoStub(env).wipe();
+    if (event.cron === "*/15 * * * *") await releaseTick(env, demoEnv(env));
   },
 } satisfies ExportedHandler<Env>;
 
