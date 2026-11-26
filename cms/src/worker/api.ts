@@ -66,7 +66,7 @@ async function demoRoute(request: Request, env: Env, url: URL): Promise<Response
       return json({ ok: true, items: DEMO_MEDIA, cursor: null });
     case "POST /media":
     case "DELETE /media":
-      return error(403, "Uploads are off in the demo. Pick one of the placeholder pictures instead.");
+      return error(403, "Uploads are off in the demo. Pick a placeholder picture, or upload in the real editor at /admin/.");
     case "POST /publish":
       await draft.markPublished();
       return json({ ok: true, commit: DEMO_COMMIT, url: null, changed: [], demo: true });
