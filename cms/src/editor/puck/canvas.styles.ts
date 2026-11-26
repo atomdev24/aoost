@@ -48,6 +48,8 @@ html.ed-dragging [data-puck-overlay-portal],html.ed-dragging [class*="DraggableC
 body:has(.ed-mega-stage){background:var(--c-sand)}
 .n iframe,.n video,.n audio,.n model-viewer{pointer-events:none}
 .ed-flash{animation:ed-flash 2s ease-out}
+[data-ed-over]{outline:1.5px solid rgba(255,159,10,.85);outline-offset:-1.5px}
+.s[data-ed-over]{outline:none;box-shadow:inset 3px 0 0 rgba(255,159,10,.85)}
 /* Hover outline + name tag (editor/canvas/HoverLabel.tsx). */
 .ed-hover{position:fixed;display:none;pointer-events:none;z-index:2147483000;outline:1.5px dashed #0A84FF;outline-offset:-1px;border-radius:2px}
 .ed-hover>span{position:absolute;left:-1px;bottom:100%;padding:1px 6px;border-radius:3px 3px 0 0;background:#0A84FF;color:#fff;font:500 11px/16px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;white-space:nowrap;letter-spacing:0}

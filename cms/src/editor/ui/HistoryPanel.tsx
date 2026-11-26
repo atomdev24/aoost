@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { dayLabel, initials } from "./history-format";
 import { summarizeChanges } from "../../model/changes";
 import { restoreVersion } from "../../model/versions";
 import { closeCompare, openCompare } from "../workspace/compare";
@@ -38,10 +39,19 @@ function when(at: string): string {
   return `${d.toLocaleDateString([], { day: "numeric", month: "short" })} ${time}`;
 }
 
+const clock = (at: string) => {
+  const d = new Date(at);
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+};
+
+/** What kind of step a version was, as a chip: Published, Pushed or Restored. */
+const kindOf = (v: Version) => (/^Push to production/.test(v.message) ? "Pushed live" : /^Restore/.test(v.message) ? "Restored" : /^Publish/.test(v.message) ? "Published" : "Saved");
+
 /**
  * Version history: every publish and push to production, newest first. Preview
  * shows a version exactly as it was; Restore puts it in the draft (⌘Z undoes it)
- * and sends it to staging, so nothing goes live until it is pushed.
+ * and sends it to staging, so nothing goes live until it is pushed. Grouped by day, one card per
+ * version with who and when; the live one is outlined green (UI spec, Nov 2026).
  */
 export function HistoryPanel() {
   const pages = useEditor((s) => s.site.pages);
@@ -123,37 +133,59 @@ export function HistoryPanel() {
       {unavailable ? <p className="ed-hint">{unavailable}</p> : null}
       {!versions && !error ? <p className="ed-hint">Loading the history…</p> : null}
       {versions?.length ? (
-        <ol className="ed-history-list" aria-label="Versions">
-          {versions.map((v, i) => (
-            <li key={v.sha} className={`ed-history-item${i === 0 ? " is-live" : ""}`}>
-              <div className="ed-history-text">
-                <span className="ed-history-title">
-                  {describe(v, titles)}
-                  {i === 0 ? <em>Live</em> : null}
-                </span>
-                <span className="ed-history-meta">
-                  {when(v.at)}
-                  {v.who ? ` · ${v.who}` : ""} · {v.sha.slice(0, 7)}
-                </span>
-              </div>
-              <div className="ed-history-actions">
-                <a className="ed-btn ed-btn-sm" href={`/preview/_version/${v.sha}/`} target="_blank" rel="noreferrer" aria-label={`Preview the version from ${when(v.at)}`}>
-                  Preview
-                </a>
-                {i > 0 ? (
-                  <button type="button" className="ed-btn ed-btn-sm" disabled={!!busy} aria-label={`Compare the version from ${when(v.at)} with live`} onClick={() => void compare(v)}>
-                    Compare
-                  </button>
-                ) : null}
-                {i > 0 ? (
-                  <button type="button" className="ed-btn ed-btn-sm" disabled={!!busy} aria-label={`Restore the version from ${when(v.at)}`} onClick={() => void restore(v)}>
-                    {busy === v.sha ? "Restoring…" : "Restore"}
-                  </button>
-                ) : null}
-              </div>
-            </li>
-          ))}
-        </ol>
+        <div className="ed-hdays">
+          {versions
+            .reduce<{ day: string; items: { v: Version; i: number }[] }[]>((days, v, i) => {
+              const day = dayLabel(v.at);
+              const last = days[days.length - 1];
+              if (last?.day === day) last.items.push({ v, i });
+              else days.push({ day, items: [{ v, i }] });
+              return days;
+            }, [])
+            .map(({ day, items }) => (
+              <section key={day} className="ed-hday">
+                <h4 className="ed-hday-title">{day}</h4>
+                <ol className="ed-history-list" aria-label={`Versions, ${day}`}>
+                  {items.map(({ v, i }) => (
+                    <li key={v.sha} className={`ed-hcard${i === 0 ? " is-live" : ""}`}>
+                      <div className="ed-hcard-top">
+                        <span className="ed-avatar" title={v.who ?? "Unknown"} aria-hidden="true">
+                          {initials(v.who)}
+                        </span>
+                        <span className="ed-hcard-who">
+                          {v.who ? v.who.split("@")[0] : "Someone"} · {clock(v.at)}
+                        </span>
+                        {i === 0 ? <span className="ed-pbadge is-live">Live</span> : null}
+                      </div>
+                      <div className="ed-hcard-title">{describe(v, titles)}</div>
+                      <div className="ed-hcard-chips">
+                        <span className="ed-hchip">{kindOf(v)}</span>
+                        <span className="ed-hchip ed-hchip-sha" title="Version id">
+                          {v.sha.slice(0, 7)}
+                        </span>
+                      </div>
+                      <div className="ed-history-actions">
+                        {i > 0 ? (
+                          <button type="button" className="ed-hlink" disabled={!!busy} aria-label={`See what changed in the version from ${when(v.at)}, compared with live`} onClick={() => void compare(v)}>
+                            ▸ See what changed
+                          </button>
+                        ) : null}
+                        <span className="ed-hcard-spacer" />
+                        <a className="ed-btn ed-btn-sm" href={`/preview/_version/${v.sha}/`} target="_blank" rel="noreferrer" aria-label={`Preview the version from ${when(v.at)}`}>
+                          Preview
+                        </a>
+                        {i > 0 ? (
+                          <button type="button" className="ed-btn ed-btn-sm" disabled={!!busy} aria-label={`Restore the version from ${when(v.at)}`} onClick={() => void restore(v)}>
+                            {busy === v.sha ? "Restoring…" : "Restore"}
+                          </button>
+                        ) : null}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ))}
+        </div>
       ) : versions && !unavailable ? (
         <p className="ed-hint">Nothing has been published yet.</p>
       ) : null}

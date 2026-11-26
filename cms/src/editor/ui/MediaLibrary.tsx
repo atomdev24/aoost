@@ -5,6 +5,7 @@ import type { MediaKind } from "../fields/media";
 import { deleteMedia, formatSize, isCancelled, listMedia, uploadFile, type MediaItem } from "../media";
 import { mediaUsage } from "../media-usage";
 import { useEditor } from "../store";
+import { tagName, versionCounts, versionKey } from "./media-names";
 
 const KIND_FILTER: Record<MediaKind, (item: MediaItem) => boolean> = {
   image: (i) => i.kind === "image",
@@ -90,6 +91,7 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
   };
 
   const usage = useMemo(() => mediaUsage(site, (items ?? []).map((i) => i.url)), [site, items]);
+  const versions = useMemo(() => versionCounts((items ?? []).map((i) => i.name)), [items]);
   const q = query.trim().toLowerCase();
   const shown = (items ?? []).filter(
     (i) =>
@@ -215,7 +217,7 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
       {items === null && !error ? <p className="ed-hint">Loading…</p> : null}
       {items && !shown.length ? <p className="ed-hint">{chip === "unused" ? "Every file is in use." : q ? `Nothing matches "${query}".` : "Nothing here yet."}</p> : null}
       {view === "masonry" ? (
-        <ul className="ed-masonry" aria-label="Media">
+        <ul className="ed-masonry ed-masonry-tagged" aria-label="Media">
           {shown.map((item) => {
             const used = usage.get(item.url) ?? [];
             return (
@@ -224,6 +226,12 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
                   <span className="ed-masonry-media" style={item.width && item.height ? { aspectRatio: `${item.width} / ${item.height}` } : undefined}>
                     {preview(item)}
                     {item.kind === "video" ? <span className="ed-play" aria-hidden="true">▶</span> : null}
+                    <span className="ed-mtag">{tagName(item.name)}</span>
+                    {(versions.get(versionKey(item.name)) ?? 1) > 1 ? (
+                      <span className="ed-mversions" title={`${versions.get(versionKey(item.name))} versions of this picture. Search "${versionKey(item.name)}" to see them together.`}>
+                        {versions.get(versionKey(item.name))}
+                      </span>
+                    ) : null}
                   </span>
                   {used.length ? <span className="ed-used-dot" aria-label={`Used on ${used.join(", ")}`} role="img" /> : null}
                 </button>

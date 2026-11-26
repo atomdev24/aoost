@@ -1,4 +1,5 @@
 import { HoverLabel } from "../canvas/HoverLabel";
+import { OverrideMarks } from "../canvas/OverrideMarks";
 import { openPanel } from "../workspace/rail-store";
 import { useMemo, type ReactNode } from "react";
 import { makeCtx } from "../../render/context";
@@ -60,6 +61,7 @@ export function Root({ children }: { children: ReactNode }) {
       </main>
       <CanvasController />
       <HoverLabel />
+      <OverrideMarks />
     </>
   );
 }
