@@ -22,7 +22,8 @@ export const VideoContent = z.object({
   mobileSrc: z.string().optional(),
   mobileStill: z.boolean().optional(),
   /** A YouTube or Vimeo link behind our own cover: the play button's look. */
-  play: z.enum(["classic", "disc", "glass", "pill", "ring", "square", "triangle"]).optional(),
+  /** "player": YouTube's or Vimeo's own player straight away, with no cover. */
+  play: z.enum(["classic", "disc", "glass", "pill", "ring", "square", "triangle", "player"]).optional(),
   /** The cover's corner line, like a channel line: the video's name, who it's from, their picture. */
   title: z.string().optional(),
   channel: z.string().optional(),
@@ -30,8 +31,19 @@ export const VideoContent = z.object({
   /** Shown on the cover, e.g. "2:40". */
   duration: z.string().optional(),
 });
-export const PLAY_STYLES = ["classic", "disc", "glass", "pill", "ring", "square", "triangle"] as const;
+export const PLAY_STYLES = ["classic", "disc", "glass", "pill", "ring", "square", "triangle", "player"] as const;
 export type VideoContent = z.infer<typeof VideoContent>;
+
+/** YouTube's thumbnail pictures, best first. All 16:9: the 4:3 ones (hqdefault, sddefault) have black bars. */
+const YT_FALLBACK = ["hq720", "mqdefault"];
+const ytThumb = (id: string, name: string) => `https://i.ytimg.com/vi/${id}/${name}.jpg`;
+/** Step a thumbnail to the next size in its fallback list (the editor; the site does the same in runtime/video.ts). */
+export function nextYtThumb(img: HTMLImageElement) {
+  const [next, ...rest] = (img.dataset.ytFallback ?? "").split(" ").filter(Boolean);
+  if (!next) return;
+  img.dataset.ytFallback = rest.join(" ");
+  img.src = next;
+}
 
 const PlayIcon = () => (
   <svg width="56" height="56" viewBox="0 0 44 44" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
@@ -52,14 +64,15 @@ export const Video = defineComponent<VideoContent>({
     const label = content.alt || "Video";
     if (content.source === "link") {
       const info = content.url ? embedFor(content.url) : null;
-      if (!info || (info.provider !== "youtube" && info.provider !== "vimeo")) return ctx.editing ? <div className="frame frame-empty">Paste a YouTube or Vimeo link</div> : null;
+      if (!info || (info.provider !== "youtube" && info.provider !== "vimeo")) return ctx.editing ? <div className="frame frame-empty">Double-click to paste a YouTube or Vimeo link</div> : null;
       const params = `?${info.provider === "youtube" ? "playsinline=1&rel=0" : "dnt=1"}${content.loop ? "&loop=1" : ""}${content.controls ? "" : "&controls=0"}`;
-      // With a cover the player only loads on click: nothing from YouTube or Vimeo until then
-      // (without a poster of our own, YouTube's thumbnail picture stands in).
-      const play = content.play ?? "classic";
+      // With a cover the player only loads on click: nothing from YouTube or Vimeo until then.
+      // A YouTube link shows its own thumbnail as the cover by default; "player" asks for the plain player.
+      const play = content.play && content.play !== "player" ? content.play : "classic";
       const ytId = info.provider === "youtube" ? info.src.split("/").pop() : undefined;
-      // YouTube's full-size thumbnail (1280 wide); the small one only if a video has none (runtime/video.ts, or onError in the editor).
-      const poster = content.poster || (content.play && ytId ? `https://i.ytimg.com/vi/${ytId}/maxresdefault.jpg` : "");
+      // YouTube's full-size thumbnail (1280 wide), then the 720p and small 16:9 ones (never the 4:3 sizes, which
+      // carry black bars): runtime/video.ts on the site, onError in the editor.
+      const poster = content.play === "player" ? "" : content.poster || (ytId ? ytThumb(ytId, "maxresdefault") : "");
       if (poster) {
         const name = content.title?.trim();
         const channel = content.channel?.trim();
@@ -69,7 +82,7 @@ export const Video = defineComponent<VideoContent>({
               <img
                 className="media"
                 {...(poster.startsWith("/") ? imageSources(poster) : { src: poster })}
-                {...(content.poster ? {} : { "data-yt-fallback": poster.replace("maxresdefault", "hqdefault"), onError: (e: React.SyntheticEvent<HTMLImageElement>) => (e.currentTarget.src = e.currentTarget.dataset.ytFallback!) })}
+                {...(content.poster ? {} : { "data-yt-fallback": YT_FALLBACK.map((n) => ytThumb(ytId!, n)).join(" "), onError: (e: React.SyntheticEvent<HTMLImageElement>) => nextYtThumb(e.currentTarget) })}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -114,7 +127,7 @@ export const Video = defineComponent<VideoContent>({
         </div>
       );
     }
-    if (!content.src) return ctx.editing ? <div className="frame frame-empty">Choose a video</div> : null;
+    if (!content.src) return ctx.editing ? <div className="frame frame-empty">Double-click to choose a video or paste a link</div> : null;
     const auto = content.autoplay && !ctx.editing;
     return (
       <div className={`frame vid${content.mobileStill && content.poster ? " vid-still-mobile" : ""}`}>

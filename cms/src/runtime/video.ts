@@ -1,13 +1,17 @@
 // Video: desktop-only section backgrounds, and "play when in view".
 
 export function initVideo() {
-  // A YouTube cover with no picture of its own uses the full-size thumbnail; a few videos only have the small one.
+  // A YouTube cover with no picture of its own uses the full-size thumbnail; some videos only have smaller
+  // ones, so step down the list (all 16:9, so never black bars).
   document.querySelectorAll<HTMLImageElement>("img[data-yt-fallback]").forEach((img) => {
     const swap = () => {
-      if (img.dataset.ytFallback && img.src !== img.dataset.ytFallback) img.src = img.dataset.ytFallback;
+      const [next, ...rest] = (img.dataset.ytFallback ?? "").split(" ").filter(Boolean);
+      if (!next) return;
+      img.dataset.ytFallback = rest.join(" ");
+      img.src = next;
     };
     if (img.complete && !img.naturalWidth) swap();
-    img.addEventListener("error", swap, { once: true });
+    img.addEventListener("error", swap);
   });
 
   const desktop = window.matchMedia("(min-width:900px)");

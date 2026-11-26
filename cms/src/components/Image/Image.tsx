@@ -70,7 +70,7 @@ export const Image = defineComponent<ImageContent>({
   css: css + annotationCss,
   Render: ({ node, content, ctx }) => {
     if (!content.src) {
-      return ctx.editing ? <div className="frame frame-empty">Choose an image</div> : null;
+      return ctx.editing ? <div className="frame frame-empty">Double-click to choose an image</div> : null;
     }
     const { src, srcSet } = imageSources(content.src);
     const img = (

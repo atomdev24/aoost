@@ -66,7 +66,7 @@ export const fields: Partial<Fields<VideoContent>> = {
   alt: { type: "text", label: "Description (for screen readers)" },
   play: {
     type: "select",
-    label: "Cover play button (YouTube / Vimeo)",
+    label: "Cover and play button (YouTube / Vimeo)",
     options: [
       { label: "Classic outline", value: "classic" },
       { label: "Blue disc", value: "disc" },
@@ -75,6 +75,7 @@ export const fields: Partial<Fields<VideoContent>> = {
       { label: "Pulsing ring", value: "ring" },
       { label: "App icon", value: "square" },
       { label: "Bare triangle", value: "triangle" },
+      { label: "No cover: YouTube's own player", value: "player" },
     ],
   },
   title: { type: "text", label: "Cover: video name (top left)" },

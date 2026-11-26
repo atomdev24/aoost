@@ -1,5 +1,7 @@
 import { addNode, addSection, createNode, createSection, locate, updateNode } from "../../model/page-ops";
 import { isCancelled, uploadFile } from "../media";
+import { pickMedia } from "../fields/media";
+import { embedFor } from "../../components/Embed/providers";
 import { currentPage, getState, updatePage } from "../store";
 import { selectBlock } from "../board/bridge";
 import { adjustable, startAdjust } from "./adjust-state";
@@ -29,6 +31,23 @@ function imageBlockAt(target: EventTarget | null): string | null {
 export function replaceImage(id: string, media: { url: string; width?: number; height?: number }, label = "Replace image") {
   const { pageId } = getState();
   updatePage(pageId, (p) => updateNode(p, id, (n) => ({ ...n, content: { ...n.content, src: media.url, width: media.width, height: media.height } })), label);
+}
+
+/**
+ * Fill an Image or Video block from the media library (a video can also take a YouTube or Vimeo
+ * link pasted in the same dialog). One undo step.
+ */
+export async function chooseMedia(id: string, kind: "image" | "video") {
+  const url = await pickMedia(kind);
+  if (!url) return;
+  if (kind === "image") return replaceImage(id, { url }, "Choose image");
+  const info = embedFor(url);
+  const link = info && (info.provider === "youtube" || info.provider === "vimeo");
+  updatePage(
+    getState().pageId,
+    (p) => updateNode(p, id, (n) => ({ ...n, content: link ? { ...n.content, source: "link", url } : { ...n.content, source: "upload", src: url } })),
+    "Choose video",
+  );
 }
 
 /**
@@ -81,6 +100,14 @@ export function attachCanvasDrops(doc: Document) {
       if (!getState().selection.includes(owner.id)) selectBlock(owner.id);
       selectPiece(null);
       startAdjust(owner.id, hit.slot.path);
+      return;
+    }
+    // An empty picture, or a video with nothing to adjust yet: double-click chooses what goes in it.
+    if (owner && !adjustable(el) && (owner.type === "Image" || owner.type === "Video")) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!getState().selection.includes(owner.id)) selectBlock(owner.id);
+      void chooseMedia(owner.id, owner.type === "Video" ? "video" : "image");
       return;
     }
     if (!adjustable(el)) return;

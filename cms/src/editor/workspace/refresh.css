@@ -1056,3 +1056,10 @@ select.ed-input option {
 @keyframes ed-agent-sweep { from { background-position: -50% 0; } to { background-position: 150% 0; } }
 @media (prefers-reduced-motion: reduce) { .ed-agent-pill.is-working, .ed-agent-spark, .ed-agent-sheen { animation: none; } }
 @media (max-width: 700px) { .ed-agent-pill { max-width: 150px; } }
+
+/* Choosing a video: a link field above the library (ui/MediaPicker.tsx). */
+.ed-pick-link { display: flex; flex-direction: column; gap: 6px; margin: 0 0 14px; }
+.ed-pick-link label { font-size: 12px; font-weight: 600; color: var(--ed-text-2, #a1a1a6); }
+.ed-pick-link-row { display: flex; gap: 8px; }
+.ed-pick-link-row .ed-input { flex: 1; min-width: 0; }
+.ed-pick-link-or { margin: 0; font-size: 12px; color: var(--ed-text-3, #8e8e93); }
