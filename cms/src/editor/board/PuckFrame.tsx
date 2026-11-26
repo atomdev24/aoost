@@ -5,6 +5,8 @@ import { attachCanvasDrops } from "../canvas/drops";
 import { attachAnnotationDrag } from "../canvas/annotations";
 import { attachFlowResize } from "../canvas/flow-resize";
 import { attachRatioChip } from "../canvas/ratio";
+import { attachDragOut } from "./ref-page";
+import { attachSideDrop } from "../canvas/side-drop";
 import { attachSectionResize } from "../canvas/section-handle";
 import { watchAnn } from "../../components/Image/ann-layout";
 import { watchAnchors } from "../../components/FruitReading/follow";
@@ -44,6 +46,8 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     // First, so that while commenting a click reaches nothing else.
     const detachComments = attachCommentClicks(doc);
     const detachRatio = attachRatioChip(doc);
+    const detachDragOut = attachDragOut(doc);
+    const detachSide = attachSideDrop(doc);
     const detach = attachKeys(doc);
     const detachDrops = attachCanvasDrops(doc);
     const detachMarks = attachAnnotationDrag(doc);
@@ -92,6 +96,8 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       detachMarks();
       detachFlowResize();
       detachRatio();
+      detachDragOut();
+      detachSide();
       detachSectionResize();
       unwatchAnn();
       unwatchAnchors();

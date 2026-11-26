@@ -12,7 +12,12 @@ import { api, ApiError } from "./api";
  * Puck is a view onto the current page; everything else reads from here.
  */
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
-type HistoryEntry = { site: Site; label: string; pageId: string };
+/**
+ * One undo step. `side` undoes and redoes what the step changed outside the draft (the board's
+ * references, when something moves between the board and the page).
+ */
+export type SideEffect = { undo: () => void; redo: () => void };
+type HistoryEntry = { site: Site; label: string; pageId: string; side?: SideEffect };
 
 export type EditorState = {
   site: Site;
@@ -162,7 +167,7 @@ let langCache: { page: Page; lang: string; view: Page } | null = null;
  * Change the draft. `label` names the undo step; edits sharing a `merge` key
  * within a short window collapse into one step (typing, dragging a slider).
  */
-export function update(fn: (site: Site) => Site, label: string, opts: { merge?: string } = {}) {
+export function update(fn: (site: Site) => Site, label: string, opts: { merge?: string; side?: SideEffect } = {}) {
   // Viewers look and comment; the server refuses their edits too.
   if (!canDo("edit")) {
     set({ lastLabel: "View only: ask an owner for the Editor role to make changes" });
@@ -176,7 +181,7 @@ export function update(fn: (site: Site) => Site, label: string, opts: { merge?: 
   lastMerge = opts.merge ? { key: opts.merge, at: now } : null;
   set({
     site: next,
-    past: merging ? state.past : [...state.past, { site: state.site, label, pageId: state.pageId }].slice(-MAX_HISTORY),
+    past: merging ? state.past : [...state.past, { site: state.site, label, pageId: state.pageId, side: opts.side }].slice(-MAX_HISTORY),
     future: [],
     lastLabel: label,
     unpublished: true,
@@ -184,7 +189,21 @@ export function update(fn: (site: Site) => Site, label: string, opts: { merge?: 
   scheduleSave();
 }
 
-export function updatePage(pageId: string, fn: (page: Page) => Page, label: string, opts: { merge?: string } = {}) {
+/**
+ * Change the draft as part of the undo step just made (a drop Puck has just applied, finished off
+ * by the editor): one undo puts both back. Falls back to a new step when there is none.
+ */
+export function amendLast(fn: (site: Site) => Site, label: string) {
+  if (!canDo("edit")) return;
+  const next = fn(state.site);
+  if (next === state.site) return;
+  const last = state.past[state.past.length - 1];
+  if (!last) return update(fn, label);
+  set({ site: next, past: [...state.past.slice(0, -1), { ...last, label }], future: [], lastLabel: label, unpublished: true });
+  scheduleSave();
+}
+
+export function updatePage(pageId: string, fn: (page: Page) => Page, label: string, opts: { merge?: string; side?: SideEffect } = {}) {
   const mega = megaItemId(pageId);
   if (mega) {
     update(
@@ -221,11 +240,12 @@ export function undo() {
   set({
     site: entry.site,
     past: state.past.slice(0, -1),
-    future: [{ site: state.site, label: entry.label, pageId: state.pageId }, ...state.future],
+    future: [{ site: state.site, label: entry.label, pageId: state.pageId, side: entry.side }, ...state.future],
     pageId: pageExists(entry.site, state.pageId) ? state.pageId : entry.pageId,
     lastLabel: `Undid: ${entry.label}`,
     unpublished: true,
   });
+  entry.side?.undo();
   scheduleSave();
 }
 
@@ -235,12 +255,13 @@ export function redo() {
   lastMerge = null;
   set({
     site: entry.site,
-    past: [...state.past, { site: state.site, label: entry.label, pageId: state.pageId }],
+    past: [...state.past, { site: state.site, label: entry.label, pageId: state.pageId, side: entry.side }],
     future: state.future.slice(1),
     pageId: pageExists(entry.site, state.pageId) ? state.pageId : entry.pageId,
     lastLabel: `Redid: ${entry.label}`,
     unpublished: true,
   });
+  entry.side?.redo();
   scheduleSave();
 }
 

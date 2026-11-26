@@ -78,6 +78,8 @@ export const removeRef = (id: string) => {
   update((items) => items.filter((r) => r.id !== id));
   if (state.selected === id) set({ selected: null });
 };
+/** Replace the open page's references (undo and redo of moves between the board and the page). */
+export const setRefItems = (items: RefItem[]) => update(() => items);
 export function addRef(item: RefItem) {
   update((items) => [...items, item]);
   if (!item.node) showTip("ref");

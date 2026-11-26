@@ -41,6 +41,7 @@ function Card({ type, label, hint }: { type: string; label: string; hint: string
   return (
     <div
       className="ed-card-wrap"
+      data-insert-type={type}
       onPointerDownCapture={(e) => (down.current = { x: e.clientX, y: e.clientY })}
       onClick={(e) => {
         const d = down.current;
