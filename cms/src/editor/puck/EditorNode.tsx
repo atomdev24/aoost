@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { makeCtx } from "../../render/context";
 import { nodeAttrs, NodeContent } from "../../render/NodeView";
 import { HANDLES } from "../canvas/CanvasController";
+import { FLOW_HANDLES, FLOW_HANDLE_TIP } from "../canvas/flow-resize";
 import { keepsRatio } from "../canvas/ratio";
 import { getComponent } from "../../components/registry";
 import { currentPage, useEditor } from "../store";
@@ -69,7 +70,7 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
           {keepsRatio(node) ? "Proportions" : "Free"}
         </button>
       ) : null}
-      {selected && !inCanvas && !node.locked && getComponent(type)?.framed ? <span className="ed-fh" data-ed-flow-handle="" title="Drag to resize (keeps proportions; Shift to change them)" /> : null}
+      {selected && !inCanvas && !node.locked ? FLOW_HANDLES.map((h) => <span key={h} className="ed-fh" data-ed-flow-handle={h} title={FLOW_HANDLE_TIP[h]} />) : null}
     </div>
   );
 }

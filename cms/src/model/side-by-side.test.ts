@@ -34,6 +34,11 @@ describe("placeBeside", () => {
     const p = placeBeside(page, "img", createNode("Text", { id: "n" }), "left");
     expect(p.sections[0]!.children.map((n) => n.id)).toEqual(["n", "img", "t"]);
   });
+  it("keeps the target's width: its column takes its share and the new block the rest", () => {
+    const p = placeBeside(pageWith("img"), "img", createNode("Text", { id: "n" }), "right", { share: 0.62 });
+    expect(p.sections[0]!.layout.desktop?.colWidths).toEqual([62, 38]);
+    expect(p.sections[0]!.children[0]!.style.desktop?.width).toBe("100%");
+  });
   it("does nothing when a block is dropped beside itself", () => {
     const page = pageWith("img");
     expect(placeBeside(page, "img", "img", "left")).toBe(page);

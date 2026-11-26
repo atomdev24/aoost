@@ -28,8 +28,17 @@ html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!imp
 .n>.ed-ratio{position:absolute;right:0;left:auto;top:100%;z-index:11;display:inline-flex!important;align-items:center;gap:calc(4px * var(--ed-px,1));width:auto!important;height:auto!important;margin:calc(4px * var(--ed-px,1)) 0 0;padding:calc(2px * var(--ed-px,1)) calc(7px * var(--ed-px,1)) calc(2px * var(--ed-px,1)) calc(5px * var(--ed-px,1));border:0;border-radius:calc(5px * var(--ed-px,1));background:#0A84FF;color:#fff;font:600 calc(11px * var(--ed-px,1))/1.4 -apple-system,system-ui,sans-serif;cursor:pointer;pointer-events:auto!important;transform-origin:100% 0}
 .n>.ed-ratio[aria-pressed="false"]{background:#3a3a40}
 .n>.ed-ratio svg{width:calc(12px * var(--ed-px,1));height:calc(12px * var(--ed-px,1))}
-/* Resize handle for a picture in a stacked or grid section: bottom-right corner. */
-.n>.ed-fh{position:absolute;right:0;bottom:0;z-index:11;width:calc(14px * var(--ed-px,1));height:calc(14px * var(--ed-px,1));margin:calc(-7px * var(--ed-px,1));background:#fff;border:calc(1.5px * var(--ed-px,1)) solid #0A84FF;box-sizing:border-box;cursor:nwse-resize;pointer-events:auto!important}
+/* Resize handles for a block in a stacked or grid section (canvas/flow-resize.ts): corners scale,
+   edges change width or height. Edges grab along the whole side and show a small square at the middle. */
+.n>.ed-fh{--hs:calc(10px * var(--ed-px,1));position:absolute;z-index:11;box-sizing:border-box;pointer-events:auto!important;touch-action:none}
+.n>.ed-fh[data-ed-flow-handle="nw"],.n>.ed-fh[data-ed-flow-handle="ne"],.n>.ed-fh[data-ed-flow-handle="se"],.n>.ed-fh[data-ed-flow-handle="sw"]{width:var(--hs);height:var(--hs);margin:calc(var(--hs) / -2);background:#fff;border:calc(1.5px * var(--ed-px,1)) solid #0A84FF;z-index:12}
+.n>.ed-fh[data-ed-flow-handle="nw"]{left:0;top:0;cursor:nwse-resize}.n>.ed-fh[data-ed-flow-handle="ne"]{right:0;top:0;cursor:nesw-resize}
+.n>.ed-fh[data-ed-flow-handle="se"]{right:0;bottom:0;cursor:nwse-resize}.n>.ed-fh[data-ed-flow-handle="sw"]{left:0;bottom:0;cursor:nesw-resize}
+.n>.ed-fh[data-ed-flow-handle="e"],.n>.ed-fh[data-ed-flow-handle="w"]{top:0;bottom:0;width:var(--hs);cursor:ew-resize}
+.n>.ed-fh[data-ed-flow-handle="e"]{right:calc(var(--hs) / -2)}.n>.ed-fh[data-ed-flow-handle="w"]{left:calc(var(--hs) / -2)}
+.n>.ed-fh[data-ed-flow-handle="n"],.n>.ed-fh[data-ed-flow-handle="s"]{left:0;right:0;height:var(--hs);cursor:ns-resize}
+.n>.ed-fh[data-ed-flow-handle="n"]{top:calc(var(--hs) / -2)}.n>.ed-fh[data-ed-flow-handle="s"]{bottom:calc(var(--hs) / -2)}
+.n>.ed-fh[data-ed-flow-handle="e"]::after,.n>.ed-fh[data-ed-flow-handle="w"]::after,.n>.ed-fh[data-ed-flow-handle="n"]::after,.n>.ed-fh[data-ed-flow-handle="s"]::after{content:"";position:absolute;left:50%;top:50%;width:calc(var(--hs) * .8);height:calc(var(--hs) * .8);translate:-50% -50%;box-sizing:border-box;background:#fff;border:calc(1.5px * var(--ed-px,1)) solid #0A84FF}
 .n:has(>.ed-fh){position:relative}
 /* Section height handle: the middle of the bottom edge, on hover (editor/canvas/section-resize.ts). */
 .s>.ed-sh{position:absolute;left:50%;bottom:0;z-index:12;width:calc(44px * var(--ed-px,1));height:calc(16px * var(--ed-px,1));translate:-50% 50%;display:flex;align-items:center;justify-content:center;cursor:ns-resize;opacity:0;transition:opacity .15s;pointer-events:auto!important;touch-action:none}
