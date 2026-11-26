@@ -2,6 +2,7 @@ import type { Page, Site } from "../schema";
 import { renderPage, type RenderOptions } from "./document";
 import { renderNotFound } from "./not-found";
 import { redirectsFile } from "./redirects";
+import { expiries, isCampaign } from "../model/page-kinds";
 
 export type SearchEntry = { title: string; url: string; kind: string; text: string };
 
@@ -17,7 +18,8 @@ export const builtPages = (site: Site): Page[] => site.pages.filter((p) => p.sta
 export function searchIndex(site: Site): SearchEntry[] {
   const out: SearchEntry[] = [];
   const diaryPage = site.pages.find((p) => p.status === "published" && p.sections.some((s) => s.children.some((n) => n.type === "DiaryList")));
-  for (const p of site.pages.filter((x) => x.status === "published")) {
+  // Campaign pages are reached by link only: never in search.
+  for (const p of site.pages.filter((x) => x.status === "published" && !isCampaign(x))) {
     const texts: string[] = [];
     for (const s of p.sections) {
       for (const n of s.children) {
@@ -46,10 +48,12 @@ export function buildSite(site: Site, opts: RenderOptions = {}): Record<string, 
   files["404.html"] = renderNotFound(site, opts);
   files["_redirects"] = redirectsFile(site);
   files["search.json"] = JSON.stringify(searchIndex(site));
+  // Campaign pages with an unpublish day: the Worker answers "gone" after it.
+  files["_expires.json"] = JSON.stringify(expiries(site));
   files["robots.txt"] = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\nDisallow: /preview\nDisallow: /staging\n${opts.siteUrl ? `Sitemap: ${opts.siteUrl.replace(/\/$/, "")}/sitemap.xml\n` : ""}`;
   if (opts.siteUrl) {
     const base = opts.siteUrl.replace(/\/$/, "");
-    const urls = site.pages.filter((p) => p.status === "published").map((p) => `<url><loc>${base}${p.slug === "/" ? "/" : p.slug}</loc></url>`);
+    const urls = site.pages.filter((p) => p.status === "published" && !isCampaign(p)).map((p) => `<url><loc>${base}${p.slug === "/" ? "/" : p.slug}</loc></url>`);
     files["sitemap.xml"] = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join("")}</urlset>\n`;
   }
   return files;

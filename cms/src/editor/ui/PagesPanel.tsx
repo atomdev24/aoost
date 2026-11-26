@@ -4,6 +4,7 @@ import { newVariant } from "../workspace/PageSwitcher";
 import type { Page } from "../../schema";
 import { setPage, update, useEditor } from "../store";
 import { NewPageModal } from "./NewPageModal";
+import { openWriter } from "../writer/writer-open";
 import { PageSettings } from "./PageSettings";
 
 const HomeIcon = () => (
@@ -47,6 +48,32 @@ const SearchIcon = () => (
 
 type P = Page;
 
+const PenIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M10.5 2.5l3 3L6 13H3v-3z" />
+  </svg>
+);
+
+/** A folder of pages (Campaigns, Blog), open by default when it has something in it. */
+function Folder({ name, count, empty, children }: { name: string; count: number; empty: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(count > 0);
+  return (
+    <div className="ed-pfolder">
+      <button type="button" className="ed-pfolder-head" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+          <path d={open ? "M2 3.500l3 3 3-3" : "M3.500 2l3 3-3 3"} />
+        </svg>
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
+          <path d="M1.5 4.5a1 1 0 0 1 1-1h3.500l1.500 1.500h6a1 1 0 0 1 1 1V12.500a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1z" />
+        </svg>
+        <span>{name}</span>
+        <small>{count}</small>
+      </button>
+      {open ? count ? <ul className="ed-pkids ed-pfolder-list">{children}</ul> : <p className="ed-hint ed-pfolder-empty">{empty}</p> : null}
+    </div>
+  );
+}
+
 /**
  * The pages list as cards: one card per top-level page with a Live or Draft badge, an eye for
  * "show in the nav" and a gear for page settings. Sub-pages sit indented on a line inside their
@@ -69,16 +96,28 @@ export function PagesPanel() {
   const q = query.trim().toLowerCase();
   const hit = (p: P) => !q || p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q);
   const variantsOf = (p: P) => pages.filter((v) => v.variantOf === p.id);
-  const childrenOf = (p: P) => pages.filter((c) => c.parentId === p.id && !c.variantOf);
-  const tops = pages.filter((p) => !p.parentId && !p.variantOf).filter((p) => hit(p) || childrenOf(p).some(hit));
+  const childrenOf = (p: P) => pages.filter((c) => c.parentId === p.id && !c.variantOf && (!c.kind || c.kind === "page"));
+  // Campaign pages and blog posts live in their own folders below the site's pages.
+  const plain = (p: P) => !p.kind || p.kind === "page";
+  const tops = pages.filter((p) => !p.parentId && !p.variantOf && plain(p)).filter((p) => hit(p) || childrenOf(p).some(hit));
+  const campaigns = pages.filter((p) => p.kind === "campaign" && !p.variantOf && hit(p));
+  const posts = pages.filter((p) => p.kind === "post" && !p.variantOf && hit(p)).sort((a, b) => (b.post?.date ?? "").localeCompare(a.post?.date ?? ""));
+  const today = new Date().toISOString().slice(0, 10);
   const count = pages.filter((p) => !p.variantOf).length;
 
   const badge = (p: P) =>
-    p.status === "published" ? <span className="ed-pbadge is-live">Live</span> : <span className="ed-pbadge is-draft">{p.status === "draft" ? "Draft" : "Unlisted"}</span>;
+    p.kind === "campaign" && p.unpublishAt && today > p.unpublishAt ? (
+      <span className="ed-pbadge is-ended" title={`Ended after ${p.unpublishAt}`}>Ended</span>
+    ) : p.status === "published" ? <span className="ed-pbadge is-live">Live</span> : <span className="ed-pbadge is-draft">{p.status === "draft" ? "Draft" : "Unlisted"}</span>;
 
   const actions = (p: P) => (
     <span className="ed-pcard-tools">
-      {p.isHome ? null : (
+      {p.kind === "post" ? (
+        <button type="button" className="ed-mini" aria-label={`Write ${p.title}`} title="Open the blog writer" onClick={() => (setPage(p.id), openWriter(p.id))}>
+          <PenIcon />
+        </button>
+      ) : null}
+      {p.isHome || (p.kind && p.kind !== "page") ? null : (
         <button
           type="button"
           className="ed-mini"
@@ -177,8 +216,24 @@ export function PagesPanel() {
             </li>
           );
         })}
-        {!tops.length ? <li className="ed-empty">No pages match “{query}”.</li> : null}
+        {!tops.length && !campaigns.length && !posts.length ? <li className="ed-empty">No pages match “{query}”.</li> : null}
       </ul>
+      <Folder name="Campaigns" count={campaigns.length} empty="Campaign pages for events and emails: New page → Campaign page.">
+        {campaigns.map((c) => (
+          <li key={c.id}>
+            {row(c, true)}
+            {c.unpublishAt ? <span className="ed-pfolder-note">{today > c.unpublishAt ? "Ended" : "Ends"} after {c.unpublishAt}</span> : null}
+          </li>
+        ))}
+      </Folder>
+      <Folder name="Blog" count={posts.length} empty="Blog posts: New page → Blog post.">
+        {posts.map((c) => (
+          <li key={c.id}>
+            {row(c, true)}
+            {c.post?.date ? <span className="ed-pfolder-note">{c.post.date}</span> : null}
+          </li>
+        ))}
+      </Folder>
       <p className="ed-panel-note">
         The eye shows or hides a page in the nav; hidden pages still work at their address, like /links for your Instagram bio. <VariantIcon /> makes a variant to try ideas without touching the live page.
       </p>

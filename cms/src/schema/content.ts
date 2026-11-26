@@ -128,6 +128,15 @@ export const Page = z.object({
   overlays: z.array(Overlay).default([]),
   /** A variant: a copy of the page with this id to try ideas on. Never built into the site (always status "draft"). */
   variantOf: Id.optional(),
+  /**
+   * What kind of page: an ordinary page, a campaign page (events, emails: reached by link only,
+   * kept out of the nav, search and sitemap, and taken down on `unpublishAt`) or a blog post.
+   */
+  kind: z.enum(["page", "campaign", "post"]).optional(),
+  /** Campaign pages: the day (YYYY-MM-DD) after which the live page answers "gone". */
+  unpublishAt: z.string().date().optional(),
+  /** Blog posts: the date shown and sorted by, a cover picture and a short summary for lists. */
+  post: z.object({ date: z.string().date(), cover: z.string().optional(), coverAlt: z.string().optional(), excerpt: z.string().optional() }).optional(),
   /** The variant's name ("Variant 1", "Spring hero"). */
   variantName: z.string().min(1).max(60).optional(),
   /** Variant block id → the page's block id it was copied from, so electing gives blocks back their ids. */
