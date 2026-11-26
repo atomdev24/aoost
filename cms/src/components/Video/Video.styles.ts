@@ -7,8 +7,8 @@ export const css = `
 .vid-facade:hover .vid-play{background:rgba(20,20,20,.1)}
 .vid-still{display:none!important}
 .vid-facade{isolation:isolate;overflow:hidden;font-family:var(--font-body);text-align:left;-webkit-tap-highlight-color:transparent}
-.vid-facade>.media{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
-.vid-facade:not(.vid-p-classic):hover>.media{transform:scale(1.03)}
+.vid-facade>.media{transition:scale .6s cubic-bezier(.2,.8,.2,1)}
+.vid-facade:not(.vid-p-classic):hover>.media{scale:1.03}
 .vid-facade:not(.vid-p-classic)::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(8,16,24,.55),rgba(8,16,24,0) 34%,rgba(8,16,24,0) 70%,rgba(8,16,24,.35))}
 .vid-chan{position:absolute;z-index:2;top:12px;left:12px;right:12px;display:flex;align-items:center;gap:10px;color:#fff}
 .vid-av{flex:none;display:grid;place-items:center;width:34px;height:34px;overflow:hidden;border-radius:50%;background:#fff;color:#17293e;font:700 15px var(--font-body);box-shadow:0 2px 6px rgba(0,0,0,.25)}

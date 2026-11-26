@@ -4,6 +4,7 @@ import { getState, useEditor } from "../store";
 import { attachCanvasDrops } from "../canvas/drops";
 import { attachAnnotationDrag } from "../canvas/annotations";
 import { attachFlowResize } from "../canvas/flow-resize";
+import { attachRatioChip } from "../canvas/ratio";
 import { attachSectionResize } from "../canvas/section-handle";
 import { watchAnn } from "../../components/Image/ann-layout";
 import { watchAnchors } from "../../components/FruitReading/follow";
@@ -42,6 +43,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     if (!doc) return;
     // First, so that while commenting a click reaches nothing else.
     const detachComments = attachCommentClicks(doc);
+    const detachRatio = attachRatioChip(doc);
     const detach = attachKeys(doc);
     const detachDrops = attachCanvasDrops(doc);
     const detachMarks = attachAnnotationDrag(doc);
@@ -89,6 +91,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       detachDrops();
       detachMarks();
       detachFlowResize();
+      detachRatio();
       detachSectionResize();
       unwatchAnn();
       unwatchAnchors();

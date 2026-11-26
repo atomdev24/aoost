@@ -24,7 +24,7 @@ describe("Video", () => {
     expect(still).toContain('<img class="media vid-still" src="/art/hero.960.webp"');
   });
   it("embeds YouTube and Vimeo, loading the player on click when there is a poster", () => {
-    const direct = renderNode("Video", { ...base, source: "link", url: "https://youtu.be/dQw4w9WgXcQ" });
+    const direct = renderNode("Video", { ...base, source: "link", url: "https://youtu.be/dQw4w9WgXcQ", play: "player" });
     expect(direct).toContain('<iframe class="media" data-src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?playsinline=1&amp;rel=0&amp;loop=1&amp;controls=0"');
     const facade = renderNode("Video", { ...base, source: "link", url: "https://vimeo.com/123", poster: "/art/hero.jpg", alt: "Reel" });
     expect(facade).toContain('data-video-embed="https://player.vimeo.com/video/123?dnt=1&amp;loop=1&amp;controls=0&amp;autoplay=1"');

@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { makeCtx } from "../../render/context";
 import { nodeAttrs, NodeContent } from "../../render/NodeView";
 import { HANDLES } from "../canvas/CanvasController";
-import { keepsRatio, toggleKeepRatio } from "../canvas/ratio";
+import { keepsRatio } from "../canvas/ratio";
 import { getComponent } from "../../components/registry";
 import { currentPage, useEditor } from "../store";
 import { itemToNode } from "./adapter";
@@ -60,11 +60,8 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
           data-ed-ratio=""
           aria-pressed={keepsRatio(node)}
           title={keepsRatio(node) ? "Keeps its proportions when resized (click to resize freely; Shift flips it while dragging)" : "Resizes freely (click to keep its proportions; Shift flips it while dragging)"}
+          // The click itself is handled by attachRatioChip (canvas/ratio.ts).
           onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleKeepRatio(node);
-          }}
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
             {keepsRatio(node) ? <path d="M3.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5M2.5 5.5h7v5h-7z" /> : <path d="M3.5 5.5V4a2.5 2.5 0 0 1 4.8-1M2.5 5.5h7v5h-7z" />}

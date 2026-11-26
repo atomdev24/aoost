@@ -15,6 +15,13 @@ describe("Video cover for YouTube and Vimeo", () => {
   it("uses YouTube's thumbnail when a play style is set without a poster", () => {
     expect(renderNode("Video", { ...base, play: "disc" })).toContain("https://i.ytimg.com/vi/27Aj5-LUDUU/maxresdefault.jpg");
   });
+  it("shows the thumbnail as the cover by default, with 16:9 fallbacks only", () => {
+    const html = renderNode("Video", base);
+    expect(html).toContain("https://i.ytimg.com/vi/27Aj5-LUDUU/maxresdefault.jpg");
+    expect(html).toContain('data-yt-fallback="https://i.ytimg.com/vi/27Aj5-LUDUU/hq720.jpg https://i.ytimg.com/vi/27Aj5-LUDUU/mqdefault.jpg"');
+    expect(html).not.toContain("hqdefault");
+    expect(html).not.toContain("<iframe");
+  });
   it("puts the length inside the pill, and never starts the player while editing", () => {
     const html = renderNode("Video", { ...base, poster: "/art/a.webp", play: "pill", duration: "2:40" }, { editing: true });
     expect(html).toContain('vid-pill-dur">2:40');

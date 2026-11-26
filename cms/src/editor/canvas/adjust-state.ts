@@ -33,8 +33,9 @@ export const useAdjusting = () =>
     () => adjusting,
   );
 
-/** Can this block be adjusted on the canvas? (A framed picture with a loaded image.) */
+/** Can this block be adjusted on the canvas? (A framed picture whose image has loaded.) */
 export function adjustable(el: Element | null): el is HTMLElement {
-  return !!el?.querySelector(".frame > .media, .frame > a > .media") && el.querySelector<HTMLImageElement>("img.media") !== null;
+  // A video's cover (a YouTube thumbnail or its poster) adjusts like a picture.
+  return !!el?.querySelector(".frame > .media, .frame > a > .media, .frame > .vid-facade > .media") && !!el.querySelector<HTMLImageElement>("img.media")?.naturalWidth;
 }
 
