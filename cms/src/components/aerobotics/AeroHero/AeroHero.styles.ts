@@ -1,7 +1,7 @@
 export const css = `
 .abh{display:flex;align-items:stretch;overflow:hidden;color:#fff;background:#14210a}
 .abh-full{min-height:640px}.abh-medium{min-height:440px}
-@media (min-width:810px){.abh-full{min-height:max(680px,100vh)}.abh-medium{min-height:489px}}
+@media (min-width:810px){.abh-full{min-height:clamp(680px,100vh,920px)}.abh-medium{min-height:489px}}
 .abh-bg{position:absolute;inset:0}
 .abh-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,16,10,calc(var(--abh-shade) + .2)) 0%,rgba(8,16,10,var(--abh-shade)) 55%,rgba(8,16,10,calc(var(--abh-shade) * .6)) 100%)}
 .abh-center .abh-shade{background:rgba(8,16,10,var(--abh-shade))}

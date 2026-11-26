@@ -17,8 +17,9 @@ import { fields as AeroFaq } from "./AeroFaq/AeroFaq.puck";
 import { fields as AeroSteps } from "./AeroSteps/AeroSteps.puck";
 import { fields as AeroEvents } from "./AeroEvents/AeroEvents.puck";
 import { fields as AeroOffices } from "./AeroOffices/AeroOffices.puck";
+import { fields as AeroText } from "./AeroText/AeroText.puck";
 import { fields as AeroPageHeader } from "./AeroPageHeader/AeroPageHeader.puck";
 import { fields as AeroCta } from "./AeroCta/AeroCta.puck";
 import { fields as AeroFooter } from "./AeroFooter/AeroFooter.puck";
 
-export const aeroboticsFields = { AeroHero, AeroLogos, AeroSplit, AeroChart, AeroReadings, AeroCrops, AeroShowcase, AeroProductCard, AeroFeatures, AeroTestimonial, AeroStories, AeroStats, AeroPhotoGrid, AeroPricing, AeroFaq, AeroSteps, AeroEvents, AeroOffices, AeroPageHeader, AeroCta, AeroFooter };
+export const aeroboticsFields = { AeroHero, AeroLogos, AeroSplit, AeroChart, AeroReadings, AeroCrops, AeroShowcase, AeroProductCard, AeroFeatures, AeroText, AeroTestimonial, AeroStories, AeroStats, AeroPhotoGrid, AeroPricing, AeroFaq, AeroSteps, AeroEvents, AeroOffices, AeroPageHeader, AeroCta, AeroFooter };

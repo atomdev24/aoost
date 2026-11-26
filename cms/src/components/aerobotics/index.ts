@@ -17,8 +17,9 @@ import { AeroFaq } from "./AeroFaq/AeroFaq";
 import { AeroSteps } from "./AeroSteps/AeroSteps";
 import { AeroEvents } from "./AeroEvents/AeroEvents";
 import { AeroOffices } from "./AeroOffices/AeroOffices";
+import { AeroText } from "./AeroText/AeroText";
 import { AeroPageHeader } from "./AeroPageHeader/AeroPageHeader";
 import { AeroCta } from "./AeroCta/AeroCta";
 import { AeroFooter } from "./AeroFooter/AeroFooter";
 
-export const aeroboticsComponents = [AeroHero, AeroLogos, AeroSplit, AeroChart, AeroReadings, AeroCrops, AeroShowcase, AeroProductCard, AeroFeatures, AeroTestimonial, AeroStories, AeroStats, AeroPhotoGrid, AeroPricing, AeroFaq, AeroSteps, AeroEvents, AeroOffices, AeroPageHeader, AeroCta, AeroFooter];
+export const aeroboticsComponents = [AeroHero, AeroLogos, AeroSplit, AeroChart, AeroReadings, AeroCrops, AeroShowcase, AeroProductCard, AeroFeatures, AeroText, AeroTestimonial, AeroStories, AeroStats, AeroPhotoGrid, AeroPricing, AeroFaq, AeroSteps, AeroEvents, AeroOffices, AeroPageHeader, AeroCta, AeroFooter];

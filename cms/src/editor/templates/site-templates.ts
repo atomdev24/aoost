@@ -1,4 +1,5 @@
 import { createNode, createSection } from "../../model/page-ops";
+import { AEROBOTICS_TEMPLATES } from "./aerobotics-templates";
 import type { Node, Section, Style } from "../../schema";
 
 /**
@@ -93,7 +94,7 @@ function linkCatalogues(sections: Section[]): Section[] {
   }));
 }
 
-export const SITE_TEMPLATES: SiteTemplate[] = [
+const BROCHURE_TEMPLATES: SiteTemplate[] = [
   {
     id: "aero-brochures",
     name: "Brochures, photo hero",
@@ -164,5 +165,8 @@ export const SITE_TEMPLATES: SiteTemplate[] = [
       ]),
   },
 ];
+
+/** The Aerobotics pages first, then the brochure designs. */
+export const SITE_TEMPLATES: SiteTemplate[] = [...AEROBOTICS_TEMPLATES, ...BROCHURE_TEMPLATES];
 
 export const siteTemplate = (id: string) => SITE_TEMPLATES.find((t) => t.id === id);
