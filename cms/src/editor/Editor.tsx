@@ -21,6 +21,7 @@ import { currentPage, getState, updatePage, useEditor } from "./store";
 import { QuickInsert } from "./insert/QuickInsert";
 import { PaletteHost } from "./commands/PaletteHost";
 import { MediaPickerHost } from "./ui/MediaPicker";
+import { TipBar } from "./tips/TipBar";
 import { ActionBar } from "./workspace/ActionBar";
 import { FieldLabel } from "./workspace/FieldLabel";
 import { Inspector } from "./workspace/Inspector";
@@ -85,6 +86,7 @@ export function Editor() {
   return (
     <>
       <MediaPickerHost />
+      <TipBar />
       <Puck
         key={`${pageId}:${lang ?? ""}`}
         config={puckConfig}

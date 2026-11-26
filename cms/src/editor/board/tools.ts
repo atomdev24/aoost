@@ -1,6 +1,7 @@
 import { addNode, addSection, createNode, createSection, locate } from "../../model/page-ops";
 import type { Page, Section } from "../../schema";
 import { currentPage, getState, updatePage } from "../store";
+import { showTip } from "../tips/tips";
 
 /**
  * The top bar's tools. Select is the resting mode; the others place something
@@ -35,6 +36,7 @@ export function runTool(tool: Tool): string | null {
     const index = after ? page.sections.indexOf(after) + 1 : page.sections.length;
     const section = createSection(tool === "frame" ? "canvas" : "flow");
     updatePage(page.id, (p) => addSection(p, section, index), tool === "frame" ? "Add free-layout section" : "Add section");
+    showTip("section");
     return section.id;
   }
   if (tool === "text" || tool === "image") {
@@ -48,6 +50,7 @@ export function runTool(tool: Tool): string | null {
     const node = createNode(tool === "text" ? "Text" : "Image", inCanvas ? { style: { x: 24, y: 24, w: tool === "text" ? 240 : 200, h: tool === "text" ? 60 : 160 } } : {});
     const sectionId = section.id;
     updatePage(page.id, (p) => addNode(p, sectionId, node), tool === "text" ? "Add Text" : "Add Image");
+    if (tool === "image") showTip("imageEmpty");
     return node.id;
   }
   return null;
