@@ -1,3 +1,4 @@
+import type { Release } from "../model/release";
 import type { DemoSettings } from "../model/demo-settings";
 import type { Role, Team } from "../model/roles";
 import type { Op } from "../model/ops";
@@ -78,6 +79,10 @@ export const api = {
   pushStaging: (message?: string) => call<{ commit: string | null; url: string | null; changed: string[] }>("/api/editor/staging/push", { method: "POST", body: JSON.stringify({ message }) }),
   me: () => call<{ who: string; via: string; role: Role }>("/api/editor/me"),
   team: () => call<{ team: Team; owners: string[]; signIn: "access" | "password" }>("/api/editor/team"),
+  release: () => call<{ release: Release | null }>("/api/editor/release").then((r) => r.release),
+  scheduleRelease: (body: { label: string; goLiveAt: number; endAt?: number }) => call<{ release: Release }>("/api/editor/release", { method: "PUT", body: JSON.stringify(body) }).then((r) => r.release),
+  cancelRelease: () => call<{ release: Release | null }>("/api/editor/release", { method: "DELETE" }).then((r) => r.release),
+  undoRelease: () => call<{ release: Release }>("/api/editor/release/undo", { method: "POST" }).then((r) => r.release),
   demoSettings: () => call<{ settings: DemoSettings }>("/api/editor/demo/settings"),
   putDemoSettings: (settings: DemoSettings) => call<{ settings: DemoSettings }>("/api/editor/demo/settings", { method: "PUT", body: JSON.stringify(settings) }),
   resetDemo: () => call<{ ok: boolean }>("/api/editor/demo/reset-now", { method: "POST" }),

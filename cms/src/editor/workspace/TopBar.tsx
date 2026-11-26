@@ -12,6 +12,7 @@ import { PuckSync } from "../puck/PuckSync";
 import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
 import { currentPage, flush, megaItemId, redo, setLang, setPage, undo, update, useEditor } from "../store";
 import { loadPublished, openSheet, publish, usePublish } from "./publish";
+import { PublishMenu, ReleaseChip } from "./Release";
 import { loadStaging, useStaging } from "./staging";
 import { useChanges } from "./changes-count";
 import { DEMO } from "../demo";
@@ -60,6 +61,7 @@ export function TopBar() {
   const savedAt = useEditor((s) => s.savedAt);
   const unpublished = useEditor((s) => s.unpublished);
   const canPublish = useCan("publish");
+  const canPromote = useCan("promote");
   const canUndo = useEditor((s) => s.past.length > 0);
   const canRedo = useEditor((s) => s.future.length > 0);
   const lastLabel = useEditor((s) => s.lastLabel);
@@ -199,8 +201,12 @@ export function TopBar() {
             Staging
           </button>
         ) : null}
+        <ReleaseChip canPromote={canPromote} />
         {canPublish ? (
-          <PublishButton phase={phase} count={count} disabled={!unpublished && save !== "error" && phase === "idle"} />
+          <span className="ed-publish-group">
+            <PublishButton phase={phase} count={count} disabled={!unpublished && save !== "error" && phase === "idle"} />
+            <PublishMenu canPromote={canPromote} />
+          </span>
         ) : (
           <span className="ed-viewonly" title="You can look around and leave comments. Ask an owner (… → Team) for the Editor role to make changes.">
             View only · you can comment
