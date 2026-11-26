@@ -56,6 +56,7 @@ body:has(.ed-mega-stage){background:var(--c-sand)}
 .ao .ao-b[data-mat][data-band="last"],.ao .ao-b[data-mat][data-band="only"]{padding-bottom:var(--s8)}
 .ao .ao-b[data-mat="light"][data-band="last"],.ao .ao-b[data-mat="light"][data-band="only"]{padding-bottom:calc(var(--s8) + 40px)}
 .ao .ao-b[data-mat][data-band-top]{margin-top:calc(-1 * var(--s9))}
+[data-ed-untr]{outline:1.5px dashed rgba(255,159,10,.9);outline-offset:2px}
 /* Hover outline + name tag (editor/canvas/HoverLabel.tsx). */
 .ed-hover{position:fixed;display:none;pointer-events:none;z-index:2147483000;outline:1.5px dashed #0A84FF;outline-offset:-1px;border-radius:2px}
 .ed-hover>span{position:absolute;left:-1px;bottom:100%;padding:1px 6px;border-radius:3px 3px 0 0;background:#0A84FF;color:#fff;font:500 11px/16px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;white-space:nowrap;letter-spacing:0}

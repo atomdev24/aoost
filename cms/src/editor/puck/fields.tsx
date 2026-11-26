@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { languageName } from "../../model/i18n";
 import type { CustomField } from "@puckeditor/core";
 import { resolve, setOnly } from "../../responsive/resolve";
 import type { FrameFit, Node, Responsive, Section, SectionLayout, Style } from "../../schema";
@@ -128,10 +129,11 @@ export function HelpButton({ label, open, onToggle }: { label: string; open: boo
 
 function ContentHeading() {
   const [help, setHelp] = useState(false);
+  const lang = useEditor((s) => s.lang);
   return (
     <div data-tab="content">
       <h4 className="ed-igroup-title ed-igroup-solo">
-        Content <span>same on every screen size</span>
+        Content <span>{lang ? `${languageName(lang)} version · same on every screen size` : "same on every screen size"}</span>
         <HelpButton label="Content" open={help} onToggle={() => setHelp(!help)} />
       </h4>
       {help ? <p className="ed-help-text">{GROUP_HELP.Content}</p> : null}

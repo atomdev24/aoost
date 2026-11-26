@@ -1,3 +1,4 @@
+import { pageAt } from "../model/i18n";
 import type { Op } from "../model/ops";
 import type { StagingMeta } from "../model/protocol";
 import { renderPage } from "../render/document";
@@ -247,7 +248,7 @@ export async function preview(env: Env, url: URL): Promise<Response> {
   const path = url.pathname.replace(/^\/preview/, "") || "/";
   if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: (env.IS_DEMO ? "/demo/preview" : "/preview") + e.url })));
   const slug = path.length > 1 ? path.replace(/\/$/, "") : "/";
-  const page = site.pages.find((p) => p.slug === slug);
+  const page = pageAt(site, slug, false);
   if (!page) return html("<!doctype html><meta charset=utf-8><title>Not in the draft</title><p style='font:16px system-ui;padding:40px'>No page at this URL in the draft.</p>", 404);
   const prefix = env.IS_DEMO ? "/demo/preview" : "/preview";
   return html(renderPage(site, page, { preview: { prefix }, assetVersion: String(version) }));
@@ -270,7 +271,7 @@ export async function staging(env: Env, url: URL): Promise<Response> {
   const prefix = `${env.IS_DEMO ? "/demo" : ""}/staging/${token}`;
   const path = m[2].replace(/\/$/, "") || "/";
   if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: prefix + e.url })));
-  const page = site.pages.find((p) => p.slug === path && p.status !== "draft" && p.variantOf === undefined);
+  const page = pageAt(site, path, true);
   if (!page) return html("<!doctype html><meta charset=utf-8><meta name=robots content=noindex><title>Not in staging</title><p style='font:16px system-ui;padding:40px'>No page at this address in staging.</p>", 404);
   const tag = env.IS_DEMO ? STAGING_TAG.replace("Staging preview", "Demo · staging preview") : STAGING_TAG;
   const body = renderPage(site, page, { preview: { prefix }, assetVersion: "staging" }).replace("</body>", `${tag}</body>`);
@@ -299,7 +300,7 @@ export async function historyPage(env: Env, url: URL): Promise<Response> {
   const path = m[2].replace(/\/$/, "") || "/";
   if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: prefix + e.url })));
   // Signed in, like /preview: draft pages show too (only variants never do).
-  const page = site.pages.find((p) => p.slug === path && p.variantOf === undefined);
+  const page = pageAt(site, path, false);
   if (!page) return html("<!doctype html><meta charset=utf-8><title>Not in this version</title><p style='font:16px system-ui;padding:40px'>No page at this address in this version.</p>", 404);
   const tag = STAGING_TAG.replace("Staging preview", `Version ${sha.slice(0, 7)}`).replace("#8e44ff", "#444");
   return html(renderPage(site, page, { preview: { prefix }, assetVersion: sha.slice(0, 12) }).replace("</body>", `${tag}</body>`));
@@ -313,7 +314,7 @@ export async function livePage(env: Env, url: URL): Promise<Response> {
   const prefix = env.IS_DEMO ? "/demo/preview/_live" : "/preview/_live";
   const path = url.pathname.slice("/preview/_live".length).replace(/\/$/, "") || "/";
   if (path === "/search.json") return json(searchIndex(site).map((e) => ({ ...e, url: prefix + e.url })));
-  const page = site.pages.find((p) => p.slug === path && p.variantOf === undefined);
+  const page = pageAt(site, path, false);
   if (!page) return html("<!doctype html><meta charset=utf-8><title>Not live</title><p style='font:16px system-ui;padding:40px'>This page isn't on the live site yet.</p>", 404);
   return html(renderPage(site, page, { preview: { prefix }, assetVersion: "live" }));
 }

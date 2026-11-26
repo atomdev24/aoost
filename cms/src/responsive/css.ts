@@ -270,7 +270,8 @@ export function themeCss(theme: Theme): string {
     const decls = (size: number): Decls => ({
       "font-family": `var(--font-${t.font})`,
       // --cs is one design px inside a canvas section, so type scales with the artboard.
-      "font-size": `calc(var(--cs, 1px) * ${size})`,
+      // --fit shrinks a translated text a little when it came out longer than the original.
+      "font-size": `calc(var(--cs, 1px) * var(--fit, 1) * ${size})`,
       "font-weight": String(t.weight),
       "line-height": String(t.lineHeight),
       "letter-spacing": `${t.tracking}em`,
