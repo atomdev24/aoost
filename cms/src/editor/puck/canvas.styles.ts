@@ -64,6 +64,7 @@ body:has(.ed-mega-stage){background:var(--c-sand)}
 .ed-flash{animation:ed-flash 2s ease-out}
 [data-ed-over]{outline:1.5px solid rgba(255,159,10,.85);outline-offset:-1.5px}
 .s[data-ed-over]{outline:none;box-shadow:inset 3px 0 0 rgba(255,159,10,.85)}
+[data-ed-changed]{outline:1.5px dashed rgba(191,90,242,.95);outline-offset:-1.5px}
 /* Mat bands, spaced like the live page's .mat wrapper (editor/canvas/MatBands.tsx). */
 .ao .ao-b[data-mat][data-band]{padding-top:0;padding-bottom:var(--s9)}
 .ao .ao-b[data-mat][data-band="first"],.ao .ao-b[data-mat][data-band="only"]{padding-top:var(--s8)}

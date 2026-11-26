@@ -45,6 +45,8 @@ const set = (patch: Partial<CommentsState>) => {
   listeners.forEach((l) => l());
 };
 export const getComments = () => state;
+/** Listen to comment changes outside React (variants/comment-count.ts loads this store late). */
+export const subscribeComments = (l: () => void) => (listeners.add(l), () => void listeners.delete(l));
 export function useComments<T>(sel: (s: CommentsState) => T): T {
   return useSyncExternalStore(
     (l) => {

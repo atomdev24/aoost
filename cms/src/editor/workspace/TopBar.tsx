@@ -19,7 +19,7 @@ import { Preflight } from "./Preflight";
 import { loadStaging, useStaging } from "./staging";
 import { useChanges } from "./changes-count";
 import { DEMO } from "../demo";
-import { Avatars, DemoBar, PublishSheet } from "../parts";
+import { Avatars, DemoBar, PublishSheet, VersionsButton } from "../parts";
 import { StatusPill } from "./StatusPill";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
@@ -194,6 +194,7 @@ export function TopBar() {
         {DEMO ? <DemoBar /> : null}
         <Avatars />
         <Preflight />
+        <VersionsButton />
         <button type="button" className="ed-btn ed-desk-only" onClick={preview}>
           Preview
         </button>

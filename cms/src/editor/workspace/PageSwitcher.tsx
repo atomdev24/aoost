@@ -1,15 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { createVariant, ownerPage } from "../../model/variants";
-import { currentPage, getState, setPage, update, useEditor } from "../store";
+import { ownerPage } from "../../model/variants";
+import { currentPage, setPage, useEditor } from "../store";
 
 /** Make a variant of the page on screen (or of its page, on a variant) and open it. */
-export function newVariant(pageId?: string) {
-  const s = getState();
-  const made = createVariant(s.site, pageId ?? s.pageId);
-  if (!made) return;
-  update(() => made.site, "New variant");
-  setPage(made.pageId);
-}
+export { newVariant } from "../variants/actions";
+import { newVariant } from "../variants/actions";
 
 /** "Home ▾": jump to another page without leaving the canvas. */
 export function PageSwitcher() {
@@ -18,7 +13,8 @@ export function PageSwitcher() {
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const site = useEditor((s) => s.site);
-  const withVariants = (p: (typeof pages)[number]) => [p, ...pages.filter((v) => v.variantOf === p.id)];
+  // Earlier versions (kept after a pick) live in the page's Versions list, not here.
+  const withVariants = (p: (typeof pages)[number]) => [p, ...pages.filter((v) => v.variantOf === p.id && v.variantStatus !== "archived")];
   const ordered = pages.filter((p) => !p.parentId && !p.variantOf).flatMap((p) => [...withVariants(p), ...pages.filter((c) => c.parentId === p.id && !c.variantOf).flatMap(withVariants)]);
 
   useEffect(() => {

@@ -1,4 +1,6 @@
 import { startRichEdit } from "../rich/edit-store";
+import { openDesigns } from "../templates/designs-open";
+import { propose } from "../variants/actions";
 import { resetTips } from "../tips/tips";
 import { nodeToBoard } from "../board/ref-page";
 import { openProblemLog, openReport } from "../problems";
@@ -142,6 +144,11 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
   "page.preview": () => void previewPage(),
   "variant.new": () => newVariant(),
   "variant.elect": () => void electCurrentVariant(),
+  "variant.review": () => openDesigns(),
+  "variant.propose": () => {
+    const p = currentPage(getState());
+    if (p.variantOf) propose(p.id, true);
+  },
   "staging.send": () => void sendToStaging().then((ok) => ok && openSheet()),
   "staging.push": () => void (getStaging().info ? pushStaging() : sendToStaging().then((ok) => ok && openSheet())),
   "claude.ask": openPalette,

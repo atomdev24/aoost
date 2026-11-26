@@ -3482,9 +3482,13 @@ body:has(.ed-flyout) .ed-dock {
     white-space: nowrap;
   }
 }
+/* The demo strip under the top bar says it's the demo (its Details opens the same card), so the
+   top bar's Demo chip steps out and leaves room for the page name. */
+.ed-demo-chip {
+  display: none !important;
+}
 @media (max-width: 767px) {
-  /* One top row on a phone: the demo strip already says it's the demo, and faces of others wait for Full. */
-  .ed-demo-chip,
+  /* One top row on a phone: faces of others wait for Full. */
   .ed-island-right:has(.ed-demo) .ed-pres-faces {
     display: none !important;
   }

@@ -24,7 +24,7 @@ export function StatusPill({ save, saveTitle, savedText, count, live }: { save: 
         onClick={(e) => setAt(at ? null : anchorOf(e.currentTarget))}
       >
         <span aria-hidden="true" />
-        {text}
+        <span className="ed-statechip-text">{text}</span>
       </button>
       {at ? (
         <Popover anchor={at} onClose={() => setAt(null)} label="Status" width={300} className="ed-status-pop">

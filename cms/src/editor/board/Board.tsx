@@ -23,7 +23,7 @@ import { OverflowLayer } from "./OverflowLayer";
 import { attachRefDrops } from "./refs-store";
 import { attachGestures } from "../touch/gestures";
 import { LONG_PRESS_MS } from "../touch/longpress";
-import { AdjustImage, CommentLayer, PresenceLayer } from "../parts";
+import { AdjustImage, CommentLayer, PresenceLayer, VersionRowFrames, VersionRowLabels } from "../parts";
 import "./board.css";
 
 const NAME = BREAKPOINT_LABEL;
@@ -244,6 +244,8 @@ export function Board() {
               <LoadingCover bp={f.bp} pageId={pageId} slug={page.slug} ready={ready[f.bp] && !hold} />
             </div>
           ))}
+        {/* Other versions of this page (it and its variants), as rows under it (EDITOR-VARIANTS.md). */}
+        <VersionRowFrames frames={frames} view={view} size={size} />
         {addable.length && !simple ? (
           <div className="bd-slot" style={{ left: slot.x, top: slot.y, width: slot.w, height: slot.h }} role="group" aria-label="Add a breakpoint">
             <span className="bd-slot-plus">+</span>
@@ -302,6 +304,8 @@ export function Board() {
           <FrameMenu bp={f.bp} canHide={frames.length > 1} open={menuFor === f.bp} setOpen={(open) => setMenuFor(open ? f.bp : null)} />
         </div>
       ))}
+
+      <VersionRowLabels frames={frames} />
 
       {hiddenBps.length ? (
         <InDock slot="bottom" name="hidden">

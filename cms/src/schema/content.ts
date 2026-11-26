@@ -176,6 +176,14 @@ export const Page = z.object({
   variantName: z.string().min(1).max(60).optional(),
   /** Variant block id → the page's block id it was copied from, so electing gives blocks back their ids. */
   variantIds: z.record(z.string(), z.string()).optional(),
+  /** Where a variant is in review: a draft (unset), proposed to the team, or kept as an earlier version after a pick. */
+  variantStatus: z.enum(["proposed", "archived"]).optional(),
+  /** Who made the variant (their name). */
+  variantBy: z.string().max(60).optional(),
+  /** Teammates who voted for the variant (one each). */
+  variantVotes: z.array(z.object({ id: z.string().min(1).max(120), name: z.string().max(60) })).max(200).optional(),
+  /** When a variant became an earlier version (ISO date). */
+  archivedAt: z.string().max(40).optional(),
 });
 export type Page = z.infer<typeof Page>;
 
