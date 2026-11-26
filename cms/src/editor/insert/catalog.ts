@@ -4,37 +4,51 @@ import type { Page, Section } from "../../schema";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage } from "../store";
 
-/** The Insert flyout's chips. "Saved" lists the site's templates. */
-export type Chip = "all" | "layout" | "media" | "text" | "saved";
-export type Entry = { type: string; label: string; chip: Exclude<Chip, "all" | "saved">; hint: string };
+/**
+ * The Insert flyout's tabs (UI spec, Nov 2026): Basics are the everyday blocks, Brand the
+ * site-specific ones (TrueFruit, the aoost blocks), Motion the animated ones, More the rest.
+ * "Saved" lists the site's templates. "all" is for search and quick insert.
+ */
+export type Chip = "all" | "basics" | "brand" | "motion" | "more" | "saved";
+export type Group = "layout" | "content" | "global";
+export type Entry = { type: string; label: string; chip: Exclude<Chip, "all" | "saved">; group?: Group; hint: string };
 
 const SECTIONS: Entry[] = [
-  { type: "FlowSection", label: "Section", chip: "layout", hint: "Blocks stacked in a column" },
-  { type: "GridSection", label: "Grid", chip: "layout", hint: "Blocks in columns" },
-  { type: "CanvasSection", label: "Free layout", chip: "layout", hint: "Place layers anywhere" },
+  { type: "FlowSection", label: "Section", chip: "basics", group: "layout", hint: "Blocks stacked in a column" },
+  { type: "GridSection", label: "Grid", chip: "basics", group: "layout", hint: "Blocks in columns" },
+  { type: "CanvasSection", label: "Free layout", chip: "basics", group: "layout", hint: "Place layers anywhere" },
 ];
-const TEXT = new Set(["Text", "Button", "Code"]);
+const BASIC_CONTENT = new Set(["Text", "Image", "Video", "Button", "Shape", "Cards"]);
+const BASIC_LAYOUT = new Set(["Spacer", "Divider"]);
+const BASIC_GLOBAL = new Set(["Global", "Footer"]);
+const MOTION = new Set(["Lottie", "Model3D"]);
+const BRAND = new Set(["TrueFruitSeason", "FruitReading"]);
 const KIND: Record<string, Section["kind"]> = { FlowSection: "flow", GridSection: "grid", CanvasSection: "canvas" };
 
 /** Short card names: "Projects: the table of work" → "Projects". */
 const short = (label: string) => label.split(":")[0]!.replace(/\s*\(.*\)$/, "");
 
-/** Every block that can be added, grouped by chip (sections first). */
+function place(type: string, category: string): Pick<Entry, "chip" | "group"> {
+  if (BASIC_CONTENT.has(type)) return { chip: "basics", group: "content" };
+  if (BASIC_LAYOUT.has(type)) return { chip: "basics", group: "layout" };
+  if (BASIC_GLOBAL.has(type)) return { chip: "basics", group: "global" };
+  if (MOTION.has(type)) return { chip: "motion" };
+  if (BRAND.has(type) || category === "aoost") return { chip: "brand" };
+  return { chip: "more" };
+}
+
+/** Every block that can be added (sections first). */
 export const CATALOG: Entry[] = [
   ...SECTIONS,
-  ...components.map((c) => ({
-    type: c.type,
-    label: short(c.label),
-    chip: (TEXT.has(c.type) ? "text" : c.category === "media" || c.category === "embed" ? "media" : "layout") as Entry["chip"],
-    hint: c.label,
-  })),
+  ...components.filter((c) => c.type !== "FruitReading").map((c) => ({ type: c.type, label: short(c.label), hint: c.label, ...place(c.type, c.category) })),
 ];
 
 export const entryFor = (type: string) => CATALOG.find((e) => e.type === type);
 
 export function filterCatalog(query: string, chip: Chip): Entry[] {
   const q = query.trim().toLowerCase();
-  return CATALOG.filter((e) => (chip === "all" || e.chip === chip) && (!q || `${e.label} ${e.hint} ${e.type}`.toLowerCase().includes(q)));
+  // Searching looks across every tab.
+  return CATALOG.filter((e) => (q || chip === "all" ? true : e.chip === chip) && (!q || `${e.label} ${e.hint} ${e.type}`.toLowerCase().includes(q)));
 }
 
 /** The name of what a new block goes below ("Projects"), or null for the end of the page. */

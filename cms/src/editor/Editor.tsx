@@ -1,3 +1,4 @@
+import { FeedbackToast } from "./workspace/FeedbackToast";
 import { Puck, useGetPuck } from "@puckeditor/core";
 import "@puckeditor/core/puck.css";
 import { useEffect, useMemo, useRef } from "react";
@@ -117,6 +118,7 @@ export function Editor() {
           <PaletteHost />
           <BrowserZoomNotice />
           <UploadTrayHost />
+          <FeedbackToast />
         </div>
       </Puck>
     </>

@@ -912,3 +912,52 @@ select.ed-input option {
 .ed-pcards .ed-prow.is-selected .ed-page-icon { color: var(--ed-text); }
 .ed-layer-section { border-left-color: #6e6e78; }
 .ed-layer-section.is-global { border-left-color: #a78bfa; background: rgba(167, 139, 250, 0.07); }
+
+/* ---------------------------------------------- insert: tabs (UI spec, Nov 2026) */
+.ed-ins-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--ed-line-strong); margin: 8px 0 4px; }
+.ed-ins-tabs button { flex: 1; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 6px 2px; color: var(--ed-sub); font: 500 12.5px var(--ed-font); cursor: pointer; }
+.ed-ins-tabs button:hover { color: var(--ed-text); }
+.ed-ins-tabs button[aria-selected="true"] { color: var(--ed-text); border-bottom-color: var(--ed-text); font-weight: 600; }
+.ed-ins-group { margin-bottom: 6px; }
+.ed-ins-group-label { margin: 8px 12px 4px; font-size: 11px; color: var(--ed-sub); }
+
+/* ---------------------------------------------- inspector: Content / Style / Layout tabs + help */
+.ed-itabs { display: flex; gap: 2px; margin: 0 12px; border-bottom: 1px solid var(--ed-line-strong); }
+.ed-itabs button { flex: 1; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 7px 2px; color: var(--ed-sub); font: 500 12.5px var(--ed-font); cursor: pointer; }
+.ed-itabs button:hover { color: var(--ed-text); }
+.ed-itabs button[aria-selected="true"] { color: var(--ed-text); border-bottom-color: var(--ed-text); font-weight: 600; }
+.ed-inspector-body[data-tab="content"] [data-tab]:not([data-tab="content"]),
+.ed-inspector-body[data-tab="style"] [data-tab]:not([data-tab="style"]),
+.ed-inspector-body[data-tab="layout"] [data-tab]:not([data-tab="layout"]),
+.ed-inspector-body[data-tab="content"] [data-field-tab]:not([data-field-tab="content"]),
+.ed-inspector-body[data-tab="style"] [data-field-tab]:not([data-field-tab="style"]),
+.ed-inspector-body[data-tab="layout"] [data-field-tab]:not([data-field-tab="layout"]) { display: none !important; }
+.ed-help { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: 4px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--ed-sub); cursor: pointer; vertical-align: -3px; }
+.ed-help:hover, .ed-help[aria-expanded="true"] { color: var(--ed-text); background: var(--ed-seg); }
+.ed-help-text { margin: 2px 0 8px; padding: 7px 9px; border-radius: 8px; background: rgba(10, 132, 255, 0.12); color: #cfe3ff; font-size: 12px; line-height: 1.45; }
+
+/* ---------------------------------------------- feedback: small message with Undo (UI spec, Nov 2026) */
+.ed-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 8px 7px 14px;
+  border-radius: 999px;
+  background: rgba(36, 36, 40, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: var(--ed-text);
+  font: 13px var(--ed-font);
+  transform: translateX(-50%);
+  animation: ed-toast-in 0.22s ease-out, ed-toast-out 0.3s ease-in 2.9s forwards;
+  pointer-events: auto;
+}
+.ed-toast button { background: none; border: 0; padding: 3px 9px; border-radius: 999px; color: #409cff; font: 600 13px var(--ed-font); cursor: pointer; }
+.ed-toast button:hover { background: rgba(10, 132, 255, 0.18); }
+@keyframes ed-toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes ed-toast-out { to { opacity: 0; transform: translate(-50%, 6px); } }
+@media (max-width: 700px) { .ed-toast { bottom: calc(var(--ed-card-h, 0px) + 84px); } }

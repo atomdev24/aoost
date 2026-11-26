@@ -86,7 +86,7 @@ function Palette() {
                   <Thumb type={it.type} />
                 </span>
                 <span className="ed-qi-name">{it.label}</span>
-                <span className="ed-qi-kind">{it.chip === "layout" ? "Layout" : it.chip === "media" ? "Media" : "Text"}</span>
+                <span className="ed-qi-kind">{{ basics: "Basics", brand: "Brand", motion: "Motion", more: "More" }[it.chip]}</span>
               </li>
             ))}
             {!items.length ? <li className="ed-empty">Nothing matches "{query}".</li> : null}

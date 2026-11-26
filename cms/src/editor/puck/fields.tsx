@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { CustomField } from "@puckeditor/core";
 import { resolve, setOnly } from "../../responsive/resolve";
 import type { FrameFit, Node, Responsive, Section, SectionLayout, Style } from "../../schema";
@@ -85,12 +86,56 @@ export const styleField = (framed: boolean): CustomField<Responsive<Style>> => (
 });
 
 /** A titled group in the inspector: 11px semibold label, then its rows. */
+/** Which inspector tab a group sits under (UI spec, Nov 2026: Content / Style / Layout). */
+export type InspectorTab = "content" | "style" | "layout";
+const GROUP_TAB: Record<string, InspectorTab> = { Layout: "layout", "Visible on": "layout", Frame: "style", "Picture in frame": "style", Motion: "style", Background: "style" };
+/** One line per group, shown by its help icon. Plain words for teammates who aren't designers. */
+export const GROUP_HELP: Record<string, string> = {
+  Content: "The words, pictures and links in this block. The same on every screen size.",
+  Layout: "Where the block sits and how big it is: position, size, columns and spacing. Can differ per screen size.",
+  "Visible on": "Switch the block off on screen sizes where it shouldn't show. It stays on the others.",
+  Frame: "How the block's box looks: corners, border, background, shadow and opacity.",
+  "Picture in frame": "How the picture fills its box: crop or fit, the focus point, and any slow pan or zoom.",
+  Motion: "How the block animates as it scrolls into view, and any parallax as you scroll past.",
+  Background: "The section's background colour or picture, and how it is shaded.",
+};
+
 export function InspectorGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  const [help, setHelp] = useState(false);
+  const text = GROUP_HELP[title];
   return (
-    <section className="ed-igroup">
-      <h4 className="ed-igroup-title">{title}</h4>
+    <section className="ed-igroup" data-tab={GROUP_TAB[title] ?? "style"}>
+      <h4 className="ed-igroup-title">
+        {title}
+        {text ? <HelpButton label={title} open={help} onToggle={() => setHelp(!help)} /> : null}
+      </h4>
+      {help && text ? <p className="ed-help-text">{text}</p> : null}
       {children}
     </section>
+  );
+}
+
+export function HelpButton({ label, open, onToggle }: { label: string; open: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" className="ed-help" aria-expanded={open} aria-label={`What is ${label}?`} title={GROUP_HELP[label]} onClick={onToggle}>
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.5" />
+        <path d="M6.200 6.200a1.900 1.900 0 0 1 3.600.8c0 1.300-1.800 1.600-1.800 2.700M8 11.600v.1" />
+      </svg>
+    </button>
+  );
+}
+
+function ContentHeading() {
+  const [help, setHelp] = useState(false);
+  return (
+    <div data-tab="content">
+      <h4 className="ed-igroup-title ed-igroup-solo">
+        Content <span>same on every screen size</span>
+        <HelpButton label="Content" open={help} onToggle={() => setHelp(!help)} />
+      </h4>
+      {help ? <p className="ed-help-text">{GROUP_HELP.Content}</p> : null}
+    </div>
   );
 }
 
@@ -98,11 +143,7 @@ export function InspectorGroup({ title, children }: { title: string; children: R
 export const contentHeading: CustomField<undefined> = {
   type: "custom",
   label: "Content",
-  render: () => (
-    <h4 className="ed-igroup-title ed-igroup-solo">
-      Content <span>same on every screen size</span>
-    </h4>
-  ),
+  render: () => <ContentHeading />,
 };
 
 /** "Visible on": one switch per breakpoint. Each changes only its own breakpoint. */

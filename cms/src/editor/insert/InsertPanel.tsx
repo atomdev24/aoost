@@ -3,17 +3,22 @@ import { useMemo, useRef, useState, type ReactNode } from "react";
 import { insertTemplate, removeTemplate, saveTemplate, STARTER_TEMPLATES } from "../../model/library";
 import { locate } from "../../model/page-ops";
 import { currentPage, getState, update, useEditor } from "../store";
-import { filterCatalog, insertAnchorName, insertBlock, type Chip } from "./catalog";
+import { filterCatalog, insertAnchorName, insertBlock, type Chip, type Entry, type Group } from "./catalog";
 import { Thumb } from "./thumbs";
 import { addMark, ANNOTATION_MIME } from "../canvas/annotations";
 import { addReadingOnPicture } from "../canvas/reading-anchor";
 
-const CHIPS: { id: Chip; label: string }[] = [
-  { id: "all", label: "All" },
+const TABS: { id: Chip; label: string; title: string }[] = [
+  { id: "basics", label: "Basics", title: "Sections, text, pictures, buttons: the blocks you use all the time" },
+  { id: "brand", label: "Brand", title: "Blocks made for this site, like TrueFruit by season and fruit readings" },
+  { id: "motion", label: "Motion", title: "Animated blocks: Lottie animations and 3D models" },
+  { id: "more", label: "More", title: "Embeds, audio, galleries, custom code and downloads" },
+  { id: "saved", label: "Saved", title: "Sections and pages you saved as templates" },
+];
+const GROUPS: { id: Group; label: string }[] = [
   { id: "layout", label: "Layout" },
-  { id: "media", label: "Media" },
-  { id: "text", label: "Text" },
-  { id: "saved", label: "Saved" },
+  { id: "content", label: "Content" },
+  { id: "global", label: "On every page" },
 ];
 
 /** A library card: Puck makes it draggable onto the canvas; a click adds it below the selection. */
@@ -61,38 +66,53 @@ function Card({ type, label, hint }: { type: string; label: string; hint: string
  */
 export function InsertPanel() {
   const [query, setQuery] = useState("");
-  const [chip, setChip] = useState<Chip>("all");
+  const [chip, setChip] = useState<Chip>("basics");
   const [annHint, setAnnHint] = useState(false);
   const page = useEditor(currentPage);
   const selected = useEditor((s) => s.selection[0]);
   const below = insertAnchorName(page, selected);
-  const entries = chip === "saved" ? [] : filterCatalog(query, chip);
+  const searching = !!query.trim();
+  const entries = chip === "saved" && !searching ? [] : filterCatalog(query, chip);
+  const cards = (list: Entry[]) => (
+    <div className="ed-cards">
+      {list.map((e) => (
+        <Card key={e.type} type={e.type} label={e.label} hint={e.hint} />
+      ))}
+    </div>
+  );
+  const showReading = (searching && "fruit reading annotation".includes(query.trim().toLowerCase())) || (!searching && chip === "brand");
   return (
     <div className="ed-library-panel">
       <div className="ed-library-top">
-        <input className="ed-input ed-search" type="search" placeholder="Search blocks" aria-label="Search blocks" value={query} onChange={(e) => setQuery(e.target.value)} />
-        <div className="ed-chips" role="tablist" aria-label="Block categories">
-          {CHIPS.map((c) => (
-            <button key={c.id} type="button" role="tab" aria-selected={chip === c.id} className="ed-chip-sm" onClick={() => setChip(c.id)}>
+        <input className="ed-input ed-search" type="search" placeholder="Search all blocks" aria-label="Search blocks" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <div className="ed-ins-tabs" role="tablist" aria-label="Block categories">
+          {TABS.map((c) => (
+            <button key={c.id} type="button" role="tab" title={c.title} aria-selected={!searching && chip === c.id} onClick={() => (setChip(c.id), setQuery(""))}>
               {c.label}
             </button>
           ))}
         </div>
         <p className="ed-hint">{below ? `Click adds below ${below}. Or drag onto the page.` : "Click adds at the end of the page. Or drag onto the page."}</p>
       </div>
-      {chip === "saved" ? (
+      {chip === "saved" && !searching ? (
         <SavedGrid query={query} />
       ) : (
         <Drawer>
-          <div className="ed-cards">
-            {entries.map((e) => (
-              <Card key={e.type} type={e.type} label={e.label} hint={e.hint} />
-            ))}
-          </div>
-          {!entries.length ? <p className="ed-empty">No blocks match "{query}".</p> : null}
+          {chip === "basics" && !searching
+            ? GROUPS.map((g) => {
+                const list = entries.filter((e) => e.group === g.id);
+                return list.length ? (
+                  <div key={g.id} className="ed-ins-group">
+                    <p className="ed-ins-group-label">{g.label}</p>
+                    {cards(list)}
+                  </div>
+                ) : null;
+              })
+            : cards(entries)}
+          {!entries.length && !showReading ? <p className="ed-empty">No blocks match "{query}".</p> : null}
         </Drawer>
       )}
-      {chip === "saved" || (query && !"fruit reading annotation".includes(query.toLowerCase())) ? null : (
+      {!showReading ? null : (
         <div className="ed-overlay-cards">
           <p className="ed-hint">On a picture</p>
           <div
