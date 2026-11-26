@@ -31,6 +31,7 @@ export function CanvasController() {
     const onDown = (e: PointerEvent) => {
       if (e.button !== 0) return;
       const target = e.target as Element;
+      if (target.closest?.("[data-rich-editing]")) return;
       const el = target.closest<HTMLElement>(LAYER);
       if (!el) return;
       // Fruit-reading marks and the proportions switch handle their own presses.

@@ -19,6 +19,8 @@ export type RowDef<T> = {
   glyph?: string;
   /** A spacing value: right-click snaps it to the theme's spacing steps. */
   spacing?: boolean;
+  /** A select row whose values are numbers (stored as numbers). */
+  numeric?: boolean;
   /** The value can't be cleared (the schema requires it). */
   required?: boolean;
   /** An alignment grid: which keys hold the horizontal and vertical alignment. */
@@ -30,6 +32,18 @@ export type RowContext = { parentKind?: "flow" | "grid" | "canvas"; framed?: boo
 
 const inCanvas = (c: RowContext) => c.parentKind === "canvas";
 const notCanvas = (c: RowContext) => c.parentKind !== "canvas";
+
+const WEIGHTS = [
+  [100, "Thin"],
+  [200, "Extra light"],
+  [300, "Light"],
+  [400, "Regular"],
+  [500, "Medium"],
+  [600, "Semibold"],
+  [700, "Bold"],
+  [800, "Extra bold"],
+  [900, "Black"],
+].map(([v, l]) => ({ value: String(v), label: `${l} ${v}` }));
 
 export const STYLE_ROWS: RowDef<Style>[] = [
   { key: "x", label: "X", group: "Position", kind: "number", when: inCanvas, suffix: "px", pair: "Position", glyph: "X" },
@@ -75,18 +89,54 @@ export const STYLE_ROWS: RowDef<Style>[] = [
   { key: "shade", label: "Darken", group: "Look", kind: "number", min: 0, max: 100, step: 1, suffix: "%", placeholder: "0", pair: "Overlay", glyph: "◑", when: (c) => !!c.framed },
   { key: "blur", label: "Blur", group: "Look", kind: "number", min: 0, max: 40, step: 1, suffix: "px", placeholder: "0", pair: "Overlay", glyph: "≋", when: (c) => !!c.framed },
   { key: "background", label: "Fill", group: "Look", kind: "color" },
-  { key: "fontSize", label: "Text size", group: "Look", kind: "number", min: 6, max: 400, step: 1, suffix: "px", placeholder: "style", when: (c) => !!c.textual, glyph: "Aa" },
-  { key: "color", label: "Text colour", group: "Look", kind: "color" },
+  { key: "color", label: "Colour", group: "Look", kind: "color", when: (c) => !c.textual },
   {
     key: "textAlign",
     label: "Text align",
     group: "Look",
     kind: "select",
+    when: (c) => !c.textual,
     options: [
       { value: "", label: "Default" },
       { value: "left", label: "Left" },
       { value: "center", label: "Centre" },
       { value: "right", label: "Right" },
+    ],
+  },
+  // Text blocks: their own type settings over the text style's (see TEXT_ROWS order in the inspector).
+  { key: "fontFamily", label: "Font", group: "Text", kind: "select", when: (c) => !!c.textual, options: [{ value: "", label: "From the style" }, { value: "display", label: "Display" }, { value: "body", label: "Body" }, { value: "mono", label: "Mono" }] },
+  { key: "fontSize", label: "Size", group: "Text", kind: "number", min: 6, max: 400, step: 1, suffix: "px", placeholder: "style", when: (c) => !!c.textual, glyph: "Aa", pair: "Size" },
+  { key: "fontWeight", label: "Weight", group: "Text", kind: "select", numeric: true, when: (c) => !!c.textual, pair: "Size", options: [{ value: "", label: "Style" }, ...WEIGHTS] },
+  { key: "lineHeight", label: "Line height", group: "Text", kind: "number", min: 0.6, max: 3, step: 0.05, placeholder: "style", when: (c) => !!c.textual, glyph: "↕", pair: "Spacing" },
+  { key: "letterSpacing", label: "Letter spacing", group: "Text", kind: "number", min: -0.2, max: 1, step: 0.01, suffix: "em", placeholder: "style", when: (c) => !!c.textual, glyph: "↔", pair: "Spacing" },
+  { key: "color", label: "Colour", group: "Text", kind: "color", when: (c) => !!c.textual },
+  {
+    key: "textAlign",
+    label: "Align",
+    group: "Text",
+    kind: "select",
+    when: (c) => !!c.textual,
+    pair: "Align",
+    options: [
+      { value: "", label: "Default" },
+      { value: "left", label: "Left" },
+      { value: "center", label: "Centre" },
+      { value: "right", label: "Right" },
+    ],
+  },
+  {
+    key: "textCase",
+    label: "Case",
+    group: "Text",
+    kind: "select",
+    when: (c) => !!c.textual,
+    pair: "Align",
+    options: [
+      { value: "", label: "Style" },
+      { value: "none", label: "As typed" },
+      { value: "upper", label: "CAPITALS" },
+      { value: "lower", label: "lowercase" },
+      { value: "title", label: "Title Case" },
     ],
   },
   { key: "hidden", label: "Hide on this breakpoint", group: "Visibility", kind: "toggle" },

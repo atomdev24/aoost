@@ -1,3 +1,4 @@
+import { startRichEdit } from "../rich/edit-store";
 import { addNode, addSection, createNode, createSection, locate, updateNode } from "../../model/page-ops";
 import { isCancelled, uploadFile } from "../media";
 import { pickMedia } from "../fields/media";
@@ -116,6 +117,14 @@ export function attachCanvasDrops(doc: Document) {
     // A picture inside a block's content (an aoost block's artwork or cover): adjust that one picture.
     const at = locate(currentPage(getState()), el.getAttribute("data-node-id") ?? "");
     const owner = at?.kind === "node" ? at.node : at?.kind === "overlay" ? at.overlay.node : null;
+    // Text: edit the words where they are.
+    if (owner?.type === "Text" && !owner.locked) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!getState().selection.includes(owner.id)) selectBlock(owner.id);
+      startRichEdit(owner.id, getState().bp);
+      return;
+    }
     const hit = owner ? slotAtPoint(owner, el, e.clientX, e.clientY) : null;
     if (owner && hit && (hit.slot.kind === "bg" || (hit.el as HTMLImageElement).naturalWidth)) {
       e.preventDefault();

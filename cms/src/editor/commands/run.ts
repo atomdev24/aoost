@@ -1,3 +1,4 @@
+import { startRichEdit } from "../rich/edit-store";
 import { resetTips } from "../tips/tips";
 import { nodeToBoard } from "../board/ref-page";
 import { openProblemLog, openReport } from "../problems";
@@ -48,6 +49,12 @@ function editSelection(): boolean {
   if (at.kind === "section") {
     const first = at.section.children[0];
     if (first) selectBlock(first.id);
+    return true;
+  }
+  // Text: edit the words where they are.
+  const node = at.kind === "node" ? at.node : at.kind === "overlay" ? at.overlay.node : null;
+  if (node?.type === "Text" && !node.locked) {
+    startRichEdit(id, getState().bp);
     return true;
   }
   if (adjustable(blockEl(id))) {

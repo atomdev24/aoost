@@ -56,6 +56,16 @@ export const Style = z.object({
   textAlign: z.enum(["left", "center", "right"]).optional(),
   /** Text: its own font size in px, over the text style's (for this screen size). */
   fontSize: z.number().min(6).max(400).optional(),
+  /** Text: the font over the text style's (the theme's display, body or mono font). */
+  fontFamily: z.enum(["display", "body", "mono"]).optional(),
+  /** Text: weight over the text style's (100 thin to 900 black). */
+  fontWeight: z.number().int().min(100).max(900).optional(),
+  /** Text: line height over the text style's, as a multiple of the size. */
+  lineHeight: z.number().min(0.6).max(3).optional(),
+  /** Text: letter spacing over the text style's, in em. */
+  letterSpacing: z.number().min(-0.2).max(1).optional(),
+  /** Text: capitals. */
+  textCase: z.enum(["none", "upper", "lower", "title"]).optional(),
   filter: ImageFilter.optional(),
   /** Pictures and video: a black layer over the content, in % dark (0 to 100). */
   shade: z.number().min(0).max(100).optional(),

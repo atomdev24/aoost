@@ -228,8 +228,8 @@ export function addNodeCss(sheet: Sheet, node: Node, section?: Section) {
     }
   }
   // Text size over the text style's: on the text inside the block (it beats the style's class).
-  const fs = (s?: Style): Decls => (s?.fontSize ? { "font-size": `calc(var(--cs, 1px) * var(--fit, 1) * ${s.fontSize})` } : {});
-  if (m.style.fontSize || d.style.fontSize || extra.tablet?.style.fontSize || extra.widescreen?.style.fontSize) {
+  const fs = (s?: Style): Decls => textDecls(s);
+  if (hasText(m.style) || hasText(d.style) || hasText(extra.tablet?.style) || hasText(extra.widescreen?.style)) {
     sheet.add(`${sel} .tx`, fs(m.style), fs(d.style), extraDecls((bp) => !!extra[bp as keyof typeof extra], (bp) => fs(extra[bp as keyof typeof extra]!.style)));
   }
   const sm = shadeDecls(m.style);
@@ -240,6 +240,21 @@ export function addNodeCss(sheet: Sheet, node: Node, section?: Section) {
     const sx = { tablet: st ?? sm ?? {}, widescreen: sw ?? sd ?? sm ?? {} };
     sheet.add(`${sel} .shade`, sm ?? {}, sd ?? sm ?? {}, extraDecls((bp) => !!extra[bp], (bp) => sx[bp as keyof typeof sx]));
   }
+}
+
+const TEXT_CASE = { none: "none", upper: "uppercase", lower: "lowercase", title: "capitalize" } as const;
+const hasText = (s?: Style) => !!s && (s.fontSize !== undefined || !!s.fontFamily || s.fontWeight !== undefined || s.lineHeight !== undefined || s.letterSpacing !== undefined || !!s.textCase);
+/** A text block's own type settings, over its text style's: on the text inside the block. */
+function textDecls(s?: Style): Decls {
+  const d: Decls = {};
+  if (!s) return d;
+  if (s.fontSize) d["font-size"] = `calc(var(--cs, 1px) * var(--fit, 1) * ${s.fontSize})`;
+  if (s.fontFamily) d["font-family"] = `var(--font-${s.fontFamily})`;
+  if (s.fontWeight !== undefined) d["font-weight"] = String(s.fontWeight);
+  if (s.lineHeight !== undefined) d["line-height"] = String(s.lineHeight);
+  if (s.letterSpacing !== undefined) d["letter-spacing"] = `${s.letterSpacing}em`;
+  if (s.textCase) d["text-transform"] = TEXT_CASE[s.textCase];
+  return d;
 }
 
 export function addSectionCss(sheet: Sheet, section: Section) {

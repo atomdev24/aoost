@@ -43,6 +43,17 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 6. Masks and colour adjustments for board images; video and link references; shared scrapbook board.
 7. Engine / site-pack split for the Aerobotics website (see HANDBOOK.md §7). Started: the Aerobotics block pack (`components/aerobotics/`) is in the demo's Brand tab.
 
+## Foundations first (Alex, 26 Nov 2026)
+
+Before more features: the basics people touch all day. In order:
+1. **Text editing** — rich text on the page, per-screen type controls (EDITOR-TEXT.md). ✓ built.
+2. **Speed and UI audit** — measured baseline (EDITOR-FOUNDATIONS.md), research of Linear, Figma,
+   Framer, Webflow and Apple's Pro apps, then mockups to test.
+3. **Web app** — the editor already installs as an app; extras (share to media, notifications).
+4. **Microsoft Clarity** with cookie consent, and an insights view in the editor (the demo shows
+   aoost.com's own numbers).
+5. Later (kept, not now): **AI attention preview** (predicted heatmaps before publishing).
+
 ## Done (26 Nov 2026): editor UI spec for the Aerobotics team
 
 From the interview with Alex (doc "Editor UI spec — Aerobotics team"), shipped in PRs #95–#101:

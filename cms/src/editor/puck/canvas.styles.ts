@@ -52,6 +52,11 @@ html.ed-dragging [data-puck-overlay-portal],html.ed-dragging [class*="DraggableC
 .s[data-kind="grid"]>.si{background-image:repeating-linear-gradient(to right,rgba(10,132,255,.07) 0,rgba(10,132,255,.07) var(--ed-col),transparent var(--ed-col),transparent calc(var(--ed-col) + var(--ed-gap)));background-origin:content-box;background-clip:content-box}
 .ov{cursor:pointer;outline:1px dashed rgba(10,132,255,.6);outline-offset:2px}
 .ov.ed-selected{outline:2px solid #0A84FF}
+.ed-richhost{display:contents}
+.tx-editing{white-space:pre-wrap;word-wrap:break-word;font-variant-ligatures:none;cursor:text;outline:calc(1.5px * var(--ed-px,1)) dashed rgba(10,132,255,.7);outline-offset:calc(4px * var(--ed-px,1));caret-color:#0A84FF}
+.tx-editing:focus{outline-style:solid}
+.tx-editing a{cursor:text}
+.tx-editing .ProseMirror-selectednode{outline:2px solid #0A84FF}
 .ov[data-anchor="viewport"]{position:fixed}
 .ed-mega-stage{width:min(1100px,calc(100% - 48px));margin:40px auto;background:#F3EFE6;color:#141414;border:1.5px solid #141414;border-radius:14px;box-shadow:5px 5px 0 #141414;overflow:hidden}
 body:has(.ed-mega-stage){background:var(--c-sand)}
