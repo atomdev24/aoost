@@ -16,4 +16,5 @@ export const readingsField = {
 export const fields: Fields<AeroReadingsContent> = {
   readings: readingsField,
   layout: { type: "radio", label: "Layout", options: [{ label: "Stacked", value: "stack" }, { label: "In a row", value: "row" }] },
+  animate: { type: "radio", label: "Pop in when scrolled into view", options: [{ label: "Yes", value: true }, { label: "No", value: false }] },
 };

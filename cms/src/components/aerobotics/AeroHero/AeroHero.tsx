@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
 import { art, Btn, Pic, BUTTON_STYLES } from "../shared";
+import { LogoTicker, tickerCss, TickerSettings } from "../ticker";
 import { css } from "./AeroHero.styles";
 
 export const AeroHeroContent = z.object({
@@ -25,7 +26,7 @@ export const AeroHeroContent = z.object({
   secondaryStyle: z.enum(BUTTON_STYLES),
   /** Customer logos along the bottom (white artwork). */
   logos: z.array(z.object({ src: z.string(), alt: z.string() })),
-});
+}).merge(TickerSettings);
 export type AeroHeroContent = z.infer<typeof AeroHeroContent>;
 
 const logo = (n: string, alt: string) => ({ src: art(`logo_${n}`), alt });
@@ -54,12 +55,18 @@ export const AeroHero = defineComponent<AeroHeroContent>({
       secondaryLabel: "See how it works",
       secondaryUrl: "https://aerobotics.com/#how-it-works",
       secondaryStyle: "white",
-      logos: CUSTOMER_LOGOS.slice(0, 5),
+      logos: CUSTOMER_LOGOS,
+      logosMotion: "scroll",
+      logosSpeed: 40,
+      logosDirection: "left",
+      logosGap: 56,
+      logosFade: 25,
+      logosPause: false,
     },
   },
   fullBleed: true,
   kit: aeroboticsKit,
-  css,
+  css: css + tickerCss,
   Render: ({ content: c, ctx }) => (
     <div className={`ab ab-full ab-on-dark abh abh-${c.align} abh-${c.height}`} style={{ "--abh-shade": String((c.shade ?? 25) / 100) } as CSSProperties}>
       <Pic className="abh-bg" src={c.image} alt={c.alt} ctx={ctx} eager />
@@ -75,7 +82,9 @@ export const AeroHero = defineComponent<AeroHeroContent>({
             <Btn label={c.secondaryLabel} url={c.secondaryUrl} kind={c.secondaryStyle} ctx={ctx} />
           </div>
         </div>
-        {c.logos.length ? (
+        {c.logos.length && (c.logosMotion ?? "scroll") === "scroll" ? (
+          <LogoTicker logos={c.logos} s={c} className="abh-ticker" />
+        ) : c.logos.length ? (
           <ul className="abh-logos" aria-label="Customers">
             {c.logos.map((l, i) => (
               <li key={i}>

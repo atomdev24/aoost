@@ -77,7 +77,7 @@ export const AeroSplit = defineComponent<AeroSplitContent>({
           {c.media !== "picture" && c.charts.length ? (
             <div className="abs-charts">
               {c.charts.map((d, i) => (
-                <ChartCard key={i} d={d} />
+                <ChartCard key={i} d={d} editing={ctx.editing} order={i} />
               ))}
             </div>
           ) : null}
