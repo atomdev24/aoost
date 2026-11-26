@@ -65,3 +65,14 @@ export function resetBlockOverrides(page: Page, id: string, bp: Breakpoint = "mo
     sections: page.sections.map((s) => (!s.children.some((n) => n.id === id) ? s : { ...s, children: s.children.map((n) => (n.id !== id ? n : resetNode(n, bp))) })),
   };
 }
+
+/** The sections and blocks that have their own values at this size (marked orange on the board). */
+export function overriddenIds(page: Page, bp: Breakpoint): string[] {
+  if (bp === "desktop") return [];
+  const ids: string[] = [];
+  for (const s of page.sections) {
+    if (overridesAt(s.layout, bp).length) ids.push(s.id);
+    for (const node of s.children) if (nodeOverrides(node, bp)) ids.push(node.id);
+  }
+  return ids;
+}

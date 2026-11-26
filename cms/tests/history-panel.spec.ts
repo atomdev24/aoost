@@ -45,15 +45,15 @@ test.describe("version history", () => {
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     await page.getByRole("button", { name: "History", exact: true }).click();
-    const list = page.getByRole("list", { name: "Versions" });
+    const list = page.locator(".ed-hdays"); // grouped by day: Today, Yesterday
     await expect(list.locator("li").first()).toContainText("Pushed Home: Variant 1");
     await expect(list.locator("li").first()).toContainText("Live");
     await expect(list.locator("li").nth(1)).toContainText("Published Sample");
     await expect(list.locator("li").first().getByRole("button", { name: /Restore/ })).toHaveCount(0);
     await expect(list.locator("li").nth(1).getByRole("link", { name: /Preview/ })).toHaveAttribute("href", `/preview/_version/${b}/`);
 
-    // Compare: that version beside the live page, with what it changes; Restore from there.
-    await list.locator("li").nth(1).getByRole("button", { name: /Compare/ }).click();
+    // See what changed: that version beside the live page, with what it changes; Restore from there.
+    await list.locator("li").nth(1).getByRole("button", { name: /See what changed/ }).click();
     const compare = page.getByRole("dialog", { name: /compared with live/ });
     await expect(compare).toBeVisible();
     await expect(compare.getByRole("region", { name: "What changed" })).toContainText("Sample");
