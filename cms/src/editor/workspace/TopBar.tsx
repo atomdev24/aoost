@@ -13,6 +13,7 @@ import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
 import { currentPage, flush, megaItemId, redo, setLang, setPage, undo, update, useEditor } from "../store";
 import { loadPublished, openSheet, publish, usePublish } from "./publish";
 import { PublishMenu, ReleaseChip } from "./Release";
+import { Preflight } from "./Preflight";
 import { loadStaging, useStaging } from "./staging";
 import { useChanges } from "./changes-count";
 import { DEMO } from "../demo";
@@ -193,6 +194,7 @@ export function TopBar() {
         {DEMO ? <DemoBar /> : null}
         <Avatars />
         {DEMO ? null : <ClaudePill />}
+        <Preflight />
         <button type="button" className="ed-btn ed-desk-only" onClick={preview}>
           Preview
         </button>
