@@ -141,6 +141,7 @@ campaigns); roles with a Team panel and @mention suggestions. Waiting on Alex: B
 - Movable panel bar: drag the left rail by its grip anywhere on the canvas; its panels open on the
   side with room; remembered; double-click the grip (or snap to the left edge) to put it back.
 - Problem log and Report a problem (HANDBOOK §5b), readable in the editor, as text and by Claude.
+- Done (Nov 2026): connect a personal Claude account by OAuth (`docs/connect-claude.md`), Claude-at-work pill, ring and tag, @Claude comment tasks. Needs the Access path change in BLOCKERS.md.
 
 ## Done (19 Nov 2026)
 

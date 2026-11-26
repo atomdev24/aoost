@@ -1,3 +1,4 @@
+import { agentSaid } from "./agent/store";
 import { noteProblem } from "./problems";
 import type { ClientMessage, ServerMessage } from "../model/protocol";
 import { api } from "./api";
@@ -77,8 +78,12 @@ function handle(msg: ServerMessage) {
       }
       const who = msg.origin === "mcp" ? "Claude" : "Another window";
       applyRemote(msg.ops, `${who}: ${msg.summary ?? "edit"}`, msg.changedNodeIds);
+      if (msg.origin === "mcp") agentSaid({ state: "working", text: msg.summary ?? "Editing", nodeIds: msg.changedNodeIds });
       break;
     }
+    case "agent":
+      agentSaid({ state: msg.state, text: msg.text, pageId: msg.pageId, nodeIds: msg.nodeIds });
+      break;
     case "published":
       setUnpublished(false);
       break;

@@ -57,6 +57,12 @@ body:has(.ed-mega-stage){background:var(--c-sand)}
 .ao .ao-b[data-mat="light"][data-band="last"],.ao .ao-b[data-mat="light"][data-band="only"]{padding-bottom:calc(var(--s8) + 40px)}
 .ao .ao-b[data-mat][data-band-top]{margin-top:calc(-1 * var(--s9))}
 [data-ed-untr]{outline:1.5px dashed rgba(255,159,10,.9);outline-offset:2px}
+/* Claude at work (editor/agent/AgentMarks.tsx): a glow in Claude's colour and a small tag. */
+.ed-agent-ring{position:fixed;z-index:2147483000;pointer-events:none;border:4px solid #D97757;border-radius:6px}
+.ed-agent-ring[data-state="working"]{animation:ed-agent 1.6s ease-in-out infinite}
+@keyframes ed-agent{0%,100%{box-shadow:0 0 0 0 rgba(217,119,87,.0)}50%{box-shadow:0 0 0 12px rgba(217,119,87,.25)}}
+.ed-agent-tag{position:fixed;z-index:2147483001;pointer-events:none;padding:2px 8px;border-radius:4px;background:#D97757;color:#fff;font:600 11px/16px -apple-system,Inter,system-ui,sans-serif;white-space:nowrap;letter-spacing:0}
+@media (prefers-reduced-motion:reduce){.ed-agent-ring{animation:none!important}}
 /* Hover outline + name tag (editor/canvas/HoverLabel.tsx). */
 .ed-hover{position:fixed;display:none;pointer-events:none;z-index:2147483000;outline:1.5px dashed #0A84FF;outline-offset:-1px;border-radius:2px}
 .ed-hover>span{position:absolute;left:-1px;bottom:100%;padding:1px 6px;border-radius:3px 3px 0 0;background:#0A84FF;color:#fff;font:500 11px/16px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;white-space:nowrap;letter-spacing:0}

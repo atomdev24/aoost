@@ -53,3 +53,17 @@ sign in stays an owner, as before, and whoever saves the team list always stays 
   service (Cloudflare Email Routing can't send to arbitrary inboxes; Resend/Postmark have free
   tiers but are new accounts) and Slack needs the CTO's approval for the app. @mentions in
   comments already suggest teammates from the Team list.
+
+## Connect your own Claude account (Nov 2026)
+The site now signs Claude in with OAuth (`docs/connect-claude.md`). Cloudflare Access must let
+Claude's requests through to these paths, while the editor itself stays behind Access:
+1. Cloudflare dashboard → Zero Trust → Access → Applications → the editor app → Edit. If its
+   paths include `/mcp*`, remove that path (keep `/admin*`, `/api/editor/*`, `/preview*`).
+   `/oauth/*` and `/.well-known/*` must not be covered either (they aren't unless the app covers
+   the whole domain; if it does, add a second application for those three paths with the
+   policy action **Bypass**, Include: Everyone).
+2. Claude → Settings → Connectors → Add custom connector → name `aoost`, URL
+   `https://alexoostendurp.com/mcp` → Add → on the site's "Connect Claude" page press **Allow**.
+3. Test in a chat: "list my aoost pages". Then open the editor and ask for a small change: the
+   Claude pill should appear under the top bar.
+Without step 1 the connector says it can't reach the server; nothing else breaks.

@@ -1,4 +1,5 @@
 import { cleanTeam, type Team } from "../model/roles";
+import type { AgentStatus } from "../model/protocol";
 import { DurableObject } from "cloudflare:workers";
 import "../components/registry";
 import { deepEqual, getAt, mergeFiles, pathLabel, serialize, setAt, type PathSeg } from "../model/merge";
@@ -402,6 +403,31 @@ export class DraftStore extends DurableObject<Env> {
   }
 
   /** A page's reference images on the board (editor only; never part of the site's content). */
+  // ------------------------------------------------- small key/value store (OAuth for the connector)
+
+  async kvGet<T>(key: string): Promise<T | null> {
+    const row = await this.ctx.storage.get<{ v: T; exp: number }>(`kv:${key}`);
+    if (!row) return null;
+    if (row.exp && row.exp < Date.now()) {
+      await this.ctx.storage.delete(`kv:${key}`);
+      return null;
+    }
+    return row.v;
+  }
+
+  async kvPut(key: string, v: unknown, ttlMs: number) {
+    await this.ctx.storage.put(`kv:${key}`, { v, exp: ttlMs ? Date.now() + ttlMs : 0 });
+  }
+
+  async kvDelete(key: string) {
+    await this.ctx.storage.delete(`kv:${key}`);
+  }
+
+  /** What Claude is doing right now, for every open editor (the "Claude is working" pill and glow). */
+  agentStatus(status: AgentStatus) {
+    this.broadcast({ type: "agent", ...status, at: Date.now() });
+  }
+
   /** The team: email (or "*@domain") → role. Only owners change it (checked in the API). */
   async getTeam(): Promise<Team> {
     return (await this.ctx.storage.get<Team>("team")) ?? {};

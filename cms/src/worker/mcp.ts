@@ -19,7 +19,30 @@ const INSTRUCTIONS =
   "Tools for editing Alex's site, aoost. Every tool changes the DRAFT only; the open editor shows changes live and Alex can undo them. " +
   "Start with get_editor_context to see the page and selection Alex means, and get_site for theme tokens and component types. " +
   "The base layout is mobile (390px); desktop stores only overrides (set_responsive_override). Check mobile first. " +
-  "Never call publish unless Alex explicitly asks you to publish in the chat.";
+  "Never call publish unless Alex explicitly asks you to publish in the chat. " +
+  "Alex watches the editor while you work: call set_status with what you're doing at each step (and node_ids for the blocks), and set_status done: true with a summary at the end. " +
+  "Comments that tag @Claude are tasks for you: get_claude_tasks lists them; reply_to_comment (resolve) when each is done.";
+
+/** "@Claude" (any case) in a comment makes it a task for Claude. */
+export const CLAUDE_TAG = /(^|\s)@claude\b/i;
+
+/** What a tool call looks like to someone watching the editor. */
+export function describeTool(name: string): string {
+  if (name === "get_page" || name === "list_pages" || name === "get_site" || name === "get_node" || name === "get_editor_context") return "Reading the site";
+  if (name === "get_comments" || name === "get_claude_tasks") return "Reading comments";
+  if (name === "get_preview_screenshot") return "Looking at the page";
+  if (name === "reply_to_comment") return "Replying to a comment";
+  if (name === "publish") return "Publishing";
+  if (name.startsWith("add_")) return "Adding to the page";
+  if (name === "update_node" || name === "set_responsive_override") return "Changing a block";
+  if (name === "move_node") return "Moving a block";
+  if (name === "delete_node") return "Removing a block";
+  if (name === "create_page") return "Making a page";
+  if (name === "update_page_settings") return "Changing page settings";
+  if (name === "update_nav") return "Updating the navigation";
+  if (name === "upload_media_from_url") return "Adding a picture";
+  return "Working";
+}
 
 type Rpc = { jsonrpc: "2.0"; id?: string | number | null; method?: string; params?: Record<string, unknown> };
 type Content = { type: "text"; text: string } | { type: "image"; data: string; mimeType: string };
@@ -41,6 +64,28 @@ async function callTool(name: string, args: Record<string, unknown>, env: Env, o
   const parsed = tool.input.safeParse(args ?? {});
   if (!parsed.success) return text(`Invalid arguments: ${parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; ")}`, true);
   const draft = draftStub(env);
+  // Every call shows in the open editors: "Claude is working · Updating a block".
+  if (name !== "set_status") {
+    const a = parsed.data as { page?: unknown; node_id?: unknown };
+    await draft.agentStatus({ state: "working", text: describeTool(name), ...(typeof a.page === "string" ? { pageId: a.page } : {}), ...(typeof a.node_id === "string" ? { nodeIds: [a.node_id] } : {}) }).catch(() => {});
+  }
+
+  if (name === "set_status") {
+    const a = parsed.data as { text: string; done: boolean; page?: string; node_ids?: string[] };
+    await draft.agentStatus({ state: a.done ? "done" : "working", text: a.text, ...(a.page ? { pageId: a.page } : {}), ...(a.node_ids?.length ? { nodeIds: a.node_ids } : {}) });
+    return text("Shown in the editor.");
+  }
+
+  if (name === "get_claude_tasks") {
+    const a = parsed.data as { page?: string };
+    const tasks = (await draft.getComments()).filter((t) => t.status === "open" && (!a.page || t.pageId === a.page) && t.messages.some((m) => CLAUDE_TAG.test(m.text)));
+    if (!tasks.length) return text("No open @Claude tasks.");
+    return text(
+      tasks
+        .map((t) => [`${t.id} · page ${t.pageId} · block ${t.nodeId} ("${t.label}") · ${t.bp}`, ...t.messages.map((m) => `  ${m.by.name}: ${m.text}`)].join("\n"))
+        .join("\n\n"),
+    );
+  }
 
   if (name === "get_problem_log") {
     const a = parsed.data as { limit: number; kind?: string };
