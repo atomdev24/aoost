@@ -17,7 +17,7 @@ const KIND_OF: Record<string, Section["kind"]> = { FlowSection: "flow", GridSect
 export const isSectionType = (type: string) => type in KIND_OF;
 
 /** Props on a node item that are not component content. */
-export const NODE_META = ["id", "name", "locked", "style", "frame", "effects"] as const;
+export const NODE_META = ["id", "name", "locked", "style", "frame", "effects", "bind"] as const;
 
 const defined = <T extends object>(o: T): T => {
   const out = {} as Record<string, unknown>;
@@ -26,14 +26,14 @@ const defined = <T extends object>(o: T): T => {
 };
 
 export function nodeToItem(node: Node): PuckItem {
-  return { type: node.type, props: defined({ ...node.content, id: node.id, name: node.name, locked: node.locked, style: node.style, frame: node.frame, effects: node.effects }) };
+  return { type: node.type, props: defined({ ...node.content, id: node.id, name: node.name, locked: node.locked, style: node.style, frame: node.frame, effects: node.effects, bind: node.bind }) };
 }
 
 /** Column stacks: each column is its own Puck slot (c0…c3), so blocks drop into a column. */
 export const STACK_SLOTS = ["c0", "c1", "c2", "c3"] as const;
 
 export function itemToNode(item: PuckItem): Node {
-  const { id, name, locked, style, frame, effects, puck: _puck, editMode: _editMode, ...rest } = item.props as Record<string, unknown> & { id: string };
+  const { id, name, locked, style, frame, effects, bind, puck: _puck, editMode: _editMode, ...rest } = item.props as Record<string, unknown> & { id: string };
   // "__" props are inspector-only headings and switches, never content.
   const content = Object.fromEntries(Object.entries(rest).filter(([k]) => !k.startsWith("__")));
   return defined({
@@ -45,6 +45,7 @@ export function itemToNode(item: PuckItem): Node {
     style: (style as Node["style"]) ?? { base: {} },
     frame: frame as Node["frame"],
     effects: effects as Node["effects"],
+    bind: bind && typeof bind === "object" && Object.keys(bind).length ? (bind as Record<string, string>) : undefined,
   }) as Node;
 }
 

@@ -34,7 +34,7 @@ export async function listVersions(opts: Opts, limit = 30): Promise<Version[]> {
   });
 }
 
-const CONTENT_FILE = /^content\/(site\.json|collections\.json|pages\/[^/]+\.json)$/;
+const CONTENT_FILE = /^content\/(site\.json|collections\.json|cms\.json|pages\/[^/]+\.json)$/;
 
 function decodeBase64(b64: string): string {
   const bin = atob(b64.replace(/\n/g, ""));

@@ -13,7 +13,7 @@ const withPage = (site: Site, children: ReturnType<typeof createNode>[], extra: 
 });
 
 describe("publish checks", () => {
-  const base = demoSite;
+  const base = demoSite();
   it("flags pictures without a description and empty pictures", () => {
     const site = withPage(base, [createNode("Image", { id: "a", content: { src: "/media/x.jpg", alt: "" } }), createNode("Image", { id: "b", content: { src: "" } })]);
     const c = publishChecks(site, { pageIds: ["chk"] });

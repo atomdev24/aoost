@@ -28,7 +28,8 @@ import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { UploadTrayHost } from "./ui/UploadTrayHost";
-import { CompareView, BrowserZoomNotice, DesignsBoard, VariantBand } from "./parts";
+import { CollectionsView, CompareView, BrowserZoomNotice, DesignBand, DesignsBoard, VariantBand } from "./parts";
+import { useCollectionsOpen } from "./collections/collections-open";
 import { useDesignsOpen } from "./templates/designs-open";
 import { useCompare } from "./workspace/compare";
 import { TopBar } from "./workspace/TopBar";
@@ -73,8 +74,10 @@ export function Editor() {
   const interacting = useBoard((s) => s.interacting);
   const moving = useBoard((s) => s.moving);
   const onVariant = useEditor((s) => !!currentPage(s).variantOf);
+  const onDesign = useEditor((s) => !!currentPage(s).collectionId);
   const comparing = !!useCompare();
   const designsOpen = !!useDesignsOpen();
+  const collectionsOpen = !!useCollectionsOpen();
   useEffect(() => attachKeys(document), []);
   useEffect(() => warmUp(), []);
   useEffect(() => void performance.mark("aoost:shell"), []);
@@ -121,8 +124,10 @@ export function Editor() {
           <TopBar />
           <SyncNotice />
           <VariantBand />
+          {onDesign ? <DesignBand /> : null}
           {comparing ? <CompareView /> : null}
           {designsOpen ? <DesignsBoard /> : null}
+          {collectionsOpen ? <CollectionsView /> : null}
           <LeftPanel />
           <Board />
           <Inspector />

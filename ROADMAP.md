@@ -42,6 +42,8 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
    (email, Slack provision) and a settings page.
 6. Masks and colour adjustments for board images; video and link references; shared scrapbook board.
 7. Engine / site-pack split for the Aerobotics website (see HANDBOOK.md §7). Started: the Aerobotics block pack (`components/aerobotics/`) is in the demo's Brand tab.
+8. Collections (`EDITOR-COLLECTIONS.md`): ✓ built on `feat/collections` (PR open, waiting on Alex's review).
+   Next: the "not yet" list in that brief.
 
 ## Done (26 Nov 2026): editor UI spec for the Aerobotics team
 

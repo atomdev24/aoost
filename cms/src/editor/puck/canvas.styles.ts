@@ -59,6 +59,10 @@ body:has(.ed-mega-stage){background:var(--c-sand)}
 .ed-flash{animation:ed-flash 2s ease-out}
 [data-ed-over]{outline:1.5px solid rgba(255,159,10,.85);outline-offset:-1.5px}
 .s[data-ed-over]{outline:none;box-shadow:inset 3px 0 0 rgba(255,159,10,.85)}
+/* Collection page designs: blocks connected to fields (collections/BoundMarks.tsx). */
+[data-ed-bound]{outline:1.5px dashed rgba(175,82,222,.9);outline-offset:-1.5px}
+.n[data-ed-bound]:not(.s[data-kind="canvas"]>.si>.n){position:relative}
+[data-ed-bound]::after{content:"\\2192 " attr(data-ed-bound);position:absolute;top:4px;left:4px;z-index:5;padding:2px 7px;border-radius:999px;background:#AF52DE;color:#fff;font:600 11px/1.5 -apple-system,system-ui,sans-serif;pointer-events:none;white-space:nowrap;max-width:calc(100% - 8px);overflow:hidden;text-overflow:ellipsis}
 /* Mat bands, spaced like the live page's .mat wrapper (editor/canvas/MatBands.tsx). */
 .ao .ao-b[data-mat][data-band]{padding-top:0;padding-bottom:var(--s9)}
 .ao .ao-b[data-mat][data-band="first"],.ao .ao-b[data-mat][data-band="only"]{padding-top:var(--s8)}

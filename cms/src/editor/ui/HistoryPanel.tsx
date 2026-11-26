@@ -23,6 +23,7 @@ function describe(v: Version, titles: Map<string, string>): string {
     if (page) return `Published ${titles.get(page[1]!) ?? page[1]}`;
     if (what === "content/site.json") return "Published site settings";
     if (what === "content/collections.json") return "Published diary and playlists";
+    if (what === "content/cms.json") return "Published collections";
     return `Published ${what}`;
   }
   return v.message;

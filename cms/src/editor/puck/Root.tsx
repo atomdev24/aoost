@@ -1,5 +1,6 @@
 import { HoverLabel } from "../canvas/HoverLabel";
 import { OverrideMarks } from "../canvas/OverrideMarks";
+import { BoundMarks } from "../collections/BoundMarks";
 import { MatBands } from "../canvas/MatBands";
 import { AgentMarks } from "../agent/AgentMarks";
 import { openPanel } from "../workspace/rail-store";
@@ -64,6 +65,7 @@ export function Root({ children }: { children: ReactNode }) {
       <CanvasController />
       <HoverLabel />
       <OverrideMarks />
+      <BoundMarks />
       <MatBands />
       <AgentMarks />
     </>

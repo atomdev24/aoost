@@ -12,7 +12,8 @@ const META: { key: keyof Site; name: string }[] = [
   { key: "settings", name: "Site settings" },
   { key: "globals", name: "Global components" },
   { key: "templates", name: "Templates" },
-  { key: "collections", name: "Collections" },
+  { key: "collections", name: "Diary and playlists" },
+  { key: "cms", name: "Collections" },
   { key: "redirects", name: "Redirects" },
 ];
 

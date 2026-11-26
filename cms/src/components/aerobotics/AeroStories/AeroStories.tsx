@@ -2,7 +2,7 @@ import { z } from "zod";
 import { safeUrl } from "../../../render/links";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
-import { art, Band, Btn, Pic, lines, BACKGROUNDS } from "../shared";
+import { art, Band, Btn, collectionEntries, Pic, lines, BACKGROUNDS } from "../shared";
 import { css } from "./AeroStories.styles";
 
 export const Story = z.object({ image: z.string(), title: z.string(), text: z.string(), url: z.string(), video: z.boolean() });
@@ -17,6 +17,10 @@ export const AeroStoriesContent = z.object({
   /** "overlay": title on the photo (home page); "below": photo, title and text (Success stories page). */
   look: z.enum(["overlay", "below"]),
   bg: z.enum(BACKGROUNDS),
+  /** Fill the cards from a collection (its live entries) instead of the list below. */
+  collection: z.string().optional(),
+  /** With a collection: at most this many cards (0 = all). */
+  limit: z.number().int().min(0).max(24).optional(),
 });
 export type AeroStoriesContent = z.infer<typeof AeroStoriesContent>;
 
@@ -44,6 +48,8 @@ export const AeroStories = defineComponent<AeroStoriesContent>({
       stories: STORIES,
       look: "overlay",
       bg: "pale",
+      collection: "",
+      limit: 4,
     },
   },
   fullBleed: true,
@@ -51,6 +57,11 @@ export const AeroStories = defineComponent<AeroStoriesContent>({
   css,
   Render: ({ content: c, ctx }) => {
     const filters = lines(c.filters);
+    // From a collection: each live entry's picture, title, summary and page; a video link makes it a video story.
+    const from = collectionEntries(ctx, c.collection, c.limit);
+    const stories = from
+      ? from.entries.map((e) => ({ image: e.value(from.field("image")), title: e.item.title, text: e.value(from.field("summary")), url: e.href, video: !!e.value(from.field("video", "link")) }))
+      : c.stories;
     return (
       <Band bg={c.bg} className={`abst abst-${c.look}`}>
         <div className="abst-head">
@@ -72,7 +83,7 @@ export const AeroStories = defineComponent<AeroStoriesContent>({
           </p>
         ) : null}
         <ul className="abst-grid">
-          {c.stories.map((s, i) => (
+          {stories.map((s, i) => (
             <li key={i}>
               <a className="abst-card" href={ctx.editing ? undefined : safeUrl(s.url || "#")}>
                 <span className="abst-media">

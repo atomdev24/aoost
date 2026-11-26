@@ -1,4 +1,5 @@
 import type { Fields } from "@puckeditor/core";
+import { collectionField } from "../../../editor/fields/custom";
 import { mediaField } from "../../../editor/fields/media";
 import { backgroundField } from "../shared";
 import type { AeroEventsContent } from "./AeroEvents";
@@ -18,5 +19,6 @@ export const fields: Fields<AeroEventsContent> = {
     defaultItemProps: { logo: "", name: "New event", when: "", buttonLabel: "Book a meeting", buttonUrl: "https://aerobotics.com/contact-us" },
     getItemSummary: (item, i) => item.name || `Event ${(i ?? 0) + 1}`,
   },
+  collection: collectionField("Fill from a collection (instead of the events above)", (site) => site.cms.map((c) => ({ value: c.id, label: `${c.name} (${c.items.filter((i) => i.status === "live").length} live)` }))) as never,
   bg: backgroundField,
 };

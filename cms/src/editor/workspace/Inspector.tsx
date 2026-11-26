@@ -5,7 +5,7 @@ import { BREAKPOINT_LABEL, type Breakpoint, type Section } from "../../schema";
 import { REFERENCE } from "../../responsive/resolve";
 import { blockOverrides, resetBlockOverrides } from "../board/overrides";
 import { currentPage, updatePage, useEditor } from "../store";
-import { GlobalPanel, OverlayPanel } from "../parts";
+import { ConnectPanel, GlobalPanel, OverlayPanel } from "../parts";
 import { usePhone } from "../touch/device";
 import { nearestCardSize, type CardSize } from "./card";
 import { useEffect, useRef, useState } from "react";
@@ -63,6 +63,7 @@ function InspectorPanel() {
   const globalId = useEditor((s) => s.globalId);
   const selected = useEditor((s) => s.selection.length > 0);
   const subject = useSubject();
+  const onDesign = useEditor((s) => !!currentPage(s).collectionId);
   const phone = usePhone();
   const card = useCard();
   // On a phone the sheet steps aside (just its title row) while a left panel is open.
@@ -119,7 +120,12 @@ function InspectorPanel() {
         </div>
       ) : null}
       <div className="ed-inspector-body" ref={body} data-tab={present.length > 1 ? tab : undefined}>
-        {overlayId ? <OverlayPanel overlayId={overlayId} /> : globalId ? <GlobalPanel globalId={globalId} /> : <Puck.Fields />}
+        {overlayId ? <OverlayPanel overlayId={overlayId} /> : globalId ? <GlobalPanel globalId={globalId} /> : (
+          <>
+            {onDesign ? <ConnectPanel /> : null}
+            <Puck.Fields />
+          </>
+        )}
       </div>
     </aside>
   );

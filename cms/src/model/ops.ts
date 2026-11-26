@@ -6,8 +6,8 @@ import { deepEqual } from "../responsive/resolve";
  * connector. Ops are page-granular: small enough to sync live, simple enough
  * that "last write wins per page" is easy to reason about.
  */
-export type MetaKey = "settings" | "theme" | "nav" | "globals" | "templates" | "collections" | "redirects";
-export const META_KEYS: MetaKey[] = ["settings", "theme", "nav", "globals", "templates", "collections", "redirects"];
+export type MetaKey = "settings" | "theme" | "nav" | "globals" | "templates" | "collections" | "cms" | "redirects";
+export const META_KEYS: MetaKey[] = ["settings", "theme", "nav", "globals", "templates", "collections", "cms", "redirects"];
 
 export type Op =
   | { op: "putPage"; page: Page }
