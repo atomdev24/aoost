@@ -17,7 +17,7 @@ function nodeConfig(def: ComponentDef): ComponentConfig {
     fields: {
       ...(Object.keys(contentFields[def.type] ?? {}).length ? { __content: contentHeading } : {}),
       ...contentFields[def.type],
-      style: styleField(!!def.framed),
+      style: styleField(!!def.framed, def.type === "Text"),
       ...(def.framed ? { frame: frameField } : {}),
       effects: effectsField,
       __visible: visibleOnField,

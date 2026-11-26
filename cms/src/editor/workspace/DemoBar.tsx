@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { DEMO_LIMITS, DEMO_STRIP } from "../demo/limits";
+import { DEMO_LIMITS, demoStrip } from "../demo/limits";
 
 /**
  * The demo editor's chip in the top bar and a thin strip under it: the strip always says what's
@@ -9,6 +9,13 @@ import { DEMO_LIMITS, DEMO_STRIP } from "../demo/limits";
  */
 export function DemoBar() {
   const [open, setOpen] = useState(false);
+  const [resetEvery, setResetEvery] = useState("nightly");
+  useEffect(() => {
+    fetch("/api/session")
+      .then((r) => r.json() as Promise<{ reset?: string }>)
+      .then((r) => r.reset && setResetEvery(r.reset))
+      .catch(() => {});
+  }, []);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const box = useRef<HTMLDivElement>(null);
@@ -48,7 +55,7 @@ export function DemoBar() {
       {/* On the page itself: the top bar's frosted glass would otherwise hold a fixed strip inside it. */}
       {createPortal(
         <div className="ed-demo-strip" role="note">
-          <span>{DEMO_STRIP}</span>
+          <span>{demoStrip(resetEvery)}</span>
           <button
             type="button"
             onPointerDown={(e) => e.stopPropagation()}

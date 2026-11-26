@@ -815,7 +815,7 @@ html.ed-commenting #preview-frame {
 .ed-demo-why p { margin: 0; font-size: 12px; line-height: 1.45; color: var(--ed-sub); }
 .ed-rail-btn[data-demo-off] { position: relative; }
 .ed-rail-btn[data-demo-off]::after {
-  content: ""; position: absolute; right: 5px; bottom: 5px; width: 9px; height: 9px;
+  content: ""; position: absolute; left: auto; top: auto; right: 4px; bottom: 4px; width: 9px; height: 9px; transform: none; padding: 0; border: 0; border-radius: 0;
   background: currentColor; opacity: 0.8;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5M2.5 5.5h7v5h-7z' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5M2.5 5.5h7v5h-7z' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -1122,3 +1122,14 @@ body:has(.ed-demo-strip) .ed-tip { bottom: 56px; }
 @media (max-width: 720px) {
   .ed-tip, body:has(.ed-demo-strip) .ed-tip { top: 118px; bottom: auto; left: 12px; right: 12px; max-width: none; transform: none; animation: none; z-index: 300; font-size: 12px; }
 }
+
+/* Demo editor settings (team/DemoModal.tsx). */
+.ed-demo-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.ed-demo-row > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ed-demo-row b { font-weight: 600; font-size: 13px; }
+.ed-demo-row small { color: var(--ed-sub); font-size: 12px; }
+.ed-demo-row input[type="checkbox"] { width: 34px; height: 20px; accent-color: var(--ed-accent, #0a84ff); }
+.ed-seg { display: inline-flex; flex: none; padding: 2px; border-radius: 9px; background: rgba(255, 255, 255, 0.06); }
+.ed-seg button { height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--ed-sub); font: inherit; font-size: 12px; cursor: pointer; }
+.ed-seg button[aria-checked="true"] { background: rgba(255, 255, 255, 0.14); color: #fff; }
+@media (max-width: 520px) { .ed-demo-row { flex-direction: column; align-items: stretch; } }
