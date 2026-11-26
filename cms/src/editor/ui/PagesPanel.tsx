@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { onOpenPageSettings, takePageSettings } from "./page-settings-open";
 import { deletePage, setShowInNav } from "../../model/pages";
 import { newVariant } from "../workspace/PageSwitcher";
@@ -239,7 +240,8 @@ export function PagesPanel() {
       <p className="ed-panel-note">
         The eye shows or hides a page in the nav; hidden pages still work at their address, like /links for your Instagram bio. <VariantIcon /> makes a variant to try ideas without touching the live page.
       </p>
-      {creating ? <NewPageModal onClose={() => setCreating(false)} /> : null}
+      {/* On the page itself, so the panel's width doesn't squeeze it. */}
+      {creating ? createPortal(<NewPageModal onClose={() => setCreating(false)} />, document.body) : null}
     </div>
   );
 }

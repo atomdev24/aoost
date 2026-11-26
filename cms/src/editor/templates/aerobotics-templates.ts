@@ -14,8 +14,8 @@ import type { SiteTemplate } from "./site-templates";
 
 const A = "https://aerobotics.com";
 /** One block in its own edge-to-edge section, named for the Layers panel. */
-const band = (name: string, type: string, content: Record<string, unknown> = {}): Section => ({ ...sectionForBlock(createNode(type, { content })), name });
-const footer = () => band("Footer", "AeroFooter");
+export const band = (name: string, type: string, content: Record<string, unknown> = {}): Section => ({ ...sectionForBlock(createNode(type, { content })), name });
+export const footer = () => band("Footer", "AeroFooter");
 const cta = (title?: string) => band("Call to action", "AeroCta", title ? { title } : {});
 /**
  * Aerobotics' own HubSpot forms (account 8626769, EU), as aerobotics.com embeds them. They start
@@ -26,7 +26,7 @@ const PLACEHOLDER = {
   contact: { placeholderFields: "First name, Last name, Work email, Company, Country, Message", placeholderButton: "Send message" },
   demo: { placeholderFields: "First name, Last name, Work email, Phone number, Company, Country, Crops you grow", placeholderButton: "Request a demo" },
 };
-const form = (which: keyof typeof HUBSPOT) => createNode("HubSpotForm", { content: { portalId: "8626769", formId: HUBSPOT[which], region: "eu1", heading: "", live: false, ...PLACEHOLDER[which], placeholderNote: "" } });
+export const form = (which: keyof typeof HUBSPOT) => createNode("HubSpotForm", { content: { portalId: "8626769", formId: HUBSPOT[which], region: "eu1", heading: "", live: false, ...PLACEHOLDER[which], placeholderNote: "" } });
 
 const page = (t: Omit<SiteTemplate, "hideNav" | "nav">): SiteTemplate => ({ ...t, hideNav: false, nav: "aerobotics" });
 

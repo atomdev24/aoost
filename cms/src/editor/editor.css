@@ -912,7 +912,9 @@ body {
   box-sizing: border-box;
 }
 .ed-panel *,
-.ed-side * {
+.ed-side *,
+.ed-modal,
+.ed-modal * {
   box-sizing: border-box;
 }
 .ed-style-body .ed-row {

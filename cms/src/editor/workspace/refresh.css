@@ -1166,3 +1166,11 @@ body:has(.ed-demo-strip) .ed-tip { bottom: 56px; }
 .ed-preflight-pop small { display: block; color: var(--ed-sub); font-size: 11px; margin-top: 2px; }
 .ed-preflight-pop li button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: rgba(10, 132, 255, 0.18); color: #8ac2ff; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
 .ed-preflight-pop li button:hover { background: rgba(10, 132, 255, 0.3); }
+
+/* New campaign page from a brief (ui/NewPageModal.tsx). */
+.ed-brief-switch { align-self: flex-start; }
+.ed-brief { display: flex; flex-direction: column; gap: 12px; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.04); }
+.ed-brief .ed-field { display: flex; flex-direction: column; gap: 5px; }
+.ed-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ed-chips button { height: 28px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; background: transparent; color: var(--ed-sub); font: inherit; font-size: 12px; cursor: pointer; }
+.ed-chips button[aria-checked="true"], .ed-chips button[aria-pressed="true"] { background: var(--ed-accent, #0a84ff); border-color: transparent; color: #fff; }

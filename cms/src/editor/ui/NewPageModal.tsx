@@ -3,13 +3,18 @@ import { createPage, slugify } from "../../model/pages";
 import { getState, setPage, update, useEditor } from "../store";
 import { Button, Modal } from "./kit";
 import { openWriter } from "../writer/writer-open";
+import { addCampaignFromBrief, BRIEF_ASKS, BRIEF_PRODUCTS, briefText, type BriefAsk, type BriefProduct } from "../templates/campaign-brief";
+import { getAuthor, newId, send } from "../comments/store";
+import { DEMO } from "../demo";
 
 /** Thumbnails for the starter templates (same language as the mockup). */
 const THUMBS: Record<string, string> = {
   blank: "none",
   gallery: "linear-gradient(90deg, #3A3A40 0 30%, transparent 30% 35%, #3A3A40 35% 65%, transparent 65% 70%, #3A3A40 70%)",
-  diary: "linear-gradient(180deg, #3A3A40 0 40%, transparent 40% 52%, #33333A 52% 60%, transparent 60% 70%, #33333A 70% 78%, transparent 78%)",
-  playlist: "linear-gradient(180deg, #E2683A 0 26%, transparent 26% 38%, #3A3A40 38% 50%, transparent 50% 62%, #3A3A40 62% 74%, transparent 74%)",
+  diary:
+    "linear-gradient(180deg, #3A3A40 0 40%, transparent 40% 52%, #33333A 52% 60%, transparent 60% 70%, #33333A 70% 78%, transparent 78%)",
+  playlist:
+    "linear-gradient(180deg, #E2683A 0 26%, transparent 26% 38%, #3A3A40 38% 50%, transparent 50% 62%, #3A3A40 62% 74%, transparent 74%)",
 };
 const CUSTOM_THUMB = "linear-gradient(180deg, #3A3A40 0 22%, transparent 22% 34%, #33333A 34% 100%)";
 
@@ -26,6 +31,20 @@ export function NewPageModal({ onClose }: { onClose: () => void }) {
   const [unpublishAt, setUnpublishAt] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const uid = useId();
+  // Campaign pages: from a brief (built from the Aerobotics blocks), or from a template.
+  const siteLangs = useEditor((s) => s.site.settings.languages);
+  const langs = (siteLangs ?? []).slice(1);
+  // Briefs build Aerobotics pages: offered in the demo and on a site that uses the Aerobotics nav.
+  const aero = useEditor((s) => DEMO || s.site.nav.logoImage === "/art/tpl_aero_logo.svg");
+  const [fromBrief, setFromBrief] = useState(true);
+  const [when, setWhen] = useState("");
+  const [where, setWhere] = useState("");
+  const [product, setProduct] = useState<BriefProduct>("binscan");
+  const [ask, setAsk] = useState<BriefAsk>("meeting");
+  const [message, setMessage] = useState("");
+  const [briefLangs, setBriefLangs] = useState<string[]>([]);
+  const [askClaude, setAskClaude] = useState(true);
+  const briefMode = aero && kind === "campaign" && fromBrief;
   const pickKind = (k: typeof kind) => {
     setKind(k);
     // Posts go under the blog page when there is one.
@@ -36,16 +55,67 @@ export function NewPageModal({ onClose }: { onClose: () => void }) {
   const preview = `${parent ? parent.slug : ""}/${slugify(name)}`;
   const create = () => {
     if (!name.trim()) return;
+    if (briefMode) return createFromBrief();
     let made = "";
-    update((site) => {
-      const result = createPage(site, { name, templateId, showInNav: kind === "page" && showInNav, parentId: parentId || null, kind, unpublishAt: unpublishAt || undefined, date });
-      made = result.pageId;
-      return result.site;
-    }, `${kind === "post" ? "New blog post" : kind === "campaign" ? "New campaign page" : "New page"} ${name.trim()}`);
+    update(
+      (site) => {
+        const result = createPage(site, {
+          name,
+          templateId,
+          showInNav: kind === "page" && showInNav,
+          parentId: parentId || null,
+          kind,
+          unpublishAt: unpublishAt || undefined,
+          date,
+        });
+        made = result.pageId;
+        return result.site;
+      },
+      `${kind === "post" ? "New blog post" : kind === "campaign" ? "New campaign page" : "New page"} ${name.trim()}`,
+    );
     if (made && getState().site.pages.some((p) => p.id === made)) {
       setPage(made);
       if (kind === "post") openWriter(made);
     }
+    onClose();
+  };
+
+  const createFromBrief = () => {
+    const brief = {
+      event: name,
+      when,
+      where,
+      product,
+      ask,
+      message,
+      languages: briefLangs,
+      endDate: unpublishAt || undefined,
+    };
+    let made = "";
+    update((site) => {
+      const r = addCampaignFromBrief(site, brief, {
+        parentId: parentId || null,
+      });
+      made = r.pageId;
+      return r.site;
+    }, `New campaign page ${name.trim()} (from a brief)`);
+    if (!made) return onClose();
+    setPage(made);
+    // The same brief to Claude, as a task on the hero: polish the words, do the other languages.
+    const hero = getState().site.pages.find((p) => p.id === made)?.sections[0]?.children[0];
+    if (askClaude && hero)
+      void send({
+        op: "create",
+        id: newId("c"),
+        pageId: made,
+        nodeId: hero.id,
+        bp: "desktop",
+        fx: 0.08,
+        fy: 0.12,
+        label: "Hero",
+        by: getAuthor() ?? { name: "Brief", color: "#D97757" },
+        text: briefText(brief),
+      });
     onClose();
   };
 
@@ -78,19 +148,111 @@ export function NewPageModal({ onClose }: { onClose: () => void }) {
 
         <div className="ed-field">
           <label className="ed-field-label ed-field-label-lg" htmlFor={`${uid}-name`}>
-            {kind === "post" ? "Post title" : "Page name"}
+            {kind === "post" ? "Post title" : briefMode ? "Event or campaign" : "Page name"}
           </label>
-          <input id={`${uid}-name`} className="ed-input ed-input-lg" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Sketchbook" autoFocus />
+          <input
+            id={`${uid}-name`}
+            className="ed-input ed-input-lg"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={briefMode ? "e.g. Interpoma 2026" : "e.g. Sketchbook"}
+            autoFocus
+          />
           <span className="ed-hint">URL: alexoostendurp.com{preview}</span>
         </div>
+
+        {aero && kind === "campaign" ? (
+          <div className="ed-seg ed-brief-switch" role="radiogroup" aria-label="Start from">
+            <button type="button" role="radio" aria-checked={fromBrief} onClick={() => setFromBrief(true)}>
+              From a brief
+            </button>
+            <button type="button" role="radio" aria-checked={!fromBrief} onClick={() => setFromBrief(false)}>
+              From a template
+            </button>
+          </div>
+        ) : null}
+
+        {briefMode ? (
+          <div className="ed-brief">
+            <div className="ed-form-two">
+              <label className="ed-field">
+                <span className="ed-field-label">Dates</span>
+                <input className="ed-input" value={when} onChange={(e) => setWhen(e.target.value)} placeholder="25–27 Nov 2026" />
+              </label>
+              <label className="ed-field">
+                <span className="ed-field-label">Where</span>
+                <input className="ed-input" value={where} onChange={(e) => setWhere(e.target.value)} placeholder="Bolzano, stand B12" />
+              </label>
+            </div>
+            <div className="ed-field">
+              <span className="ed-field-label">Product</span>
+              <div className="ed-chips" role="radiogroup" aria-label="Product">
+                {(Object.keys(BRIEF_PRODUCTS) as BriefProduct[]).map((k) => (
+                  <button key={k} type="button" role="radio" aria-checked={product === k} onClick={() => setProduct(k)}>
+                    {BRIEF_PRODUCTS[k].name.replace("TrueFruit ", "")}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="ed-field">
+              <span className="ed-field-label">Ask people to</span>
+              <div className="ed-chips" role="radiogroup" aria-label="Ask people to">
+                {(Object.keys(BRIEF_ASKS) as BriefAsk[]).map((k) => (
+                  <button key={k} type="button" role="radio" aria-checked={ask === k} onClick={() => setAsk(k)}>
+                    {BRIEF_ASKS[k].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="ed-field">
+              <span className="ed-field-label">The one thing to say (optional)</span>
+              <input
+                className="ed-input"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={`See ${BRIEF_PRODUCTS[product].name} live at ${name.trim() || "the show"}`}
+              />
+            </label>
+            {langs.length ? (
+              <div className="ed-field">
+                <span className="ed-field-label">Also in</span>
+                <div className="ed-chips" role="group" aria-label="Also in">
+                  {langs.map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      aria-pressed={briefLangs.includes(l)}
+                      onClick={() => setBriefLangs((x) => (x.includes(l) ? x.filter((y) => y !== l) : [...x, l]))}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <label className="ed-check">
+              <input type="checkbox" checked={askClaude} onChange={(e) => setAskClaude(e.target.checked)} />
+              Ask Claude to polish the words
+              {briefLangs.length ? " and translate" : ""} (an @Claude comment on the page)
+            </label>
+          </div>
+        ) : null}
 
         {kind === "campaign" ? (
           <div className="ed-field">
             <label className="ed-field-label ed-field-label-lg" htmlFor={`${uid}-end`}>
               Take it down after (optional)
             </label>
-            <input id={`${uid}-end`} type="date" className="ed-input ed-input-lg" value={unpublishAt} onChange={(e) => setUnpublishAt(e.target.value)} />
-            <span className="ed-hint">After this day the link shows the site's "not found" page. Campaign pages never show in the nav or search.</span>
+            <input
+              id={`${uid}-end`}
+              type="date"
+              className="ed-input ed-input-lg"
+              value={unpublishAt}
+              onChange={(e) => setUnpublishAt(e.target.value)}
+            />
+            <span className="ed-hint">
+              After this day the link shows the site's "not found" page. Campaign pages never show in the nav or search.
+            </span>
           </div>
         ) : null}
         {kind === "post" ? (
@@ -102,17 +264,19 @@ export function NewPageModal({ onClose }: { onClose: () => void }) {
           </div>
         ) : null}
 
-        <div className="ed-field" hidden={kind === "post"}>
-          <span className="ed-field-label ed-field-label-lg">Start from</span>
-          <div className="ed-templates">
-            {templates.map((t) => (
-              <button key={t.id} type="button" aria-pressed={t.id === templateId} onClick={() => setTemplateId(t.id)}>
-                <span className="ed-template-thumb" style={{ backgroundImage: THUMBS[t.id] ?? CUSTOM_THUMB }} />
-                <span>{t.name}</span>
-              </button>
-            ))}
+        {kind === "post" || briefMode ? null : (
+          <div className="ed-field">
+            <span className="ed-field-label ed-field-label-lg">Start from</span>
+            <div className="ed-templates">
+              {templates.map((t) => (
+                <button key={t.id} type="button" aria-pressed={t.id === templateId} onClick={() => setTemplateId(t.id)}>
+                  <span className="ed-template-thumb" style={{ backgroundImage: THUMBS[t.id] ?? CUSTOM_THUMB }} />
+                  <span>{t.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="ed-form-two">
           {kind === "page" ? (
