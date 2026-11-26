@@ -17,6 +17,8 @@ Public site on a slow phone (150 ms, 1.6 Mbps, 4× CPU): `/work`, `/journal` dra
 with 80 KB; the homepage takes 5.2 s to its main picture, 1.8 MB, 3.6 s blocked (artwork images
 and effects). Targets: under 100 ms per interaction (Linear's bar); Google calls 200 ms good.
 
+After "redraw only what changed" (26 Nov): phone tap 48 ms, key 72 ms.
+
 Scripts: `/home/claude/perf/*.mjs` style Playwright runs (event timing, long animation frames,
 largest paint). Re-run after each foundation to show the change.
 

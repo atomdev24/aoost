@@ -35,6 +35,17 @@ function savedKeysOnly(node: Node, page: Page): Node {
   return Object.keys(content).length === Object.keys(node.content).length ? node : { ...node, content };
 }
 
+function savedNode(page: Page, id: string): Node | null {
+  for (const s of page.sections) {
+    const n = s.children.find((c) => c.id === id);
+    if (n) return n;
+  }
+  return page.overlays.find((o) => o.node.id === id)?.node ?? null;
+}
+
+/** Blocks that draw from other pages (lists of posts, a post's body, diaries, playlists). */
+const PAGE_READERS = new Set(["PostList", "PostBody", "DiaryList", "PlaylistCard"]);
+
 export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckContext; id: string } & Record<string, unknown>) {
   const site = useEditor((s) => s.site);
   const page = useEditor(currentPage);
@@ -48,6 +59,19 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
   const simple = useSimple();
   const node = savedKeysOnly(itemToNode({ type, props }), page);
   const ctx = useMemo(() => ({ ...makeCtx(site, page, { editing: true }), bp }), [site, page, bp]);
+  // Redraw a block only when something it draws from changed (speed, Nov 2026): its own settings,
+  // the screen size, what every page shares, and the page list for blocks that read other pages.
+  // Typing in one block no longer redraws every other block on the page.
+  // The saved block keeps its identity until it's edited (the store copies only what changes), so
+  // it's a cheap "did this block change?" test; a block not saved yet falls back to its contents.
+  const saved = useMemo(() => savedNode(page, props.id), [page, props.id]);
+  const nodeKey: unknown = saved ?? JSON.stringify(node);
+  const readsPages = useMemo(() => PAGE_READERS.has(type) || JSON.stringify(saved?.content ?? node.content).includes('"pageId"'), [type, saved]);
+  const drawn = useMemo(
+    () => <NodeContent node={node} ctx={ctx} />,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nodeKey, bp, page.id, page.lang, site.theme, site.settings, site.nav, site.globals, site.collections, readsPages ? site.pages : null],
+  );
   const attrs = nodeAttrs(node);
   return (
     <div
@@ -59,7 +83,7 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
       data-node-id={node.id}
       style={node.fit ? ({ "--fit": String(node.fit) } as React.CSSProperties) : undefined}
     >
-      {editingText ? <RichEditingPart node={node} fallback={<NodeContent node={node} ctx={ctx} />} /> : <NodeContent node={node} ctx={ctx} />}
+      {editingText ? <RichEditingPart node={node} fallback={drawn} /> : drawn}
       {selected && inCanvas && !node.locked && !editingText && !simple ? HANDLES.map((h) => <span key={h} className="ed-h" data-ed-handle={h} />) : null}
       {selected && !node.locked && (inCanvas || getComponent(type)?.framed) ? (
         <button

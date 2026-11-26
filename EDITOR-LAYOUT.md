@@ -21,7 +21,10 @@ workspace** as the base, **B's Simple mode** for teammates, and **Phone 1 · bot
    More; panels open as half-height sheets above the tabs; More holds Desktop / Phone, Comments,
    Search and (in Full) the Site panels; the settings card, zoom bar and notes sit above the tabs;
    the tabs step aside while typing in place.
-6. **Speed.** Redraw only the block that changed; side frames catch up after; lighter first load.
+6. ✓ **Speed, first step.** Each block redraws only when something it draws from changes (its own
+   settings, the screen size, what every page shares; the page list only for post lists, diaries,
+   playlists and blocks linking to a page). Phone speed (4× slower CPU): tap 150 → 48 ms, key
+   80 → 72 ms. Next: side frames catch up after an edit; lighter first load.
 
 ## Checks
 Each stage: unit tests, build, browser at 1440 and 390.
