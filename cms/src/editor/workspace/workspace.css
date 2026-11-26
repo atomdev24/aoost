@@ -1042,10 +1042,15 @@
   opacity: 0;
   transition: max-width 150ms ease, opacity 120ms ease;
 }
-.ed-tag:hover .ed-tag-actions,
-.ed-tag:focus-within .ed-tag-actions {
-  max-width: 160px;
+/* Direction A: the selection's actions are always out, with the main one in words. */
+.ed-tag .ed-tag-actions {
+  max-width: 360px;
   opacity: 1;
+}
+.ed-tag-actions .ed-tag-word {
+  width: auto;
+  padding: 0 6px;
+  font: inherit;
 }
 .ed-tag-actions::before {
   content: "";

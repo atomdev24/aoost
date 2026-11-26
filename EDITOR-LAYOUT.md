@@ -9,9 +9,10 @@ workspace** as the base, **B's Simple mode** for teammates, and **Phone 1 · bot
    Publish carries its count inside the button. The checks badge stays (Alex asked for it).
 2. ✓ **Labelled rail.** Add, Layers, Pages, Media, Comments with words under the icons; one Site
    button opens Navigation, Theme, Fonts, Shared blocks and History.
-3. **Actions above the selection.** A small bar right above what you click (Edit text / Replace,
-   Style, Move, Settings, ···); the side panel opens when asked for, or stays pinned for those who
-   like it.
+3. ✓ **Actions above the selection.** The name tag above a selected block now always shows its
+   actions: the main one in words (Edit text, Replace), move, duplicate, hide, delete and Settings.
+   Settings shows or hides the side panel and is remembered per person; it starts shown, so nobody
+   loses the panel they know (Figma's UI3 lesson).
 4. **Simple mode (B).** A Simple / Full switch: Simple shows content first in plain words, brand
    colours and text styles only, no layout or screen-size controls; Full is today's editor.
    Default Simple for Editor-role teammates, Full for Owners.
