@@ -116,7 +116,8 @@ export function sectionDecls(kind: Section["kind"], l: SectionLayout, artboard?:
     inner["aspect-ratio"] = `${artboard.width}/${artboard.height}`;
     inner["--cw"] = String(artboard.width);
   } else {
-    inner["grid-template-columns"] = `repeat(${kind === "grid" ? l.columns : 1}, minmax(0, 1fr))`;
+    const widths = kind === "grid" && l.colWidths?.length === l.columns ? l.colWidths : null;
+    inner["grid-template-columns"] = widths ? widths.map((w) => `minmax(0, ${Math.round(w * 100) / 100}fr)`).join(" ") : `repeat(${kind === "grid" ? l.columns : 1}, minmax(0, 1fr))`;
     if (kind === "grid" && l.rows) inner["grid-auto-rows"] = "minmax(0, auto)";
     inner.gap = px(l.gap);
     if (l.align) inner["align-items"] = ALIGN[l.align];

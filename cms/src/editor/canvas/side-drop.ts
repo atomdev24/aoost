@@ -11,7 +11,7 @@ import { amendLast, currentPage, getState, updatePage } from "../store";
  * does what it always does.
  */
 type Source = { kind: "node"; id: string } | { kind: "new"; type: string };
-type Hit = { targetId: string; side: "left" | "right" };
+type Hit = { targetId: string; side: "left" | "right"; share?: number };
 
 const EDGE = 0.22;
 const ids = (page: { sections: { children: { id: string }[] }[] }) => page.sections.flatMap((s) => s.children.map((n) => n.id));
@@ -53,7 +53,12 @@ export function attachSideDrop(doc: Document) {
       // only blocks that sit straight in the section (not inside a block's own content)
       const r = node.getBoundingClientRect();
       const rel = (x - r.left) / r.width;
-      return show(rel < EDGE ? { targetId: id, side: "left" } : rel > 1 - EDGE ? { targetId: id, side: "right" } : null, r);
+      // How much of the section's width the target takes now (it keeps that beside the new block).
+      const inner = node.parentElement;
+      const cs = inner ? getComputedStyle(inner) : null;
+      const room = inner && cs ? inner.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) : 0;
+      const share = room ? r.width / room : undefined;
+      return show(rel < EDGE ? { targetId: id, side: "left", share } : rel > 1 - EDGE ? { targetId: id, side: "right", share } : null, r);
     }
     show(null);
   };
@@ -73,7 +78,7 @@ export function attachSideDrop(doc: Document) {
       const page = currentPage(state);
       const added = s.kind === "new" ? ids(page).find((id) => !known.has(id)) : undefined;
       const moving = s.kind === "node" ? s.id : (added ?? createNode(s.type));
-      const next = placeBeside(page, h.targetId, moving, h.side);
+      const next = placeBeside(page, h.targetId, moving, h.side, { share: h.share });
       if (next === page) return;
       const apply = (site: typeof state.site) => ({ ...site, pages: site.pages.map((p) => (p.id === page.id ? next : p)) });
       if (state.past.length > before) amendLast(apply, "Place side by side");

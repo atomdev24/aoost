@@ -62,6 +62,8 @@ export const SectionLayout = z.object({
   /** Grid: column and row counts. Flow uses columns = 1. */
   columns: z.number().int().min(1).max(12),
   rows: z.number().int().min(1).max(12).optional(),
+  /** Grid: each column's share of the width (any numbers; used as fr). Set by side-by-side rows and resizing in them. */
+  colWidths: z.array(z.number().min(1).max(1000)).max(12).optional(),
   gap: z.number().min(0),
   /** CSS padding shorthand in px, e.g. "64px 20px". */
   padding: z.string(),
