@@ -793,7 +793,7 @@ html.ed-commenting #preview-frame {
 .ed-demo-card .ed-demo-limits b { display: block; color: #e8e8ea; font-weight: 600; }
 /* The strip under the top bar: always says what's off (B), with Details for the full list. */
 .ed-demo-strip {
-  position: fixed; top: 58px; left: 50%; transform: translateX(-50%); z-index: 60;
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 60;
   display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px);
   height: 26px; padding: 0 4px 0 12px; border-radius: 13px;
   background: color-mix(in srgb, var(--ed-attn) 18%, #1c1c1f);

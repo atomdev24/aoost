@@ -54,6 +54,8 @@ export type Presence = {
   sel: string[];
   /** Their pointer, in the frame's own pixels for their screen size; null when it's off the canvas. */
   cur: { x: number; y: number } | null;
+  /** Their pointer on the board around the frames (board pixels), when it isn't over a frame. */
+  bcur?: { x: number; y: number } | null;
 };
 
 /** One line of the activity feed. */

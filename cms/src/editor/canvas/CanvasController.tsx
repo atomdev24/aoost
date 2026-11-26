@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { canvasSize, layerBox } from "../../responsive/canvas";
 import { currentPage, getState, setSelection } from "../store";
 import { keepsRatio } from "./ratio";
+import { nodeToBoard } from "../board/ref-page";
 import { reanchor } from "./reading-anchor";
 import { nudgeSelection, setLayerBoxes } from "./actions";
 import { axisLock, resize, snapMove, type Guide, type Handle, type Rect } from "./geometry";
@@ -58,6 +59,12 @@ export function CanvasController() {
       const others = section.children.filter((n) => !moving.includes(n.id) && !n.style.base.hidden).map((n) => layerBox(section, n, state.bp));
       const els = new Map<string, HTMLElement>([...start.keys()].map((k) => [k, si.querySelector<HTMLElement>(`[data-node-id="${CSS.escape(k)}"]`)!]));
       const origin = { x: e.clientX, y: e.clientY };
+      // Keep getting the pointer when it leaves the frame (a picture can be dragged out onto the board).
+      try {
+        target.setPointerCapture(e.pointerId);
+      } catch {
+        /* not capturable */
+      }
       let dragging = false;
       let result = new Map<string, Rect>();
       const guideLayer = doc.createElement("div");
@@ -120,9 +127,16 @@ export function CanvasController() {
         doc.documentElement.classList.remove("ed-dragging");
         cleanup = null;
       };
-      const onUp = () => {
+      const onUp = (ev: PointerEvent) => {
         finish();
         if (!dragging || !result.size) return;
+        // A picture dragged right out of the page goes onto the board as a reference.
+        const out = ev.clientX < 0 || ev.clientY < 0 || ev.clientX > doc.documentElement.clientWidth || ev.clientY > doc.documentElement.scrollHeight;
+        if (!handle && out && result.size === 1 && node.type === "Image" && node.content.src) {
+          els.forEach((n) => n && ["left", "top", "width", "height"].forEach((p) => n.style.removeProperty(p)));
+          nodeToBoard(id, ev.clientX, ev.clientY);
+          return;
+        }
         setLayerBoxes(section.id, Object.fromEntries(result), handle ? "Resize layer" : result.size > 1 ? "Move layers" : "Move layer");
         // A fruit reading moved or resized: anchor it to the spot of the picture under its centre.
         const moved = [...result.keys()];

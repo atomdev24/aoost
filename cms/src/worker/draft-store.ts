@@ -49,8 +49,10 @@ function cleanPresence(p: unknown): Presence | null {
   const o = p as Record<string, unknown>;
   const str = (v: unknown, n: number) => (typeof v === "string" ? v.slice(0, n) : "");
   const bp = ["mobile", "tablet", "desktop", "widescreen"].includes(o.bp as string) ? (o.bp as Presence["bp"]) : "desktop";
-  const cur = o.cur && typeof o.cur === "object" && Number.isFinite((o.cur as { x: number }).x) && Number.isFinite((o.cur as { y: number }).y) ? { x: Math.round((o.cur as { x: number }).x), y: Math.round((o.cur as { y: number }).y) } : null;
-  return { name: str(o.name, 40) || "Guest", color: /^#[0-9a-fA-F]{6}$/.test(str(o.color, 7)) ? str(o.color, 7) : "#8E8E93", pageId: str(o.pageId, 80) || null, bp, sel: Array.isArray(o.sel) ? o.sel.filter((x): x is string => typeof x === "string").slice(0, 20).map((x) => x.slice(0, 80)) : [], cur };
+  const point = (v: unknown) => (v && typeof v === "object" && Number.isFinite((v as { x: number }).x) && Number.isFinite((v as { y: number }).y) ? { x: Math.round((v as { x: number }).x), y: Math.round((v as { y: number }).y) } : null);
+  const cur = point(o.cur);
+  const bcur = point(o.bcur);
+  return { name: str(o.name, 40) || "Guest", color: /^#[0-9a-fA-F]{6}$/.test(str(o.color, 7)) ? str(o.color, 7) : "#8E8E93", pageId: str(o.pageId, 80) || null, bp, sel: Array.isArray(o.sel) ? o.sel.filter((x): x is string => typeof x === "string").slice(0, 20).map((x) => x.slice(0, 80)) : [], cur, bcur };
 }
 const BASE_FP = "baseFp";
 /** Values both sides changed differently in the last merge (the draft kept its own). */
