@@ -1,4 +1,6 @@
 import { useSimple } from "./mode";
+import { PhoneTabs } from "./PhoneTabs";
+import { usePhone } from "../touch/device";
 import { Puck } from "@puckeditor/core";
 import { useEffect, useRef, useState } from "react";
 import { addSection, createSection, locate } from "../../model/page-ops";
@@ -361,6 +363,7 @@ export function LeftPanel() {
   };
   const siteActive = !!active && SITE_PANELS.includes(active);
   const simple = useSimple();
+  const phone = usePhone();
 
   return (
     <>
@@ -392,6 +395,7 @@ export function LeftPanel() {
           </>
         )}
       </nav>
+      {phone ? <PhoneTabs /> : null}
 
       {active ? (
         <aside

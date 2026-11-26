@@ -17,8 +17,10 @@ workspace** as the base, **B's Simple mode** for teammates, and **Phone 1 · bot
    the side panel (with "Switch to Full"), no resize handles, Desktop and Mobile only (no "Add a
    breakpoint"), no Site button, brand colours only in the text bar. Full is the whole editor.
    Remembered per person; until chosen, Owners start in Full and everyone else in Simple.
-5. **Phone 1.** One slim top row, bottom tabs (Add, Layers, Pages, Media, More), half-height
-   sheets, block actions above the tabs.
+5. ✓ **Phone 1.** One top row (page, status, Undo, Publish); bottom tabs Add, Layers, Pages, Media,
+   More; panels open as half-height sheets above the tabs; More holds Desktop / Phone, Comments,
+   Search and (in Full) the Site panels; the settings card, zoom bar and notes sit above the tabs;
+   the tabs step aside while typing in place.
 6. **Speed.** Redraw only the block that changed; side frames catch up after; lighter first load.
 
 ## Checks
