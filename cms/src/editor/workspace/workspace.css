@@ -366,7 +366,7 @@
   position: absolute;
   top: 58px;
   left: 10px;
-  width: 44px;
+  width: 60px;
   box-sizing: border-box;
   padding: 4px;
   display: flex;
@@ -426,7 +426,7 @@
 .ed-flyout {
   position: absolute;
   top: 58px;
-  left: 60px;
+  left: 76px;
   width: 260px;
   max-height: calc(100vh - 68px);
   max-height: calc(100dvh - 68px);

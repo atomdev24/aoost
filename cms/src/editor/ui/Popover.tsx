@@ -14,15 +14,15 @@ export const anchorOf = (el: Element): Anchor => {
  * below its anchor (or to its left when `side` is "left"), stays inside the
  * window, and closes on Esc or a press outside.
  */
-export function Popover({ anchor, onClose, children, className = "", side = "below", label, width }: { anchor: Anchor; onClose: () => void; children: ReactNode; className?: string; side?: "below" | "left"; label?: string; width?: number }) {
+export function Popover({ anchor, onClose, children, className = "", side = "below", label, width }: { anchor: Anchor; onClose: () => void; children: ReactNode; className?: string; side?: "below" | "left" | "right"; label?: string; width?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   useLayoutEffect(() => {
     const el = ref.current!;
     const w = el.offsetWidth;
     const h = el.offsetHeight;
-    let left = side === "left" ? anchor.x - w - 8 : anchor.x;
-    let top = side === "left" ? anchor.y : anchor.y + (anchor.h ?? 0) + 4;
+    let left = side === "left" ? anchor.x - w - 8 : side === "right" ? anchor.x + (anchor.w ?? 0) + 8 : anchor.x;
+    let top = side === "below" ? anchor.y + (anchor.h ?? 0) + 4 : anchor.y;
     left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
     top = Math.max(8, Math.min(top, window.innerHeight - h - 8));
     setPos({ left, top });

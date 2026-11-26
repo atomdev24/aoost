@@ -48,8 +48,8 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 Before more features: the basics people touch all day. In order:
 1. **Text editing** — rich text on the page, per-screen type controls (EDITOR-TEXT.md). ✓ built.
 2. **Speed and UI audit** — baseline measured, 13-item audit and three directions (A calm, B content
-   first, C command bar; two phone layouts) in EDITOR-FOUNDATIONS.md and the Design canvas. Waiting on
-   Alex's pick, then: redraw only what changed, lighter first load, and the chosen layout.
+   first, C command bar; two phone layouts) in EDITOR-FOUNDATIONS.md and the Design canvas. Alex picked A as
+   the base, B's Simple mode, Phone 1 (EDITOR-LAYOUT.md); stages 1–2 built.
 3. **Web app** — the editor already installs as an app. Next: share photos into Media, push
    notifications for mentions and Claude; no offline editing yet.
 4. **Microsoft Clarity** with cookie consent, and an insights view in the editor (the demo shows
