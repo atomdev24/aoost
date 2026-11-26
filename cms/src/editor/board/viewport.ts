@@ -1,3 +1,4 @@
+import { DEMO } from "../demo";
 import { DESIGN_WIDTH, type Breakpoint } from "../../schema";
 
 /**
@@ -117,7 +118,9 @@ export function isVisible(view: View, rect: Rect, width: number, height: number,
 
 // ------------------------------------------------- remembered per page
 
-const KEY = (pageId: string) => `aoost.board.${pageId}`;
+// The demo keeps its own board memory: the real editor's shown frames and positions (same browser,
+// same page ids) must not carry over, so the demo always opens on desktop and mobile.
+const KEY = (pageId: string) => `aoost.${DEMO ? "demo." : ""}board.${pageId}`;
 
 export type SavedBoardPage = {
   view: View;
