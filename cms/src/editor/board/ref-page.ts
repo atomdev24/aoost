@@ -3,6 +3,8 @@ import { placeRef, type RefItem } from "../../model/refs";
 import { canvasSize } from "../../responsive/canvas";
 import type { Node, Section } from "../../schema";
 import { withBox } from "../canvas/actions";
+import { dropAt, showDropBar } from "../canvas/drop-place";
+import { placeNear } from "../../model/side-by-side";
 import { activateBreakpoint, selectBlock } from "./bridge";
 import { addRef, getRefs, removeRef, setRefItems } from "./refs-store";
 import { frameOrigin, getBoard } from "./store";
@@ -16,6 +18,13 @@ import { showTip } from "../tips/tips";
  */
 
 const frame = () => document.querySelector<HTMLIFrameElement>("#preview-frame");
+
+/** While a reference is held over the page: show where it would go. */
+export function previewRefDrop(clientX: number, clientY: number) {
+  const at = framePointAt(clientX, clientY);
+  const doc = frame()?.contentDocument;
+  if (doc) showDropBar(doc, at ? dropAt(at.doc, at.x, at.y) : null);
+}
 
 /** A point on screen in the editable frame's own pixels, or null when it's outside the frame. */
 export function framePointAt(clientX: number, clientY: number): { x: number; y: number; doc: Document } | null {
@@ -62,15 +71,17 @@ export function refToPage(ref: RefItem, clientX: number, clientY: number): boole
     const sid = section.id;
     updatePage(page.id, (p) => addNode(p, sid, node), parked ? "Put block back on the page" : "Move reference into the page", { side });
   } else if (section) {
-    // Stacked or grid: after the block it was dropped on, or at the end of the section.
-    const nodeEl = hit?.closest<HTMLElement>("[data-node-id]");
-    const index = nodeEl ? section.children.findIndex((n) => n.id === nodeEl.dataset.nodeId) + 1 : undefined;
+    // Stacked or grid: above, below or beside the block it was let go on (the blue line showed which).
+    const drop = dropAt(at.doc, at.x, at.y);
     const sid = section.id;
-    updatePage(page.id, (p) => addNode(p, sid, node, index && index > 0 ? index : undefined), parked ? "Put block back on the page" : "Move reference into the page", { side });
+    const label = parked ? "Put block back on the page" : "Move reference into the page";
+    if (drop) updatePage(page.id, (p) => placeNear(p, drop.targetId, node, drop.where, { share: drop.share }), label, { side });
+    else updatePage(page.id, (p) => addNode(p, sid, node), label, { side });
   } else {
     const n = node;
     updatePage(page.id, (p) => addSection(p, createSection("flow", { children: [n] })), parked ? "Put block back on the page" : "Move reference into the page", { side });
   }
+  showDropBar(at.doc, null);
   removeRef(ref.id);
   selectBlock(node.id);
   if (!parked) showTip("image");

@@ -2,6 +2,8 @@ import { addNode, addSection, createNode, createSection, locate, updateNode } fr
 import { isCancelled, uploadFile } from "../media";
 import { pickMedia } from "../fields/media";
 import { showTip } from "../tips/tips";
+import { dropAt, showDropBar, type DropHit } from "./drop-place";
+import { placeNear } from "../../model/side-by-side";
 import { embedFor } from "../../components/Embed/providers";
 import { currentPage, getState, updatePage } from "../store";
 import { selectBlock } from "../board/bridge";
@@ -83,6 +85,24 @@ export function placeMedia(target: EventTarget | null, media: { url: string; kin
   return node.id;
 }
 
+/** The middle of a block (not near an edge): a picture dropped there replaces the one under it. */
+const isMiddle = (hit: DropHit, x: number, y: number) => {
+  const r = hit.rect;
+  const rx = (x - r.left) / r.width;
+  const ry = (y - r.top) / r.height;
+  return rx > 0.22 && rx < 0.78 && ry > 0.25 && ry < 0.75;
+};
+
+/** A new picture or video above, below or beside a block. One undo step; selected. */
+function placeMediaNear(hit: DropHit, media: { url: string; kind?: string; width?: number; height?: number }) {
+  const node =
+    media.kind === "video" ? createNode("Video", { content: { src: media.url } }) : createNode("Image", { content: { src: media.url, width: media.width, height: media.height, alt: "" } });
+  const page = currentPage(getState());
+  updatePage(page.id, (p) => placeNear(p, hit.targetId, node, hit.where, { share: hit.share }), media.kind === "video" ? "Add video" : "Add image");
+  selectBlock(node.id);
+  showTip(media.kind === "video" ? "video" : "image");
+}
+
 /**
  * Canvas behaviour wired into Puck's editable frame:
  *   double-click a picture (or a picture inside an aoost block) → adjust it in its frame;
@@ -135,16 +155,23 @@ export function attachCanvasDrops(doc: Document) {
     e.stopPropagation();
     e.dataTransfer!.dropEffect = "copy";
     if (e.dataTransfer!.types.includes(ANNOTATION_MIME)) return mark(pictureAt(doc, e.clientX, e.clientY)?.el ?? null);
+    // On the middle of a picture: replace it. Anywhere else on a block: a line shows above, below or beside.
+    const hit = dropAt(doc, e.clientX, e.clientY);
     const id = imageBlockAt(e.target);
-    mark(id ? (e.target as Element).closest("[data-node-id]") : null);
+    const replace = !!id && !!hit && hit.targetId === id && isMiddle(hit, e.clientX, e.clientY);
+    mark(replace ? (e.target as Element).closest("[data-node-id]") : null);
+    showDropBar(doc, replace ? null : hit);
   };
   const drop = async (e: DragEvent) => {
     mark(null);
+    showDropBar(doc, null);
     if (!wanted(e)) return;
     e.preventDefault();
     e.stopPropagation();
-    const id = imageBlockAt(e.target);
-    const target = e.target;
+    const hit = dropAt(doc, e.clientX, e.clientY);
+    const onImage = imageBlockAt(e.target);
+    const id = onImage && hit?.targetId === onImage && isMiddle(hit, e.clientX, e.clientY) ? onImage : null;
+    const place = (m: { url: string; kind?: string; width?: number; height?: number }) => (hit && !id ? placeMediaNear(hit, m) : placeMedia(e.target, m));
     // A fruit reading dropped on a picture: a mark where it landed.
     if (e.dataTransfer!.types.includes(ANNOTATION_MIME)) {
       // Found by position, so a locked picture (which ignores the pointer) counts too.
@@ -161,7 +188,7 @@ export function attachCanvasDrops(doc: Document) {
     if (media) {
       const m = JSON.parse(media) as DraggedMedia;
       if (id && m.kind === "image") replaceImage(id, m);
-      else if (m.kind === "image" || m.kind === "video") placeMedia(target, m);
+      else if (m.kind === "image" || m.kind === "video") place(m);
       return;
     }
     const file = [...e.dataTransfer!.files].find((f) => IMAGE_FILE.test(f.type) || /^video\//.test(f.type));
@@ -169,14 +196,14 @@ export function attachCanvasDrops(doc: Document) {
     try {
       const item = await uploadFile(file);
       if (id && item.kind === "image") replaceImage(id, item);
-      else placeMedia(target, item);
+      else place(item);
     } catch (err) {
       // the upload tray already shows a failure or a cancel
       if (!isCancelled(err)) console.warn(err);
     }
   };
   const leave = (e: DragEvent) => {
-    if (!e.relatedTarget) mark(null);
+    if (!e.relatedTarget) (mark(null), showDropBar(doc, null));
   };
   doc.addEventListener("dblclick", dbl, true);
   // Phones: a double tap does what a double-click does (enter Adjust image).

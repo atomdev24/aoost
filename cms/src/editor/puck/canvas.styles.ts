@@ -69,6 +69,9 @@ body:has(.ed-mega-stage){background:var(--c-sand)}
 /* Claude at work (editor/agent/AgentMarks.tsx): a glow in Claude's colour and a small tag. */
 .ed-agent-ring{position:fixed;z-index:2147483000;pointer-events:none;border:4px solid #D97757;border-radius:6px}
 .ed-agent-ring[data-state="working"]{animation:ed-agent 1.6s ease-in-out infinite}
+.ed-drop-bar{position:absolute;z-index:2147483001;pointer-events:none;background:#0A84FF;border-radius:3px;box-shadow:0 0 0 3px rgba(10,132,255,.25);color:transparent;font-size:0}
+.ed-drop-bar[data-where="left"],.ed-drop-bar[data-where="right"]{width:calc(6px * var(--ed-px,1))}
+.ed-drop-bar[data-where="before"],.ed-drop-bar[data-where="after"]{height:calc(4px * var(--ed-px,1))}
 .ed-side-bar{position:absolute;z-index:2147483001;width:calc(6px * var(--ed-px,1));border-radius:3px;background:#0A84FF;box-shadow:0 0 0 3px rgba(10,132,255,.25);pointer-events:none}
 .ed-side-bar span{position:absolute;top:8px;white-space:nowrap;padding:4px 9px;border-radius:7px;background:#0A84FF;color:#fff;font:600 calc(13px * var(--ed-px,1))/1.2 system-ui,sans-serif}
 .ed-side-bar[data-side="left"] span{left:12px}

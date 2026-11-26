@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Page } from "../schema";
 import { createNode, createSection } from "./page-ops";
-import { placeBeside } from "./side-by-side";
+import { placeBeside, placeNear } from "./side-by-side";
 
 const pageWith = (...ids: string[]): Page => ({
   id: "p",
@@ -57,5 +57,17 @@ describe("placeBeside", () => {
   it("does nothing when a block is dropped beside itself", () => {
     const page = pageWith("img");
     expect(placeBeside(page, "img", "img", "left")).toBe(page);
+  });
+});
+
+describe("placeNear", () => {
+  it("puts a block above another in the same column of a stacks row", () => {
+    const row = placeBeside(pageWith("img"), "img", createNode("Text", { id: "t" }), "right");
+    const p = placeNear(row, "t", createNode("Image", { id: "pic" }), "before");
+    expect(p.sections[0]!.children.map((n) => [n.id, n.col])).toEqual([["img", 0], ["pic", 1], ["t", 1]]);
+  });
+  it("puts a block below another in a stacked section", () => {
+    const p = placeNear(pageWith("a", "b"), "a", createNode("Text", { id: "n" }), "after");
+    expect(p.sections[0]!.children.map((n) => n.id)).toEqual(["a", "n", "b"]);
   });
 });

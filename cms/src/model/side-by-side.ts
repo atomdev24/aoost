@@ -93,3 +93,31 @@ function besideInStacks(page: Page, s: Section, target: Node, node: Node, side: 
   children.splice(at, 0, { ...node, col: into });
   return { ...page, sections: page.sections.map((x) => (x.id === s.id ? { ...section, children } : x)) };
 }
+
+/** Where a block goes relative to another: above, below, or beside it. */
+export type Placement = "before" | "after" | "left" | "right";
+
+/**
+ * Put a block above, below or beside another. Above and below keep it in the same section and, in
+ * a row of column stacks, in the same column; beside works as placeBeside.
+ */
+export function placeNear(page: Page, targetId: string, moving: string | Node, where: Placement, opts: { share?: number } = {}): Page {
+  if (where === "left" || where === "right") return placeBeside(page, targetId, moving, where, opts);
+  let node: Node | null = typeof moving === "string" ? null : moving;
+  let p = page;
+  if (typeof moving === "string") {
+    if (moving === targetId) return page;
+    const from = locate(page, moving);
+    if (from?.kind !== "node") return page;
+    node = from.node;
+    p = remove(page, moving);
+  }
+  const at = locate(p, targetId);
+  if (!node || at?.kind !== "node") return page;
+  const s = at.section;
+  const placed: Node = s.stacks ? { ...node, col: Math.min(s.stacks - 1, at.node.col ?? 0) } : { ...node, col: undefined };
+  const children = [...s.children];
+  const i = children.findIndex((n) => n.id === targetId);
+  children.splice(where === "before" ? i : i + 1, 0, placed);
+  return { ...p, sections: p.sections.map((x) => (x.id === s.id ? { ...x, children } : x)) };
+}
