@@ -104,15 +104,12 @@ test.describe("variants and staging", () => {
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     await page.getByRole("button", { name: "Pages", exact: true }).click();
-    // The variant button shows on hover (or on the selected row).
-    await page.locator(".ed-page-row", { hasText: "/sample" }).hover();
     await page.getByRole("button", { name: "New variant of Sample" }).click();
     await expect(page.getByRole("region", { name: "Variant" })).toBeVisible();
     // Only Sample's variants (the content can hold variants of other pages).
-    const row = page.locator(".ed-page-variant", { hasText: "Variant of Sample" });
+    const row = page.getByRole("group", { name: "Variants of Sample" }).locator(".ed-pchip", { hasText: "Variant 1" });
     await expect(row).toHaveCount(1);
     await expect(row).toContainText("Variant 1");
-    await expect(row).toContainText("Variant of Sample");
     page.once("dialog", (d) => void d.accept());
     await page.getByRole("button", { name: "Delete Variant 1 of Sample" }).click();
     await expect(row).toHaveCount(0);
