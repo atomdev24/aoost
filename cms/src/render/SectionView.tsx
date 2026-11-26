@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import type { RenderCtx } from "../components/types";
-import { DESKTOP_MIN, type Overlay, type Section } from "../schema";
+import { DESKTOP_MIN, type Node, type Overlay, type Section } from "../schema";
 import { imageSources } from "./media";
 import { NodeView } from "./NodeView";
 
@@ -61,9 +61,22 @@ export function OverlayView({ overlay, ctx }: { overlay: Overlay; ctx: RenderCtx
 export function SectionView({ section, overlays, ctx }: { section: Section; overlays: Overlay[]; ctx: RenderCtx }): ReactElement {
   return (
     <SectionShell section={section} extra={overlays.map((o) => <OverlayView key={o.id} overlay={o} ctx={ctx} />)}>
-      {section.children.map((n) => (
-        <NodeView key={n.id} node={n} ctx={ctx} />
-      ))}
+      {section.stacks
+        ? columnsOf(section).map((col, i) => (
+            <div key={i} className="sc">
+              {col.map((n) => (
+                <NodeView key={n.id} node={n} ctx={ctx} />
+              ))}
+            </div>
+          ))
+        : section.children.map((n) => <NodeView key={n.id} node={n} ctx={ctx} />)}
     </SectionShell>
   );
+}
+
+/** A stacks section's blocks, column by column, in page order. */
+export function columnsOf(section: Section): Node[][] {
+  const cols: Node[][] = Array.from({ length: section.stacks ?? 1 }, () => []);
+  for (const n of section.children) cols[Math.min(cols.length - 1, Math.max(0, n.col ?? 0))]!.push(n);
+  return cols;
 }

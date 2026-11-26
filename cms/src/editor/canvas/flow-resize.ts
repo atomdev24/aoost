@@ -53,11 +53,14 @@ export function attachFlowResize(doc: Document) {
     const { bp } = getState();
     const framed = !!getComponent(node.type)?.framed;
     const box = el.getBoundingClientRect();
-    const cell = el.parentElement!.getBoundingClientRect();
-    const cs = getComputedStyle(el.parentElement!);
+    // The section's content box (a stack's column sits inside it).
+    const inner = el.closest<HTMLElement>(".si") ?? el.parentElement!;
+    const cell = inner.getBoundingClientRect();
+    const cs = getComputedStyle(inner);
     const room = cell.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     const widths = rowWidths(section, bp);
-    const index = section.children.indexOf(node);
+    // Which column the block is in: its stack in a stacks row, else its place in the grid.
+    const index = section.stacks ? Math.min(section.stacks - 1, node.col ?? 0) : section.children.indexOf(node);
     // In a row, the whole content width is what the columns share (the gap stays as it is).
     const gap = parseFloat(cs.columnGap) || 0;
     const rowRoom = widths ? room - gap * (widths.length - 1) : room;
@@ -87,7 +90,7 @@ export function attachFlowResize(doc: Document) {
       if (widths && (sx || framed)) {
         // A row: move the split live; the block fills its column.
         const next = splitFor(widths, index % widths.length, w, rowRoom, colStart);
-        el.parentElement!.style.gridTemplateColumns = next.map((x) => `minmax(0, ${x}fr)`).join(" ");
+        inner.style.gridTemplateColumns = next.map((x) => `minmax(0, ${x}fr)`).join(" ");
         el.style.width = "100%";
       } else el.style.width = `${w}px`;
       el.style.maxWidth = "none";
@@ -122,7 +125,7 @@ export function attachFlowResize(doc: Document) {
       );
       setTimeout(() => {
         ["width", "maxWidth", "aspectRatio", "minHeight"].forEach((k) => el.style.removeProperty(k.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase())));
-        el.parentElement?.style.removeProperty("grid-template-columns");
+        inner.style.removeProperty("grid-template-columns");
       }, 80);
       selectBlock(id);
       doc.addEventListener("click", (c) => c.stopPropagation(), { capture: true, once: true });

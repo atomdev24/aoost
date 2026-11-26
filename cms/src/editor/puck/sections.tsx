@@ -5,10 +5,10 @@ import { resolve } from "../../responsive/resolve";
 import { newId } from "../../schema/ids";
 import { currentPage, useEditor } from "../store";
 import { EditorOverlay } from "./EditorOverlay";
-import { itemToSection, SECTION_TYPES, type PuckItem } from "./adapter";
+import { itemToSection, SECTION_TYPES, STACK_SLOTS, type PuckItem } from "./adapter";
 import { layoutField, visibleOnField } from "./fields";
 
-type SectionProps = { id: string; name?: string; locked?: boolean; layout: Responsive<SectionLayout>; customDesktop?: boolean; items: SlotComponent; puck: PuckContext };
+type SectionProps = { id: string; name?: string; locked?: boolean; layout: Responsive<SectionLayout>; customDesktop?: boolean; stacks?: number; items: SlotComponent; c0?: SlotComponent; c1?: SlotComponent; c2?: SlotComponent; c3?: SlotComponent; puck: PuckContext };
 
 const DEFAULT_LAYOUT: Record<Section["kind"], Responsive<SectionLayout>> = {
   flow: { base: { columns: 1, gap: 18, padding: "56px 20px", maxWidth: 1160 }, desktop: { padding: "96px 56px" } },
@@ -39,8 +39,10 @@ function sectionConfig(kind: Section["kind"]): ComponentConfig {
       __visible: visibleOnField,
       name: { type: "text", label: "Name" },
       items: { type: "slot", disallow: Object.values(SECTION_TYPES) },
+      // Column stacks (grid sections made by side by side): one slot per column.
+      ...(kind === "grid" ? Object.fromEntries(STACK_SLOTS.map((k) => [k, { type: "slot", disallow: Object.values(SECTION_TYPES) }])) : {}),
     },
-    defaultProps: { layout: DEFAULT_LAYOUT[kind], items: [] },
+    defaultProps: { layout: DEFAULT_LAYOUT[kind], items: [], ...(kind === "grid" ? { c0: [], c1: [], c2: [], c3: [] } : {}) },
     resolvePermissions: (data) => (data.props?.locked ? { drag: false, delete: false, duplicate: false } : {}),
     render: (props) => <EditorSection kind={kind} {...(props as unknown as SectionProps)} />,
   };
@@ -51,7 +53,8 @@ function EditorSection({ kind, ...props }: SectionProps & { kind: Section["kind"
   const bp = useEditor((s) => s.bp);
   const overlays = useEditor((s) => currentPage(s).overlays);
   const flash = useEditor((s) => s.highlight.includes(id));
-  const section = itemToSection({ type: SECTION_TYPES[kind], props: { ...props, items: [] } } as unknown as PuckItem);
+  const section = itemToSection({ type: SECTION_TYPES[kind], props: { ...props, items: [], c0: [], c1: [], c2: [], c3: [] } } as unknown as PuckItem);
+  const stacks = kind === "grid" && props.stacks ? STACK_SLOTS.slice(0, props.stacks).map((k) => props[k]!) : null;
   const layout = resolve(section.layout, bp);
   // Column guides for grid sections: the drop zones Alex splits the section into.
   const guides =
@@ -61,7 +64,15 @@ function EditorSection({ kind, ...props }: SectionProps & { kind: Section["kind"
   return (
     <section ref={puck.dragRef} id={id} className={`s s-${id}${flash ? " ed-flash" : ""}`} data-kind={kind} data-section-id={id}>
       <SectionBackground section={section} />
-      <Items className="si" style={guides} minEmptyHeight={kind === "canvas" ? 0 : 120} />
+      {stacks ? (
+        <div className="si">
+          {stacks.map((Col, i) => (
+            <Col key={i} className="sc" minEmptyHeight={60} />
+          ))}
+        </div>
+      ) : (
+        <Items className="si" style={guides} minEmptyHeight={kind === "canvas" ? 0 : 120} />
+      )}
       {overlays
         .filter((o) => o.anchor !== "viewport" && o.anchor.sectionId === id)
         .map((o) => (

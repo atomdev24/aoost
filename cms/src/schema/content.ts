@@ -33,6 +33,8 @@ export interface Node {
   effects?: z.infer<typeof ScrollEffects>;
   /** Set only while rendering a translation: shrinks text that came out longer (0.82–1). Never saved. */
   fit?: number;
+  /** In a section with column stacks: which column (0-based) the block is stacked in. */
+  col?: number;
 }
 
 export const Node: z.ZodType<Node> = z.object({
@@ -45,6 +47,7 @@ export const Node: z.ZodType<Node> = z.object({
   frame: ResponsiveFrameFit.optional(),
   effects: ScrollEffects.optional(),
   fit: z.number().min(0.5).max(1).optional(),
+  col: z.number().int().min(0).max(3).optional(),
 });
 
 // ------------------------------------------------------------- sections
@@ -87,6 +90,12 @@ export const Section = z.object({
   layout: responsive(SectionLayout),
   /** Canvas only: true once Alex has laid desktop out by hand (no auto-scaling). */
   customDesktop: z.boolean().optional(),
+  /**
+   * Grid only: the section is a row of column stacks (2–4). Each block sits in its column (Node.col)
+   * in order; a column grows with what's in it and never moves the column beside it. Phones stack
+   * the columns one after another.
+   */
+  stacks: z.number().int().min(2).max(4).optional(),
   children: z.array(Node),
 });
 export type Section = z.infer<typeof Section>;
