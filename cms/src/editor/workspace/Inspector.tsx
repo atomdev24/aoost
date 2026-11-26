@@ -1,3 +1,4 @@
+import { useSettingsShown } from "./settings-pref";
 import { Puck } from "@puckeditor/core";
 import { getComponent } from "../../components/registry";
 import { locate } from "../../model/page-ops";
@@ -54,7 +55,11 @@ export function Inspector() {
   const overlayId = useEditor((s) => s.overlayId);
   const globalId = useEditor((s) => s.globalId);
   const selected = useEditor((s) => s.selection.length > 0);
+  const shown = useSettingsShown();
+  const phone = usePhone();
   if (!selected && !overlayId && !globalId) return null;
+  // Desktop: the settings show when asked for (Settings in the block's action bar); phones keep the sheet.
+  if (!shown && !phone && !overlayId && !globalId) return null;
   return <InspectorPanel />;
 }
 
