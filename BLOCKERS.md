@@ -67,3 +67,10 @@ Claude's requests through to these paths, while the editor itself stays behind A
 3. Test in a chat: "list my aoost pages". Then open the editor and ask for a small change: the
    Claude pill should appear under the top bar.
 Without step 1 the connector says it can't reach the server; nothing else breaks.
+
+## Visitor insights (Microsoft Clarity), Nov 2026
+- Done by Alex: Clarity project `zju5sls37v` and the `CLARITY_API_TOKEN` secret on the aoost-cms Worker.
+- Left: in the editor, ⋯ → **Visitor insights…** → paste `zju5sls37v` → Save → **Publish**. Clarity
+  starts counting from then; the first numbers show the next morning (or press Fetch now).
+- If Fetch now says the token wasn't accepted: Clarity → Settings → Data Export → generate a new token,
+  then replace the secret in Cloudflare (Workers & Pages → aoost-cms → Settings → Variables and Secrets).

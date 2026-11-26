@@ -25,6 +25,7 @@ import { openProblemLog, openReport } from "../problems";
 import { setGlass, useGlass } from "../display";
 // Opened now and then: loads on first use.
 const DemoModal = lazy(() => import("../team/DemoModal").then((m) => ({ default: m.DemoModal })));
+const InsightsModal = lazy(() => import("../insights/InsightsModal").then((m) => ({ default: m.InsightsModal })));
 
 /** "just now", "2 min ago", "at 14:05". */
 function ago(at: number, now: number): string {
@@ -253,6 +254,7 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
   const [open, setOpen] = useState(false);
   const [teamOpen, setTeamOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
+  const [insightsOpen, setInsightsOpen] = useState(false);
   const glass = useGlass();
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -265,6 +267,7 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
     <div className="ed-more" ref={box}>
       {teamOpen ? createPortal(<TeamModal onClose={() => setTeamOpen(false)} />, document.body) : null}
       {demoOpen ? createPortal(<Suspense fallback={null}><DemoModal onClose={() => setDemoOpen(false)} /></Suspense>, document.body) : null}
+      {insightsOpen ? createPortal(<Suspense fallback={null}><InsightsModal onClose={() => setInsightsOpen(false)} /></Suspense>, document.body) : null}
       <button type="button" className="ed-icon ed-more-btn" aria-label="More" aria-haspopup="menu" aria-expanded={open} title="More" onClick={() => setOpen(!open)}>
         …
       </button>
@@ -293,6 +296,18 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
               }}
             >
               Team…
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                setInsightsOpen(true);
+              }}
+            >
+              Visitor insights…
             </button>
           </li>
           {DEMO ? null : (

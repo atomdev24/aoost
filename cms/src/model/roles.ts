@@ -33,6 +33,8 @@ export function actionFor(route: string): Action | null {
   if (path === "/team") return "team";
   // The demo's settings: Managers and Owners.
   if (path === "/demo/settings" || path === "/demo/reset-now") return "promote";
+  // Fetching visitor numbers uses Clarity's small daily allowance: Managers and Owners.
+  if (path === "/insights/fetch") return "promote";
   return "edit";
 }
 

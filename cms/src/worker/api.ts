@@ -14,6 +14,7 @@ import { problemsReport } from "../model/problems";
 import { buildStatus, publishToGitHub } from "./publish";
 import { cachedVersionFiles, listVersions } from "./history";
 import { cancelRelease, getRelease, scheduleRelease, undoRelease } from "./release";
+import { fetchInsights, getInsights, setInsightsProject } from "./insights";
 import { CommentOp } from "../model/comments";
 import { filesToSite } from "../schema";
 
@@ -150,6 +151,12 @@ async function demoRoute(request: Request, env: Env, url: URL): Promise<Response
     case "GET /demo/settings":
     case "PUT /demo/settings":
       return error(403, "The demo's settings are in the real editor.");
+    // The real site's visitor numbers, read-only: the demo shows how insights look on a live site.
+    case "GET /insights":
+      return json({ ok: true, ...(await getInsights(env, Number(url.searchParams.get("days")) || 30)), demo: true });
+    case "POST /insights/fetch":
+    case "PUT /insights/project":
+      return error(403, "Visitor insights are set up in the real editor.");
     case "GET /release":
       return json({ ok: true, release: await getRelease(draftStub(env)) });
     case "PUT /release": {
@@ -212,6 +219,14 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
   if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
 
   switch (route) {
+    case "GET /insights":
+      return json({ ok: true, ...(await getInsights(env, Number(url.searchParams.get("days")) || 30)) });
+    case "PUT /insights/project":
+      return json({ ok: true, project: await setInsightsProject(env, (await readJson<{ project?: unknown }>(request))?.project) });
+    case "POST /insights/fetch": {
+      const problem = await fetchInsights(env, { manual: true });
+      return json({ ok: !problem, error: problem ?? undefined, ...(await getInsights(env)) });
+    }
     case "GET /release":
       return json({ ok: true, release: await getRelease(draftStub(env)) });
     case "PUT /release": {

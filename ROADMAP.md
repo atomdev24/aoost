@@ -51,7 +51,7 @@ Before more features: the basics people touch all day. In order:
    Framer, Webflow and Apple's Pro apps, then mockups to test.
 3. **Web app** — the editor already installs as an app; extras (share to media, notifications).
 4. **Microsoft Clarity** with cookie consent, and an insights view in the editor (the demo shows
-   aoost.com's own numbers).
+   aoost.com's own numbers). ✓ built (EDITOR-INSIGHTS.md).
 5. Later (kept, not now): **AI attention preview** (predicted heatmaps before publishing).
 
 ## Done (26 Nov 2026): editor UI spec for the Aerobotics team

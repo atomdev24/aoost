@@ -301,6 +301,15 @@ export const SiteSettings = z.object({
   socials: z.array(Social),
   defaultSeo: Seo,
   favicon: z.string().optional(),
+  /** Visitor insights: a Microsoft Clarity project on the published pages, with a small cookie notice. */
+  analytics: z
+    .object({
+      /** The Clarity project ID (public; it sits in the page anyway). */
+      clarity: z.string().regex(/^[a-z0-9]{6,20}$/).optional(),
+      /** Show the cookie notice (on unless switched off). */
+      notice: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 export const GlobalComponent = z.object({ id: Id, name: z.string(), node: Node });
