@@ -1,3 +1,4 @@
+import { nodeToBoard } from "../board/ref-page";
 import { openProblemLog, openReport } from "../problems";
 import { locate } from "../../model/page-ops";
 import type { Breakpoint } from "../../schema";
@@ -107,6 +108,7 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
   "block.hide": withSelection(toggleBlockHidden),
   "block.edit": () => !isAdjusting() && editSelection(),
   "block.stepOut": stepOut,
+  "block.toBoard": withSelection((id) => void nodeToBoard(id)),
   "block.resetOverrides": withSelection((id) => {
     const { bp } = getState();
     if (bp === "desktop") return;

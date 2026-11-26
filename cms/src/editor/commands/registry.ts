@@ -30,6 +30,7 @@ export const ACTION_IDS = [
   "block.hide",
   "block.edit",
   "block.stepOut",
+  "block.toBoard",
   "block.resetOverrides",
   "panel.layers",
   "panel.pages",
@@ -102,6 +103,7 @@ export const ACTIONS: ActionMeta[] = [
   { id: "block.hide", title: "Hide block on this size", group: "Blocks", keywords: "show visible visibility", needsSelection: true },
   { id: "block.edit", title: "Edit or adjust the selection", group: "Blocks", keywords: "adjust crop step in", needsSelection: true },
   { id: "block.stepOut", title: "Step out of the selection", group: "Blocks", keywords: "parent deselect escape" },
+  { id: "block.toBoard", title: "Move picture to the board", group: "Blocks", keywords: "reference park out canvas", needsSelection: true },
   { id: "block.resetOverrides", title: "Reset overrides on this size", group: "Blocks", keywords: "reset changes breakpoint", needsSelection: true },
 
   { id: "panel.layers", title: "Layers", group: "Panels", keywords: "panel tree outline" },

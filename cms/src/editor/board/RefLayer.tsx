@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { activateBreakpoint } from "./bridge";
+import { framePointAt, refToPage } from "./ref-page";
 import { getRefs, loadRefs, moveRef, raiseRef, removeRef, selectRef, sizeRef, useRefs } from "./refs-store";
 import { getBoard, setInteracting } from "./store";
 import { getState } from "../store";
@@ -43,7 +44,7 @@ export function RefLayer({ pageId, zoom }: { pageId: string; zoom: number }) {
   }, []);
 
   /** Drag in screen pixels, applied in world pixels at the zoom of the moment. */
-  const drag = (e: React.PointerEvent, apply: (dx: number, dy: number) => void) => {
+  const drag = (e: React.PointerEvent, apply: (dx: number, dy: number) => void, drop?: (m: PointerEvent) => void, over?: (m: PointerEvent) => void) => {
     if (e.button !== 0) return;
     e.stopPropagation();
     e.preventDefault();
@@ -59,9 +60,11 @@ export function RefLayer({ pageId, zoom }: { pageId: string; zoom: number }) {
       if (!moved) setInteracting(true);
       moved = true;
       apply(dx, dy);
+      over?.(m);
     };
-    const up = () => {
+    const up = (m: PointerEvent) => {
       if (moved) setInteracting(false);
+      if (moved && m.type === "pointerup") drop?.(m);
       target.removeEventListener("pointermove", move);
       target.removeEventListener("pointerup", up);
       target.removeEventListener("pointercancel", up);
@@ -88,7 +91,18 @@ export function RefLayer({ pageId, zoom }: { pageId: string; zoom: number }) {
               if (getState().selection.length) activateBreakpoint(getState().bp, null);
               selectRef(r.id);
               raiseRef(r.id);
-              drag(e, (dx, dy) => moveRef(r.id, r.x + dx, r.y + dy));
+              const el = e.currentTarget as HTMLElement;
+              drag(
+                e,
+                (dx, dy) => moveRef(r.id, r.x + dx, r.y + dy),
+                // Let go over the page: it becomes a picture there (the board keeps it otherwise).
+                (m) => {
+                  el.classList.remove("is-into-page");
+                  const ref = getRefs().items.find((x) => x.id === r.id);
+                  if (ref) refToPage(ref, m.clientX, m.clientY);
+                },
+                (m) => el.classList.toggle("is-into-page", !!framePointAt(m.clientX, m.clientY)),
+              );
             }}
           >
             <img src={r.src} alt="" draggable={false} />

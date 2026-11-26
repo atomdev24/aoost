@@ -49,6 +49,10 @@ export function PresenceLayer() {
         if (o.cur) {
           const p = toScreen(o.bp, o.cur.x, o.cur.y);
           if (p) c.push({ id: o.clientId, color: o.color, name: o.name, x: Math.round(p.x), y: Math.round(p.y) });
+        } else if (o.bcur) {
+          // on the board around the frames (by the references, say)
+          const { view } = getBoard();
+          c.push({ id: o.clientId, color: o.color, name: o.name, x: Math.round(o.bcur.x * view.zoom + view.x), y: Math.round(o.bcur.y * view.zoom + view.y) });
         }
         // their selection can only be measured on the frame you can edit, so it shows when you share a screen size
         if (doc && o.bp === bp)
