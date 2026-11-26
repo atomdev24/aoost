@@ -197,6 +197,24 @@ export function PageBody({ site, page, opts = {}, editing = false }: { site: Sit
   );
 }
 
+/**
+ * Microsoft Clarity on published pages (not previews): the standard loader with the project ID.
+ * The cookie notice (runtime/consent.ts) passes the visitor's choice on with Clarity's consent API;
+ * Clarity itself waits for consent from visitors in Europe.
+ */
+function clarityTag(site: Site, opts: RenderOptions): string {
+  const a = site.settings.analytics;
+  if (!a?.clarity || opts.preview || !/^[a-z0-9]{6,20}$/.test(a.clarity)) return "";
+  const notice = a.notice === false ? "" : ` data-notice=""`;
+  return (
+    `<script id="clarity-tag" data-clarity="${a.clarity}"${notice}>` +
+    `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};` +
+    `try{var k=localStorage.getItem("aoost.consent");if(k)c[a]("consentv2",{ad_Storage:"denied",analytics_Storage:k==="yes"?"granted":"denied"})}catch(e){}` +
+    `t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})` +
+    `(window,document,"clarity","script","${a.clarity}")</script>`
+  );
+}
+
 /** A complete static HTML document for one page. */
 export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): string {
   const title = pageTitle(site, page);
@@ -221,6 +239,7 @@ export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): st
     fontLinks(site, kits.flatMap((k) => k.googleFonts ?? []), kits.some((k) => k.blockingFonts)),
     `<style>${pageCss(site, page)}</style>`,
     `<script>document.documentElement.classList.add("js")</script>`,
+    clarityTag(site, opts),
     `<script defer src="/assets/site.js${v}"></script>`,
     ...kits.filter((k) => k.script).map((k) => `<script defer src="${esc(k.script!)}${v}"></script>`),
   ]

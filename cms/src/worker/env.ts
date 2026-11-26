@@ -21,6 +21,8 @@ export interface Env {
   PUBLISH_BRANCH: string;
   EDITOR_PASSWORD?: string;
   GITHUB_TOKEN?: string;
+  /** Microsoft Clarity Data Export token (a Worker secret), for the daily visitor numbers. */
+  CLARITY_API_TOKEN?: string;
   /** "1" lets a password-mode or localhost server publish for real (off by default: those are test servers). */
   ALLOW_LOCAL_PUBLISH?: string;
 }
