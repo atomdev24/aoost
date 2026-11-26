@@ -14,6 +14,8 @@ export type SiteTemplate = {
   thumb: string;
   /** Hide the site's own nav: the design brings its own top bar. */
   hideNav: boolean;
+  /** A ready-made nav the design needs; using the template puts it on the site. */
+  nav?: "aerobotics";
   sections: () => Section[];
 };
 
@@ -40,12 +42,14 @@ type Layout = Section["layout"]["base"];
 const section = (kind: Section["kind"], name: string, base: Layout, desktop: Partial<Layout> | undefined, children: Node[]): Section =>
   createSection(kind, { name, layout: desktop ? { base, desktop: { ...base, ...desktop } } : { base }, children });
 
+/** The catalogue PDFs on Google Drive, as aerobotics.com/brochures links them (English edition). */
+const drive = (id: string) => ({ view: `https://drive.google.com/file/d/${id}/view`, download: `https://drive.google.com/uc?export=download&id=${id}` });
 const CROPS = [
-  { crop: "Citrus", img: "tpl_aero_citrus.webp", tags: "Size, Grade, Bin Scan", text: "See exactly why fruit is falling out of spec in the field and at intake.", langs: "English, English (AU), Español, Português, Italiano, Türkçe" },
-  { crop: "Apples", img: "tpl_aero_apples.webp", tags: "Size, Grade, Bin Scan", text: "Plan your harvest with starch in the Harvest Planner.", langs: "English, Español" },
-  { crop: "Table grapes", img: "tpl_aero_grapes.webp", tags: "Size, Grade, Bin Scan", text: "Know which blocks are ready before you commit a picking team.", langs: "English, Español, Türkçe" },
-  { crop: "Cherries", img: "tpl_aero_cherries.webp", tags: "Size, Grade", text: "Rank blocks on size and colour before you pick.", langs: "English, Español" },
-  { crop: "Avocado", img: "tpl_aero_avocado.webp", tags: "Size", text: "More accurate mass estimates for Hass.", langs: "English, Español" },
+  { crop: "Citrus", img: "tpl_aero_citrus.webp", tags: "Size, Grade, Bin Scan", text: "See exactly why fruit is falling out of spec in the field and at intake.", langs: "English, English (AU), Español, Português, Italiano, Türkçe", pdf: drive("1ZmOKj64y90Z6umcRy18tpkk3epFOQXx1") },
+  { crop: "Apples", img: "tpl_aero_apples.webp", tags: "Size, Grade, Bin Scan", text: "Plan your harvest with starch in the Harvest Planner.", langs: "English, Español", pdf: drive("1EzPWyj2wme9-na9i5No4voljSmuMFUJW") },
+  { crop: "Table grapes", img: "tpl_aero_grapes.webp", tags: "Size, Grade, Bin Scan", text: "Know which blocks are ready before you commit a picking team.", langs: "English, Español, Türkçe", pdf: drive("1zc2qq1jtbNKsgFa2vCDouNxRRcL7Bbax") },
+  { crop: "Cherries", img: "tpl_aero_cherries.webp", tags: "Size, Grade", text: "Rank blocks on size and colour before you pick.", langs: "English, Español", pdf: drive("1QY-OZKbxyrIfmXnkRfyPe7sX5epruSY3") },
+  { crop: "Avocado", img: "tpl_aero_avocado.webp", tags: "Size", text: "More accurate mass estimates for Hass.", langs: "English, Español", pdf: drive("1WTuDLWM983HMxzaIwVZ-qrBo5REtfep7") },
 ];
 const cards = (columns: number) =>
   node("Cards", {
@@ -59,24 +63,15 @@ const cards = (columns: number) =>
       listLabel: "Available in",
       list: c.langs,
       primaryLabel: "View",
-      primaryUrl: "#",
+      primaryUrl: c.pdf.view,
       secondaryLabel: "Download",
-      secondaryUrl: "#",
+      secondaryUrl: c.pdf.download,
     })),
     columns,
     accent: BLUE,
     ink: INK,
     surface: "#FFFFFF",
   });
-
-/** The white bar along the top: logo, links, Login and Request a demo. */
-const topBar = () =>
-  section("grid", "Top bar", { columns: 2, gap: 12, padding: "14px 16px", align: "center", background: { color: "#FFFFFF" } }, { columns: 6, padding: "16px 40px", maxWidth: 1240 }, [
-    mark(A + "tpl_aero_logo.svg", "Aerobotics", "132/23", { base: { width: "132px" } }),
-    text(["Products", "Pricing", "Success stories", "About", "Blog", "Contact"].join("\u00a0\u00a0\u00a0\u00a0 "), "small", "p", { base: { hidden: true, color: INK }, desktop: { hidden: false, colSpan: 3, textAlign: "center", color: INK } }),
-    button("Login", "#", "outline", BLUE, { base: { hidden: true }, desktop: { hidden: false, justifySelf: "end" } }),
-    button("Request a demo", "#", "filled", BLUE, { base: { justifySelf: "end" } }),
-  ]);
 
 /** Navy footer with the faint wordmark and three link columns. */
 const footer = () =>
@@ -104,14 +99,14 @@ export const SITE_TEMPLATES: SiteTemplate[] = [
     name: "Brochures, photo hero",
     hint: "A full-width photo with the headline on top, then catalogue cards",
     thumb: A + "tpl_aero_hero_wide.webp",
-    hideNav: true,
+    hideNav: false,
+    nav: "aerobotics",
     sections: () =>
       linkCatalogues([
-        topBar(),
         section(
           "flow",
           "Hero",
-          { columns: 1, gap: 16, padding: "72px 20px 380px", minHeight: "640px", align: "start", background: { image: A + "tpl_aero_hero_tall.webp", overlay: "rgba(10,22,36,0.22)" } },
+          { columns: 1, gap: 16, padding: "104px 20px 380px", minHeight: "640px", align: "start", background: { image: A + "tpl_aero_hero_tall.webp", overlay: "rgba(10,22,36,0.22)" } },
           { padding: "150px 56px 150px", minHeight: "620px", maxWidth: 1240, background: { image: A + "tpl_aero_hero_wide.webp", overlay: "rgba(10,22,36,0.32)" } },
           [
             text("See what TrueFruit can do for your crop this season", "h1", "h1", { base: { color: "#FFFFFF", maxWidth: "560px" } }),
@@ -139,11 +134,11 @@ export const SITE_TEMPLATES: SiteTemplate[] = [
     name: "Brochures, split hero",
     hint: "The phone photo beside the headline, then the cards two to a row",
     thumb: A + "tpl_aero_hero_tall.webp",
-    hideNav: true,
+    hideNav: false,
+    nav: "aerobotics",
     sections: () =>
       linkCatalogues([
-        topBar(),
-        section("grid", "Hero", { columns: 1, gap: 24, padding: "40px 20px 40px", align: "center", background: { color: PALE } }, { columns: 2, gap: 56, padding: "72px 40px", maxWidth: 1240 }, [
+        section("grid", "Hero", { columns: 1, gap: 24, padding: "104px 20px 40px", align: "center", background: { color: PALE } }, { columns: 2, gap: 56, padding: "128px 40px 72px", maxWidth: 1240 }, [
           image(A + "tpl_aero_hero_tall.webp", "A phone scanning fruit on the tree", { base: { aspectRatio: "4/5", radius: [20, 20, 20, 20] }, desktop: { aspectRatio: "4/5", radius: [24, 24, 24, 24], rowSpan: 4 } }, {
             width: 1200,
             height: 1791,

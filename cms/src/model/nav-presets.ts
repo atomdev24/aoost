@@ -3,7 +3,8 @@ import type { NavConfig, NavItem, Site } from "../schema";
 /**
  * Ready-made navs. "Aerobotics": the aerobotics.com bar (logo, Products menu
  * with descriptions, the main links, Login and Request a demo), every part
- * editable afterwards in the Navigation panel.
+ * editable afterwards in the Navigation panel. Links match the live aerobotics.com
+ * nav (checked 26 Nov 2026).
  */
 let n = 0;
 const id = (s: string) => `nav_aero_${s}_${(n++).toString(36)}`;
@@ -36,11 +37,11 @@ export function aeroboticsNav(): Pick<NavConfig, "style" | "items" | "logoImage"
       },
       link("Pricing", `${A}/pricing`),
       link("Success stories", `${A}/success-stories`),
-      link("About", `${A}/about`),
-      link("Blog", `${A}/blog`),
-      link("Contact", `${A}/contact`),
-      { id: id("login"), type: "button", label: "Login", target: { kind: "url", url: "https://app.aerobotics.com" }, variant: "outline", showOn: "both", hover: "none" },
-      { id: id("demo"), type: "button", label: "Request a demo", target: { kind: "url", url: `${A}/contact` }, variant: "filled", showOn: "both", hover: "none" },
+      link("About", `${A}/about-us`),
+      link("Blog", "https://blog.aerobotics.com/"),
+      link("Contact", `${A}/contact-us`),
+      { id: id("login"), type: "button", label: "Login", target: { kind: "url", url: "https://app.aerobotics.com/log-in" }, variant: "outline", showOn: "both", hover: "none" },
+      { id: id("demo"), type: "button", label: "Request a demo", target: { kind: "url", url: `${A}/request-a-demo` }, variant: "filled", showOn: "both", hover: "none" },
     ],
   };
 }
