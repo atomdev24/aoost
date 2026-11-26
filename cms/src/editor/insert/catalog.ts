@@ -18,7 +18,7 @@ const SECTIONS: Entry[] = [
   { type: "GridSection", label: "Grid", chip: "basics", group: "layout", hint: "Blocks in columns" },
   { type: "CanvasSection", label: "Free layout", chip: "basics", group: "layout", hint: "Place layers anywhere" },
 ];
-const BASIC_CONTENT = new Set(["Text", "Image", "Video", "Button", "Shape", "Cards"]);
+const BASIC_CONTENT = new Set(["Text", "Image", "Video", "Button", "Shape", "Cards", "HubSpotForm"]);
 const BASIC_LAYOUT = new Set(["Spacer", "Divider"]);
 const BASIC_GLOBAL = new Set(["Global", "Footer"]);
 const MOTION = new Set(["Lottie", "Model3D"]);

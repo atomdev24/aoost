@@ -1,3 +1,4 @@
+import { createNode, createSection } from "./page-ops";
 import { newId, type NavItem, type Page, type Redirect, type Site } from "../schema";
 import { instantiate } from "./library";
 
@@ -83,7 +84,18 @@ export function setShowInNav(site: Site, pageId: string, show: boolean): Site {
 
 // -------------------------------------------------------------- pages
 
-export type NewPage = { name: string; templateId?: string; showInNav?: boolean; parentId?: string | null; slug?: string };
+export type NewPage = {
+  name: string;
+  templateId?: string;
+  showInNav?: boolean;
+  parentId?: string | null;
+  slug?: string;
+  /** Campaign pages stay out of the nav; blog posts start as one "Blog post" block laid out by the template. */
+  kind?: "page" | "campaign" | "post";
+  unpublishAt?: string;
+  /** Blog posts: the post date (YYYY-MM-DD). */
+  date?: string;
+};
 
 export function createPage(site: Site, input: NewPage): { site: Site; pageId: string } {
   const title = input.name.trim() || "Untitled";
@@ -91,7 +103,10 @@ export function createPage(site: Site, input: NewPage): { site: Site; pageId: st
   // Pages nest one level deep; the home page can't have sub-pages.
   const parentId = parent && !parent.parentId && !parent.isHome ? parent.id : null;
   const template = site.templates.find((t) => t.id === (input.templateId ?? "blank") && t.kind === "page") ?? site.templates.find((t) => t.id === "blank");
-  const sections = instantiate(template?.sections ?? []).map((s) => ({
+  const kind = input.kind ?? "page";
+  const sections = kind === "post"
+    ? [createSection("flow", { children: [createNode("PostBody")] })]
+    : instantiate(template?.sections ?? []).map((s) => ({
     ...s,
     // A fresh page's first heading starts as the page name.
     children: s.children.map((n) => (n.type === "Text" && (n.content.tag === "h1" || n.content.styleId === "h1") ? { ...n, content: { ...n.content, text: title } } : n)),
@@ -108,13 +123,17 @@ export function createPage(site: Site, input: NewPage): { site: Site; pageId: st
     showInNav: false,
     sections,
     overlays: [],
+    ...(kind !== "page" ? { kind } : {}),
+    ...(kind === "campaign" && input.unpublishAt ? { unpublishAt: input.unpublishAt } : {}),
+    ...(kind === "post" ? { post: { date: input.date ?? new Date().toISOString().slice(0, 10) } } : {}),
   };
   // Sub-pages sit right after their siblings so the list reads as a tree.
   const pages = [...site.pages];
   const lastSibling = parentId ? pages.reduce((last, p, i) => (p.id === parentId || p.parentId === parentId ? i : last), -1) : pages.length - 1;
   pages.splice(lastSibling + 1, 0, page);
   const next = { ...site, pages };
-  return { site: input.showInNav === false ? next : setShowInNav(next, page.id, true), pageId: page.id };
+  // Campaign pages and blog posts are reached by link or from the blog list, never the nav.
+  return { site: input.showInNav === false || kind !== "page" ? next : setShowInNav(next, page.id, true), pageId: page.id };
 }
 
 export const renamePage = (site: Site, pageId: string, title: string): Site =>

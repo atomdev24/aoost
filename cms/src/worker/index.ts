@@ -1,3 +1,4 @@
+import { expiredResponse } from "./expiry";
 import { authenticate, login, logout } from "./auth";
 import { editorApi, historyPage, livePage, preview, staging } from "./api";
 import { demoEnv, demoStub, draftStub, type Env } from "./env";
@@ -20,7 +21,7 @@ export default {
       }
     }
     // Public pages and files go straight to the static site (no sign-in work on every visit).
-    if (!/^\/(admin|api|mcp|media|preview|staging|demo|_published\.json)(\/|$)/.test(new URL(request.url).pathname)) return env.ASSETS.fetch(request);
+    if (!/^\/(admin|api|mcp|media|preview|staging|demo|_published\.json|_expires\.json)(\/|$)/.test(new URL(request.url).pathname)) return (await expiredResponse(request, env)) ?? env.ASSETS.fetch(request);
     const url = new URL(request.url);
     const path = url.pathname;
     try {
@@ -43,7 +44,7 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
   if (path === "/api/health") return json({ ok: true, authMode: env.AUTH_MODE });
   if (path === "/api/login" && request.method === "POST") return login(request, env);
   if (path === "/api/logout" && request.method === "POST") return logout(request);
-  if (path === "/_published.json") return new Response("Not found", { status: 404 });
+  if (path === "/_published.json" || path === "/_expires.json") return new Response("Not found", { status: 404 });
 
   if (path.startsWith("/media/")) return serveMedia(request, env, url);
   // A staging share link: public on purpose (like a Framer staging link); the long random token is the key.

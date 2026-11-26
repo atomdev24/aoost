@@ -14,6 +14,7 @@ export function PageSettings({ targetPageId, onBack }: { targetPageId?: string; 
   const current = useEditor(currentPage);
   const pages = useEditor((s) => s.site.pages);
   const page = targetPageId ? (pages.find((p) => p.id === targetPageId) ?? current) : current;
+  const patch = (fields: Partial<Page>, label: string) => update((s) => ({ ...s, pages: s.pages.map((p) => (p.id === page.id ? (Object.fromEntries(Object.entries({ ...p, ...fields }).filter(([, v]) => v !== undefined)) as Page) : p)) }), label);
   const editingMenu = !!megaItemId(page.id);
   const redirects = useEditor((s) => s.site.redirects);
   const siteTitle = useEditor((s) => s.site.settings.title);
@@ -96,6 +97,56 @@ export function PageSettings({ targetPageId, onBack }: { targetPageId?: string; 
             onChange={(status) => status && update((s) => setStatus(s, page.id, status), `Set ${page.title} to ${status}`)}
           />
         </label>
+
+        {page.isHome ? null : (
+          <label className="ed-field">
+            <span className="ed-field-label">Page type</span>
+            <Select<"page" | "campaign" | "post">
+              value={page.kind ?? "page"}
+              options={[
+                { value: "page", label: "Page" },
+                { value: "campaign", label: "Campaign page (link only, can end on a date)" },
+                { value: "post", label: "Blog post" },
+              ]}
+              onChange={(kind) =>
+                kind &&
+                patch(
+                  {
+                    kind: kind === "page" ? undefined : kind,
+                    ...(kind === "post" && !page.post ? { post: { date: new Date().toISOString().slice(0, 10) } } : {}),
+                    ...(kind !== "page" ? { showInNav: false } : {}),
+                  },
+                  `Make ${page.title} a ${kind === "post" ? "blog post" : kind === "campaign" ? "campaign page" : "page"}`,
+                )
+              }
+            />
+          </label>
+        )}
+
+        {page.kind === "campaign" ? (
+          <label className="ed-field">
+            <span className="ed-field-label">Take it down after</span>
+            <input type="date" className="ed-input" value={page.unpublishAt ?? ""} onChange={(e) => patch({ unpublishAt: e.target.value || undefined }, "Set the campaign end date")} />
+            <span className="ed-hint">{page.unpublishAt ? `From the day after, the link shows the "not found" page.` : "Leave empty to keep it up."}</span>
+          </label>
+        ) : null}
+
+        {page.kind === "post" && page.post ? (
+          <>
+            <label className="ed-field">
+              <span className="ed-field-label">Post date</span>
+              <input type="date" className="ed-input" value={page.post.date} onChange={(e) => e.target.value && patch({ post: { ...page.post!, date: e.target.value } }, "Set the post date")} />
+            </label>
+            <div className="ed-field">
+              <span className="ed-field-label">Cover picture</span>
+              <MediaInput kind="image" label="Cover picture" value={page.post.cover} onChange={(cover) => patch({ post: { ...page.post!, cover: cover || undefined } }, "Set the post cover")} />
+            </div>
+            <label className="ed-field">
+              <span className="ed-field-label">Summary (shown in the blog list)</span>
+              <TextInput value={page.post.excerpt ?? ""} placeholder="One sentence" onCommit={(excerpt) => patch({ post: { ...page.post!, excerpt: excerpt || undefined } }, "Edit the post summary")} />
+            </label>
+          </>
+        ) : null}
 
         {page.isHome ? null : (
           <label className="ed-field">

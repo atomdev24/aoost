@@ -28,7 +28,8 @@ export type ResolvedItem = {
  * A page the nav links to only once it's published. The editor's frames follow the same rule (they
  * used to list draft pages too), so the nav looks while editing exactly as it will on the site.
  */
-const live = (p: Page | undefined, _editing: boolean): p is Page => !!p && p.status === "published";
+// Campaign pages are reached by link only, so they never show in the nav.
+const live = (p: Page | undefined, _editing: boolean): p is Page => !!p && p.status === "published" && p.kind !== "campaign";
 
 /** A badge with an expiry date disappears after that day (also enforced client-side). */
 export function badgeFor(item: NavItem, today: string): ResolvedItem["badge"] {

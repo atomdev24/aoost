@@ -200,7 +200,8 @@ export function PageBody({ site, page, opts = {}, editing = false }: { site: Sit
 export function renderPage(site: Site, page: Page, opts: RenderOptions = {}): string {
   const title = pageTitle(site, page);
   const abs = (path: string) => (opts.siteUrl && path.startsWith("/") ? opts.siteUrl.replace(/\/$/, "") + path : path);
-  const noindex = !!opts.preview || page.status !== "published";
+  // Campaign pages are for people with the link: kept out of search engines too.
+  const noindex = !!opts.preview || page.status !== "published" || page.kind === "campaign";
   const v = opts.assetVersion ? `?v=${esc(opts.assetVersion)}` : "";
   const kits = pageKits(site, page);
 
