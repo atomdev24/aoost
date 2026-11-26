@@ -370,6 +370,16 @@ export const tools: Tool[] = [
     "Reply to a comment thread as Claude (shown with Claude's own colour), and optionally resolve it. Use it to say what you changed for a comment, after making the change.",
     z.object({ id: z.string().describe("The thread id from get_comments."), text: z.string().min(1).max(2000), resolve: z.boolean().default(false) }),
   ),
+  tool(
+    "get_claude_tasks",
+    "List the open comments where someone tagged @Claude: what they asked, on which page and block. Work through them one by one: call set_status, make the change, then reply_to_comment (resolve: true) saying what you did. Call this when Alex says to do the tagged tasks.",
+    z.object({ page: z.string().optional().describe("Only this page id.") }),
+  ),
+  tool(
+    "set_status",
+    "Show Alex what you're doing, in the editor's top bar (a working pill) and as a glow on the blocks you name. Call it at the start of a task and whenever you move to a new step, in plain words (\"Planning the hero section\", \"Writing the Spanish copy\"). Use done: true with a one-line summary when you finish.",
+    z.object({ text: z.string().min(1).max(120), done: z.boolean().default(false), page: z.string().optional().describe("Page id you're working on."), node_ids: z.array(z.string()).max(20).optional().describe("Blocks you're working on (glow in the editor).") }),
+  ),
   // The three tools below need the Worker (network, R2, an open editor, GitHub); it supplies their behaviour.
   tool(
     "upload_media_from_url",

@@ -259,7 +259,7 @@ function Composer({ placeholder, onSend, autoFocus }: { placeholder: string; onS
           {matches.map((m) => (
             <li key={m}>
               <button type="button" role="option" aria-selected={false} onMouseDown={(e) => (e.preventDefault(), setText(completeMention(text, m)))}>
-                @{m.split("@")[0]} <small>{m}</small>
+                @{m.split("@")[0] === "claude" ? "Claude" : m.split("@")[0]} <small>{m === "claude" ? "Claude works on it through the connector" : m}</small>
               </button>
             </li>
           ))}

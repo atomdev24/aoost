@@ -1,3 +1,4 @@
+import { AgentPill } from "../agent/AgentPill";
 import { createPortal } from "react-dom";
 import { TeamModal } from "../team/TeamModal";
 import { useCan } from "../team/role";
@@ -67,7 +68,8 @@ export function TopBar() {
   const editingMenu = !!megaItemId(page.id);
   const [notice, setNotice] = useState<string | null>(null);
   const now = useNow(20_000);
-  const remote = lastLabel && /^(Claude|Another window): /.test(lastLabel) ? lastLabel : null;
+  // Claude has its own pill (agent/AgentPill); this line is for edits from another window.
+  const remote = lastLabel && /^Another window: /.test(lastLabel) ? lastLabel : null;
   const phase = usePublish((p) => p.phase);
   const changes = useChanges();
   useEffect(() => void loadPublished(), []);
@@ -174,6 +176,11 @@ export function TopBar() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Claude at work: its own pill, centred under the top bar so it never crowds the controls. */}
+      <div className="ed-agent-dock">
+        <AgentPill />
       </div>
 
       {/* Right island: Claude status pill, Preview, Discard draft, Publish */}

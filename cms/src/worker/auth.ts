@@ -9,7 +9,7 @@ import type { Env } from "./env";
  *   access:   Cloudflare Access sits in front and adds a signed JWT to every
  *             request (browser logins and service tokens alike). We verify it.
  */
-export type Identity = { via: "session" | "bearer" | "access"; who: string };
+export type Identity = { via: "session" | "bearer" | "access" | "oauth"; who: string };
 
 const COOKIE = "aoost_session";
 const SESSION_DAYS = 30;

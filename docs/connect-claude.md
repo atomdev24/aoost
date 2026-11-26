@@ -6,7 +6,7 @@ Everything Claude does changes the **draft** only. Nothing goes live until you p
 
 ## What you need
 
-- The editor address: `https://aoost-cms.aoost-cms.workers.dev` (the preview deployment).
+- The editor address: `https://alexoostendurp.com` (or the preview deployment `https://aoost-cms.aoost-cms.workers.dev`).
 - The editor password (the `EDITOR_PASSWORD` you chose). Claude sends it as a bearer token.
 
 ## Claude Code (works today)
@@ -22,11 +22,38 @@ Check it with `claude mcp list` (it should say `aoost … connected`), then, ins
 
 To remove it: `claude mcp remove aoost`.
 
-## Claude on the web or desktop app
+## Your own Claude account (claude.ai, desktop and phone apps)
 
-The connector dialog in claude.ai (Settings → Connectors → Add custom connector) signs in with OAuth and cannot send a fixed password header, so it does not work with the password setup. It becomes possible after the planned switch to Cloudflare Access (`docs/auth.md`), which puts a proper sign-in in front of `/mcp`. That step is on the list for after this run; check then whether the claude.ai dialog accepts the Access sign-in.
+No server to run: the site signs Claude in with OAuth, the same way other connectors work.
 
-Any other MCP client that lets you set an `Authorization` header works the same way as Claude Code: URL `https://aoost-cms.aoost-cms.workers.dev/mcp`, transport "streamable HTTP", header `Authorization: Bearer <password>`.
+1. In Claude: **Settings → Connectors → Add custom connector**.
+2. Name it `aoost`, URL `https://alexoostendurp.com/mcp`. Leave the advanced OAuth fields empty.
+3. Claude opens a "Connect Claude" page on the site. You're already signed in to the editor there
+   (Cloudflare Access), so press **Allow**. On the password setup it asks for the editor password.
+4. In a chat, turn the `aoost` connector on from the tools menu and ask away.
+
+Claude acts as you: your team role applies to it. Each approval gives it a 1-hour key that it
+renews by itself for up to 30 days; after that it asks you to Allow again.
+
+Other MCP clients can still use a fixed header: `Authorization: Bearer <editor password>` on the
+password setup.
+
+## Seeing Claude work
+
+- While Claude works, a **Claude pill** floats under the top bar with what it's doing ("Update
+  About: one line…"), a thin moving line runs along the top of the window, and the block it is
+  working on gets an orange ring and a small "Claude" tag on the canvas.
+- When it stops, the pill turns green: "Finished · …" for a few seconds. ⌘Z undoes its changes.
+- Claude calls `set_status` to say what it is about to do, so the pill appears before the first
+  change, not only after.
+
+## Tagging Claude on a section
+
+Write a comment on the canvas and start it with **@Claude** ("@Claude make this calmer"). It
+becomes a task. Claude doesn't watch the site on its own: in a Claude chat with the connector on,
+say **"do my tagged tasks"**. Claude reads them (`get_claude_tasks`), shows its work in the
+editor as above, and replies on each comment. To have it check every morning instead, ask Claude
+for a scheduled task that does the same.
 
 ## Using it
 
@@ -56,6 +83,8 @@ Any other MCP client that lets you set an `Authorization` header works the same 
 | `upload_media_from_url` | Copy a file from a public https URL into the media library |
 | `get_preview_screenshot` | A PNG of the draft page at 390px or 1440px |
 | `publish` | Publish the draft. Claude is told to use this only when you explicitly ask |
+| `get_claude_tasks` | Open comments that tag @Claude, with the block they're on |
+| `set_status` | Show what Claude is doing in the editor's Claude pill, and on which blocks |
 
 ## Good to know
 

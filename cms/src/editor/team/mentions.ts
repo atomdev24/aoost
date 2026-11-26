@@ -7,9 +7,9 @@ export async function teamPeople(): Promise<string[]> {
   if (people) return people;
   try {
     const r = await api.team();
-    people = [...r.owners, ...Object.keys(r.team)].filter((e) => !e.startsWith("*@"));
+    people = ["claude", ...r.owners, ...Object.keys(r.team)].filter((e) => !e.startsWith("*@"));
   } catch {
-    people = [];
+    people = ["claude"];
   }
   return people;
 }

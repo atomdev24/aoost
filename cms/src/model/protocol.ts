@@ -31,7 +31,18 @@ export type ServerMessage =
   /** Everyone else already in the editor, sent when you first say who you are. */
   | { type: "presences"; list: { clientId: string; p: Presence }[] }
   /** Something happened (an edit, a comment, a publish): the activity feed's newest line. */
-  | { type: "activity"; entry: ActivityEntry };
+  | { type: "activity"; entry: ActivityEntry }
+  /** What Claude is doing (shown as a working pill and a glow on the blocks it touches). */
+  | ({ type: "agent"; at: number } & AgentStatus);
+
+export type AgentStatus = {
+  /** working: busy (thinking or editing); done: finished, with what it did. */
+  state: "working" | "done";
+  /** Plain words: "Reading the Home page", "Updating the hero heading". */
+  text: string;
+  pageId?: string;
+  nodeIds?: string[];
+};
 
 /** Who is in the editor and what they're looking at (no accounts: the name and colour they comment under). */
 export type Presence = {

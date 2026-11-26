@@ -1039,3 +1039,20 @@ select.ed-input option {
 .ed-mentions button { display: flex; gap: 6px; align-items: baseline; width: 100%; padding: 5px 7px; border: 0; border-radius: 6px; background: none; color: var(--ed-text); font: 13px var(--ed-font); text-align: left; cursor: pointer; }
 .ed-mentions button:hover { background: var(--ed-accent-soft); }
 .ed-mentions small { color: var(--ed-sub); }
+
+/* ---------------------------------------------- Claude at work */
+.ed-agent-dock { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 65; display: flex; width: max-content; max-width: calc(100vw - 32px); pointer-events: none; }
+.ed-agent-dock:empty { display: none; }
+@media (max-width: 720px) { .ed-agent-dock { top: auto; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 90; } }
+.ed-agent-pill { pointer-events: auto; backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); display: inline-flex; align-items: center; gap: 6px; height: 30px; max-width: min(420px, calc(100vw - 32px)); padding: 0 14px 0 10px; border-radius: 15px; flex: 0 1 auto; min-width: 0; font: 13px var(--ed-font); white-space: nowrap; overflow: hidden; }
+.ed-agent-pill b { font-weight: 600; }
+.ed-agent-pill .ed-agent-text { overflow: hidden; text-overflow: ellipsis; color: inherit; opacity: 0.85; }
+.ed-agent-pill.is-working { color: #ffd7c8; background: linear-gradient(90deg, rgba(217, 119, 87, 0.22), rgba(217, 119, 87, 0.42), rgba(217, 119, 87, 0.22)), rgba(28, 28, 30, 0.9); background-size: 200% 100%, auto; animation: ed-agent-shimmer 1.8s linear infinite; box-shadow: inset 0 0 0 1px rgba(217, 119, 87, 0.55); }
+.ed-agent-pill.is-done { color: #5be37f; background: linear-gradient(rgba(48, 209, 88, 0.16), rgba(48, 209, 88, 0.16)), rgba(28, 28, 30, 0.9); box-shadow: inset 0 0 0 1px rgba(48, 209, 88, 0.4); animation: ed-toast-in 0.2s ease-out; }
+.ed-agent-spark { color: #f0a58a; animation: ed-agent-spin 2.4s linear infinite; flex: none; }
+.ed-agent-sheen { position: fixed; left: 0; right: 0; top: 0; height: 2px; z-index: 70; pointer-events: none; background: linear-gradient(90deg, transparent, #D97757, #ffb08f, #D97757, transparent); background-size: 50% 100%; background-repeat: no-repeat; animation: ed-agent-sweep 1.6s ease-in-out infinite; }
+@keyframes ed-agent-shimmer { to { background-position: -200% 0; } }
+@keyframes ed-agent-spin { to { transform: rotate(360deg); } }
+@keyframes ed-agent-sweep { from { background-position: -50% 0; } to { background-position: 150% 0; } }
+@media (prefers-reduced-motion: reduce) { .ed-agent-pill.is-working, .ed-agent-spark, .ed-agent-sheen { animation: none; } }
+@media (max-width: 700px) { .ed-agent-pill { max-width: 150px; } }

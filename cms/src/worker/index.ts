@@ -1,3 +1,4 @@
+import { oauthIdentity, oauthRoute, resourceMetadataUrl } from "./oauth";
 import { expiredResponse } from "./expiry";
 import { authenticate, login, logout } from "./auth";
 import { editorApi, historyPage, livePage, preview, staging } from "./api";
@@ -21,7 +22,7 @@ export default {
       }
     }
     // Public pages and files go straight to the static site (no sign-in work on every visit).
-    if (!/^\/(admin|api|mcp|media|preview|staging|demo|_published\.json|_expires\.json)(\/|$)/.test(new URL(request.url).pathname)) return (await expiredResponse(request, env)) ?? env.ASSETS.fetch(request);
+    if (!/^\/(admin|api|mcp|media|preview|staging|demo|_published\.json|_expires\.json|\.well-known|oauth)(\/|$)/.test(new URL(request.url).pathname)) return (await expiredResponse(request, env)) ?? env.ASSETS.fetch(request);
     const url = new URL(request.url);
     const path = url.pathname;
     try {
@@ -53,6 +54,10 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
   if (path === "/demo") return Response.redirect(new URL("/demo/", url).toString(), 302);
   if (path.startsWith("/demo/")) return demo(request, env, url, path.slice("/demo".length));
 
+  // Sign-in for the Claude connector from claude.ai (OAuth); see oauth.ts.
+  const oauth = await oauthRoute(request, env, url);
+  if (oauth) return oauth;
+
   const who = await authenticate(request, env);
 
   if (path === "/api/session") return json({ ok: !!who, authMode: env.AUTH_MODE, passwordSet: env.AUTH_MODE === "access" || !!env.EDITOR_PASSWORD });
@@ -63,9 +68,14 @@ async function route(request: Request, env: Env, url: URL, path: string): Promis
   }
 
   if (path === "/mcp" || path === "/mcp/") {
-    if (!who) return new Response(JSON.stringify({ jsonrpc: "2.0", id: null, error: { code: -32001, message: "Unauthorized. Send the editor password as a bearer token." } }), { status: 401, headers: { "Content-Type": "application/json", "WWW-Authenticate": 'Bearer realm="aoost"' } });
+    const agent = who ?? (await oauthIdentity(request, env));
+    if (!agent)
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: null, error: { code: -32001, message: "Unauthorized. Connect through OAuth, or send the editor password as a bearer token." } }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", "WWW-Authenticate": `Bearer realm="aoost", resource_metadata="${resourceMetadataUrl(url.origin)}"` },
+      });
     // Remember that the connector reached us with valid credentials (the editor's "Claude connected" pill).
-    if (who.via !== "session") await draftStub(env).noteConnector().catch(() => {});
+    if (agent.via !== "session") await draftStub(env).noteConnector().catch(() => {});
     return mcp(request, env);
   }
 
