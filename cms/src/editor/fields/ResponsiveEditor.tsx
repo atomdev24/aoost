@@ -120,7 +120,16 @@ function Control<T>({ row, value, onChange, id }: { row: RowDef<T>; value: unkno
     case "number":
       return <ScrubNumber id={id} ariaLabel={row.label} glyph={row.glyph} value={value as number | undefined} min={row.min} max={row.max} step={row.step} suffix={row.suffix} placeholder={row.placeholder} spacing={row.spacing} onChange={(n) => (n === undefined && row.required ? undefined : onChange(n))} />;
     case "select":
-      return <Select id={id} ariaLabel={row.label} value={(value as string) ?? ""} options={row.options ?? []} onChange={(v) => onChange(v || undefined)} />;
+      return (
+        <Select
+          id={id}
+          ariaLabel={row.label}
+          value={value === undefined || value === null ? "" : String(value)}
+          options={row.options ?? []}
+          // Number rows offered as a list (font weight) keep their number.
+          onChange={(v) => onChange(v ? (row.numeric ? Number(v) : v) : undefined)}
+        />
+      );
     case "color":
       return <ColorInput label={row.label} value={value as string | undefined} onChange={onChange} />;
     case "toggle":

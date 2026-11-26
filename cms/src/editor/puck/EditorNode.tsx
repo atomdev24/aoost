@@ -10,6 +10,8 @@ import { currentPage, useEditor } from "../store";
 import { itemToNode } from "./adapter";
 import type { Node, Page } from "../../schema";
 import { usePuck } from "./usePuck";
+import { useRichEdit } from "../rich/edit-store";
+import { RichEditingPart } from "../rich/part";
 
 /**
  * A node on the editor canvas. It draws exactly what the public site draws
@@ -39,6 +41,8 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
   const flash = useEditor((s) => s.highlight.includes(props.id));
   const selected = useEditor((s) => s.selection.includes(props.id));
   const inCanvas = usePuck((s) => s.getParentById(props.id)?.type === "CanvasSection");
+  const richEdit = useRichEdit();
+  const editingText = type === "Text" && richEdit?.id === props.id && richEdit.bp === bp;
   const node = savedKeysOnly(itemToNode({ type, props }), page);
   const ctx = useMemo(() => ({ ...makeCtx(site, page, { editing: true }), bp }), [site, page, bp]);
   const attrs = nodeAttrs(node);
@@ -52,8 +56,8 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
       data-node-id={node.id}
       style={node.fit ? ({ "--fit": String(node.fit) } as React.CSSProperties) : undefined}
     >
-      <NodeContent node={node} ctx={ctx} />
-      {selected && inCanvas && !node.locked ? HANDLES.map((h) => <span key={h} className="ed-h" data-ed-handle={h} />) : null}
+      {editingText ? <RichEditingPart node={node} fallback={<NodeContent node={node} ctx={ctx} />} /> : <NodeContent node={node} ctx={ctx} />}
+      {selected && inCanvas && !node.locked && !editingText ? HANDLES.map((h) => <span key={h} className="ed-h" data-ed-handle={h} />) : null}
       {selected && !node.locked && (inCanvas || getComponent(type)?.framed) ? (
         <button
           type="button"
@@ -70,7 +74,7 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
           {keepsRatio(node) ? "Proportions" : "Free"}
         </button>
       ) : null}
-      {selected && !inCanvas && !node.locked ? FLOW_HANDLES.map((h) => <span key={h} className="ed-fh" data-ed-flow-handle={h} title={FLOW_HANDLE_TIP[h]} />) : null}
+      {selected && !inCanvas && !node.locked && !editingText ? FLOW_HANDLES.map((h) => <span key={h} className="ed-fh" data-ed-flow-handle={h} title={FLOW_HANDLE_TIP[h]} />) : null}
     </div>
   );
 }
