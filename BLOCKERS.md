@@ -62,7 +62,7 @@ Claude's requests through to these paths, while the editor itself stays behind A
    `/oauth/*` and `/.well-known/*` must not be covered either (they aren't unless the app covers
    the whole domain; if it does, add a second application for those three paths with the
    policy action **Bypass**, Include: Everyone).
-2. Claude → Settings → Connectors → Add custom connector → name `aoost`, URL
+2. Claude → Customize → Connectors → + → Add custom connector → name `aoost`, URL
    `https://alexoostendurp.com/mcp` → Add → on the site's "Connect Claude" page press **Allow**.
 3. Test in a chat: "list my aoost pages". Then open the editor and ask for a small change: the
    Claude pill should appear under the top bar.
