@@ -116,6 +116,16 @@ export function TopBar() {
           <span className="ed-savedot" data-state={save === "error" ? "error" : save === "saving" ? "saving" : "saved"} role="img" aria-label={saveTitle} title={saveTitle} />
           <span className="ed-savetext ed-desk-only" aria-hidden="true">{save === "error" ? "Not saved" : save === "saving" ? "Saving…" : "Saved"}</span>
         </span>
+        {/* Draft vs live, in words (UI spec, Nov 2026): amber while the draft differs from the live site. */}
+        <button
+          type="button"
+          className={`ed-statechip${count ? " is-draft" : " is-live"}`}
+          onClick={openSheet}
+          title={count ? "The draft has changes visitors can't see yet. Click to see them, then Publish." : "Everything in the editor is what visitors see."}
+        >
+          <span aria-hidden="true" />
+          {count ? `Draft · ${count} not live` : count === 0 ? "Matches live" : "Draft · changes not live"}
+        </button>
         {notice || remote ? (
           <span className="ed-status" role="status" title={lastLabel ?? undefined}>
             {notice ?? remote}
