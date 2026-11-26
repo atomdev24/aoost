@@ -80,7 +80,7 @@ export const removeRef = (id: string) => {
 };
 export function addRef(item: RefItem) {
   update((items) => [...items, item]);
-  showTip("ref");
+  if (!item.node) showTip("ref");
   set({ selected: item.id });
 }
 

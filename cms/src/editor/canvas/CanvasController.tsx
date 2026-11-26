@@ -132,7 +132,7 @@ export function CanvasController() {
         if (!dragging || !result.size) return;
         // A picture dragged right out of the page goes onto the board as a reference.
         const out = ev.clientX < 0 || ev.clientY < 0 || ev.clientX > doc.documentElement.clientWidth || ev.clientY > doc.documentElement.scrollHeight;
-        if (!handle && out && result.size === 1 && node.type === "Image" && node.content.src) {
+        if (!handle && out && result.size === 1) {
           els.forEach((n) => n && ["left", "top", "width", "height"].forEach((p) => n.style.removeProperty(p)));
           nodeToBoard(id, ev.clientX, ev.clientY);
           return;

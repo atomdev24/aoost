@@ -7,8 +7,17 @@ import { z } from "zod";
  */
 export const RefItem = z.object({
   id: z.string().min(1).max(64),
-  /** A media library URL (/media/…) or another https image. */
-  src: z.string().max(2000).refine((s) => s.startsWith("/") || s.startsWith("https://"), "an image URL"),
+  /** A media library URL (/media/…) or another https image. Empty for a parked block. */
+  src: z.string().max(2000).refine((s) => s === "" || s.startsWith("/") || s.startsWith("https://"), "an image URL"),
+  /**
+   * A block taken off the page and parked on the board, drawn live as it looks on the page (board/
+   * ParkedBlock.tsx): the block itself, the section it came from (its kind and layout, with no
+   * other blocks) and the screen size it was taken from. Never published; put back by dragging it
+   * onto a frame.
+   */
+  node: z.record(z.string(), z.unknown()).optional(),
+  section: z.record(z.string(), z.unknown()).optional(),
+  bp: z.enum(["mobile", "tablet", "desktop", "widescreen"]).optional(),
   /** Top-left corner and size in board (world) pixels. */
   x: z.number().finite().min(-200_000).max(200_000),
   y: z.number().finite().min(-200_000).max(200_000),
@@ -26,7 +35,8 @@ export function cleanRefs(input: unknown): RefItem[] {
   const seen = new Set<string>();
   for (const raw of input.slice(0, 500)) {
     const r = RefItem.safeParse(raw);
-    if (r.success && !seen.has(r.data.id)) {
+    // A reference needs a picture or a parked block, and a parked block stays under 200 KB.
+    if (r.success && !seen.has(r.data.id) && (r.data.src || r.data.node) && JSON.stringify(r.data).length < 200_000) {
       seen.add(r.data.id);
       out.push(r.data);
     }
