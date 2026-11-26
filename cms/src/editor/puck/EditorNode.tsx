@@ -7,6 +7,7 @@ import { keepsRatio, toggleKeepRatio } from "../canvas/ratio";
 import { getComponent } from "../../components/registry";
 import { currentPage, useEditor } from "../store";
 import { itemToNode } from "./adapter";
+import type { Node, Page } from "../../schema";
 import { usePuck } from "./usePuck";
 
 /**
@@ -14,6 +15,21 @@ import { usePuck } from "./usePuck";
  * (same wrapper, same component, same CSS) and hands Puck the wrapper as the
  * draggable element.
  */
+/**
+ * Puck fills a block's missing settings with the component's defaults before drawing it; the live
+ * page draws only what is saved. Keep just the saved keys so the editor shows what visitors see.
+ */
+function savedKeysOnly(node: Node, page: Page): Node {
+  let saved: Node | undefined;
+  for (const s of page.sections) {
+    saved = s.children.find((n) => n.id === node.id);
+    if (saved) break;
+  }
+  if (!saved) return node;
+  const content = Object.fromEntries(Object.entries(node.content).filter(([k]) => k in saved!.content));
+  return Object.keys(content).length === Object.keys(node.content).length ? node : { ...node, content };
+}
+
 export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckContext; id: string } & Record<string, unknown>) {
   const site = useEditor((s) => s.site);
   const page = useEditor(currentPage);
@@ -21,7 +37,7 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
   const flash = useEditor((s) => s.highlight.includes(props.id));
   const selected = useEditor((s) => s.selection.includes(props.id));
   const inCanvas = usePuck((s) => s.getParentById(props.id)?.type === "CanvasSection");
-  const node = itemToNode({ type, props });
+  const node = savedKeysOnly(itemToNode({ type, props }), page);
   const ctx = useMemo(() => ({ ...makeCtx(site, page, { editing: true }), bp }), [site, page, bp]);
   const attrs = nodeAttrs(node);
   return (
