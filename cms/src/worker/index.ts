@@ -3,6 +3,7 @@ import { expiredResponse } from "./expiry";
 import { authenticate, login, logout } from "./auth";
 import { editorApi, historyPage, livePage, preview, staging } from "./api";
 import { demoEnv, demoStub, draftStub, type Env } from "./env";
+import { cleanDemoSettings, DEMO_SETTINGS_KEY, resetsTonight } from "../model/demo-settings";
 import { error, html, json } from "./http";
 import { loginPage } from "./login-page";
 import { mcp } from "./mcp";
@@ -32,9 +33,10 @@ export default {
       return path.startsWith("/api/") || path.startsWith("/mcp") ? error(500, e instanceof Error ? e.message : "Something went wrong.") : new Response("Something went wrong.", { status: 500 });
     }
   },
-  // Every night (03:00 in Cape Town) the demo editor goes back to its wireframe site.
+  // At 03:00 in Cape Town the demo editor goes back to its sample site: every night, on Mondays or
+  // never, as set from the real editor (Demo editor in the ⋯ menu).
   async scheduled(_event: ScheduledController, env: Env): Promise<void> {
-    await demoStub(env).wipe();
+    if (resetsTonight(await demoSettings(env), new Date())) await demoStub(env).wipe();
   },
 } satisfies ExportedHandler<Env>;
 
@@ -121,12 +123,17 @@ const noindex = (res: Response, store = false) => {
  */
 async function demo(request: Request, env: Env, url: URL, rest: string): Promise<Response> {
   const denv = demoEnv(env);
+  // Switched off from the real editor: the editor's files still load, everything else says so.
+  if (!(await demoSettings(env)).enabled && !rest.startsWith("/assets/")) {
+    if (rest.startsWith("/api/")) return error(403, "The demo is switched off.");
+    return html("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Demo off</title><body style='margin:0;display:grid;place-items:center;min-height:100vh;background:#161618;color:#ececee;font:16px/1.5 system-ui,sans-serif'><p>This demo is switched off for now.</p>", 503);
+  }
   const at = (p: string) => {
     const u = new URL(url);
     u.pathname = p;
     return u;
   };
-  if (rest === "/api/session") return json({ ok: true, authMode: "demo", passwordSet: true, demo: true });
+  if (rest === "/api/session") return json({ ok: true, authMode: "demo", passwordSet: true, demo: true, reset: (await demoSettings(env)).reset });
   if (rest === "/api/logout" || rest === "/api/login") return json({ ok: true });
   if (rest.startsWith("/api/editor/")) {
     const u = at(rest);
@@ -154,4 +161,9 @@ async function demo(request: Request, env: Env, url: URL, rest: string): Promise
     .replace(/<title>[^<]*<\/title>/, "<title>Editor demo</title>")
     .replace("<head>", '<head>\n    <meta name="aoost-demo" content="1" />');
   return noindex(new Response(text, { status: shell.status, headers: { "Content-Type": "text/html; charset=utf-8" } }), true);
+}
+
+/** The demo's settings, kept with the real draft. */
+async function demoSettings(env: Env) {
+  return cleanDemoSettings(await draftStub({ ...env, IS_DEMO: undefined }).kvGet(DEMO_SETTINGS_KEY));
 }

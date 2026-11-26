@@ -54,6 +54,8 @@ export const Style = z.object({
   background: Color.optional(),
   color: Color.optional(),
   textAlign: z.enum(["left", "center", "right"]).optional(),
+  /** Text: its own font size in px, over the text style's (for this screen size). */
+  fontSize: z.number().min(6).max(400).optional(),
   filter: ImageFilter.optional(),
   /** Pictures and video: a black layer over the content, in % dark (0 to 100). */
   shade: z.number().min(0).max(100).optional(),

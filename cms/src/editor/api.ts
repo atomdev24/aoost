@@ -1,3 +1,4 @@
+import type { DemoSettings } from "../model/demo-settings";
 import type { Role, Team } from "../model/roles";
 import type { Op } from "../model/ops";
 import type { SyncInfo } from "../model/protocol";
@@ -77,6 +78,9 @@ export const api = {
   pushStaging: (message?: string) => call<{ commit: string | null; url: string | null; changed: string[] }>("/api/editor/staging/push", { method: "POST", body: JSON.stringify({ message }) }),
   me: () => call<{ who: string; via: string; role: Role }>("/api/editor/me"),
   team: () => call<{ team: Team; owners: string[]; signIn: "access" | "password" }>("/api/editor/team"),
+  demoSettings: () => call<{ settings: DemoSettings }>("/api/editor/demo/settings"),
+  putDemoSettings: (settings: DemoSettings) => call<{ settings: DemoSettings }>("/api/editor/demo/settings", { method: "PUT", body: JSON.stringify(settings) }),
+  resetDemo: () => call<{ ok: boolean }>("/api/editor/demo/reset-now", { method: "POST" }),
   putTeam: (team: Team) => call<{ team: Team }>("/api/editor/team", { method: "PUT", body: JSON.stringify({ team }) }),
   history: () => call<{ versions: Version[]; unavailable?: string }>("/api/editor/history"),
   version: (sha: string) => call<{ site: Site }>(`/api/editor/history/version?sha=${encodeURIComponent(sha)}`),

@@ -9,6 +9,7 @@ import type { Identity } from "./auth";
 import { demoStub, draftStub, readDraft, type Env } from "./env";
 import { error, html, json, readJson } from "./http";
 import { mediaApi, toItem } from "./media";
+import { cleanDemoSettings, DEMO_SETTINGS_KEY } from "../model/demo-settings";
 import { problemsReport } from "../model/problems";
 import { buildStatus, publishToGitHub } from "./publish";
 import { cachedVersionFiles, listVersions } from "./history";
@@ -81,6 +82,9 @@ async function demoRoute(request: Request, env: Env, url: URL): Promise<Response
     case "GET /media/demo":
     case "PUT /media/demo":
       return error(403, "Choose the demo's pictures from the real editor.");
+    case "GET /demo/settings":
+    case "PUT /demo/settings":
+      return error(403, "The demo's settings are in the real editor.");
     case "POST /media":
     case "DELETE /media":
       return error(403, "Uploads are off in the demo. Pick a placeholder picture, or upload in the real editor at /admin/.");
@@ -129,6 +133,16 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
   if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
 
   switch (route) {
+    case "GET /demo/settings":
+      return json({ ok: true, settings: cleanDemoSettings(await realDraft(env).kvGet(DEMO_SETTINGS_KEY)) });
+    case "PUT /demo/settings": {
+      const settings = cleanDemoSettings(await request.json().catch(() => null));
+      await realDraft(env).kvPut(DEMO_SETTINGS_KEY, settings, 0);
+      return json({ ok: true, settings });
+    }
+    case "POST /demo/reset-now":
+      await demoStub(env).wipe();
+      return json({ ok: true });
     case "GET /media/demo":
       return json({ ok: true, keys: await demoPicks(env) });
     case "PUT /media/demo": {

@@ -65,7 +65,7 @@ function AlignBar() {
 }
 
 /** The block's style, as two inspector groups: Layout (where and how big) and Frame (how it looks). */
-function StylePanel({ value, onChange, framed }: { value: Responsive<Style>; onChange: (v: Responsive<Style>) => void; framed: boolean }) {
+function StylePanel({ value, onChange, framed, textual }: { value: Responsive<Style>; onChange: (v: Responsive<Style>) => void; framed: boolean; textual?: boolean }) {
   const parentKind = useParentKind();
   return (
     <>
@@ -74,16 +74,16 @@ function StylePanel({ value, onChange, framed }: { value: Responsive<Style>; onC
         <ResponsiveEditor value={value} onChange={onChange} rows={STYLE_ROWS} ctx={{ parentKind, framed }} groups={["Position", "Size", "Grid cell", "Spacing"]} />
       </InspectorGroup>
       <InspectorGroup title="Frame">
-        <ResponsiveEditor value={value} onChange={onChange} rows={STYLE_ROWS} ctx={{ parentKind, framed }} groups={["Frame", "Look"]} hideHeads={["Frame"]} />
+        <ResponsiveEditor value={value} onChange={onChange} rows={STYLE_ROWS} ctx={{ parentKind, framed, textual }} groups={["Frame", "Look"]} hideHeads={["Frame"]} />
       </InspectorGroup>
     </>
   );
 }
 
-export const styleField = (framed: boolean): CustomField<Responsive<Style>> => ({
+export const styleField = (framed: boolean, textual = false): CustomField<Responsive<Style>> => ({
   type: "custom",
   label: "Layout",
-  render: ({ value, onChange }) => <StylePanel value={value} onChange={onChange} framed={framed} />,
+  render: ({ value, onChange }) => <StylePanel value={value} onChange={onChange} framed={framed} textual={textual} />,
 });
 
 /** A titled group in the inspector: 11px semibold label, then its rows. */

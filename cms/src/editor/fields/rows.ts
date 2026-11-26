@@ -26,7 +26,7 @@ export type RowDef<T> = {
   /** Show the row only in some contexts, e.g. inside a grid or canvas section. */
   when?: (ctx: RowContext) => boolean;
 };
-export type RowContext = { parentKind?: "flow" | "grid" | "canvas"; framed?: boolean; fit?: FrameFit["fit"] };
+export type RowContext = { parentKind?: "flow" | "grid" | "canvas"; framed?: boolean; fit?: FrameFit["fit"]; textual?: boolean };
 
 const inCanvas = (c: RowContext) => c.parentKind === "canvas";
 const notCanvas = (c: RowContext) => c.parentKind !== "canvas";
@@ -75,6 +75,7 @@ export const STYLE_ROWS: RowDef<Style>[] = [
   { key: "shade", label: "Darken", group: "Look", kind: "number", min: 0, max: 100, step: 1, suffix: "%", placeholder: "0", pair: "Overlay", glyph: "◑", when: (c) => !!c.framed },
   { key: "blur", label: "Blur", group: "Look", kind: "number", min: 0, max: 40, step: 1, suffix: "px", placeholder: "0", pair: "Overlay", glyph: "≋", when: (c) => !!c.framed },
   { key: "background", label: "Fill", group: "Look", kind: "color" },
+  { key: "fontSize", label: "Text size", group: "Look", kind: "number", min: 6, max: 400, step: 1, suffix: "px", placeholder: "style", when: (c) => !!c.textual, glyph: "Aa" },
   { key: "color", label: "Text colour", group: "Look", kind: "color" },
   {
     key: "textAlign",

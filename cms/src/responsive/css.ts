@@ -227,6 +227,11 @@ export function addNodeCss(sheet: Sheet, node: Node, section?: Section) {
       sheet.add(`${sel} ${sub}`, (fm ?? none)[part], (fd ?? fm ?? none)[part], extraDecls((bp) => !!extra[bp], (bp) => fx[bp as keyof typeof fx][part]));
     }
   }
+  // Text size over the text style's: on the text inside the block (it beats the style's class).
+  const fs = (s?: Style): Decls => (s?.fontSize ? { "font-size": `calc(var(--cs, 1px) * var(--fit, 1) * ${s.fontSize})` } : {});
+  if (m.style.fontSize || d.style.fontSize || extra.tablet?.style.fontSize || extra.widescreen?.style.fontSize) {
+    sheet.add(`${sel} .tx`, fs(m.style), fs(d.style), extraDecls((bp) => !!extra[bp as keyof typeof extra], (bp) => fs(extra[bp as keyof typeof extra]!.style)));
+  }
   const sm = shadeDecls(m.style);
   const sd = shadeDecls(d.style);
   const st = extra.tablet ? shadeDecls(extra.tablet.style) : null;
