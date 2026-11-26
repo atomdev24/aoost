@@ -13,7 +13,8 @@
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.worker.json",
     "deploy:preview": "npm run playlists:refresh && npm run build && wrangler deploy",
-    "playlists:refresh": "tsx scripts/refresh-playlists.ts"
+    "playlists:refresh": "tsx scripts/refresh-playlists.ts",
+    "template:snapshot": "tsx scripts/snapshot-template.ts"
   },
   "dependencies": {
     "@google/model-viewer": "^4.4.0",

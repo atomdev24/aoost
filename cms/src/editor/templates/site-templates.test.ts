@@ -3,6 +3,7 @@ import { getComponent } from "../../components/registry";
 import { Section } from "../../schema";
 import { AEROBOTICS_TEMPLATES } from "./aerobotics-templates";
 import { SITE_TEMPLATES } from "./site-templates";
+import { fromSnapshot } from "./snapshot-templates";
 
 describe("page templates", () => {
   for (const t of SITE_TEMPLATES) {
@@ -31,7 +32,18 @@ describe("page templates", () => {
       }
   });
   it("lists nine Aerobotics pages before the brochure designs", () => {
-    expect(SITE_TEMPLATES.map((t) => t.id).slice(0, 9)).toEqual(AEROBOTICS_TEMPLATES.map((t) => t.id));
+    expect(SITE_TEMPLATES.map((t) => t.id).slice(1, 10)).toEqual(AEROBOTICS_TEMPLATES.map((t) => t.id));
+    expect(SITE_TEMPLATES[0]!.id).toBe("aero-home-concept");
     expect(AEROBOTICS_TEMPLATES).toHaveLength(9);
+  });
+  it("copies the saved homepage concept with fresh ids and keeps its own anchor links pointing inside it", () => {
+    const snap = { from: "", savedAt: "2026-11-26", hideNav: false, sections: [
+      { id: "s_a", kind: "flow", layout: { base: { columns: 1, gap: 0, padding: "0px" } }, children: [{ id: "n_b", type: "Button", content: { label: "Go", target: { kind: "url", url: "#s_c" }, variant: "filled" }, style: { base: {} } }] },
+      { id: "s_c", kind: "flow", layout: { base: { columns: 1, gap: 0, padding: "0px" } }, children: [] },
+    ] };
+    const [a, c] = fromSnapshot(snap);
+    expect(a!.id).not.toBe("s_a");
+    expect(a!.children[0]!.id).not.toBe("n_b");
+    expect((a!.children[0]!.content.target as { url: string }).url).toBe(`#${c!.id}`);
   });
 });
