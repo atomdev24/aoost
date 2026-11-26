@@ -1,3 +1,4 @@
+import { cleanTeam, type Team } from "../model/roles";
 import { DurableObject } from "cloudflare:workers";
 import "../components/registry";
 import { deepEqual, getAt, mergeFiles, pathLabel, serialize, setAt, type PathSeg } from "../model/merge";
@@ -401,6 +402,17 @@ export class DraftStore extends DurableObject<Env> {
   }
 
   /** A page's reference images on the board (editor only; never part of the site's content). */
+  /** The team: email (or "*@domain") → role. Only owners change it (checked in the API). */
+  async getTeam(): Promise<Team> {
+    return (await this.ctx.storage.get<Team>("team")) ?? {};
+  }
+
+  async putTeam(team: unknown): Promise<Team> {
+    const clean = cleanTeam(team);
+    await this.ctx.storage.put("team", clean);
+    return clean;
+  }
+
   async getRefs(pageId: string): Promise<RefItem[]> {
     return (await this.ctx.storage.get<RefItem[]>(REFS + pageId)) ?? [];
   }

@@ -1,3 +1,4 @@
+import { loadRole, useCan } from "./team/role";
 import { mergeTranslatedEdit, withoutFit } from "../model/i18n";
 import { FeedbackToast } from "./workspace/FeedbackToast";
 import { BlogWriter } from "./writer/BlogWriter";
@@ -65,6 +66,8 @@ function PuckBridge() {
 export function Editor() {
   const pageId = useEditor((s) => s.pageId);
   const lang = useEditor((s) => s.lang);
+  const editable = useCan("edit");
+  useEffect(() => void loadRole(), []);
   const bp = useEditor((s) => s.bp);
   const interacting = useBoard((s) => s.interacting);
   const moving = useBoard((s) => s.moving);
@@ -88,6 +91,7 @@ export function Editor() {
         data={initial as never}
         viewports={VIEWPORTS}
         iframe={{ enabled: true, waitForStyles: false }}
+        permissions={editable ? undefined : { drag: false, edit: false, insert: false, delete: false, duplicate: false }}
         ui={{ viewports: { current: { width: DESIGN_WIDTH[bp], height: "auto" }, controlsVisible: false, options: VIEWPORTS } }}
         overrides={{ iframe: PuckFrame, actionBar: ActionBar, fieldLabel: FieldLabel as never }}
         onAction={(action) => {

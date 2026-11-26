@@ -43,6 +43,18 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 6. Masks and colour adjustments for board images; video and link references; shared scrapbook board.
 7. Engine / site-pack split for the Aerobotics website (see HANDBOOK.md §7).
 
+## Done (26 Nov 2026): editor UI spec for the Aerobotics team
+
+From the interview with Alex (doc "Editor UI spec — Aerobotics team"), shipped in PRs #95–#101:
+layers as a Figma-style tree (drag to reorder, top layer first); pages as cards with Campaigns and
+Blog folders; insert tabs (Basics, Brand, Motion, More); inspector tabs (Content, Style, Layout)
+with help; hover name tags; undo messages; history grouped by day; image name tags; orange marks
+for phone-only changes; the editing frame measured and fixed to match the live page; a
+draft-vs-live chip; campaign pages (link only, end dates) with a HubSpot form block; blog posts
+with a doc-like writer and a blog list; English/Spanish linked translations (copies for
+campaigns); roles with a Team panel and @mention suggestions. Waiting on Alex: BLOCKERS.md
+"Team roles and Google sign-in".
+
 ## Done (21 Nov 2026)
 
 - Placing project pieces: drag a piece in the editor to set where it sits on that screen size

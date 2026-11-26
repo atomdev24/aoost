@@ -1,3 +1,4 @@
+import { useCan } from "../team/role";
 import { useState } from "react";
 import { ownerPage, renameVariant, variantsOf } from "../../model/variants";
 import { openDesigns } from "../templates/designs-open";
@@ -9,6 +10,7 @@ import { compareCurrentVariant, electCurrentVariant, useStaging } from "./stagin
  * the live page isn't affected, and the way back or forward (Elect to staging).
  */
 export function VariantBand() {
+  const canPromote = useCan("promote");
   const page = useEditor(currentPage);
   const site = useEditor((s) => s.site);
   const busy = useStaging((s) => s.busy);
@@ -57,7 +59,7 @@ export function VariantBand() {
       <button type="button" className="ed-btn ed-btn-sm" onClick={() => setPage(owner.id)}>
         Back<span className="ed-desk-only"> to {owner.title}</span>
       </button>
-      <button type="button" className="ed-btn ed-btn-sm ed-btn-variant" disabled={busy} onClick={() => void electCurrentVariant()}>
+      <button type="button" className="ed-btn ed-btn-sm ed-btn-variant" disabled={busy || !canPromote} title={canPromote ? undefined : "Electing needs the Manager role"} onClick={() => void electCurrentVariant()}>
         {busy ? "Sending…" : (
           <>
             Elect<span className="ed-desk-only"> to staging</span>

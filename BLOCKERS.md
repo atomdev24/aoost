@@ -31,3 +31,25 @@ Each entry: what is needed, exact steps, and what is stubbed meanwhile.
 - The editor now installs as a home-screen app (Share → Add to Home Screen on the iPhone). With the default Access session it keeps asking for the email code.
 - Cloudflare dashboard → Zero Trust → Access → Applications → the editor app → Edit → Session Duration → **1 month** → Save.
 - Only you can do this (it's your Cloudflare account). Nothing is stubbed: until then the app works, it just asks for the code more often.
+
+## Team roles and Google sign-in (Nov 2026)
+Roles are built (Owner, Manager, Editor, Viewer; … → Team in the editor) and enforced by the
+Worker. They only tell people apart when the editor is behind Cloudflare Access, which it is
+(`AUTH_MODE = "access"` in `cms/wrangler.toml`). Until anyone is added in Team, everyone who can
+sign in stays an owner, as before, and whoever saves the team list always stays an owner.
+1. **Make yourself a permanent owner:** Cloudflare dashboard → Workers & Pages → the aoost
+   Worker → Settings → Variables → add `OWNER_EMAILS` = the email you sign in with (comma-separate
+   more). Or ask Claude to add it to `cms/wrangler.toml` once you say which email.
+2. **Google sign-in:** Cloudflare Zero Trust (free up to 50 users) → Settings → Authentication →
+   Login methods → Add new → Google. It asks for a Google OAuth client: Google Cloud console →
+   APIs & Services → Credentials → Create credentials → OAuth client ID → Web application →
+   Authorised redirect URI `https://rapid-cake-bd62.cloudflareaccess.com/cdn-cgi/access/callback`
+   → paste the client ID and secret back into Cloudflare.
+3. **Who may sign in:** Zero Trust → Access → Applications → the editor app → Policies → allow
+   "Emails ending in" `@aerobotics.com`, plus any guests by email. Keep `/mcp` outside the
+   Access app (the Claude connector signs in with its bearer token).
+4. For the Aerobotics site this is a CTO decision (which Google Workspace, who may sign in).
+- Not built: email or Slack notifications for @mentions and replies. Email needs a sending
+  service (Cloudflare Email Routing can't send to arbitrary inboxes; Resend/Postmark have free
+  tiers but are new accounts) and Slack needs the CTO's approval for the app. @mentions in
+  comments already suggest teammates from the Team list.

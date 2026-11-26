@@ -1,3 +1,6 @@
+import { createPortal } from "react-dom";
+import { TeamModal } from "../team/TeamModal";
+import { useCan } from "../team/role";
 import { addTranslation, languageName, siteLanguages, translatable } from "../../model/i18n";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "../api";
@@ -52,6 +55,7 @@ export function TopBar() {
   const saveError = useEditor((s) => s.saveError);
   const savedAt = useEditor((s) => s.savedAt);
   const unpublished = useEditor((s) => s.unpublished);
+  const canPublish = useCan("publish");
   const canUndo = useEditor((s) => s.past.length > 0);
   const canRedo = useEditor((s) => s.future.length > 0);
   const lastLabel = useEditor((s) => s.lastLabel);
@@ -185,7 +189,13 @@ export function TopBar() {
             Staging
           </button>
         ) : null}
-        <PublishButton phase={phase} count={count} disabled={!unpublished && save !== "error" && phase === "idle"} />
+        {canPublish ? (
+          <PublishButton phase={phase} count={count} disabled={!unpublished && save !== "error" && phase === "idle"} />
+        ) : (
+          <span className="ed-viewonly" title="You can look around and leave comments. Ask an owner (… → Team) for the Editor role to make changes.">
+            View only · you can comment
+          </span>
+        )}
         <MoreMenu canDiscard={unpublished} onDiscard={discard} onPreview={() => void preview()} />
         {sheetOpen ? <PublishSheet /> : null}
       </div>
@@ -223,6 +233,7 @@ function PublishButton({ phase, count, disabled }: { phase: string; count: numbe
 /** The right island's "…" menu: Discard draft lives here. */
 function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; onDiscard: () => void; onPreview: () => void }) {
   const [open, setOpen] = useState(false);
+  const [teamOpen, setTeamOpen] = useState(false);
   const glass = useGlass();
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -233,6 +244,7 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
   }, [open]);
   return (
     <div className="ed-more" ref={box}>
+      {teamOpen ? createPortal(<TeamModal onClose={() => setTeamOpen(false)} />, document.body) : null}
       <button type="button" className="ed-icon ed-more-btn" aria-label="More" aria-haspopup="menu" aria-expanded={open} title="More" onClick={() => setOpen(!open)}>
         …
       </button>
@@ -249,6 +261,18 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
               }}
             >
               Preview
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                setTeamOpen(true);
+              }}
+            >
+              Team…
             </button>
           </li>
           <li role="none">

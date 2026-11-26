@@ -1,3 +1,4 @@
+import { canDo } from "./team/role";
 import { applyTranslation, translatable } from "../model/i18n";
 import { useSyncExternalStore } from "react";
 import { applyOps, diffSite, type Op } from "../model/ops";
@@ -162,6 +163,11 @@ let langCache: { page: Page; lang: string; view: Page } | null = null;
  * within a short window collapse into one step (typing, dragging a slider).
  */
 export function update(fn: (site: Site) => Site, label: string, opts: { merge?: string } = {}) {
+  // Viewers look and comment; the server refuses their edits too.
+  if (!canDo("edit")) {
+    set({ lastLabel: "View only: ask an owner for the Editor role to make changes" });
+    return;
+  }
   const next = fn(state.site);
   if (next === state.site) return;
   const now = Date.now();

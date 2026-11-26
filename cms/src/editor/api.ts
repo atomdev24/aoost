@@ -1,3 +1,4 @@
+import type { Role, Team } from "../model/roles";
 import type { Op } from "../model/ops";
 import type { SyncInfo } from "../model/protocol";
 import type { Issue, Site } from "../schema";
@@ -74,6 +75,9 @@ export const api = {
   sendToStaging: (label: string) => call<{ staging: StagingPath }>("/api/editor/staging", { method: "POST", body: JSON.stringify({ label }) }).then((r) => withUrl(r.staging)),
   clearStaging: () => call("/api/editor/staging", { method: "DELETE" }),
   pushStaging: (message?: string) => call<{ commit: string | null; url: string | null; changed: string[] }>("/api/editor/staging/push", { method: "POST", body: JSON.stringify({ message }) }),
+  me: () => call<{ who: string; via: string; role: Role }>("/api/editor/me"),
+  team: () => call<{ team: Team; owners: string[]; signIn: "access" | "password" }>("/api/editor/team"),
+  putTeam: (team: Team) => call<{ team: Team }>("/api/editor/team", { method: "PUT", body: JSON.stringify({ team }) }),
   history: () => call<{ versions: Version[]; unavailable?: string }>("/api/editor/history"),
   version: (sha: string) => call<{ site: Site }>(`/api/editor/history/version?sha=${encodeURIComponent(sha)}`),
   logout: () => call("/api/logout", { method: "POST" }),
