@@ -69,6 +69,10 @@ function LoadingCover({ bp, pageId, slug, ready }: { bp: Breakpoint; pageId: str
  * preview; the others are live renders of the same draft. One document, many
  * views: an edit anywhere shows everywhere.
  */
+/** "25 changes for phones": plain words, not "overrides" (audit, Nov 2026). */
+const FOR: Record<string, string> = { mobile: "phones", tablet: "tablets", widescreen: "wide screens", desktop: "desktop" };
+const overrideWords = (n: number, bp: string) => `${n} ${n === 1 ? "change" : "changes"} for ${FOR[bp] ?? bp}`;
+
 export function Board() {
   // Simple mode works on Desktop and Mobile only.
   const simple = useSimple();
@@ -286,11 +290,11 @@ export function Board() {
             {short ? null : (NOTE[f.bp] ?? null)}
             {overrides[f.bp] ? (
               short ? (
-                <span className="bd-badge is-dot" title={overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}>
-                  <span className="ed-visually-hidden">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span>
+                <span className="bd-badge is-dot" title={overrideWords(overrides[f.bp]!, f.bp)}>
+                  <span className="ed-visually-hidden">{overrideWords(overrides[f.bp]!, f.bp)}</span>
                 </span>
               ) : (
-                <span className="bd-badge">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span>
+                <span className="bd-badge">{overrideWords(overrides[f.bp]!, f.bp)}</span>
               )
             ) : null}
           </button>
