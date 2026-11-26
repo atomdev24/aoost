@@ -22,3 +22,10 @@ node scripts/probes/audit.mjs 8799 my-run                 # every main flow (des
 
 Output goes to `cms/.probe-out/` (ignored). The probes read `EDITOR_PASSWORD` from `cms/.dev.vars`.
 Don't run them while the e2e suite uses the same server: they share one draft.
+
+## perf.mjs / site.mjs (Nov 2026)
+Speed baseline probes (EDITOR-FOUNDATIONS.md). With the local server on :8790:
+`node scripts/probes/perf.mjs` (desktop) or `node scripts/probes/perf.mjs mobile` (390px, 4× slower CPU):
+time to an editable canvas, and tap / key latency from the Event Timing API.
+`node scripts/probes/site.mjs`: public pages on a slow phone (first paint, largest paint, blocking, bytes).
+Both use Chrome at /usr/bin/google-chrome.
