@@ -12,7 +12,7 @@
   "showInNav": false,
   "sections": [
     {
-      "id": "s_ku92uh42",
+      "id": "s_jlrj1dgq",
       "kind": "flow",
       "name": "Hero",
       "layout": {
@@ -24,13 +24,18 @@
       },
       "children": [
         {
-          "id": "n_tof3f9xt",
+          "id": "n_gtq14at7",
           "type": "AoostHero",
           "content": {
             "label": "aoost / portfolio",
             "clockLabel": "CPT",
             "timeZone": "Africa/Johannesburg",
             "reel": [
+              {
+                "src": "/media/2026/aoost-hero-skull-scuffed-chrome-2400x1000-cxr4.png",
+                "alt": "",
+                "date": "22.11.26"
+              },
               {
                 "src": "/media/2026/hero-banner-halftone-viho.png",
                 "alt": "",
@@ -50,19 +55,51 @@
                     "panX": 0,
                     "panY": 0
                   }
-                }
+                },
+                "date": "22.11.26"
               },
               {
-                "src": "/media/2026/aoost-hero-skull-ethereal-2400x1000-63zv.png",
-                "alt": ""
+                "src": "/media/2026/aoost-hero-jadeskull-01-front-close-w4dd.png",
+                "alt": "",
+                "date": "22.11.26"
               }
             ],
-            "reelSeconds": 5.2,
-            "ticker": [],
-            "tickerTopScore": true,
+            "reelSeconds": 3,
+            "ticker": [
+              {
+                "text": "Hey, welcome",
+                "mode": "both"
+              },
+              {
+                "text": "take a look around",
+                "mode": "both"
+              },
+              {
+                "text": "",
+                "mode": "both"
+              }
+            ],
+            "tickerTopScore": false,
             "tickerVisitors": true,
             "lateMode": false,
-            "showTicker": true
+            "showTicker": true,
+            "tickerStyle": "dots",
+            "dotGrid": true,
+            "dotSeconds": 4.9,
+            "reelBar": false,
+            "reelViewer": false,
+            "artPan": "rtl",
+            "dotAfter": "sky",
+            "dotEffect": "resolve",
+            "dotTextSize": 40,
+            "dotLook": "glassblock",
+            "phantoms": true,
+            "phantomRate": "sometimes",
+            "overlay": "minimal",
+            "screen": {
+              "show": true
+            },
+            "intro": "always"
           },
           "style": {
             "base": {},
@@ -71,14 +108,14 @@
             }
           },
           "effects": {
-            "enter": "slide-right",
-            "parallax": 0.15
+            "enter": "slide-left",
+            "parallax": 0.4
           }
         }
       ]
     },
     {
-      "id": "s_knkc3bvd",
+      "id": "s_7vdj57k0",
       "kind": "flow",
       "name": "Projects",
       "layout": {
@@ -90,7 +127,7 @@
       },
       "children": [
         {
-          "id": "n_z9l5uj2t",
+          "id": "n_t8vzsld1",
           "type": "AoostProjects",
           "content": {
             "mat": "light",
@@ -98,27 +135,126 @@
             "heading": "Projects",
             "projects": [
               {
-                "image": "/art/hero.jpg"
+                "image": "/art/hero.jpg",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.73,
+                    "x": 0.1831,
+                    "y": 0.0975
+                  }
+                }
               },
               {
                 "image": "/art/monkey-figure.jpg",
                 "hidden": true
               },
               {
-                "image": "/art/storefront.png"
+                "image": "/art/storefront.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.66,
+                    "x": 0.1605,
+                    "y": 0.4123
+                  }
+                }
               },
               {
-                "image": "/art/hear-no-evil-3d.png"
+                "image": "/art/hear-no-evil-3d.png",
+                "sticker": false,
+                "frame": {
+                  "base": {
+                    "fit": "fill",
+                    "focalX": 50,
+                    "focalY": 50,
+                    "zoom": 1,
+                    "panX": 0,
+                    "panY": 0
+                  }
+                },
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.55,
+                    "x": 0.8552,
+                    "y": 0.5536
+                  }
+                }
               },
               {
-                "image": "/art/flower-skull.png"
+                "image": "/art/flower-skull.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.61,
+                    "x": 0.8427,
+                    "y": 0.2104
+                  }
+                }
               },
               {
-                "image": "/art/hear-no-evil-ring.png"
+                "image": "/art/hear-no-evil-ring.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 0.68,
+                    "x": 0.2153,
+                    "y": 0.7875
+                  }
+                },
+                "sticker": false
+              },
+              {
+                "image": "/media/2026/aoost-hero-skull-scuffed-chrome-2400x1000-cxr4.png",
+                "sticker": false,
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "x": 0.3629,
+                    "y": 0.5997,
+                    "scale": 1.5
+                  }
+                }
+              },
+              {
+                "image": "/media/2026/aoost-hero-jadeskull-02-tilt-1h1t.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 1.45
+                  }
+                }
+              },
+              {
+                "image": "/media/2026/aoost-hero-skullcactus-10-window-wide-jade-pair-2bqi.png",
+                "size": {
+                  "base": {
+                    "scale": 1
+                  },
+                  "desktop": {
+                    "scale": 1.29
+                  }
+                },
+                "hidden": true
               }
             ],
             "note": {
-              "show": true,
+              "show": false,
               "style": "plain"
             },
             "keychain": {
@@ -131,24 +267,52 @@
             "fixtures": [
               {
                 "image": "/art/clover-metal.png",
-                "x": 20,
-                "y": 26,
+                "x": 4,
+                "y": 36,
                 "width": 210,
                 "rotate": -8
               },
               {
                 "image": "/media/2026/aoost-skull-resin-transparent-wide-1-bjma.png",
-                "x": 81,
-                "y": 91,
+                "x": 4,
+                "y": 6,
                 "width": 200
               },
               {
                 "image": "/media/2026/aoost-skull-side-black-transparent-wide-1-p8mv.png",
-                "x": 5,
-                "y": 78,
+                "x": 4,
+                "y": 63,
                 "width": 200
+              },
+              {
+                "image": "/media/2026/aoost-cactus-transparent-wide-1-33uc.png",
+                "x": 8,
+                "y": 100,
+                "width": 243
+              },
+              {
+                "image": "/media/2026/aoost-sticky-stack-transparent-wide-1-bd0p.png",
+                "x": 98,
+                "y": 6,
+                "width": 200
+              },
+              {
+                "image": "/media/2026/aoost-copper-ring-transparent-wide-1-35rq.png",
+                "x": 98,
+                "y": 22,
+                "width": 53
+              },
+              {
+                "image": "/media/2026/aoost-journal-transparent-wide-2vq7.png",
+                "x": 96,
+                "y": 49,
+                "width": 332
               }
-            ]
+            ],
+            "viewer": false,
+            "shadow": {
+              "show": true
+            }
           },
           "style": {
             "base": {}
@@ -157,7 +321,7 @@
       ]
     },
     {
-      "id": "s_s1n4h9qb",
+      "id": "s_c70qdrqw",
       "kind": "flow",
       "name": "Journals",
       "layout": {
@@ -169,7 +333,7 @@
       },
       "children": [
         {
-          "id": "n_4gjaq9s6",
+          "id": "n_vz45bq6m",
           "type": "AoostJournals",
           "content": {
             "mat": "light",
@@ -179,46 +343,75 @@
               {
                 "title": "sketchbook 1",
                 "year": "2025",
-                "cover": "/art/j-star1.jpg",
                 "band": "#141516",
                 "tilt": -5,
                 "pages": [
                   {
-                    "id": "cc67ed56-1343-4107-8236-c6fc982e371f",
+                    "id": "194db5e7-f4cc-474c-b8f9-048c2c703197",
                     "paper": "black",
-                    "spread": true,
                     "items": [
                       {
-                        "id": "e244da62-0ce7-4377-9ba9-4cb4cec26aa7",
+                        "id": "6f4ccca9-b268-48e4-9071-0e35df0d0487",
                         "kind": "sticker",
-                        "src": "https://htlshvacmhprvsupkbpt.supabase.co/storage/v1/object/public/aoost/stickers/4e412042-39ad-4a0e-ac61-a61006fd405c.webp",
-                        "x": 0.512805,
-                        "y": 0.478652,
-                        "w": 0.512394,
-                        "rot": -20.8,
-                        "skew": -0.778526,
+                        "src": "/media/2026/wip-cactus-86ro.png",
+                        "x": 0.5,
+                        "y": 0.5,
+                        "w": 0.42,
+                        "rot": -4,
+                        "skew": 0,
                         "z": 1,
                         "props": {
                           "lift": 0,
                           "tape": "none",
-                          "aspect": 0.6330275229357798,
+                          "aspect": 0.49847405900305186,
                           "shadow": "soft",
                           "tapeStyle": "masking"
                         }
                       }
                     ]
                   }
-                ]
+                ],
+                "mockup": "/media/2026/aoost-journal-transparent-wide-trimmed-1uu2.png",
+                "dark": true,
+                "coverColor": "#141516",
+                "material": "none"
               },
               {
                 "title": "sketchbook 2",
                 "year": "2025",
-                "coverColor": "#B48A5C",
-                "material": "kraft",
-                "sticker": "/art/hear-no-evil-ring.png",
-                "band": "#7A1A1A",
+                "coverColor": "#141516",
+                "material": "none",
+                "band": "#141516",
                 "tilt": 4,
-                "pages": []
+                "pages": [
+                  {
+                    "id": "25a4eadd-7ae2-4a9b-8368-20576b5a250a",
+                    "paper": "black",
+                    "items": [
+                      {
+                        "id": "f62ac00e-ebf8-42c6-af96-f775ca18bf9a",
+                        "kind": "sticker",
+                        "src": "/media/2026/wip-cactus-86ro.png",
+                        "x": 0.5,
+                        "y": 0.5,
+                        "w": 0.42,
+                        "rot": -4,
+                        "skew": 0,
+                        "z": 1,
+                        "props": {
+                          "lift": 0,
+                          "tape": "none",
+                          "aspect": 0.49847405900305186,
+                          "shadow": "soft",
+                          "tapeStyle": "masking"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "hidden": false,
+                "mockup": "/media/2026/aoost-clear-journal-v2-trimmed-wuz3.png",
+                "dark": true
               },
               {
                 "title": "sketchbook 3",
@@ -226,7 +419,8 @@
                 "cover": "/art/j-star2.jpg",
                 "band": "#1B2BA0",
                 "tilt": -2,
-                "pages": []
+                "pages": [],
+                "hidden": true
               },
               {
                 "title": "sketchbook 4",
@@ -237,9 +431,11 @@
                 "band": "#7C5CFF",
                 "dark": true,
                 "tilt": 6,
-                "pages": []
+                "pages": [],
+                "hidden": true
               }
-            ]
+            ],
+            "windowLight": true
           },
           "style": {
             "base": {}
@@ -248,7 +444,7 @@
       ]
     },
     {
-      "id": "s_awk0uj48",
+      "id": "s_8vvci0tf",
       "kind": "flow",
       "name": "Skills",
       "layout": {
@@ -261,7 +457,7 @@
       },
       "children": [
         {
-          "id": "n_q680w7gy",
+          "id": "n_dh4psqv6",
           "type": "AoostTools",
           "content": {
             "mat": "light",
@@ -312,7 +508,7 @@
       ]
     },
     {
-      "id": "s_1jvdh2v4",
+      "id": "s_wt176qcf",
       "kind": "flow",
       "name": "Playlists",
       "layout": {
@@ -324,7 +520,7 @@
       },
       "children": [
         {
-          "id": "n_7ejpzcx5",
+          "id": "n_938q4deu",
           "type": "AoostPlaylistBand",
           "content": {
             "mat": "dark",
@@ -354,7 +550,7 @@
       ]
     },
     {
-      "id": "s_1nlyix1v",
+      "id": "s_jedankb2",
       "kind": "flow",
       "name": "The wall",
       "layout": {
@@ -366,7 +562,7 @@
       },
       "children": [
         {
-          "id": "n_87a3j9v7",
+          "id": "n_p4jlp7j4",
           "type": "AoostDrawingWall",
           "content": {
             "mat": "dark",
@@ -462,7 +658,7 @@
       ]
     },
     {
-      "id": "s_j0uipi9z",
+      "id": "s_kgbccvpy",
       "kind": "flow",
       "name": "Rodeo",
       "layout": {
@@ -474,7 +670,7 @@
       },
       "children": [
         {
-          "id": "n_pnyan8cu",
+          "id": "n_ypzor9xj",
           "type": "AoostRodeo",
           "content": {
             "mat": "dark",
@@ -490,7 +686,7 @@
       ]
     },
     {
-      "id": "s_mje31sa8",
+      "id": "s_gpym7vyh",
       "kind": "flow",
       "name": "Footer",
       "layout": {
@@ -502,7 +698,7 @@
       },
       "children": [
         {
-          "id": "n_5loj76vh",
+          "id": "n_15y314x1",
           "type": "AoostFooter",
           "content": {
             "mat": "dark",
@@ -518,7 +714,7 @@
       ]
     },
     {
-      "id": "s_jtjw3rvy",
+      "id": "s_4c3vu6yx",
       "kind": "flow",
       "name": "Artwork viewer",
       "layout": {
@@ -530,11 +726,33 @@
       },
       "children": [
         {
-          "id": "n_cyya2lie",
+          "id": "n_a1dighoq",
           "type": "AoostViewer",
           "content": {},
           "style": {
             "base": {}
+          }
+        },
+        {
+          "id": "n_63d0n7py",
+          "type": "Image",
+          "content": {
+            "src": "",
+            "alt": "",
+            "lightbox": true
+          },
+          "style": {
+            "base": {}
+          },
+          "frame": {
+            "base": {
+              "fit": "fill",
+              "focalX": 50,
+              "focalY": 50,
+              "zoom": 1,
+              "panX": 0,
+              "panY": 0
+            }
           }
         }
       ]
@@ -544,23 +762,24 @@
   "variantOf": "home",
   "variantName": "Variant 1",
   "variantIds": {
-    "s_ku92uh42": "home-hero",
-    "n_tof3f9xt": "home-hero-block",
-    "s_knkc3bvd": "home-projects",
-    "n_z9l5uj2t": "home-projects-block",
-    "s_s1n4h9qb": "home-journals",
-    "n_4gjaq9s6": "home-journals-block",
-    "s_awk0uj48": "home-tools",
-    "n_q680w7gy": "home-tools-block",
-    "s_1jvdh2v4": "home-playlistband",
-    "n_7ejpzcx5": "home-playlistband-block",
-    "s_1nlyix1v": "home-drawingwall",
-    "n_87a3j9v7": "home-drawingwall-block",
-    "s_j0uipi9z": "home-rodeo",
-    "n_pnyan8cu": "home-rodeo-block",
-    "s_mje31sa8": "home-footer",
-    "n_5loj76vh": "home-footer-block",
-    "s_jtjw3rvy": "home-viewer",
-    "n_cyya2lie": "home-viewer-block"
+    "s_jlrj1dgq": "home-hero",
+    "n_gtq14at7": "home-hero-block",
+    "s_7vdj57k0": "home-projects",
+    "n_t8vzsld1": "home-projects-block",
+    "s_c70qdrqw": "home-journals",
+    "n_vz45bq6m": "home-journals-block",
+    "s_8vvci0tf": "home-tools",
+    "n_dh4psqv6": "home-tools-block",
+    "s_wt176qcf": "home-playlistband",
+    "n_938q4deu": "home-playlistband-block",
+    "s_jedankb2": "home-drawingwall",
+    "n_p4jlp7j4": "home-drawingwall-block",
+    "s_kgbccvpy": "home-rodeo",
+    "n_ypzor9xj": "home-rodeo-block",
+    "s_gpym7vyh": "home-footer",
+    "n_15y314x1": "home-footer-block",
+    "s_4c3vu6yx": "home-viewer",
+    "n_a1dighoq": "home-viewer-block",
+    "n_63d0n7py": "n_47094vqs"
   }
 }

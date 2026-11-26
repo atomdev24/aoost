@@ -15,6 +15,9 @@
     ],
     "defaultSeo": {
       "title": "aoost"
+    },
+    "analytics": {
+      "clarity": "zju5sls37v"
     }
   },
   "theme": {

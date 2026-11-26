@@ -122,6 +122,84 @@
       ]
     },
     {
+      "id": "FlowSection-921c3152-a67d-49de-ad65-01953291e38c",
+      "kind": "flow",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 18,
+          "padding": "56px 20px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "padding": "96px 56px"
+        }
+      },
+      "children": [
+        {
+          "id": "Video-c2b513f6-9a77-43fd-a01c-4be614860156",
+          "type": "Video",
+          "content": {
+            "source": "upload",
+            "src": "",
+            "autoplay": true,
+            "loop": true,
+            "controls": false,
+            "playInView": true
+          },
+          "style": {
+            "base": {
+              "aspectRatio": "16/9"
+            }
+          },
+          "frame": {
+            "base": {
+              "fit": "fill",
+              "focalX": 50,
+              "focalY": 50,
+              "zoom": 1,
+              "panX": 0,
+              "panY": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "GridSection-a598ccba-1d0c-4e1d-a0f0-c94f58003011",
+      "kind": "grid",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 14,
+          "padding": "56px 20px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "columns": 3,
+          "padding": "96px 56px"
+        }
+      },
+      "children": []
+    },
+    {
+      "id": "GridSection-ed656380-43e1-4ce4-91c5-6e4888951ba5",
+      "kind": "grid",
+      "layout": {
+        "base": {
+          "columns": 1,
+          "gap": 14,
+          "padding": "56px 20px",
+          "maxWidth": 1160
+        },
+        "desktop": {
+          "columns": 3,
+          "padding": "96px 56px"
+        }
+      },
+      "children": []
+    },
+    {
       "id": "work-footer",
       "kind": "flow",
       "name": "Footer",
