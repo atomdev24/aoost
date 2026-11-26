@@ -65,7 +65,7 @@ Speed probes: `cms/scripts/probes/perf.mjs [mobile]` (editor: load, tap and key 
 2. **Homepage on phones:** 5.2 s to the main picture, 1.8 MB (artwork images and effects).
    Smaller images, start effects after first paint. It's Alex's art homepage: keep the look.
 3. **Audit leftovers** (canvas board "Audit"): developer words in fields (raw URL, rgba tint),
-   pictures not file names in lists, quieter Layers rows, "25 overrides" → "25 changes for phones".
+   pictures not file names in lists, quieter Layers rows. ("25 changes for phones" done, PR #135.)
 4. **Rich text for the Aerobotics blocks' text fields**; inline font size.
 5. **Web app extras:** share a photo from the phone into Media (Web Share Target), push
    notifications for mentions and Claude replies.
