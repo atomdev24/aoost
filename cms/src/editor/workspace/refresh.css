@@ -788,6 +788,38 @@ html.ed-commenting #preview-frame {
   margin: 10px 0 0 !important;
   color: #e8e8ea !important;
 }
+.ed-demo-card .ed-demo-limits { list-style: none; padding: 0; }
+.ed-demo-card .ed-demo-limits li + li { margin-top: 6px; }
+.ed-demo-card .ed-demo-limits b { display: block; color: #e8e8ea; font-weight: 600; }
+/* The strip under the top bar: always says what's off (B), with Details for the full list. */
+.ed-demo-strip {
+  position: fixed; top: 58px; left: 50%; transform: translateX(-50%); z-index: 60;
+  display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px);
+  height: 26px; padding: 0 4px 0 12px; border-radius: 13px;
+  background: color-mix(in srgb, var(--ed-attn) 18%, #1c1c1f);
+  border: 1px solid color-mix(in srgb, var(--ed-attn) 35%, transparent);
+  color: color-mix(in srgb, var(--ed-attn) 70%, #fff);
+  font: 500 12px/1 var(--ed-font, system-ui, sans-serif); white-space: nowrap;
+}
+.ed-demo-strip span { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ed-demo-strip button {
+  flex: none; height: 20px; padding: 0 9px; border: 0; border-radius: 10px; cursor: pointer;
+  background: color-mix(in srgb, var(--ed-attn) 26%, transparent); color: inherit; font: inherit;
+}
+.ed-demo-strip button:hover { background: color-mix(in srgb, var(--ed-attn) 38%, transparent); }
+@media (max-width: 720px) { .ed-demo-strip { top: auto; bottom: calc(76px + env(safe-area-inset-bottom)); } }
+/* A control that's off in the demo keeps its place with a lock (C); pressing it says why. */
+.ed-demo-locked { opacity: 0.72; }
+.ed-demo-locked .ed-lock-icon { margin-left: 5px; vertical-align: -1px; }
+.ed-demo-why b { display: block; margin-bottom: 4px; font-size: 13px; }
+.ed-demo-why p { margin: 0; font-size: 12px; line-height: 1.45; color: var(--ed-sub); }
+.ed-rail-btn[data-demo-off] { position: relative; }
+.ed-rail-btn[data-demo-off]::after {
+  content: ""; position: absolute; right: 5px; bottom: 5px; width: 9px; height: 9px;
+  background: currentColor; opacity: 0.8;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5M2.5 5.5h7v5h-7z' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5M2.5 5.5h7v5h-7z' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 
 /* ---------------------------------------------- dropdowns: light text on dark, never white on grey */
 .ed-shell select option,
@@ -1063,3 +1095,7 @@ select.ed-input option {
 .ed-pick-link-row { display: flex; gap: 8px; }
 .ed-pick-link-row .ed-input { flex: 1; min-width: 0; }
 .ed-pick-link-or { margin: 0; font-size: 12px; color: var(--ed-text-3, #8e8e93); }
+/* Media library: "Demo" marks a real picture as shown in the demo editor's library. */
+.ed-mini.ed-mini-demo { width: auto; padding: 0 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.02em; }
+.ed-mini.ed-mini-demo.is-on { background: color-mix(in srgb, var(--ed-attn) 30%, #1c1c1f); color: color-mix(in srgb, var(--ed-attn) 75%, #fff); opacity: 1; }
+.ed-masonry-item:has(.ed-mini-demo.is-on) .ed-asset-tools, .ed-medialist li:has(.ed-mini-demo.is-on) .ed-asset-tools { opacity: 1; }

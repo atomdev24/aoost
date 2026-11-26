@@ -28,4 +28,16 @@ export async function deleteMedia(key: string): Promise<void> {
   if (!res.ok) throw new Error(`Could not delete (${res.status}).`);
 }
 
+/** The real pictures shown in the demo editor's library (picked here, in the real editor). */
+export async function demoPicks(): Promise<string[]> {
+  const res = await fetch("/api/editor/media/demo", { credentials: "same-origin" });
+  return res.ok ? ((await res.json()) as { keys: string[] }).keys : [];
+}
+export async function setDemoPick(key: string, on: boolean): Promise<string[]> {
+  const res = await fetch("/api/editor/media/demo", { method: "PUT", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key, on }) });
+  const data = (await res.json().catch(() => ({}))) as { keys?: string[]; error?: string };
+  if (!res.ok || !data.keys) throw new Error(data.error ?? `Couldn't change the demo's pictures (${res.status}).`);
+  return data.keys;
+}
+
 export const formatSize = (bytes: number) => (bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`);

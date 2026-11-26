@@ -8,7 +8,7 @@ import { searchIndex } from "../render/build";
 import type { Identity } from "./auth";
 import { demoStub, draftStub, readDraft, type Env } from "./env";
 import { error, html, json, readJson } from "./http";
-import { mediaApi } from "./media";
+import { mediaApi, toItem } from "./media";
 import { problemsReport } from "../model/problems";
 import { buildStatus, publishToGitHub } from "./publish";
 import { cachedVersionFiles, listVersions } from "./history";
@@ -54,6 +54,20 @@ const DEMO_MEDIA = ["wide", "square", "tall", "wide-dark", "square-dark", "tall-
 const DEMO_COMMIT = "de0000000000";
 
 /**
+ * Real pictures an admin picked for the demo's library ("Use in demo" in the media library). The
+ * list lives with the real draft; the demo only reads it, after its placeholders.
+ */
+const DEMO_PICKS = "demo:media";
+const realDraft = (env: Env) => draftStub({ ...env, IS_DEMO: undefined });
+async function demoPicks(env: Env): Promise<string[]> {
+  return ((await realDraft(env).kvGet(DEMO_PICKS)) as string[] | null) ?? [];
+}
+async function demoPickItems(env: Env) {
+  const objs = await Promise.all((await demoPicks(env)).map((k) => env.MEDIA.head(k)));
+  return objs.filter((o): o is R2Object => !!o).map(toItem);
+}
+
+/**
  * The demo editor (/demo/, open to anyone): the same routes on the demo draft, except that
  * nothing reaches GitHub or the media library. Publishing and pushing pretend: the demo's "live"
  * becomes the draft, and the editor shows the rebuild finishing.
@@ -63,7 +77,10 @@ async function demoRoute(request: Request, env: Env, url: URL): Promise<Response
   const draft = draftStub(env);
   switch (route) {
     case "GET /media":
-      return json({ ok: true, items: DEMO_MEDIA, cursor: null });
+      return json({ ok: true, items: [...(await demoPickItems(env)), ...DEMO_MEDIA], cursor: null });
+    case "GET /media/demo":
+    case "PUT /media/demo":
+      return error(403, "Choose the demo's pictures from the real editor.");
     case "POST /media":
     case "DELETE /media":
       return error(403, "Uploads are off in the demo. Pick a placeholder picture, or upload in the real editor at /admin/.");
@@ -112,6 +129,18 @@ export async function editorApi(request: Request, env: Env, url: URL, who: Ident
   if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
 
   switch (route) {
+    case "GET /media/demo":
+      return json({ ok: true, keys: await demoPicks(env) });
+    case "PUT /media/demo": {
+      const body = (await request.json().catch(() => null)) as { key?: unknown; on?: unknown } | null;
+      const key = typeof body?.key === "string" ? body.key : "";
+      if (!key || !(await env.MEDIA.head(key))) return error(404, "That file isn't in the library.");
+      const keys = (await demoPicks(env)).filter((k) => k !== key);
+      if (body?.on) keys.unshift(key);
+      if (keys.length > 60) return error(400, "The demo can hold 60 pictures. Take one out first.");
+      await realDraft(env).kvPut(DEMO_PICKS, keys, 0);
+      return json({ ok: true, keys });
+    }
     case "GET /me":
       return json({ ok: true, who: who.who, via: who.via, role });
     case "GET /team":

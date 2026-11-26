@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./uploads.css";
 import { MEDIA_MIME, type DraggedMedia } from "../canvas/drops";
 import type { MediaKind } from "../fields/media";
-import { deleteMedia, formatSize, isCancelled, listMedia, uploadFile, type MediaItem } from "../media";
+import { deleteMedia, demoPicks, setDemoPick, formatSize, isCancelled, listMedia, uploadFile, type MediaItem } from "../media";
 import { mediaUsage } from "../media-usage";
 import { useEditor } from "../store";
+import { DEMO } from "../demo";
+import { DemoLocked } from "../demo/DemoLock";
 import { tagName, versionCounts, versionKey } from "./media-names";
 
 const KIND_FILTER: Record<MediaKind, (item: MediaItem) => boolean> = {
@@ -17,7 +19,7 @@ const KIND_FILTER: Record<MediaKind, (item: MediaItem) => boolean> = {
 };
 
 const KIND_GLYPH: Record<string, string> = { video: "▶", audio: "♪", file: "↓", font: "Aa", model: "3D", lottie: "{ }" };
-type Chip = "all" | "images" | "video" | "unused";
+type Chip = "all" | "images" | "video" | "unused" | "demo";
 type View = "masonry" | "list";
 const VIEW_KEY = "aoost.media.view";
 
@@ -56,6 +58,11 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
   const [view, setViewState] = useState<View>(readView);
   const input = useRef<HTMLInputElement>(null);
   const site = useEditor((s) => s.site);
+  // Real pictures picked for the demo editor's library (real editor only).
+  const [inDemo, setInDemo] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!DEMO) void demoPicks().then((k) => setInDemo(new Set(k)));
+  }, []);
   const setView = (v: View) => {
     setViewState(v);
     try {
@@ -96,12 +103,29 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
   const shown = (items ?? []).filter(
     (i) =>
       KIND_FILTER[kind](i) &&
-      (chip === "all" || (chip === "images" && i.kind === "image") || (chip === "video" && i.kind === "video") || (chip === "unused" && !usage.get(i.url)?.length)) &&
+      (chip === "all" || (chip === "images" && i.kind === "image") || (chip === "video" && i.kind === "video") || (chip === "unused" && !usage.get(i.url)?.length) || (chip === "demo" && inDemo.has(i.key))) &&
       (!q || i.name.toLowerCase().includes(q)),
   );
 
   const tools = (item: MediaItem) => (
     <span className="ed-asset-tools">
+      {!DEMO && item.kind === "image" ? (
+        <button
+          type="button"
+          className={`ed-mini ed-mini-demo${inDemo.has(item.key) ? " is-on" : ""}`}
+          aria-pressed={inDemo.has(item.key)}
+          aria-label={inDemo.has(item.key) ? `Take ${item.name} out of the demo` : `Use ${item.name} in the demo`}
+          title={inDemo.has(item.key) ? "In the demo's library · click to take it out" : "Use in the demo's library"}
+          onClick={(e) => {
+            e.stopPropagation();
+            setDemoPick(item.key, !inDemo.has(item.key))
+              .then((k) => setInDemo(new Set(k)))
+              .catch((err: Error) => setError(err.message));
+          }}
+        >
+          Demo
+        </button>
+      ) : null}
       <button
         type="button"
         className="ed-mini"
@@ -178,9 +202,15 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
             </svg>
           </button>
         </div>
-        <button type="button" className="ed-btn ed-btn-accent ed-btn-sm" onClick={() => input.current?.click()}>
-          Upload
-        </button>
+        {DEMO ? (
+          <DemoLocked limit="uploads" className="ed-btn ed-btn-sm">
+            Upload
+          </DemoLocked>
+        ) : (
+          <button type="button" className="ed-btn ed-btn-accent ed-btn-sm" onClick={() => input.current?.click()}>
+            Upload
+          </button>
+        )}
       </div>
       <div className="ed-chips" role="tablist" aria-label="Media filter">
         {(
@@ -188,6 +218,7 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
             ["all", "All"],
             ...(kind === "any" ? [["images", "Images"] as const, ["video", "Video"] as const] : []),
             ["unused", "Unused"],
+            ...(!DEMO && inDemo.size ? [["demo", `In demo · ${inDemo.size}`] as const] : []),
           ] as [Chip, string][]
         ).map(([id, label]) => (
           <button key={id} type="button" role="tab" className="ed-chip-sm" aria-selected={chip === id} onClick={() => setChip(id)}>
@@ -196,6 +227,7 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
         ))}
       </div>
       <input ref={input} type="file" multiple hidden onChange={(e) => e.target.files?.length && void upload(e.target.files).then(() => (e.target.value = ""))} />
+      {DEMO ? null : (
       <button type="button" className="ed-drop ed-medialib-drop" onClick={() => input.current?.click()}>
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M10 13V3.5M6 7.5l4-4 4 4M3.5 12.5v2.5a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5v-2.5" />
@@ -203,6 +235,7 @@ export function MediaLibrary({ kind = "any", onPick, compact }: { kind?: MediaKi
         <span>Drop files here, or click to choose</span>
         <small>Pictures, video, audio and fonts, up to 95 MB each</small>
       </button>
+      )}
       {over ? (
         <div className="ed-medialib-over" aria-hidden="true">
           <span>Drop to upload</span>

@@ -280,7 +280,8 @@ export function LeftPanel() {
         className={`ed-rail-btn${isSelected ? " is-active" : ""}`}
         aria-label={title}
         aria-pressed={isSelected}
-        title={title}
+        title={DEMO && id === "history" ? `${title} (off in the demo)` : title}
+        data-demo-off={DEMO && id === "history" ? "" : undefined}
         onClick={() => togglePanel(id)}
         onPointerEnter={() => void PANEL_PARTS[id]?.prefetch()}
       >
