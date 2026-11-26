@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { z } from "zod";
 import { defineComponent } from "../types";
 import { css } from "./HubSpotForm.styles";
@@ -13,8 +14,18 @@ export const HubSpotFormContent = z.object({
   region: z.enum(["na1", "eu1"]),
   /** A short heading above the form (optional). */
   heading: z.string().optional(),
+  /** Send submissions to HubSpot. Off (the default) shows a placeholder form that sends nothing. */
+  live: z.boolean().optional(),
+  /** The placeholder's field names, comma separated. */
+  placeholderFields: z.string().optional(),
+  /** The placeholder's button. */
+  placeholderButton: z.string().optional(),
+  /** A line under the placeholder (e.g. "Email us at hello@… for now"). */
+  placeholderNote: z.string().optional(),
 });
 export type HubSpotFormContent = z.infer<typeof HubSpotFormContent>;
+
+export const PLACEHOLDER_FIELDS = "First name, Last name, Work email, Company, Country, Message";
 
 const ID = /^[0-9]{3,12}$/;
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -27,16 +38,44 @@ export function parseHubSpot(text: string): Partial<HubSpotFormContent> {
   return { ...(portalId ? { portalId } : {}), ...(formId ? { formId } : {}), ...(region ? { region } : {}) };
 }
 
+/** The form's look with nothing behind it: disabled fields and button, so the page keeps its layout. */
+function Placeholder({ content, heading, editing }: { content: HubSpotFormContent; heading: ReactNode; editing: boolean }) {
+  const names = (content.placeholderFields || PLACEHOLDER_FIELDS)
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+  return (
+    <div className="hsf hsf-off">
+      {heading}
+      {editing ? <p className="hsf-badge">Placeholder: not sending to HubSpot. Switch it on in this block's settings.</p> : null}
+      <div className="hsf-ph" aria-disabled="true">
+        {names.map((n, i) => (
+          <label key={i} className={`hsf-ph-field${/message|comment|details|question/i.test(n) ? " hsf-ph-long" : ""}`}>
+            <span>{n}</span>
+            {/message|comment|details|question/i.test(n) ? <textarea disabled rows={3} /> : <input disabled type="text" />}
+          </label>
+        ))}
+        <button type="button" className="hsf-ph-button" disabled>
+          {content.placeholderButton || "Submit"}
+        </button>
+      </div>
+      {content.placeholderNote ? <p className="hsf-ph-note">{content.placeholderNote}</p> : null}
+    </div>
+  );
+}
+
 /**
  * A HubSpot form (sign-ups, demo requests): HubSpot's own embed, so submissions land in HubSpot
- * with its tracking. The editor shows a stand-in; the form itself loads on the live page.
+ * with its tracking. Off by default: until "Send submissions to HubSpot" is on, the page shows a
+ * placeholder form that sends nothing. When on, the editor shows a stand-in and the form itself
+ * loads on the live page.
  */
 export const HubSpotForm = defineComponent<HubSpotFormContent>({
   type: "HubSpotForm",
   label: "HubSpot form",
   category: "embed",
   schema: HubSpotFormContent,
-  defaults: { content: { embed: "", portalId: "", formId: "", region: "na1", heading: "" } },
+  defaults: { content: { embed: "", portalId: "", formId: "", region: "na1", heading: "", live: false, placeholderFields: PLACEHOLDER_FIELDS, placeholderButton: "Submit", placeholderNote: "" } },
   css,
   Render: ({ node, content: raw, ctx }) => {
     // Typed ids win over ones read from the pasted embed code.
@@ -44,6 +83,7 @@ export const HubSpotForm = defineComponent<HubSpotFormContent>({
     const content = { ...raw, portalId: raw.portalId || fromEmbed.portalId || "", formId: raw.formId || fromEmbed.formId || "", region: fromEmbed.region && !raw.portalId ? fromEmbed.region : raw.region };
     const ready = ID.test(content.portalId) && GUID.test(content.formId);
     const heading = content.heading ? <h3 className="hsf-heading">{content.heading}</h3> : null;
+    if (!content.live) return <Placeholder content={content} heading={heading} editing={ctx.editing} />;
     if (ctx.editing || !ready) {
       if (!ctx.editing) return null;
       return (

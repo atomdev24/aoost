@@ -4,7 +4,8 @@
 export function initEffects() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  const entering = document.querySelectorAll<HTMLElement>("[data-enter]");
+  // Blocks that animate their own parts (the Aerobotics graphs and reading tags) take the same "in".
+  const entering = document.querySelectorAll<HTMLElement>("[data-enter],[data-animate]");
   if (entering.length) {
     const io = new IntersectionObserver(
       (entries) => {

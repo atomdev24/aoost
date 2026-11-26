@@ -15,5 +15,8 @@ export const css = `
 .abh-logos{display:flex;flex-wrap:wrap;align-items:center;gap:20px 40px;margin:0;padding:0;list-style:none}
 .abh-center .abh-logos{justify-content:center}
 .abh-logos img{display:block;height:34px;width:auto;max-width:150px;object-fit:contain;opacity:.92}
+.abh-ticker img{height:34px;opacity:.92}
+.abh-center .abh-ticker{margin:0 auto}
+@media (min-width:810px){.abh-ticker img{height:40px}}
 @media (min-width:810px){.abh-in{padding-top:150px}.abh-logos{gap:24px 64px}.abh-logos img{height:40px}}
 `;

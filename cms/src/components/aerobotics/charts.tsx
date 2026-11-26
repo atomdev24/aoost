@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { z } from "zod";
 
 /**
@@ -20,6 +21,12 @@ export const ChartData = z.object({
   unit: z.string(),
   /** Legend and quality: one row per line, "Label | colour" or "95% unblemished | good" (good or bad). */
   rows: z.string(),
+  /** Animate the graph in when it scrolls into view (bars grow, lines draw, rows slide in). On unless switched off. */
+  animate: z.boolean().optional(),
+  /** Seconds the animation takes. */
+  animateSeconds: z.number().min(0.2).max(6).optional(),
+  /** Seconds to wait before it starts. */
+  animateDelay: z.number().min(0).max(6).optional(),
 });
 export type ChartData = z.infer<typeof ChartData>;
 
@@ -71,10 +78,10 @@ function Bars({ d }: { d: ChartData }) {
         const h = (x / max) * (H - 16);
         const cx = slot * i + slot / 2;
         return (
-          <g key={i}>
-            <rect x={cx - bw / 2} y={H - h} width={bw} height={Math.max(h, 1)} rx="2" fill={d.color || "#0B3A75"} />
+          <g key={i} style={{ "--i": i } as CSSProperties}>
+            <rect className="abg-bar" x={cx - bw / 2} y={H - h} width={bw} height={Math.max(h, 1)} rx="2" fill={d.color || "#0B3A75"} />
             {d.showValues ? (
-              <text x={cx} y={H - h - 5} className="abg-val">
+              <text x={cx} y={H - h - 5} className="abg-val abg-late">
                 {x}
                 {d.unit}
               </text>
@@ -109,19 +116,20 @@ function Lines({ d }: { d: ChartData }) {
           </text>
         </g>
       ))}
+      <g className="abg-draw">
       {series.map((s, k) => {
         const cut = s.forecastFrom > 0 ? s.forecastFrom : s.values.length;
         const solid = s.values.slice(0, cut);
         const dashed = s.forecastFrom > 0 ? s.values.slice(cut - 1) : [];
-        const last = s.values.length - 1;
         return (
           <g key={k}>
             <path d={path(solid)} fill="none" stroke={s.color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             {dashed.length > 1 ? <path d={dashed.map((v, i) => `${i ? "L" : "M"}${x(cut - 1 + i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ")} fill="none" stroke={s.color} strokeWidth="2.2" strokeDasharray="4 4" /> : null}
-            {k === 0 && last > 0 ? <circle cx={x(last)} cy={y(s.values[last]!)} r="5" fill="#fff" stroke={s.color} strokeWidth="3" /> : null}
           </g>
         );
       })}
+      </g>
+      {series[0] && series[0].values.length > 1 ? <circle className="abg-dot abg-late" cx={x(series[0].values.length - 1)} cy={y(series[0].values[series[0].values.length - 1]!)} r="5" fill="#fff" stroke={series[0].color} strokeWidth="3" /> : null}
       {l.map((t, i) => (i % Math.ceil(l.length / 8) === 0 ? <text key={i} x={x(i)} y={H + 14} className="abg-lbl">{t}</text> : null))}
       {d.unit ? <text x={W / 2 + 14} y={H + 30} className="abg-axis abg-axis-name">{d.unit}</text> : null}
     </svg>
@@ -132,7 +140,7 @@ function Legend({ d }: { d: ChartData }) {
   return (
     <ul className="abg-rows">
       {rowsOf(d.rows).map(([label, color], i) => (
-        <li key={i}>
+        <li key={i} style={{ "--i": i } as CSSProperties}>
           <i className="abg-sw" style={{ background: color || "#ccc" }} />
           {label}
         </li>
@@ -145,7 +153,7 @@ function Quality({ d }: { d: ChartData }) {
   return (
     <ul className="abg-rows">
       {rowsOf(d.rows).map(([label, kind], i) => (
-        <li key={i}>
+        <li key={i} style={{ "--i": i } as CSSProperties}>
           <i className={`abg-q abg-q-${kind === "bad" ? "bad" : "good"}`} aria-hidden="true">
             {kind === "bad" ? "!" : "✓"}
           </i>
@@ -156,10 +164,23 @@ function Quality({ d }: { d: ChartData }) {
   );
 }
 
-/** One chart on its white card. */
-export function ChartCard({ d, className = "" }: { d: ChartData; className?: string }) {
+/**
+ * One chart on its white card. Animated charts carry data-animate on the live page, and the site
+ * script adds "in" when they scroll into view; in the editor they play as soon as they are drawn
+ * (and again when the animation settings change): it runs once, so the board lets it play
+ * ([data-motion="keep"]) where other site motion is paused.
+ */
+export function ChartCard({ d, className = "", editing = false, order = 0 }: { d: ChartData; className?: string; editing?: boolean; order?: number }) {
+  const anim = d.animate !== false;
+  const vars = anim ? ({ "--abg-dur": `${d.animateSeconds ?? 1.2}s`, "--abg-delay": `${(d.animateDelay ?? 0) + order * 0.15}s` } as CSSProperties) : undefined;
   return (
-    <figure className={`abg abg-${d.kind} ${className}`}>
+    <figure
+      key={anim ? `${d.kind}-${d.animateSeconds ?? ""}-${d.animateDelay ?? ""}` : "still"}
+      className={`abg abg-${d.kind}${anim ? ` abg-anim${editing ? " in" : ""}` : ""} ${className}`}
+      data-animate={anim && !editing ? "" : undefined}
+      data-motion={anim && editing ? "keep" : undefined}
+      style={vars}
+    >
       {d.title ? <figcaption className="abg-title">{d.title}</figcaption> : null}
       {d.kind === "bars" ? <Bars d={d} /> : d.kind === "lines" ? <Lines d={d} /> : d.kind === "legend" ? <Legend d={d} /> : <Quality d={d} />}
     </figure>
@@ -180,6 +201,24 @@ export const chartCss = `
 .abg-sw{display:inline-block;width:26px;height:10px;border-radius:2px}
 .abg-q{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;color:#fff;font:700 10px/1 system-ui;font-style:normal}
 .abg-q-good{background:#22A35A}.abg-q-bad{background:#D93636}
+.abg-bar{transform-box:fill-box;transform-origin:50% 100%}
+@media (prefers-reduced-motion:no-preference){
+html.js .abg-anim:not(.in) .abg-bar{transform:scaleY(0)}
+html.js .abg-anim:not(.in) .abg-draw{clip-path:inset(-12px 100% -12px -12px)}
+html.js .abg-anim:not(.in) .abg-late,html.js .abg-anim:not(.in) .abg-rows li{opacity:0}
+.abg-anim.in .abg-bar{animation:abg-grow var(--abg-dur) cubic-bezier(.2,.8,.2,1) calc(var(--abg-delay) + var(--i,0) * var(--abg-dur) * .08) both}
+.abg-anim.in .abg-draw{animation:abg-draw calc(var(--abg-dur) * 1.4) cubic-bezier(.45,.05,.25,1) var(--abg-delay) both}
+.abg-anim.in .abg-late{animation:abg-fade calc(var(--abg-dur) * .4) ease calc(var(--abg-delay) + var(--abg-dur) * .7 + var(--i,0) * var(--abg-dur) * .08) both}
+.abg-anim.in .abg-dot{transform-box:fill-box;transform-origin:50% 50%;animation:abg-pop calc(var(--abg-dur) * .4) cubic-bezier(.3,1.6,.5,1) calc(var(--abg-delay) + var(--abg-dur) * 1.3) both}
+.abg-anim.in .abg-rows li{animation:abg-in calc(var(--abg-dur) * .6) cubic-bezier(.2,.8,.2,1) calc(var(--abg-delay) + var(--i,0) * var(--abg-dur) * .15) both}
+.abg-anim.in .abg-sw{transform-origin:0 50%;animation:abg-widen var(--abg-dur) cubic-bezier(.2,.8,.2,1) calc(var(--abg-delay) + var(--i,0) * var(--abg-dur) * .15) both}
+}
+@keyframes abg-grow{from{transform:scaleY(0)}}
+@keyframes abg-draw{from{clip-path:inset(-12px 100% -12px -12px)}to{clip-path:inset(-12px -12px -12px -12px)}}
+@keyframes abg-fade{from{opacity:0}}
+@keyframes abg-pop{from{opacity:0;transform:scale(0)}}
+@keyframes abg-in{from{opacity:0;transform:translateX(-10px)}}
+@keyframes abg-widen{from{transform:scaleX(0)}}
 `;
 
 /** Starting data for each kind, as the app shows them on aerobotics.com. */
