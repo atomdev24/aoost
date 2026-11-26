@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { onOpenPageSettings, takePageSettings } from "./page-settings-open";
 import { deletePage, setShowInNav } from "../../model/pages";
 import { newVariant } from "../workspace/PageSwitcher";
 import type { Page } from "../../schema";
@@ -84,7 +85,8 @@ export function PagesPanel() {
   const pages = useEditor((s) => s.site.pages);
   const pageId = useEditor((s) => s.pageId);
   const [creating, setCreating] = useState(false);
-  const [settingsFor, setSettingsFor] = useState<string | null>(null);
+  const [settingsFor, setSettingsFor] = useState<string | null>(takePageSettings);
+  useEffect(() => onOpenPageSettings(setSettingsFor), []);
   const [query, setQuery] = useState("");
   if (settingsFor && pages.some((p) => p.id === settingsFor)) {
     return (

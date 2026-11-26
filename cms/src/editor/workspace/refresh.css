@@ -1152,3 +1152,17 @@ body:has(.ed-demo-strip) .ed-tip { bottom: 56px; }
 .ed-release-form .ed-field { display: flex; flex-direction: column; gap: 4px; }
 .ed-release-short { display: none; }
 @media (max-width: 720px) { .ed-release-chip { padding: 0 8px; font-size: 11px; } .ed-release-long { display: none; } .ed-release-short { display: inline; } }
+
+/* Pre-flight (workspace/Preflight.tsx): a number badge left of Preview, and its list. */
+.ed-preflight { min-width: 24px; height: 24px; padding: 0 7px; border: 0; border-radius: 12px; background: var(--ed-attn, #ff9f0a); color: #241500; font: 700 12px/24px var(--ed-font, system-ui, sans-serif); font-variant-numeric: tabular-nums; cursor: pointer; }
+.ed-preflight.is-soft { background: color-mix(in srgb, var(--ed-attn, #ff9f0a) 28%, transparent); color: var(--ed-attn, #ff9f0a); }
+.ed-preflight:focus-visible { outline: 2px solid var(--ed-accent-strong, #0a84ff); outline-offset: 2px; }
+.ed-preflight-pop { padding: 12px; font-size: 13px; background: rgba(28, 28, 30, 0.97) !important; }
+.ed-preflight-pop .ed-preflight-sub { margin: 2px 0 8px; color: var(--ed-sub); font-size: 12px; }
+.ed-preflight-pop ul { list-style: none; margin: 0; padding: 0; max-height: min(420px, 60vh); overflow: auto; }
+.ed-preflight-pop li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.ed-preflight-pop li > span { flex: 1; min-width: 0; line-height: 1.35; }
+.ed-preflight-pop li.is-fix > span::before { content: "!"; display: inline-grid; place-items: center; width: 15px; height: 15px; margin-right: 6px; border-radius: 50%; background: var(--ed-attn, #ff9f0a); color: #241500; font-size: 10px; font-weight: 800; vertical-align: 1px; }
+.ed-preflight-pop small { display: block; color: var(--ed-sub); font-size: 11px; margin-top: 2px; }
+.ed-preflight-pop li button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: rgba(10, 132, 255, 0.18); color: #8ac2ff; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.ed-preflight-pop li button:hover { background: rgba(10, 132, 255, 0.3); }
