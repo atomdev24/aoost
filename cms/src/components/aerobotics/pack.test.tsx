@@ -6,6 +6,8 @@ import { aeroboticsFields } from "./fields";
 import { productSplit } from "./AeroSplit/AeroSplit";
 import { PRODUCT_CARDS } from "./AeroProductCard/AeroProductCard";
 import { parseSeries } from "./charts";
+import { NODE_META } from "../../editor/puck/adapter";
+import { components } from "../registry";
 
 describe("the Aerobotics pack", () => {
   it("has fields for every block, valid defaults and one shared kit", () => {
@@ -35,5 +37,8 @@ describe("the Aerobotics pack", () => {
   });
   it("reads line series with a dashed forecast from the ~", () => {
     expect(parseSeries("A | #000 | 1, 2, ~3, 4")).toEqual([{ name: "A", color: "#000", values: [1, 2, 3, 4], forecastFrom: 2 }]);
+  });
+  it("no block has a setting named like the editor's own block properties (id, name, style…), which the canvas would drop", () => {
+    for (const c of components) for (const key of Object.keys(c.defaults.content as object)) expect(NODE_META as readonly string[], `${c.type}.${key}`).not.toContain(key);
   });
 });
