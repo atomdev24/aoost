@@ -58,6 +58,23 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
     const next = room < 24 / zoom;
     if (next !== inside) setInside(next);
   });
+  // A block near the frame's right edge (or a small zoom, where the tag is wide in page terms) would
+  // push the actions past the frame, where they're cut off: slide the tag left until it fits.
+  const [shift, setShift] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      const docW = el.ownerDocument.documentElement.clientWidth;
+      const natural = el.getBoundingClientRect().right + shift;
+      const next = Math.max(0, Math.ceil(natural - docW + 2));
+      if (Math.abs(next - shift) > 1) setShift(next);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  });
   const act = (fn: (id: string) => void) => (e: React.MouseEvent) => {
     e.stopPropagation();
     if (id) fn(id);
@@ -66,7 +83,7 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
     <div
       ref={ref}
       className={`ed-tag${inside ? " is-inside" : ""}${open ? " is-open" : ""}`}
-      style={{ transform: `scale(${1 / zoom}) translateY(${inside ? "4px" : "calc(-100% - 4px)"})` }}
+      style={{ transform: `translateX(${-shift}px) scale(${1 / zoom}) translateY(${inside ? "4px" : "calc(-100% - 4px)"})` }}
       onPointerDown={(e) => e.stopPropagation()}>
       {/* On touch there is no hover: a tap on the name opens the quick actions. */}
       <span className="ed-tag-name" onClick={() => setOpen((o) => !o)}>

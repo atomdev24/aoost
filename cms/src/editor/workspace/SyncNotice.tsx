@@ -1,3 +1,4 @@
+import { InDock } from "./Dock";
 import { dismissToast, keepDraft, startFromLive, useSync } from "./sync";
 
 /**
@@ -11,6 +12,7 @@ export function SyncNotice() {
   const error = useSync((s) => s.error);
   if (blocked)
     return (
+      <InDock slot="top" name="sync">
       <div className="ed-sync-banner" role="alert">
         <p>{blocked}</p>
         {error ? <p className="ed-sync-error">{error}</p> : null}
@@ -28,14 +30,17 @@ export function SyncNotice() {
           </button>
         </div>
       </div>
+      </InDock>
     );
   if (!toast) return null;
   return (
+    <InDock slot="top" name="sync">
     <div className="ed-sync-toast" role="status">
       <span>{toast}</span>
       <button type="button" className="ed-mini" aria-label="Dismiss" onClick={dismissToast}>
         ×
       </button>
     </div>
+    </InDock>
   );
 }

@@ -77,6 +77,22 @@ function InspectorPanel() {
   // Each new selection opens short, at the top: the Content fields.
   const target = useEditor((s) => s.overlayId ?? s.globalId ?? s.selection[0] ?? null);
   const body = useRef<HTMLDivElement>(null);
+  // On a phone the card's height lifts the notes dock (workspace/Dock.tsx) above it.
+  const [aside, setAside] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    const el = aside;
+    const root = document.documentElement;
+    if (!phone || !el) {
+      root.style.removeProperty("--ed-card-h");
+      return;
+    }
+    const ro = new ResizeObserver(() => root.style.setProperty("--ed-card-h", `${Math.round(el.offsetHeight)}px`));
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty("--ed-card-h");
+    };
+  }, [phone, aside]);
   const [tab, setTab] = useState<InspectorTab>("content");
   const [present, setPresent] = useState<InspectorTab[]>(["content", "style", "layout"]);
   useEffect(() => {
@@ -106,7 +122,7 @@ function InspectorPanel() {
   const shownTabs = simple && !overlayId && !globalId ? present.filter((t) => t === "content") : present;
   const shownTab = simple && !overlayId && !globalId ? "content" : tab;
   return (
-    <aside className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
+    <aside ref={setAside} className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
       {phone ? (
         <button type="button" className="ed-card-grip" aria-label={size === "full" ? "Shrink the inspector" : "Expand the inspector"} aria-expanded={size === "full"} onPointerDown={card.onPointerDown} onClick={card.onClick}>
           <span aria-hidden="true" />

@@ -8,6 +8,8 @@ import { currentPage, megaItemId, useEditor } from "../store";
 import { activateBreakpoint } from "./bridge";
 import { pieceFromClick, selectPiece } from "../canvas/ResizePiece";
 import { overriddenIds } from "./overrides";
+import { changedIds } from "../../model/variants";
+import { useVariantPrefs } from "../variants/actions";
 import { useAgent } from "../agent/store";
 import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT, stillMotion } from "./frame-css";
 import { attachKeys } from "./keys";
@@ -20,7 +22,7 @@ import { watchWindow } from "../problems";
 import { guardPinch } from "../pinch-guard";
 
 /** Editor-only rules for a passive frame: still motion, no live media, nav drawn in place. */
-const passiveCss = `
+export const passiveCss = `
 html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!important}
 .skip{display:none}
 .nav{position:absolute!important}
@@ -31,6 +33,7 @@ a{cursor:default}
 [data-ed-sel]{outline:calc(1px * var(--ed-px,1)) dashed #0A84FF!important;outline-offset:calc(-1px * var(--ed-px,1))}
 [data-ed-flash]{animation:ed-flash 2s ease-out}
 [data-ed-agent]{outline:calc(2px * var(--ed-px,1)) solid #D97757!important;outline-offset:calc(1px * var(--ed-px,1))}
+[data-ed-changed]:not([data-ed-sel]){outline:calc(1.5px * var(--ed-px,1)) dashed rgba(191,90,242,.95);outline-offset:calc(-1.5px * var(--ed-px,1))}
 [data-ed-over]:not([data-ed-sel]){outline:calc(1.5px * var(--ed-px,1)) solid rgba(255,159,10,.85);outline-offset:calc(-1.5px * var(--ed-px,1))}
 .s[data-ed-over]:not([data-ed-sel]){outline:none;box-shadow:inset calc(3px * var(--ed-px,1)) 0 0 rgba(255,159,10,.85)}
 @keyframes ed-flash{0%,60%{outline:3px solid #0A84FF;outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}
@@ -85,6 +88,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
   const highlight = useEditor((s) => s.highlight);
   const agent = useAgent();
   const linked = useBoard((s) => s.linked);
+  const { outline } = useVariantPrefs();
   // Off-screen frames render nothing; their last height is kept meanwhile.
   const shown = useRef(visible);
   shown.current = visible;
@@ -191,7 +195,9 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
     // Orange: what this size changes from the size it follows (UI spec, Nov 2026).
     mark("data-ed-over", overriddenIds(page, bp));
     mark("data-ed-agent", agent.state === "idle" ? [] : agent.nodeIds);
-  }, [doc, visible, selection, highlight, linked, model, page, bp, agent]);
+    // Purple, dashed: what a variant changed from its page (EDITOR-VARIANTS.md).
+    mark("data-ed-changed", outline && page.variantOf ? changedIds(site, page) : []);
+  }, [doc, visible, selection, highlight, linked, model, page, bp, agent, outline, site]);
 
   return (
     <>

@@ -228,7 +228,7 @@
   justify-content: center;
 }
 .ed-shell.is-interacting .bd-zoombar,
-.ed-shell.is-interacting .bd-hidden-chip {
+body:has(.ed-shell.is-interacting) .ed-dock {
   opacity: 0.7;
 }
 

@@ -1,4 +1,5 @@
 import { useSimple } from "../workspace/mode";
+import { InDock } from "../workspace/Dock";
 import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
@@ -22,7 +23,7 @@ import { OverflowLayer } from "./OverflowLayer";
 import { attachRefDrops } from "./refs-store";
 import { attachGestures } from "../touch/gestures";
 import { LONG_PRESS_MS } from "../touch/longpress";
-import { AdjustImage, CommentLayer, PresenceLayer } from "../parts";
+import { AdjustImage, CommentLayer, PresenceLayer, VersionRowFrames, VersionRowLabels } from "../parts";
 import "./board.css";
 
 const NAME = BREAKPOINT_LABEL;
@@ -243,6 +244,8 @@ export function Board() {
               <LoadingCover bp={f.bp} pageId={pageId} slug={page.slug} ready={ready[f.bp] && !hold} />
             </div>
           ))}
+        {/* Other versions of this page (it and its variants), as rows under it (EDITOR-VARIANTS.md). */}
+        <VersionRowFrames frames={frames} view={view} size={size} />
         {addable.length && !simple ? (
           <div className="bd-slot" style={{ left: slot.x, top: slot.y, width: slot.w, height: slot.h }} role="group" aria-label="Add a breakpoint">
             <span className="bd-slot-plus">+</span>
@@ -302,7 +305,10 @@ export function Board() {
         </div>
       ))}
 
+      <VersionRowLabels frames={frames} />
+
       {hiddenBps.length ? (
+        <InDock slot="bottom" name="hidden">
         <div className="bd-hidden-chip" role="status">
           {hiddenBps.map((b) => (
             <span key={b}>
@@ -313,6 +319,7 @@ export function Board() {
             </span>
           ))}
         </div>
+        </InDock>
       ) : null}
 
       <RefNotice />
@@ -322,9 +329,11 @@ export function Board() {
       <AdjustImage />
       {!hidden[bp] ? <EmptyPage rect={{ ...screen(active.x, active.y), width: active.w * view.zoom, height: active.h * view.zoom }} /> : null}
       {loading ? (
-        <div className="bd-loading-chip" role="status">
-          <span className="ed-spinner" aria-hidden="true" /> Loading latest…
-        </div>
+        <InDock slot="bottom" name="loading">
+          <div className="bd-loading-chip" role="status">
+            <span className="ed-spinner" aria-hidden="true" /> Loading latest…
+          </div>
+        </InDock>
       ) : null}
       {spaceDown ? <div className="bd-shield" onPointerDown={startPan} /> : null}
       <ZoomBar />

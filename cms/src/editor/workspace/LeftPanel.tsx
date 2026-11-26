@@ -281,6 +281,7 @@ export function LeftPanel() {
   const pinned = useRail((s) => s.pinned);
   const pos = useRail((s) => s.pos);
   const pageId = useEditor((s) => s.pageId);
+  const waitingCount = useEditor((s) => s.site.pages.filter((p) => p.variantOf && p.variantStatus === "proposed").length);
   const railRef = useRef<HTMLElement>(null);
   const [win, setWin] = useState(() => ({ w: innerWidth, h: innerHeight }));
   const [railH, setRailH] = useState(330);
@@ -339,6 +340,8 @@ export function LeftPanel() {
     setRailPos({ x: place.x + d[0]!, y: place.y + d[1]! });
   };
 
+  // Variants proposed for review, on the Pages button (EDITOR-VARIANTS.md).
+  const waiting = waitingCount;
   const renderPanelButton = (id: PanelId) => {
     const isSelected = active === id;
     const title = PANEL_TITLES[id];
@@ -355,6 +358,11 @@ export function LeftPanel() {
         onPointerEnter={() => void PANEL_PARTS[id]?.prefetch()}
       >
         <RailIcon id={id} />
+        {id === "pages" && waiting ? (
+          <span className="ed-rail-count" title={`${waiting} ${waiting === 1 ? "variant" : "variants"} waiting for review`}>
+            {waiting}
+          </span>
+        ) : null}
         <span className="ed-rail-label" aria-hidden="true">
           {RAIL_LABEL[id] ?? title}
         </span>

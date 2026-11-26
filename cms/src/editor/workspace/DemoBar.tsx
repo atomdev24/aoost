@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { DEMO_LIMITS, demoStrip } from "../demo/limits";
+import { InDock } from "./Dock";
 
 /**
  * The demo editor's chip in the top bar and a thin strip under it: the strip always says what's
@@ -52,8 +52,8 @@ export function DemoBar() {
 
   return (
     <div className="ed-demo" ref={box}>
-      {/* On the page itself: the top bar's frosted glass would otherwise hold a fixed strip inside it. */}
-      {createPortal(
+      {/* In the top dock, under the top bar (it used to sit at the bottom, over the variant band). */}
+      <InDock slot="top" name="demo">
         <div className="ed-demo-strip" role="note">
           <span>{demoStrip(resetEvery)}</span>
           <button
@@ -63,9 +63,8 @@ export function DemoBar() {
           >
             Details
           </button>
-        </div>,
-        document.body,
-      )}
+        </div>
+      </InDock>
       <button type="button" className="ed-demo-chip" aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen((o) => !o)}>
         Demo
       </button>

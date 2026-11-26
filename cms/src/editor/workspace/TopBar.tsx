@@ -1,4 +1,5 @@
 import { setMode, useMode, useSimple } from "./mode";
+import { InDock } from "./Dock";
 import { AgentPill } from "../agent/AgentPill";
 import { createPortal } from "react-dom";
 import { TeamModal } from "../team/TeamModal";
@@ -18,7 +19,7 @@ import { Preflight } from "./Preflight";
 import { loadStaging, useStaging } from "./staging";
 import { useChanges } from "./changes-count";
 import { DEMO } from "../demo";
-import { Avatars, DemoBar, PublishSheet } from "../parts";
+import { Avatars, DemoBar, PublishSheet, VersionsButton } from "../parts";
 import { StatusPill } from "./StatusPill";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
@@ -182,15 +183,18 @@ export function TopBar() {
       </div>
 
       {/* Claude at work: its own pill, centred under the top bar so it never crowds the controls. */}
-      <div className="ed-agent-dock">
-        <AgentPill />
-      </div>
+      <InDock slot="top" name="agent">
+        <div className="ed-agent-dock">
+          <AgentPill />
+        </div>
+      </InDock>
 
       {/* Right island: Claude status pill, Preview, Discard draft, Publish */}
       <div className="ed-island ed-island-right" role="toolbar" aria-label="Publishing and preview">
         {DEMO ? <DemoBar /> : null}
         <Avatars />
         <Preflight />
+        <VersionsButton />
         <button type="button" className="ed-btn ed-desk-only" onClick={preview}>
           Preview
         </button>

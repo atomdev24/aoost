@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
+import { InDock } from "../workspace/Dock";
 import { activateBreakpoint } from "./bridge";
 import { framePointAt, previewRefDrop, refToPage } from "./ref-page";
 // Parked blocks render the page's own code, so they load only when one is on the board.
@@ -149,8 +150,10 @@ export function RefNotice() {
   const error = useRefs((s) => s.error);
   if (!error) return null;
   return (
-    <div className="bd-hidden-chip bd-ref-notice" role="status">
-      {error}
-    </div>
+    <InDock slot="bottom" name="refs">
+      <div className="bd-hidden-chip bd-ref-notice" role="status">
+        {error}
+      </div>
+    </InDock>
   );
 }

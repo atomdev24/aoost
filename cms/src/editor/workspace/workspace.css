@@ -3355,3 +3355,162 @@ button.ed-card {
 .ed-part-failed p {
   margin: 0;
 }
+
+/* ------------------------------------------------ docks (workspace/Dock.tsx) */
+/* Floating notes and bars stack in two centred columns instead of each picking its own spot:
+   top under the top bar, bottom above the bottom edge. They keep clear of the rail, the side
+   panel and the zoom bar; items keep their own look but not their own placement. */
+.ed-dock {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--ed-dock-side, 310px));
+  pointer-events: none;
+}
+.ed-dock:empty {
+  display: none;
+}
+.ed-dock-top {
+  top: 58px;
+}
+.ed-dock-bottom {
+  bottom: 16px;
+  flex-direction: column-reverse;
+}
+/* An open panel on the left (Add, Layers, Pages…) is wider than the rail. */
+body:has(.ed-flyout) .ed-dock {
+  --ed-dock-side: 340px;
+}
+@media (max-width: 1100px) {
+  .ed-dock {
+    --ed-dock-side: 80px;
+  }
+  .ed-dock-bottom {
+    bottom: 64px;
+  }
+}
+.ed-dock-item {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+  min-width: 0;
+  pointer-events: auto;
+}
+.ed-dock-item > * {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  max-width: 100% !important;
+  z-index: auto !important;
+}
+/* Chips that ignore the pointer on the board keep doing so. */
+.ed-dock-loading {
+  pointer-events: none;
+}
+.ed-dock-item > .ed-agent-dock {
+  display: flex;
+}
+@media (max-width: 767px) {
+  .ed-dock {
+    --ed-dock-side: 12px;
+  }
+  .ed-dock-top {
+    top: calc(env(safe-area-inset-top) + 58px);
+  }
+  .ed-dock-bottom {
+    bottom: calc(var(--ed-tabs, 58px) + 56px);
+  }
+  /* The settings card is up: notes sit above it, and the tip waits (one thing at a time). */
+  body:has(.ed-inspector.is-card) .ed-dock-bottom {
+    bottom: calc(var(--ed-tabs, 58px) + var(--ed-card-h, 0px) + 16px);
+  }
+}
+
+/* ------------------------------------------------ top bar: the three islands never overlap */
+@media (min-width: 768px) {
+  /* The tools stay in the middle while there's room and step aside rather than slide under the
+     page name (they used to be pinned to the centre, so a long name or a variant ran underneath). */
+  .ed-islands {
+    gap: 8px;
+  }
+  .ed-island-left {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  .ed-island-center {
+    position: relative;
+    left: auto;
+    transform: none;
+    flex: none;
+    margin-inline: auto;
+  }
+  .ed-island-right {
+    flex: none;
+  }
+  /* When room runs out, the status chip gives way first (down to its dot), then the variant's name. */
+  .ed-island-left > * {
+    flex: none;
+  }
+  .ed-island-left .ed-switcher {
+    min-width: 0;
+    flex: 0 0.15 auto;
+  }
+  .ed-island-left .ed-statechip {
+    flex: 0 1 auto;
+    min-width: 27px;
+    overflow: hidden;
+  }
+  .ed-island-left .ed-switcher-btn {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .ed-switcher-variant {
+    white-space: nowrap;
+  }
+  .ed-island-left .ed-switcher-title {
+    min-width: min(4.5em, 100%);
+    flex: 0 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+/* The demo strip under the top bar says it's the demo (its Details opens the same card), so the
+   top bar's Demo chip steps out and leaves room for the page name. */
+.ed-demo-chip {
+  display: none !important;
+}
+@media (max-width: 767px) {
+  /* One top row on a phone: faces of others wait for Full. */
+  .ed-island-right:has(.ed-demo) .ed-pres-faces {
+    display: none !important;
+  }
+  .ed-switcher-variant {
+    width: 8px;
+    height: 8px;
+    padding: 0 !important;
+    font-size: 0 !important;
+    flex: none;
+  }
+  .ed-dock-bottom {
+    bottom: calc(var(--ed-tabs, 58px) + 66px);
+  }
+}
+/* Under 1500px wide the top bar is tight while a variant is open: the variant's name shows in the
+   band at the bottom, so here it's just the purple dot (its name in the tooltip). */
+@media (min-width: 768px) and (max-width: 1499px) {
+  .ed-switcher-variant {
+    width: 8px;
+    height: 8px;
+    padding: 0 !important;
+    font-size: 0 !important;
+    flex: none;
+  }
+}
