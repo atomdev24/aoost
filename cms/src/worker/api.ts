@@ -1,4 +1,5 @@
 import { pageAt } from "../model/i18n";
+import { actionFor, can, cleanTeam, isRole, keepSaverOwner, roleFor, type Action } from "../model/roles";
 import type { Op } from "../model/ops";
 import type { StagingMeta } from "../model/protocol";
 import { renderPage } from "../render/document";
@@ -87,16 +88,39 @@ async function demoRoute(request: Request, env: Env, url: URL): Promise<Response
   return null;
 }
 
+const ROLE_REFUSAL: Record<Action, string> = {
+  comment: "Your role can't comment here.",
+  edit: "You can view and comment. Ask an owner for the Editor role to make changes.",
+  publish: "Publishing needs the Editor role or higher.",
+  promote: "Electing into staging and pushing live needs the Manager role.",
+  team: "Only owners can change the team.",
+};
+
 export async function editorApi(request: Request, env: Env, url: URL, who: Identity): Promise<Response> {
   if (env.IS_DEMO) {
     const handled = await demoRoute(request, env, url);
     if (handled) return handled;
   }
-  if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
   const draft = draftStub(env);
   const route = `${request.method} ${url.pathname.replace(/^\/api\/editor/, "")}`;
 
+  // Roles: what this person may do (reads are open to everyone signed in).
+  const team = await draft.getTeam();
+  const role = roleFor(who, { owners: (env.OWNER_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean), team, fallback: isRole(env.DEFAULT_ROLE) ? env.DEFAULT_ROLE : "viewer" });
+  const needs = actionFor(route);
+  if (needs && !can(role, needs)) return error(403, ROLE_REFUSAL[needs]);
+  if (url.pathname === "/api/editor/media") return mediaApi(request, env, url);
+
   switch (route) {
+    case "GET /me":
+      return json({ ok: true, who: who.who, via: who.via, role });
+    case "GET /team":
+      return json({ ok: true, team, owners: (env.OWNER_EMAILS ?? "").split(",").map((e) => e.trim()).filter(Boolean), signIn: env.AUTH_MODE === "access" ? "access" : "password" });
+    case "PUT /team": {
+      const body = await readJson<{ team: unknown }>(request);
+      const owners = (env.OWNER_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+      return json({ ok: true, team: await draft.putTeam(keepSaverOwner(cleanTeam(body?.team), who, owners)) });
+    }
     case "GET /site":
       return json({ ok: true, ...(await readDraft(env)) });
     case "GET /state":

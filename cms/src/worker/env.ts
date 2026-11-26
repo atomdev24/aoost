@@ -13,6 +13,10 @@ export interface Env {
   AUTH_MODE: string;
   ACCESS_TEAM_DOMAIN: string;
   ACCESS_AUD: string;
+  /** Comma-separated emails that are always owners when signing in with Google (Cloudflare Access). */
+  OWNER_EMAILS?: string;
+  /** Role for someone signed in who isn't on the team list: viewer (default) or editor. */
+  DEFAULT_ROLE?: string;
   GITHUB_REPO: string;
   PUBLISH_BRANCH: string;
   EDITOR_PASSWORD?: string;

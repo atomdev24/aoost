@@ -1,3 +1,4 @@
+import { completeMention, mentionQuery, teamPeople } from "../team/mentions";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { getComponent } from "../../components/registry";
 import type { CommentThread } from "../../model/comments";
@@ -232,6 +233,10 @@ function AuthorGate({ onDone }: { onDone: () => void }) {
 function Composer({ placeholder, onSend, autoFocus }: { placeholder: string; onSend: (text: string) => Promise<boolean>; autoFocus?: boolean }) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [people, setPeople] = useState<string[]>([]);
+  useEffect(() => void teamPeople().then(setPeople), []);
+  const q = mentionQuery(text);
+  const matches = q === null ? [] : people.filter((p) => p.toLowerCase().includes(q.toLowerCase())).slice(0, 5);
   const submit = async () => {
     if (!text.trim() || busy) return;
     setBusy(true);
@@ -242,11 +247,24 @@ function Composer({ placeholder, onSend, autoFocus }: { placeholder: string; onS
     e.stopPropagation();
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      void submit();
+      // With suggestions open, Enter picks the first teammate.
+      if (matches.length) setText(completeMention(text, matches[0]!));
+      else void submit();
     }
   };
   return (
     <div className="ed-cmt-compose">
+      {matches.length ? (
+        <ul className="ed-mentions" role="listbox" aria-label="Mention a teammate">
+          {matches.map((m) => (
+            <li key={m}>
+              <button type="button" role="option" aria-selected={false} onMouseDown={(e) => (e.preventDefault(), setText(completeMention(text, m)))}>
+                @{m.split("@")[0]} <small>{m}</small>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <textarea className="ed-input" rows={2} value={text} placeholder={placeholder} autoFocus={autoFocus} aria-label={placeholder} onChange={(e) => setText(e.target.value)} onKeyDown={key} />
       <button type="button" className="ed-btn ed-btn-accent ed-btn-sm" disabled={!text.trim() || busy} onClick={() => void submit()} aria-label="Send">
         {busy ? "…" : "Send"}

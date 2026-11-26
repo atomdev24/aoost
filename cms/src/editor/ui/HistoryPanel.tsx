@@ -1,3 +1,4 @@
+import { useCan } from "../team/role";
 import { useEffect, useState } from "react";
 import { dayLabel, initials } from "./history-format";
 import { summarizeChanges } from "../../model/changes";
@@ -54,6 +55,7 @@ const kindOf = (v: Version) => (/^Push to production/.test(v.message) ? "Pushed 
  * version with who and when; the live one is outlined green (UI spec, Nov 2026).
  */
 export function HistoryPanel() {
+  const canPromote = useCan("promote");
   const pages = useEditor((s) => s.site.pages);
   const [versions, setVersions] = useState<Version[] | null>(null);
   const [unavailable, setUnavailable] = useState<string | null>(null);
@@ -174,7 +176,7 @@ export function HistoryPanel() {
                         <a className="ed-btn ed-btn-sm" href={`/preview/_version/${v.sha}/`} target="_blank" rel="noreferrer" aria-label={`Preview the version from ${when(v.at)}`}>
                           Preview
                         </a>
-                        {i > 0 ? (
+                        {i > 0 && canPromote ? (
                           <button type="button" className="ed-btn ed-btn-sm" disabled={!!busy} aria-label={`Restore the version from ${when(v.at)}`} onClick={() => void restore(v)}>
                             {busy === v.sha ? "Restoring…" : "Restore"}
                           </button>

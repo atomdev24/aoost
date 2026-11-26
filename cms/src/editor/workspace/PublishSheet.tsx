@@ -1,3 +1,4 @@
+import { useCan } from "../team/role";
 import { useEffect, useMemo, useState } from "react";
 import { useEditor } from "../store";
 import { checkPage, type PageChecks } from "./checks";
@@ -18,6 +19,7 @@ const STEPS: { id: Step; label: string }[] = [
  * with the failed step in red, a plain message and Retry.
  */
 export function PublishSheet() {
+  const canPromote = useCan("promote");
   const open = usePublish((s) => s.sheet);
   const phase = usePublish((s) => s.phase);
   const failed = usePublish((s) => s.failed);
@@ -140,7 +142,7 @@ export function PublishSheet() {
               <button type="button" className="ed-btn ed-btn-sm" disabled={stagingBusy || busy} onClick={() => void emptyStaging()}>
                 Empty staging
               </button>
-              <button type="button" className="ed-btn ed-btn-sm ed-btn-variant" disabled={stagingBusy || busy} onClick={() => void pushStaging()}>
+              <button type="button" className="ed-btn ed-btn-sm ed-btn-variant" disabled={stagingBusy || busy || !canPromote} title={canPromote ? undefined : "Pushing live needs the Manager role"} onClick={() => void pushStaging()}>
                 Push to production
               </button>
             </div>
