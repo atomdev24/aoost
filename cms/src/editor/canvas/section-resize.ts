@@ -1,3 +1,4 @@
+import { swallowNextClick } from "./swallow-click";
 import { updateSection } from "../../model/page-ops";
 import { canvasSize } from "../../responsive/canvas";
 import { setOnly } from "../../responsive/resolve";
@@ -58,7 +59,7 @@ export function startSectionResize(doc: Document, e: PointerEvent, handle: HTMLE
     // The page re-renders from the store; drop the live styles once it has.
     setTimeout(undo, 80);
     // A drag isn't a click on whatever is under the pointer.
-    doc.addEventListener("click", (c) => c.stopPropagation(), { capture: true, once: true });
+    swallowNextClick(doc);
   };
   html.classList.add("ed-sizing");
   doc.addEventListener("pointermove", move, true);

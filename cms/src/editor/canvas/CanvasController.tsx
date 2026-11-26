@@ -1,3 +1,4 @@
+import { swallowNextClick } from "./swallow-click";
 import { useGetPuck } from "@puckeditor/core";
 import { useEffect, useRef } from "react";
 import { canvasSize, layerBox } from "../../responsive/canvas";
@@ -152,7 +153,7 @@ export function CanvasController() {
           setSelection(kept.includes(id) ? kept : [id]);
         }, 80);
         // Swallow the click that follows a drag so it doesn't re-trigger selection logic.
-        doc.addEventListener("click", (c) => c.stopPropagation(), { capture: true, once: true });
+        swallowNextClick(doc);
       };
       doc.addEventListener("pointermove", onMove, true);
       doc.addEventListener("pointerup", onUp, true);

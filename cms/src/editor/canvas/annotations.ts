@@ -1,3 +1,4 @@
+import { swallowNextClick } from "./swallow-click";
 import { locate, updateNode } from "../../model/page-ops";
 import { labelScale, NEW_MARK, type Mark } from "../../components/Image/annotations";
 import type { Node } from "../../schema";
@@ -80,7 +81,7 @@ function resizeRing(e: PointerEvent): boolean {
     const to = r;
     updatePage(getState().pageId, (p) => updateNode(p, id, (n) => ({ ...n, content: { ...n.content, marks: ((n.content.marks as Mark[]) ?? []).map((mk, j) => (j === i ? { ...mk, r: to } : mk)) } })), "Resize fruit reading");
     selectBlock(id);
-    doc.addEventListener("click", (k) => k.stopPropagation(), { capture: true, once: true });
+    swallowNextClick(doc);
   };
   doc.addEventListener("pointermove", move, true);
   doc.addEventListener("pointerup", up, true);

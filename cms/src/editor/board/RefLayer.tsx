@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import { activateBreakpoint } from "./bridge";
-import { framePointAt, refToPage } from "./ref-page";
+import { framePointAt, previewRefDrop, refToPage } from "./ref-page";
 // Parked blocks render the page's own code, so they load only when one is on the board.
 const ParkedBlock = lazy(() => import("./ParkedBlock").then((m) => ({ default: m.ParkedBlock })));
 import { getRefs, loadRefs, moveRef, raiseRef, removeRef, selectRef, sizeRef, useRefs } from "./refs-store";
@@ -100,10 +100,14 @@ export function RefLayer({ pageId, zoom }: { pageId: string; zoom: number }) {
                 // Let go over the page: it becomes a picture there (the board keeps it otherwise).
                 (m) => {
                   el.classList.remove("is-into-page");
+                  previewRefDrop(-1e6, -1e6);
                   const ref = getRefs().items.find((x) => x.id === r.id);
                   if (ref) refToPage(ref, m.clientX, m.clientY);
                 },
-                (m) => el.classList.toggle("is-into-page", !!framePointAt(m.clientX, m.clientY)),
+                (m) => {
+                  el.classList.toggle("is-into-page", !!framePointAt(m.clientX, m.clientY));
+                  previewRefDrop(m.clientX, m.clientY);
+                },
               );
             }}
           >

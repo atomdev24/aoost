@@ -1,3 +1,4 @@
+import { swallowNextClick } from "./swallow-click";
 import { locate, updateNode, updateSection } from "../../model/page-ops";
 import { resolve, setOnly } from "../../responsive/resolve";
 import type { Node, Section, SectionLayout, Style } from "../../schema";
@@ -128,7 +129,7 @@ export function attachFlowResize(doc: Document) {
         inner.style.removeProperty("grid-template-columns");
       }, 80);
       selectBlock(id);
-      doc.addEventListener("click", (c) => c.stopPropagation(), { capture: true, once: true });
+      swallowNextClick(doc);
     };
     doc.addEventListener("pointermove", move, true);
     doc.addEventListener("pointerup", up, true);
