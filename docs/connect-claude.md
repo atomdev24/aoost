@@ -26,7 +26,7 @@ To remove it: `claude mcp remove aoost`.
 
 No server to run: the site signs Claude in with OAuth, the same way other connectors work.
 
-1. In Claude: **Settings → Connectors → Add custom connector**.
+1. In Claude: **Customize → Connectors → + → Add custom connector** (claude.ai/customize/connectors). On a Team or Enterprise plan an Owner adds it under Organization settings → Connectors first; then you press Connect.
 2. Name it `aoost`, URL `https://alexoostendurp.com/mcp`. Leave the advanced OAuth fields empty.
 3. Claude opens a "Connect Claude" page on the site. You're already signed in to the editor there
    (Cloudflare Access), so press **Allow**. On the password setup it asks for the editor password.
