@@ -43,9 +43,9 @@ test.describe("homepage in the editor", () => {
     await resetDraft(request, password!);
   });
 
-  test("the aoost blocks are in the block library under Layout", async ({ page }) => {
+  test("the aoost blocks are in the block library under Brand", async ({ page }) => {
     await page.locator(".ed-rail").getByRole("button", { name: "Insert", exact: true }).click();
-    await page.getByRole("tab", { name: "Layout" }).click();
+    await page.getByRole("tab", { name: "Brand" }).click();
     await expect(page.locator(".ed-card-name", { hasText: /^Projects$/ }).first()).toBeVisible();
     await expect(page.locator(".ed-card-name", { hasText: /^Journals$/ }).first()).toBeVisible();
   });

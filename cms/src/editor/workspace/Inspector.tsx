@@ -10,6 +10,13 @@ import { usePhone } from "../touch/device";
 import { nearestCardSize, type CardSize } from "./card";
 import { useEffect, useRef, useState } from "react";
 import { useRail } from "./rail-store";
+import { tagInspectorTabs, type InspectorTab } from "./inspector-tabs";
+
+const TABS: { id: InspectorTab; label: string }[] = [
+  { id: "content", label: "Content" },
+  { id: "style", label: "Style" },
+  { id: "layout", label: "Layout" },
+];
 
 const KIND: Record<Section["kind"], string> = { flow: "Section", grid: "Grid section", canvas: "Free-layout section" };
 
@@ -64,10 +71,30 @@ function InspectorPanel() {
   // Each new selection opens short, at the top: the Content fields.
   const target = useEditor((s) => s.overlayId ?? s.globalId ?? s.selection[0] ?? null);
   const body = useRef<HTMLDivElement>(null);
+  const [tab, setTab] = useState<InspectorTab>("content");
+  const [present, setPresent] = useState<InspectorTab[]>(["content", "style", "layout"]);
   useEffect(() => {
     if (phone) card.reset();
     body.current?.scrollTo({ top: 0 });
   }, [target, phone]);
+  // Content / Style / Layout tabs: tag each field with its tab, and keep the tags as fields change.
+  useEffect(() => {
+    const el = body.current;
+    if (!el) return;
+    const run = () => {
+      const has = tagInspectorTabs(el);
+      setPresent((p) => (p.join() === has.join() ? p : has));
+    };
+    run();
+    const mo = new MutationObserver(run);
+    mo.observe(el, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, [target]);
+  // Each new selection opens on its first tab with something in it.
+  useEffect(() => {
+    setTab((t) => (present.includes(t) ? t : (present[0] ?? "content")));
+  }, [present]);
+  useEffect(() => setTab(present[0] ?? "content"), [target]);
   return (
     <aside className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
       {phone ? (
@@ -82,7 +109,16 @@ function InspectorPanel() {
         </div>
       </header>
       {selected || overlayId ? <ScopeBar /> : null}
-      <div className="ed-inspector-body" ref={body}>
+      {present.length > 1 ? (
+        <div className="ed-itabs" role="tablist" aria-label="Settings">
+          {TABS.filter((t) => present.includes(t.id)).map((t) => (
+            <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <div className="ed-inspector-body" ref={body} data-tab={present.length > 1 ? tab : undefined}>
         {overlayId ? <OverlayPanel overlayId={overlayId} /> : globalId ? <GlobalPanel globalId={globalId} /> : <Puck.Fields />}
       </div>
     </aside>
