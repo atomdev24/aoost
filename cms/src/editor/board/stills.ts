@@ -152,6 +152,29 @@ const sheet = (href: string) => {
   return p;
 };
 
+/** What a video (its current frame, else `poster:<its poster>`) or a 3D model shows now, as a data URL. */
+function mediaPicture(el: Element | undefined): string | null {
+  try {
+    if (el && el.tagName === "VIDEO") {
+      const v = el as HTMLVideoElement;
+      if (v.readyState >= 2 && v.videoWidth) {
+        const c = document.createElement("canvas");
+        const scale = Math.min(1, 1280 / v.videoWidth);
+        c.width = Math.round(v.videoWidth * scale);
+        c.height = Math.round(v.videoHeight * scale);
+        c.getContext("2d")!.drawImage(v, 0, 0, c.width, c.height);
+        return c.toDataURL("image/jpeg", 0.85);
+      }
+      return v.poster ? `poster:${v.poster}` : null;
+    }
+    const model = el as (Element & { toDataURL?: (type?: string) => string }) | undefined;
+    if (model?.tagName === "MODEL-VIEWER" && typeof model.toDataURL === "function") return model.toDataURL("image/png");
+  } catch {
+    /* a cross-site video can't be read: it stays a box */
+  }
+  return null;
+}
+
 /**
  * A picture of a frame's page as it is now, at design size (one picture pixel per page pixel).
  * The page is copied (no scripts, media as plain boxes), its images, fonts and style sheets are
@@ -178,12 +201,28 @@ export async function captureFrame(doc: Document): Promise<{ canvas: HTMLCanvasE
       /* a canvas we can't read stays empty */
     }
   });
-  clone.querySelectorAll("iframe, model-viewer, audio, video").forEach((el) => {
+  // Videos and 3D keep what they show (else the picture swapped a dark box in on every zoom);
+  // embeds, sound and anything we can't read become plain boxes (an SVG picture can't load them).
+  const media = [...doc.querySelectorAll("iframe, model-viewer, audio, video")];
+  const posters: Promise<unknown>[] = [];
+  [...clone.querySelectorAll("iframe, model-viewer, audio, video")].forEach((el, i) => {
+    const shown = mediaPicture(media[i]);
+    if (shown) {
+      const img = doc.createElement("img");
+      if (shown.startsWith("poster:")) posters.push(toData(new URL(shown.slice(7), doc.baseURI).href).then((d) => (d ? img.setAttribute("src", d) : img.removeAttribute("src"))));
+      else img.src = shown;
+      img.className = el.className;
+      img.setAttribute("data-from-canvas", "");
+      img.setAttribute("style", `${el.getAttribute("style") ?? ""};object-fit:${media[i] instanceof HTMLVideoElement ? getComputedStyle(media[i]!).objectFit || "cover" : "contain"}`);
+      el.replaceWith(img);
+      return;
+    }
     const box = doc.createElement("div");
     box.className = el.className;
     box.setAttribute("style", "width:100%;height:100%;min-height:60px;background:#1C1C1F;border-radius:inherit");
     el.replaceWith(box);
   });
+  await Promise.all(posters);
   const base = doc.baseURI;
   const links = [...clone.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')];
   const texts = await Promise.all(links.map((l) => sheet(new URL(l.getAttribute("href") ?? "", base).href)));
@@ -338,4 +377,31 @@ export function startStills(): () => void {
     offBoard();
     started = false;
   };
+}
+
+// ------------------------------------------------------------------ pictures for other frames
+
+let queue: Promise<unknown> = Promise.resolve();
+const settled = () =>
+  new Promise<void>((resolve) => {
+    const check = () => {
+      const b = getBoard();
+      if (b.moving || b.interacting) setTimeout(check, 400);
+      else resolve();
+    };
+    check();
+  });
+
+/**
+ * A picture of any frame's page (the variants beside the page use this), taken one at a time,
+ * never while the board moves, and when the browser has a quiet moment.
+ */
+export function captureWhenQuiet(doc: Document): Promise<{ canvas: HTMLCanvasElement; w: number; h: number } | null> {
+  const next = queue.then(async () => {
+    await settled();
+    await idle();
+    return captureFrame(doc).catch(() => null);
+  });
+  queue = next.catch(() => null);
+  return next;
 }
