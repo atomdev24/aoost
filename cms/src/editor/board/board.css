@@ -227,10 +227,6 @@
   align-items: center;
   justify-content: center;
 }
-.ed-shell.is-interacting .bd-zoombar,
-body:has(.ed-shell.is-interacting) .ed-dock {
-  opacity: 0.7;
-}
 
 /* The "…" frame menu beside each label. */
 .bd-frame-menu {
