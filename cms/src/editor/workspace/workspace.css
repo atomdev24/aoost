@@ -56,11 +56,7 @@
   font: 12px/1.4 var(--ed-font);
   transition: opacity 150ms var(--ed-ease-out);
 }
-.ed-shell.is-interacting .ed-island,
-.is-dragging .ed-island,
-.is-grabbing .ed-island {
-  opacity: 0.7;
-}
+/* The bars stay as they are while the board moves (no fading): a steady look while zooming. */
 
 .ed-island-left {
   flex: none;
@@ -381,9 +377,6 @@
   box-shadow: var(--ed-glass-edge), var(--ed-glass-shadow);
   z-index: 100;
   transition: opacity 150ms var(--ed-ease-out);
-}
-.ed-shell.is-interacting .ed-rail {
-  opacity: 0.7;
 }
 .ed-rail-group {
   display: flex;

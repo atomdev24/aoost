@@ -1,8 +1,8 @@
 /*
  * Liquid glass (liquid.ts): the page behind bends at the edges, like Apple's Liquid Glass.
- * Chromium only, and only while the board is still: during zoom and pan the element keeps
- * its ordinary frosted glass, because refraction then costs a lot of drawing.
+ * Chromium only. It stays on while the board zooms and pans (Alex: switching to frosted mid-move
+ * looked like the bars changing); the frames show still pictures then, so the bend is cheap.
  */
-html:not(.ed-no-glass) body:not(:has(.ed-shell.is-interacting, .ed-shell.is-moving)) .ed-liquid {
+html:not(.ed-no-glass) .ed-liquid {
   backdrop-filter: var(--ed-liquid-filter) !important;
 }
