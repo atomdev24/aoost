@@ -1,3 +1,4 @@
+import { markMotion, motionBadgeCss } from "./motion-marks";
 /**
  * Editor frames are as tall as the page they show, so a viewport unit would
  * keep growing with them (100vh = the frame = the page + 100vh…). Inside the
@@ -16,17 +17,21 @@ export function pinViewportUnits(css: string, screenHeight: number): string {
 export const frameBaseCss = `html,body,#frame-root{height:auto!important;min-height:0!important}html{overflow:hidden!important}body{overflow:visible!important}`;
 
 /**
- * The site's own motion (tickers, spinning records, swaying keychains…) is paused in the board's
- * frames: four frames of it meant ~100 animations repainting all the time, which made the board
- * shimmer and drop pieces while zooming. Preview and the live site still move.
+ * The site's own motion (tickers, spinning records, the hero's pan and dot board…) is paused in
+ * every frame on the board: frames full of motion shimmered and dropped pieces while zooming, and
+ * with several people on the canvas it flickered. A pink "Motion" badge marks each section that
+ * moves (motion-marks.ts); Play above a frame shows it moving. Preview and the live site move.
  */
 export function stillMotion(doc: Document): () => void {
   const style = doc.createElement("style");
   style.id = "ed-still-motion";
-  // The editor's own flash (a block Claude just changed) keeps playing, and so does motion a block
-  // marks as part of its look ([data-motion="keep"], e.g. the hero's artwork pan), so it can be judged here.
+  // Only the editor's own flash (a block Claude just changed) keeps playing.
   style.textContent =
-    "*,*::before,*::after{animation-play-state:paused!important;transition:none!important}.ed-flash,[data-ed-flash],[data-motion=keep] *{animation-play-state:running!important}";
+    "*,*::before,*::after{animation-play-state:paused!important;transition:none!important}.ed-flash,[data-ed-flash]{animation-play-state:running!important}" + motionBadgeCss;
   doc.head.appendChild(style);
-  return () => style.remove();
+  const unmark = markMotion(doc);
+  return () => {
+    unmark();
+    style.remove();
+  };
 }

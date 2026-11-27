@@ -22,16 +22,19 @@ import { openPick } from "./pick-open";
 import { renameVariant } from "../../model/variants";
 import { update } from "../store";
 import { CHANGED_CSS } from "./changed-css";
+import { PlayButton } from "../play/PlayButton";
 import "./variants.css";
 
 /**
- * Variants as rows on the board (EDITOR-VARIANTS.md): under the page being edited, every other
+ * Variants side by side on the board (EDITOR-VARIANTS.md): to the right of the page being edited
+ * (after its frames and the "add a screen size" card), every other
  * version of it (the page itself and its variants) draws as its own row of frames, one per screen
  * size shown. Click a row to edit that version; it takes the top row, where the camera already is.
  * Changed blocks are outlined in purple. Below the rows: "+ New variant".
  */
 
-const ROW_GAP = 280;
+/** Space between one version's frames and the next version's. */
+const COL_GAP = 320;
 const LABEL_W = 220;
 
 // Heights of each version's frames (pageId:bp), measured as they draw.
@@ -51,10 +54,15 @@ const useHeights = () =>
     () => tick,
   );
 
-export type VersionRow = { page: Page; y: number; h: number };
+/** One other version: its frames sit at the open page's frames moved right by `dx`. */
+export type VersionRow = { page: Page; dx: number; h: number };
 
-/** Where the other versions sit: below the open page's frames, in the group's order. */
-export function useVersionLayout(frames: FrameRect[]): { group: Page[]; rows: VersionRow[]; top: number; left: number; right: number; end: number } {
+/**
+ * Where the other versions sit: to the right of the open page's frames (and of the "add a screen
+ * size" card when it shows, `after`), one group of frames per version, in the group's order. When a
+ * screen size is added or hidden, the frames' span changes and every version moves along with it.
+ */
+export function useVersionLayout(frames: FrameRect[], after = -Infinity): { group: Page[]; rows: VersionRow[]; top: number; left: number; right: number; span: number; end: number } {
   const site = useEditor((s) => s.site);
   const pageId = useEditor((s) => s.pageId);
   const prefs = useVariantPrefs();
@@ -63,17 +71,18 @@ export function useVersionLayout(frames: FrameRect[]): { group: Page[]; rows: Ve
   const left = Math.min(...frames.map((f) => f.x));
   const right = Math.max(...frames.map((f) => f.x + f.w));
   const top = Math.min(...frames.map((f) => f.y));
-  let y = Math.max(...frames.map((f) => f.y + f.h)) + ROW_GAP;
+  const span = right - left;
+  let x = Math.max(right, after) + COL_GAP;
   const rows: VersionRow[] = [];
   if (prefs.rows !== "none")
     for (const p of group) {
       if (p.id === pageId) continue;
       if (prefs.rows === "proposed" && p.variantOf && statusOf(p) !== "proposed") continue;
       const h = Math.max(...frames.map((f) => heights.get(`${p.id}:${f.bp}`) ?? f.h));
-      rows.push({ page: p, y, h });
-      y += h + ROW_GAP;
+      rows.push({ page: p, dx: x - left, h });
+      x += span + COL_GAP;
     }
-  return { group, rows, top, left, right, end: y - (rows.length ? 0 : ROW_GAP / 2) };
+  return { group, rows, top, left, right, span, end: x - COL_GAP / 2 };
 }
 
 /** One version drawn at one screen size: read-only, same renderer as the live frames. */
@@ -181,8 +190,8 @@ function VersionFrame({ page, bp, x, y, w, visible, outline }: { page: Page; bp:
 
 
 /** The rows' frames, in board space (inside .bd-world). */
-export function VersionRowFrames({ frames, view, size }: { frames: FrameRect[]; view: View; size: { w: number; h: number } }) {
-  const layout = useVersionLayout(frames);
+export function VersionRowFrames({ frames, view, size, after }: { frames: FrameRect[]; view: View; size: { w: number; h: number }; after?: number }) {
+  const layout = useVersionLayout(frames, after);
   const prefs = useVariantPrefs();
   // Phones show one frame at a time: versions are reached from the variant band and Review there.
   if (usePhone()) return null;
@@ -194,11 +203,11 @@ export function VersionRowFrames({ frames, view, size }: { frames: FrameRect[]; 
             key={`${r.page.id}:${f.bp}`}
             page={r.page}
             bp={f.bp}
-            x={f.x}
-            y={r.y}
+            x={f.x + r.dx}
+            y={f.y}
             w={f.w}
             outline={prefs.outline}
-            visible={!size.w || isVisible(view, { x: f.x, y: r.y, w: f.w, h: r.h }, size.w, size.h, Math.max(size.w, size.h))}
+            visible={!size.w || isVisible(view, { x: f.x + r.dx, y: f.y, w: f.w, h: r.h }, size.w, size.h, Math.max(size.w, size.h))}
           />
         )),
       )}
@@ -324,32 +333,48 @@ function RowLabel({ page, current, owner, style }: { page: Page; current: boolea
   );
 }
 
+/** The name above one version's frame, with Play (see it moving, without publishing). */
+function VersionFrameLabel({ page, bp, style }: { page: Page; bp: Breakpoint; style: React.CSSProperties }) {
+  return (
+    <div className="bd-label-wrap vr-frame-label" style={style} onPointerDown={(e) => e.stopPropagation()}>
+      <button type="button" className="bd-label" onClick={() => (openVersion(page.id), activateBreakpoint(bp))} title="Click to edit this version">
+        <strong>{BREAKPOINT_LABEL[bp]}</strong>
+      </button>
+      <PlayButton pageId={page.id} bp={bp} />
+    </div>
+  );
+}
+
 /** Row labels and "+ New variant", in screen space (outside .bd-world). */
-export function VersionRowLabels({ frames }: { frames: FrameRect[] }) {
+export function VersionRowLabels({ frames, after }: { frames: FrameRect[]; after?: number }) {
   const view = useBoard((s) => s.view);
   const pageId = useEditor((s) => s.pageId);
   const site = useEditor((s) => s.site);
   const phone = usePhone();
-  const layout = useVersionLayout(frames);
+  const layout = useVersionLayout(frames, after);
   const current = site.pages.find((p) => p.id === pageId);
   if (!current || !frames.length || phone) return null;
   const owner = layout.group[0] ?? current;
   const at = (x: number, y: number) => ({ left: x * view.zoom + view.x, top: y * view.zoom + view.y });
-  const labelPos = (y: number) => {
-    const p = at(layout.left, y);
-    return { left: p.left - LABEL_W - 28, top: p.top, width: LABEL_W };
+  // Each version's card sits above its frames, clear of the frame names.
+  const labelPos = (dx: number) => {
+    const p = at(layout.left + dx, layout.top);
+    return { left: p.left, top: p.top - 44, width: LABEL_W, transform: "translateY(-100%)" };
   };
-  const button = at(layout.left, layout.end);
+  const button = at(layout.end, layout.top);
   return (
     <>
-      {layout.group.length > 1 ? <RowLabel page={current} current owner={owner} style={labelPos(layout.top)} /> : null}
+      {layout.group.length > 1 ? <RowLabel page={current} current owner={owner} style={labelPos(0)} /> : null}
       {layout.rows.map((r) => (
-        <RowLabel key={r.page.id} page={r.page} current={false} owner={owner} style={labelPos(r.y)} />
+        <RowLabel key={r.page.id} page={r.page} current={false} owner={owner} style={labelPos(r.dx)} />
       ))}
+      {layout.rows.map((r) =>
+        frames.map((f) => <VersionFrameLabel key={`${r.page.id}:${f.bp}`} page={r.page} bp={f.bp} style={{ ...at(f.x + r.dx, f.y), transform: "translateY(calc(-100% - 6px))" }} />),
+      )}
       <button
         type="button"
         className="vr-new"
-        style={{ left: button.left, top: button.top, width: Math.max(220, (layout.right - layout.left) * view.zoom) }}
+        style={{ left: button.left, top: button.top, width: LABEL_W }}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => newVariant(owner.id)}
         title="A copy of the page to try ideas on. The live page isn't touched."

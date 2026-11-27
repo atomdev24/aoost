@@ -512,7 +512,7 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
 
   // Reduced motion: each frame shows whole, and they change in place.
   let still = 0;
-  function startStill() { win.clearInterval(still); draw(0); still = win.setInterval(() => {
+  function startStill() { win.clearInterval(still); draw(0); if (holdStill) return; still = win.setInterval(() => {
     if (frames[at]) shown.add(frames[at].text);
     const n = nextFrame();
     if (n < 0) { win.clearInterval(still); paint(() => { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); drawGrid(); }); return; }

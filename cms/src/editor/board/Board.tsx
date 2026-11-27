@@ -25,6 +25,7 @@ import { attachRefDrops } from "./refs-store";
 import { attachGestures } from "../touch/gestures";
 import { LONG_PRESS_MS } from "../touch/longpress";
 import { AdjustImage, CommentLayer, PresenceLayer, VersionRowFrames, VersionRowLabels } from "../parts";
+import { PlayButton, PlayHost } from "../play/PlayButton";
 import "./board.css";
 
 const NAME = BREAKPOINT_LABEL;
@@ -246,7 +247,7 @@ export function Board() {
             </div>
           ))}
         {/* Other versions of this page (it and its variants), as rows under it (EDITOR-VARIANTS.md). */}
-        <VersionRowFrames frames={frames} view={view} size={size} />
+        <VersionRowFrames frames={frames} view={view} size={size} after={addable.length && !simple ? slot.x + slot.w : undefined} />
         {addable.length && !simple ? (
           <div className="bd-slot" style={{ left: slot.x, top: slot.y, width: slot.w, height: slot.h }} role="group" aria-label="Add a breakpoint">
             <span className="bd-slot-plus">+</span>
@@ -302,23 +303,13 @@ export function Board() {
               )
             ) : null}
           </button>
+          <PlayButton pageId={pageId} bp={f.bp} />
           <FrameMenu bp={f.bp} canHide={frames.length > 1} open={menuFor === f.bp} setOpen={(open) => setMenuFor(open ? f.bp : null)} />
         </div>
       ))}
 
-      {/* Next to the frame names: start a variant of this page from the canvas (EDITOR-VARIANTS.md). */}
-      <div className="bd-label-wrap bd-variant-wrap" style={screen(addable.length && !simple ? slot.x : Math.max(...frames.map((f) => f.x + f.w)) + FRAME_GAP, Math.min(...frames.map((f) => f.y)))}>
-        <button
-          type="button"
-          className="bd-label bd-label-variant"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={() => newVariant()}
-          title="A copy of this page to try ideas on. The live page isn't touched; propose it when it's ready."
-        >
-          + New variant
-        </button>
-      </div>
-      <VersionRowLabels frames={frames} />
+      {/* "+ New variant" sits after the last version, to the right (VersionRowLabels). */}
+      <VersionRowLabels frames={frames} after={addable.length && !simple ? slot.x + slot.w : undefined} />
 
       {hiddenBps.length ? (
         <InDock slot="bottom" name="hidden">
@@ -340,6 +331,7 @@ export function Board() {
       <PresenceLayer />
       <CommentLayer />
       <AdjustImage />
+      <PlayHost />
       {!hidden[bp] ? <EmptyPage rect={{ ...screen(active.x, active.y), width: active.w * view.zoom, height: active.h * view.zoom }} /> : null}
       {loading ? (
         <InDock slot="bottom" name="loading">
