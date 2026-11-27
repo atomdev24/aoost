@@ -37,3 +37,11 @@ decisions and the order of work). `SPEC.md` is the original spec; `DECISIONS.md`
   calm and clear. It must also work for non-designers (teammates at Aerobotics): plain words,
   content before layout controls.
 - Mobile first, always.
+
+## Coding guides (read when relevant)
+
+Copied from vercel-labs/agent-skills (MIT, commit 5a37a63) into `.claude/skills/`:
+- `web-design-guidelines`: check UI changes against its rules (accessibility, focus, forms, motion, touch).
+- `react-best-practices`: React performance rules. aoost is Vite, not Next.js, so skip the server and Next-only rules.
+- `composition-patterns`: how to split components instead of piling on boolean props.
+They don't override the rules above. Where they disagree with aoost's taste or decisions, aoost wins.
