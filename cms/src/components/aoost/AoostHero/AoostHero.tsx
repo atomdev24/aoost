@@ -156,8 +156,8 @@ function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
     let board: { stop(): void } | null = null, gone = false;
     void import("../runtime/dots.js").then(({ startDotBoard }) => {
       if (gone || !ref.current) return;
-      // Side frames (read-only previews, motion stilled) show whole frames without animating; the
-      // live frame pauses while someone types in the editor, so each key lands without waiting.
+      // On the board (motion stilled) the board shows its first line, whole and still; Play shows it
+      // moving. In Play it also pauses while someone types in the editor, so each key lands at once.
       const doc = ref.current.ownerDocument;
       const still = !!doc.getElementById("ed-still-motion");
       const top = doc.defaultView?.parent as (Window & { __edBusyUntil?: number }) | undefined;
