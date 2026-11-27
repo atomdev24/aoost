@@ -19,6 +19,7 @@ import { cleanDoc, docToText, isPlain, richFor, textToDoc } from "../../model/ri
 import type { Node } from "../../schema";
 import { getState, updatePage, useEditor as useStore } from "../store";
 import { getRichEdit, stopRichEdit } from "./edit-store";
+import { RICH_SIZE_LABEL, RICH_SIZES, type RichSize } from "../../schema/rich-sizes";
 import "./rich.css";
 
 /** A colour on a few words: a theme token ("token:rust") or a hex colour. */
@@ -30,6 +31,17 @@ const Colour = Mark.create({
     const c = String(HTMLAttributes.color ?? "");
     const m = /^token:([a-zA-Z][a-zA-Z0-9]*)$/.exec(c);
     return ["span", mergeAttributes({ "data-colour": c, style: `color:${m ? `var(--c-${m[1]})` : c}` }), 0];
+  },
+});
+
+/** A few words bigger or smaller than the rest (see schema/rich-sizes.ts). */
+const Size = Mark.create({
+  name: "size",
+  addAttributes: () => ({ size: { default: null } }),
+  parseHTML: () => [{ tag: "span[data-size]", getAttrs: (el) => ({ size: (el as HTMLElement).getAttribute("data-size") }) }],
+  renderHTML: ({ HTMLAttributes }) => {
+    const k = String(HTMLAttributes.size ?? "") as RichSize;
+    return ["span", mergeAttributes({ "data-size": k, style: k in RICH_SIZES ? `font-size:${RICH_SIZES[k]}em;line-height:1.15` : "" }), 0];
   },
 });
 
@@ -47,6 +59,7 @@ const EXTENSIONS = [
   OrderedList,
   ListItem,
   Colour,
+  Size,
   UndoRedo,
 ];
 
@@ -186,14 +199,14 @@ export function useAnchorRect(anchor: React.RefObject<HTMLElement | null>) {
 }
 
 /** Which buttons a bar shows: all of them for the Text block; marked-up words fields have fewer. */
-export type BarKind = "bold" | "italic" | "underline" | "strike" | "colour" | "link" | "lists" | "clear";
-const ALL: BarKind[] = ["bold", "italic", "underline", "strike", "colour", "link", "lists", "clear"];
+export type BarKind = "bold" | "italic" | "underline" | "strike" | "size" | "colour" | "link" | "lists" | "clear";
+const ALL: BarKind[] = ["bold", "italic", "underline", "strike", "size", "colour", "link", "lists", "clear"];
 
 export function RichBar({ editor, anchor, onDone, kinds = ALL }: { editor: Editor; anchor: React.RefObject<HTMLElement | null>; onDone: () => void; kinds?: BarKind[] }) {
   const has = (k: BarKind) => kinds.includes(k);
   const rect = useAnchorRect(anchor);
   const colors = useStore((s) => s.site.theme.colors);
-  const [pop, setPop] = useState<null | "colour" | "link">(null);
+  const [pop, setPop] = useState<null | "size" | "colour" | "link">(null);
   const simple = useSimple();
   const [href, setHref] = useState("");
   const st = useEditorState({
@@ -208,6 +221,7 @@ export function RichBar({ editor, anchor, onDone, kinds = ALL }: { editor: Edito
       bullet: e.isActive("bulletList"),
       ordered: e.isActive("orderedList"),
       colour: (e.getAttributes("color").color as string | undefined) ?? "",
+      size: (e.getAttributes("size").size as RichSize | undefined) ?? null,
       empty: e.state.selection.empty,
     }),
   });
@@ -236,7 +250,15 @@ export function RichBar({ editor, anchor, onDone, kinds = ALL }: { editor: Edito
       {has("italic") && btn("Italic", st.italic, () => chain().toggleItalic().run(), <i>I</i>, "⌘I")}
       {has("underline") && btn("Underline", st.underline, () => chain().toggleUnderline().run(), <u>U</u>, "⌘U")}
       {has("strike") && btn("Strikethrough", st.strike, () => chain().toggleStrike().run(), <s>S</s>, "⌘⇧S")}
-      {(has("colour") || has("link")) && kinds.some((k) => ["bold", "italic", "underline", "strike"].includes(k)) ? <span className="ed-richsep" /> : null}
+      {(has("size") || has("colour") || has("link")) && kinds.some((k) => ["bold", "italic", "underline", "strike"].includes(k)) ? <span className="ed-richsep" /> : null}
+      {has("size") && btn(
+        st.size ? `Text size: ${RICH_SIZE_LABEL[st.size]}` : "Text size",
+        !!st.size,
+        () => setPop(pop === "size" ? null : "size"),
+        <span className="ed-richsize" aria-hidden="true">
+          A<small>A</small>
+        </span>,
+      )}
       {has("colour") && btn(
         "Colour",
         !!st.colour,
@@ -283,6 +305,23 @@ export function RichBar({ editor, anchor, onDone, kinds = ALL }: { editor: Edito
       <button type="button" className="ed-richdone" onMouseDown={(e) => e.preventDefault()} onClick={onDone}>
         Done
       </button>
+      {pop === "size" ? (
+        <div className="ed-richpop ed-richsizes" role="dialog" aria-label="Text size">
+          {(["s", null, "l", "xl", "xxl"] as (RichSize | null)[]).map((k) => (
+            <button
+              key={k ?? "normal"}
+              type="button"
+              className="ed-richsizebtn"
+              aria-pressed={st.size === k}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => (k ? chain().setMark("size", { size: k }).run() : chain().unsetMark("size").run(), setPop(null), refocus())}
+            >
+              <span style={{ fontSize: `${k ? Math.min(RICH_SIZES[k], 1.6) : 1}em` }}>Aa</span>
+              <small>{k ? RICH_SIZE_LABEL[k] : "Normal"}</small>
+            </button>
+          ))}
+        </div>
+      ) : null}
       {pop === "colour" ? (
         <div className="ed-richpop" role="dialog" aria-label="Text colour">
           <div className="ed-richswatches">

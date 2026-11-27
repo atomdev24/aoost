@@ -26,6 +26,12 @@ describe("the Aerobotics pack", () => {
       expect(renderNode(c.type, c.defaults.content as Record<string, unknown>, { editing: true }), c.type).not.toMatch(/<a [^>]*href="https:/);
     }
   });
+  it("tints the hero with a chosen overlay colour, and refuses anything that isn't a colour", () => {
+    const hero = aeroboticsComponents.find((c) => c.type === "AeroHero")!;
+    expect(renderNode("AeroHero", { ...hero.defaults.content, shadeColour: "token:sky", shade: 30 })).toContain("color-mix(in srgb, var(--c-sky) 50%, transparent)");
+    expect(renderNode("AeroHero", { ...hero.defaults.content, align: "center", shadeColour: "#112233", shade: 30 })).toContain("background:color-mix(in srgb, #112233 30%, transparent)");
+    expect(hero.schema.safeParse({ ...hero.defaults.content, shadeColour: "red;background:url(x)" }).success).toBe(false);
+  });
   it("escapes text", () => {
     expect(renderNode("AeroCta", { ...aeroboticsComponents.find((c) => c.type === "AeroCta")!.defaults.content, title: "<b>x</b>" })).toContain("&lt;b&gt;x&lt;/b&gt;");
   });

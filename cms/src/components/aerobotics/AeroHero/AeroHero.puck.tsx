@@ -1,4 +1,5 @@
 import type { Fields } from "@puckeditor/core";
+import { colourPickField } from "../../../editor/fields/color";
 import { mediaField } from "../../../editor/fields/media";
 import { buttonStyleField } from "../shared";
 import { tickerFields } from "../ticker";
@@ -18,6 +19,7 @@ export const fields: Fields<AeroHeroContent> = {
   alt: { type: "text", label: "Photo description" },
   badge: mediaField("Product badge (optional)", "image"),
   shade: { type: "number", label: "Darken the photo (0–80)", min: 0, max: 80 },
+  shadeColour: colourPickField("Overlay colour", "Deep green") as never,
   align: { type: "radio", label: "Text", options: [{ label: "Left", value: "left" }, { label: "Centred", value: "center" }] },
   height: { type: "radio", label: "Height", options: [{ label: "Full screen", value: "full" }, { label: "Shorter", value: "medium" }] },
   logos: {

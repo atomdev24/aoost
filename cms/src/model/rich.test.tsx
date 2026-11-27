@@ -58,4 +58,11 @@ describe("rich text", () => {
     const col: RichDoc = { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "c", marks: [{ type: "color", attrs: { color: "token:rust" } }] }] }] };
     expect(html(col)).toContain('style="color:var(--c-rust)"');
   });
+  it("keeps a few words bigger or smaller, and only the known sizes", () => {
+    const doc = cleanDoc({ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Big", marks: [{ type: "size", attrs: { size: "xl" } }] }, { type: "text", text: " small", marks: [{ type: "size", attrs: { size: "40px" } }] }] }] })!;
+    expect(doc.content[0]).toEqual({ type: "paragraph", content: [{ type: "text", text: "Big", marks: [{ type: "size", attrs: { size: "xl" } }] }, { type: "text", text: " small" }] });
+    expect(isPlain(doc)).toBe(false);
+    expect(docToText(doc)).toBe("Big small");
+    expect(html(doc)).toContain('style="font-size:1.6em;line-height:1.15"');
+  });
 });

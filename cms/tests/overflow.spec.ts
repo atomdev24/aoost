@@ -14,7 +14,6 @@ test("resize a layer from outside the frame, and W shows what hangs off", async 
   });
   expect((await request.post("/demo/api/editor/ops", { data: { ops: [{ op: "putPage", page: home }] } })).ok()).toBe(true);
   await page.goto("/demo/");
-  await page.getByRole("button", { name: "Got it" }).click();
   const frame = page.locator("#preview-frame").contentFrame();
   const pb = (await frame.locator(".n-n-photo").boundingBox({ timeout: 20_000 }))!;
   await page.mouse.click(pb.x + pb.width / 2, pb.y + pb.height / 3);

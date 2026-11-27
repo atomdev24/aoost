@@ -44,6 +44,18 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 7. Engine / site-pack split for the Aerobotics website (see HANDBOOK.md §7). Started: the Aerobotics block pack (`components/aerobotics/`) is in the demo's Brand tab.
 8. Variants front and centre (`EDITOR-VARIANTS.md`): rows on the board, propose, vote, Review, Pick keeping earlier versions. Next: A/B tests from variants, notifications.
 
+## Tests to rewrite
+
+Four browser tests start from demo templates that the Aerobotics templates replaced and are marked
+`test.fixme`: annotations (fruit readings), resize, templates (try designs), image-shade. Rewrite them
+against an Aerobotics template or a page made through the connector.
+
+A full run on 27 Nov (134 passed, 41 failed, 5 skipped) shows older checks that drifted from the
+editor since the 26 Nov layout (the save dot, the inspector tabs, the rail) and from content Alex has
+since published (home, nav, About): editor, section1, section2-3, inspector-phone, phone-palette,
+nav, home, home-editor, hero-intro, hero-overlay, history-panel, projects-journals, projects-table,
+lighting, sample, sketchbook-room, aoost-framing, breakpoints. Next: bring them up to date.
+
 ## Foundations first (Alex, 26 Nov 2026)
 
 Before more features: the basics people touch all day. In order:

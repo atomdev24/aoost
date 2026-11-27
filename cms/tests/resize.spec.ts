@@ -6,10 +6,10 @@ test.describe("resize on the canvas", () => {
     expect((await request.post("/demo/api/editor/demo/reset")).ok()).toBe(true);
   });
 
-  test("a picture keeps its proportions, a ring grows with its label", async ({ page, request }) => {
+  // To rewrite: it starts from a demo template that the Aerobotics templates replaced (ROADMAP: tests to rewrite).
+  test.fixme("a picture keeps its proportions, a ring grows with its label", async ({ page, request }) => {
     test.setTimeout(90_000);
     await page.goto("/demo/");
-    await page.getByRole("button", { name: "Got it" }).click();
     await page.getByRole("button", { name: "Templates", exact: true }).click();
     await page.locator(".ed-tpl-card").nth(1).getByRole("button", { name: /^New page/ }).click();
     const frame = page.locator("#preview-frame").contentFrame();

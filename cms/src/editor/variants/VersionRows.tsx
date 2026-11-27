@@ -8,7 +8,7 @@ import { activateBreakpoint } from "../board/bridge";
 import { frameBaseCss, pinViewportUnits, SCREEN_HEIGHT, stillMotion } from "../board/frame-css";
 import { passiveCss } from "../board/LiveFrame";
 import { ZoomVar } from "../board/PuckFrame";
-import { getBoard, useBoard } from "../board/store";
+import { getBoard, setExtraFitRects, useBoard } from "../board/store";
 import { isVisible, type FrameRect, type View } from "../board/viewport";
 import { onBoardWheel } from "../board/wheel";
 import { useOpenComments } from "./comment-count";
@@ -209,8 +209,21 @@ function useStamp(deps: unknown[]): number {
 export function VersionRowFrames({ frames, view, size, after }: { frames: FrameRect[]; view: View; size: { w: number; h: number }; after?: number }) {
   const layout = useVersionLayout(frames, after);
   const prefs = useVariantPrefs();
+  const phone = usePhone();
+  // Fit takes in the versions beside the page (and room for the "New variant" button after them).
+  const fitRef = useRef(layout);
+  fitRef.current = layout;
+  useEffect(() => {
+    if (phone) return;
+    setExtraFitRects(() => {
+      const l = fitRef.current;
+      if (!l.rows.length) return [];
+      return [...l.rows.map((r) => ({ x: l.left + r.dx, y: l.top, w: r.w, h: r.h })), { x: l.end, y: l.top, w: 260, h: 10 }];
+    }, "versions");
+    return () => setExtraFitRects(() => [], "versions");
+  }, [phone]);
   // Phones show one frame at a time: versions are reached from the variant band and Review there.
-  if (usePhone()) return null;
+  if (phone) return null;
   return (
     <>
       {layout.rows.map((r) =>

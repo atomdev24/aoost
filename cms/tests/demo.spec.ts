@@ -14,10 +14,12 @@ test.describe("demo editor", () => {
   test("opens without a sign-in, on the sample site, with the demo notice", async ({ page }) => {
     await page.goto("/demo/");
     await expect(canvas(page).getByText("A headline goes here.")).toBeVisible({ timeout: 20_000 });
+    // The demo says so in a thin strip; its Details opens the full card (Nov 2026: no card on arrival).
+    await expect(page.getByRole("dialog", { name: "About this demo" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Details" }).click();
     await expect(page.getByRole("dialog", { name: "About this demo" })).toBeVisible();
     await page.getByRole("button", { name: "Got it" }).click();
     await expect(page.getByRole("dialog", { name: "About this demo" })).toHaveCount(0);
-    await expect(page.locator(".ed-demo-chip")).toBeVisible();
     // nothing of the real site in the canvas
     await expect(canvas(page).locator("img[src*='/art/']")).toHaveCount(0);
   });
@@ -44,7 +46,7 @@ test.describe("demo editor", () => {
     // uploads are off; the library lists the placeholders
     expect((await request.post("/demo/api/editor/media", { multipart: { file: { name: "x.png", mimeType: "image/png", buffer: Buffer.from("x") } } })).status()).toBe(403);
     const media = await (await request.get("/demo/api/editor/media")).json();
-    expect(media.items.length).toBe(6);
+    expect(media.items.length).toBeGreaterThan(5); // placeholders plus the Aerobotics pictures
 
     // publish pretends: the demo's "live" catches up; nothing else happens
     const pub = await (await request.post("/demo/api/editor/publish", { data: {} })).json();

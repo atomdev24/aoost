@@ -7,11 +7,21 @@ import { art, Btn, Pic, BUTTON_STYLES } from "../shared";
 import { LogoTicker, tickerCss, TickerSettings } from "../ticker";
 import { css } from "./AeroHero.styles";
 
+/** A chosen overlay colour, faded the same way as the deep green: stronger behind the words. */
+function shadeStyle(colour: string | undefined, shade: number, align: string): CSSProperties | undefined {
+  if (!colour) return undefined;
+  const c = colour.startsWith("token:") ? `var(--c-${colour.slice(6)})` : colour;
+  const at = (pct: number) => `color-mix(in srgb, ${c} ${Math.max(0, Math.min(100, Math.round(pct)))}%, transparent)`;
+  return { background: align === "center" ? at(shade) : `linear-gradient(90deg, ${at(shade + 20)} 0%, ${at(shade)} 55%, ${at(shade * 0.6)} 100%)` };
+}
+
 export const AeroHeroContent = z.object({
   image: z.string(),
   alt: z.string(),
   /** Darkens the photo so white text reads: 0 (none) to 80. */
   shade: z.number().min(0).max(80),
+  /** The colour the photo is darkened (or tinted) with: a theme colour ("token:name") or a hex. Unset: the deep green. */
+  shadeColour: z.string().regex(/^(token:[a-zA-Z][a-zA-Z0-9]*|#[0-9a-fA-F]{3,8})$/).optional(),
   align: z.enum(["left", "center"]),
   height: z.enum(["full", "medium"]),
   /** A product badge above the headline (e.g. the TrueFruit Size lockup). */
@@ -71,7 +81,7 @@ export const AeroHero = defineComponent<AeroHeroContent>({
   Render: ({ content: c, ctx }) => (
     <div className={`ab ab-full ab-on-dark abh abh-${c.align} abh-${c.height}`} style={{ "--abh-shade": String((c.shade ?? 25) / 100) } as CSSProperties}>
       <Pic className="abh-bg" src={c.image} alt={c.alt} ctx={ctx} eager />
-      <div className="abh-shade" aria-hidden="true" />
+      <div className="abh-shade" aria-hidden="true" style={shadeStyle(c.shadeColour, c.shade ?? 25, c.align)} />
       <div className="ab-in abh-in">
         <div className="abh-copy">
           {c.badge ? <img className="abh-badge" src={c.badge} alt="" /> : null}

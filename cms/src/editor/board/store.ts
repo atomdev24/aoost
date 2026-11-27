@@ -170,10 +170,12 @@ export function setHeight(bp: Breakpoint, h: number) {
 }
 
 /** Other things on the board that Fit should include (reference images). */
-let extraFitRects: () => Rect[] = () => [];
-export const setExtraFitRects = (fn: () => Rect[]) => {
-  extraFitRects = fn;
+/** Other things on the board that Fit should take in (reference boards, the variants beside the page), by name. */
+const extraFits = new Map<string, () => Rect[]>();
+export const setExtraFitRects = (fn: () => Rect[], key = "refs") => {
+  extraFits.set(key, fn);
 };
+const extraFitRects = () => [...extraFits.values()].flatMap((fn) => fn());
 /** Room for the floating panels, from what is open rather than what has drawn yet (so the first fit is right). */
 function coveredEdges(): { left: number; right: number } {
   const rail = getRailState();

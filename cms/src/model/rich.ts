@@ -1,4 +1,5 @@
 import { RichColor, RichDoc, type RichBlock, type RichInline, type RichList, type RichMark, type RichParagraph } from "../schema/rich";
+import { RICH_SIZES, type RichSize } from "../schema/rich-sizes";
 
 /**
  * Rich text next to plain text. A text block keeps `text` (the words, with **bold**, *italic*,
@@ -79,6 +80,7 @@ function cleanMarks(marks: unknown): RichMark[] | undefined {
     if (m.type === "bold" || m.type === "italic" || m.type === "underline" || m.type === "strike") out.push({ type: m.type });
     else if (m.type === "link" && typeof m.attrs?.href === "string" && m.attrs.href.trim()) out.push({ type: "link", attrs: { href: m.attrs.href.trim().slice(0, 2000) } });
     else if (m.type === "color" && RichColor.safeParse(m.attrs?.color).success) out.push({ type: "color", attrs: { color: m.attrs!.color as string } });
+    else if (m.type === "size" && typeof m.attrs?.size === "string" && m.attrs.size in RICH_SIZES) out.push({ type: "size", attrs: { size: m.attrs.size as RichSize } });
   }
   return out.length ? out : undefined;
 }

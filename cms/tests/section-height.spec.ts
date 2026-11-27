@@ -33,7 +33,6 @@ test.describe("section height handle", () => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/demo/?page=home");
-    await page.getByRole("button", { name: "Got it" }).click();
     const frame = page.locator("#preview-frame").contentFrame();
     const all = await sections(page);
     const canvas = all.find((s) => s.kind === "canvas")!;
