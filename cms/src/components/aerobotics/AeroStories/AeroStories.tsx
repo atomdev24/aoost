@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { inline } from "../../../render/inline";
 import { safeUrl } from "../../../render/links";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
@@ -55,7 +56,7 @@ export const AeroStories = defineComponent<AeroStoriesContent>({
       <Band bg={c.bg} className={`abst abst-${c.look}`}>
         <div className="abst-head">
           {c.title ? <h2 className="ab-h2">{c.title}</h2> : null}
-          {c.text ? <p className="ab-lede">{c.text}</p> : null}
+          {c.text ? <p className="ab-lede">{inline(c.text)}</p> : null}
           {c.buttonLabel ? (
             <div className="ab-btns">
               <Btn label={c.buttonLabel} url={c.buttonUrl} kind="outline" ctx={ctx} />
@@ -81,7 +82,7 @@ export const AeroStories = defineComponent<AeroStoriesContent>({
                 </span>
                 <span className="abst-copy">
                   <span className="abst-title">{s.title}</span>
-                  {s.text && c.look === "below" ? <span className="abst-text">{s.text}</span> : null}
+                  {s.text && c.look === "below" ? <span className="abst-text">{inline(s.text)}</span> : null}
                 </span>
               </a>
             </li>

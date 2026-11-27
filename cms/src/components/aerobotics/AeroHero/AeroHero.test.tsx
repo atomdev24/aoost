@@ -3,6 +3,12 @@ import { renderNode } from "../../test-utils";
 import { AeroHero } from "./AeroHero";
 
 describe("AeroHero", () => {
+  it("draws bold, italic and links in its text (edited in place)", () => {
+    const html = renderNode("AeroHero", { ...AeroHero.defaults.content, text: "Measure **every** fruit, *fast*. [See how](/how)" });
+    expect(html).toContain("<strong>every</strong>");
+    expect(html).toContain("<em>fast</em>");
+    expect(html).toContain('href="/how"');
+  });
   it("puts the headline, both buttons and the logos on the photo", () => {
     const html = renderNode("AeroHero", { ...AeroHero.defaults.content });
     expect(html).toContain("abh-ticker");

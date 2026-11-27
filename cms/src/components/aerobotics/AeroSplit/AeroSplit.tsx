@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { inline } from "../../../render/inline";
 import { defineComponent } from "../../types";
 import { ChartCard, chartCss, ChartData, SAMPLE_CHARTS, SIZE_BARS } from "../charts";
 import { CROP_KEYS, cropCss, CropStrip, ALL_CROPS } from "../AeroCrops/crops";
@@ -63,7 +64,7 @@ export const AeroSplit = defineComponent<AeroSplitContent>({
         <div className="abs-copy">
           {c.kicker ? <p className="ab-kicker">{c.kicker}</p> : null}
           {c.title ? <h2 className="ab-h2">{c.title}</h2> : null}
-          {c.text ? <p className="ab-text">{c.text}</p> : null}
+          {c.text ? <p className="ab-text">{inline(c.text)}</p> : null}
           <CropStrip label={c.cropsLabel} crops={c.crops} />
           {c.primaryLabel || c.secondaryLabel ? (
             <div className="ab-btns">

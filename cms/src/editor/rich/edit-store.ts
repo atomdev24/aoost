@@ -23,3 +23,24 @@ export const useRichEdit = () =>
     () => current,
     () => current,
   );
+
+/** Words inside another block being edited in place: which block, which field, and the elements showing it. */
+export type FieldEdit = { id: string; bp: string; path: (string | number)[]; value: string; els: HTMLElement[]; single: boolean; marks: boolean };
+let field: FieldEdit | null = null;
+const fieldSubs = new Set<() => void>();
+export const getFieldEdit = () => field;
+export function startFieldEdit(next: FieldEdit) {
+  field = next;
+  fieldSubs.forEach((f) => f());
+}
+export function stopFieldEdit() {
+  if (!field) return;
+  field = null;
+  fieldSubs.forEach((f) => f());
+}
+export const useFieldEdit = () =>
+  useSyncExternalStore(
+    (f) => (fieldSubs.add(f), () => void fieldSubs.delete(f)),
+    () => field,
+    () => field,
+  );

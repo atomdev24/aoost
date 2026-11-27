@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { inline } from "../../../render/inline";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
 import { Band, Btn, BACKGROUNDS } from "../shared";
@@ -37,7 +38,7 @@ export const AeroPageHeader = defineComponent<AeroPageHeaderContent>({
     <Band bg={c.bg} className="abp" center>
       {c.kicker ? <p className="ab-kicker">{c.kicker}</p> : null}
       {c.title ? <h1 className="ab-h1">{c.title}</h1> : null}
-      {c.text ? <p className="ab-lede abp-text">{c.text}</p> : null}
+      {c.text ? <p className="ab-lede abp-text">{inline(c.text)}</p> : null}
       {c.buttonLabel ? (
         <div className="ab-btns">
           <Btn label={c.buttonLabel} url={c.buttonUrl} kind="blue" ctx={ctx} />

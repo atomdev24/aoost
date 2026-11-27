@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { inline } from "../../../render/inline";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
 import { art, Band, Btn, Pic, lines, BACKGROUNDS } from "../shared";
@@ -55,7 +56,7 @@ export const AeroPricing = defineComponent<AeroPricingContent>({
             <Pic className="abpr-img" src={p.image} alt="" sizes="600px" ctx={ctx} />
             <div className="abpr-body">
               <h3>{p.title}</h3>
-              {p.text ? <p>{p.text}</p> : null}
+              {p.text ? <p>{inline(p.text)}</p> : null}
               <ul className="abpr-points">
                 {lines(p.points).map((pt, j) => (
                   <li key={j}>{pt}</li>
