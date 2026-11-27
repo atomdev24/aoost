@@ -20,10 +20,24 @@ The boards are on the Design canvas, in the "UI research" row: rules vs aoost to
 1. **Colours and greys** ✓ (this change): one colour list in editor.css; Graphite default, Ink and
    Paper at night in the "…" menu (Colours). Filled buttons use a deeper blue (#1a6fe0) because white on
    #0a84ff was 3.7:1. Page frames get the theme's selection colour too.
-2. **Motion kit**: two curves (`cubic-bezier(.23,1,.32,1)` out, `cubic-bezier(.77,0,.175,1)` in-out),
+2. **Motion kit** ✓ (built by Gemini via the relay, reviewed by Claude): two curves (`cubic-bezier(.23,1,.32,1)` out, `cubic-bezier(.77,0,.175,1)` in-out),
    menus from the trigger side from scale 0.96, press 0.97, no animation when opened by keyboard,
    one shared tooltip with a single timer, reduced motion built in.
 3. **Glass tidy**: glass only on floating pieces, side panels near-solid; liquid refraction
    (SVG displacement in backdrop-filter, Chromium only, frosted fallback) only on the status pill and
    phone tab bar.
 4. **Safe sub-menus** in the shared menu, following the pointer (Linear, React Aria), off for touch.
+
+## Motion kit: what was built (27 Nov 2026)
+- Curve and timing names in editor.css (`--ed-ease-out`, `--ed-ease-in-out`, `--ed-dur-press/fast/`, `--ed-dur`);
+  every editor transition now uses the fast-start curve (loops and spinners untouched; the toast's slow-start exit fixed).
+- Press: buttons, icons, rail, Publish and the block tag shrink to 97% while pressed. Menu rows don't.
+- Popovers (`ui/Popover.tsx`) grow from the side their button is on (data-side, transform-origin), the "…" menu
+  from its top right corner. Modals stay centred.
+- ⌘K opens instantly (no animation).
+- One shared tooltip (`ui/tooltip.ts`): reads existing `title`s, waits 0.5s the first time, then instant along a
+  toolbar for 0.3s; never on touch, never on rail buttons (they have their own label) or `[data-no-tip]`.
+- Reduced motion turns off the press scale and the entrances (refresh.css, last).
+
+Still to do from this step: other dropdowns that aren't `Popover` (Publish ▾, block … menus) could use the same
+entrance; tooltips for icon-only buttons that have no `title` yet.
