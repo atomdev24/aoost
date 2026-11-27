@@ -48,4 +48,6 @@ Also in `.claude/skills/` (copied, pinned):
 - `security-audit` (Cloudflare, cloudflare/security-audit-skill c1c8a8c): how to review code for real security holes. Use it for security questions and the nightly security audit; only run its full six-phase audit when asked.
 - `workers-best-practices`, `durable-objects`, `wrangler`, `web-perf` (Cloudflare, cloudflare/skills ff191de): how to build, debug and speed up Workers and Durable Objects, which is what aoost runs on.
 - `skill-inspector` (NVIDIA SkillSpector 02894ec): check any new skill before adding it here. Never run scripts from the skill being checked.
+- `differential-review` (Trail of Bits, trailofbits/skills 149d7b2): security review of a change before it merges.
+- `web-quality-audit`, `performance`, `core-web-vitals`, `accessibility`, `seo`, `best-practices` (Addy Osmani of Google Chrome, addyosmani/web-quality-skills afa8da9): Lighthouse-based checks for the public site.
 They don't override the rules above. Where they disagree with aoost's taste or decisions, aoost wins.
