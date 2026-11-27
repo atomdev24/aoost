@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { inline } from "../../../render/inline";
 import { safeUrl } from "../../../render/links";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
@@ -44,7 +45,7 @@ export const AeroShowcase = defineComponent<AeroShowcaseContent>({
         <div className="abw-shade" aria-hidden="true" />
         <div className="ab-in abw-in ab-center">
           {c.title ? <h2 className="ab-h2">{c.title}</h2> : null}
-          {c.text ? <p className="abw-text">{c.text}</p> : null}
+          {c.text ? <p className="abw-text">{inline(c.text)}</p> : null}
           <div className="abw-frame">
             <Pic className="abw-screen" src={c.screen} alt={c.screenAlt} sizes="(min-width:1100px) 1000px, 100vw" ctx={ctx} />
             {video ? (

@@ -162,7 +162,7 @@ export function RichEditing({ node }: { node: Node }) {
 
 // ------------------------------------------------------------------ the formatting bar
 
-function useAnchorRect(anchor: React.RefObject<HTMLElement | null>) {
+export function useAnchorRect(anchor: React.RefObject<HTMLElement | null>) {
   const [rect, setRect] = useState<{ top: number; left: number; bottom: number; width: number } | null>(null);
   useLayoutEffect(() => {
     let raf = 0;
@@ -185,7 +185,12 @@ function useAnchorRect(anchor: React.RefObject<HTMLElement | null>) {
   return rect;
 }
 
-function RichBar({ editor, anchor, onDone }: { editor: Editor; anchor: React.RefObject<HTMLElement | null>; onDone: () => void }) {
+/** Which buttons a bar shows: all of them for the Text block; marked-up words fields have fewer. */
+export type BarKind = "bold" | "italic" | "underline" | "strike" | "colour" | "link" | "lists" | "clear";
+const ALL: BarKind[] = ["bold", "italic", "underline", "strike", "colour", "link", "lists", "clear"];
+
+export function RichBar({ editor, anchor, onDone, kinds = ALL }: { editor: Editor; anchor: React.RefObject<HTMLElement | null>; onDone: () => void; kinds?: BarKind[] }) {
+  const has = (k: BarKind) => kinds.includes(k);
   const rect = useAnchorRect(anchor);
   const colors = useStore((s) => s.site.theme.colors);
   const [pop, setPop] = useState<null | "colour" | "link">(null);
@@ -227,18 +232,18 @@ function RichBar({ editor, anchor, onDone }: { editor: Editor; anchor: React.Ref
   const swatches = Object.keys(colors).slice(0, 12);
   return createPortal(
     <div className={`ed-richbar${phone ? " ed-richbar-phone" : ""}`} style={style} role="toolbar" aria-label="Text formatting">
-      {btn("Bold", st.bold, () => chain().toggleBold().run(), <b>B</b>, "⌘B")}
-      {btn("Italic", st.italic, () => chain().toggleItalic().run(), <i>I</i>, "⌘I")}
-      {btn("Underline", st.underline, () => chain().toggleUnderline().run(), <u>U</u>, "⌘U")}
-      {btn("Strikethrough", st.strike, () => chain().toggleStrike().run(), <s>S</s>, "⌘⇧S")}
-      <span className="ed-richsep" />
-      {btn(
+      {has("bold") && btn("Bold", st.bold, () => chain().toggleBold().run(), <b>B</b>, "⌘B")}
+      {has("italic") && btn("Italic", st.italic, () => chain().toggleItalic().run(), <i>I</i>, "⌘I")}
+      {has("underline") && btn("Underline", st.underline, () => chain().toggleUnderline().run(), <u>U</u>, "⌘U")}
+      {has("strike") && btn("Strikethrough", st.strike, () => chain().toggleStrike().run(), <s>S</s>, "⌘⇧S")}
+      {(has("colour") || has("link")) && kinds.some((k) => ["bold", "italic", "underline", "strike"].includes(k)) ? <span className="ed-richsep" /> : null}
+      {has("colour") && btn(
         "Colour",
         !!st.colour,
         () => setPop(pop === "colour" ? null : "colour"),
         <span className="ed-richdot" style={{ background: st.colour ? (st.colour.startsWith("token:") ? `var(--c-${st.colour.slice(6)}, currentColor)` : st.colour) : "currentColor" }} />,
       )}
-      {btn(
+      {has("link") && btn(
         "Link",
         st.link,
         () => {
@@ -251,8 +256,8 @@ function RichBar({ editor, anchor, onDone }: { editor: Editor; anchor: React.Ref
         "⌘K",
         true,
       )}
-      <span className="ed-richsep" />
-      {btn(
+      {has("lists") ? <span className="ed-richsep" /> : null}
+      {has("lists") && btn(
         "Bulleted list",
         st.bullet,
         () => chain().toggleBulletList().run(),
@@ -265,7 +270,7 @@ function RichBar({ editor, anchor, onDone }: { editor: Editor; anchor: React.Ref
           <rect x="6" y="11.3" width="8" height="1.4" rx=".7" />
         </svg>,
       )}
-      {btn(
+      {has("lists") && btn(
         "Numbered list",
         st.ordered,
         () => chain().toggleOrderedList().run(),
@@ -273,8 +278,8 @@ function RichBar({ editor, anchor, onDone }: { editor: Editor; anchor: React.Ref
           1.
         </span>,
       )}
-      {btn("Clear formatting", false, () => chain().unsetAllMarks().run(), <span aria-hidden="true">T̸</span>)}
-      <span className="ed-richsep" />
+      {has("clear") && btn("Clear formatting", false, () => chain().unsetAllMarks().run(), <span aria-hidden="true">T̸</span>)}
+      {kinds.length ? <span className="ed-richsep" /> : null}
       <button type="button" className="ed-richdone" onMouseDown={(e) => e.preventDefault()} onClick={onDone}>
         Done
       </button>

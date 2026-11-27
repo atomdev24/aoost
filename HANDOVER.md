@@ -66,7 +66,8 @@ Speed probes: `cms/scripts/probes/perf.mjs [mobile]` (editor: load, tap and key 
 3. **Audit leftovers** ✓ (27 Nov): background picture/video use the media picker, the tint uses the colour picker
    (with strength), lists show bigger pictures with names as words. Quieter Layers #140, phone wording #135.
    Still possible: a full picture grid for long image lists.
-4. **Rich text for the Aerobotics blocks' text fields**; inline font size.
+4. **Rich text for the Aerobotics blocks** ✓ (27 Nov): double-click words in any block to edit in place;
+   Aerobotics descriptions take bold/italic/links (EDITOR-TEXT.md). Inline font size not yet.
 5. **Web app extras:** share a photo from the phone into Media (Web Share Target), push
    notifications for mentions and Claude replies.
 6. From the research roadmap: A/B tests from variants; brand guardrails beyond Simple mode;

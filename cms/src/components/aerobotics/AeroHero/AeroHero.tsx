@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { inline } from "../../../render/inline";
 import { z } from "zod";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
@@ -76,7 +77,7 @@ export const AeroHero = defineComponent<AeroHeroContent>({
           {c.badge ? <img className="abh-badge" src={c.badge} alt="" /> : null}
           {c.eyebrow ? <p className="ab-eyebrow">{c.eyebrow}</p> : null}
           {c.title ? <h1 className="ab-h1">{c.title}</h1> : null}
-          {c.text ? <p className="abh-text">{c.text}</p> : null}
+          {c.text ? <p className="abh-text">{inline(c.text)}</p> : null}
           <div className="ab-btns">
             <Btn label={c.primaryLabel} url={c.primaryUrl} kind={c.primaryStyle} ctx={ctx} />
             <Btn label={c.secondaryLabel} url={c.secondaryUrl} kind={c.secondaryStyle} ctx={ctx} />

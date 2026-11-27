@@ -29,3 +29,15 @@ size; a Simple mode that hides the per-block type controls for teammates (brand 
 
 **Checks.** `model/rich.test.tsx` (round trip, matching rule, cleaning, drawing). Browser: edit,
 bold, colour, list, undo inside and after, at 1440 and 390.
+
+## Words in other blocks (27 Nov 2026)
+Double-click any words a block shows (Aerobotics headings, descriptions, FAQ answers, button labels;
+the aoost blocks' headings too) to edit them in place: the elements hide and an editor in the same
+type sits exactly over them. It works out which field the words came from by matching what a visitor
+reads (editor/rich/field-locate.ts), so blocks need no changes to take part.
+- Fields a block draws with render/inline keep their marked-up form (**bold**, *italic*,
+  [link](/x)) and get Bold, Italic and Link; the list is `MARKED` in field-locate.ts. The Aerobotics
+  descriptions, answers and card text now draw those marks.
+- Every other field is edited as plain words: no buttons, no shortcuts.
+- One-line fields finish on Enter; Esc, Done or a click elsewhere finish too. Saved once, one undo step.
+- Not yet: font size inside a field (the marked-up form can't hold it).

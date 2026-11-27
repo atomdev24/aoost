@@ -17,6 +17,7 @@ import { canvasCss } from "./canvas.styles";
 import { EditorOverlay } from "./EditorOverlay";
 import { frameThemeCss, markTheme, useTheme } from "../display";
 import { usePuck } from "./usePuck";
+import { FieldEditingPart } from "../rich/part";
 
 /**
  * The page shell inside the preview iframe: the same CSS and nav as the
@@ -64,6 +65,7 @@ export function Root({ children }: { children: ReactNode }) {
             <EditorOverlay key={o.id} overlay={o} />
           ))}
       </main>
+      <FieldEditingPart />
       <CanvasController />
       <HoverLabel />
       <OverrideMarks />

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { inline } from "../../../render/inline";
 import { z } from "zod";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
@@ -46,7 +47,7 @@ export const AeroFeatures = defineComponent<AeroFeaturesContent>({
       {c.title || c.text ? (
         <div className="abf-head">
           {c.title ? <h2 className="ab-h2">{c.title}</h2> : null}
-          {c.text ? <p className="ab-lede">{c.text}</p> : null}
+          {c.text ? <p className="ab-lede">{inline(c.text)}</p> : null}
         </div>
       ) : null}
       <ul className="abf-grid" style={{ "--abf-cols": String(c.columns) } as CSSProperties}>
@@ -54,7 +55,7 @@ export const AeroFeatures = defineComponent<AeroFeaturesContent>({
           <li key={i} className="abf-item">
             {it.icon ? <img className="abf-icon" src={it.icon} alt="" loading="lazy" /> : null}
             {it.title ? <h3 className="abf-title">{it.title}</h3> : null}
-            {it.text ? <p className="ab-text abf-text">{it.text}</p> : null}
+            {it.text ? <p className="ab-text abf-text">{inline(it.text)}</p> : null}
           </li>
         ))}
       </ul>
