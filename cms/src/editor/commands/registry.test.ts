@@ -89,7 +89,12 @@ describe("shortcut map", () => {
     expect(matchShortcut(press("k", { ctrl: true }))?.id).toBe("palette.open");
     expect(matchShortcut(press("2", { code: "Digit2", ctrl: true }))?.id).toBe("frame.desktop");
     expect(matchShortcut(press("v", { alt: true }))).toBeNull();
-    expect(matchShortcut(press("v", { meta: true }))).toBeNull();
+    expect(matchShortcut(press("j", { meta: true }))).toBeNull();
+    // ⌘V pastes a copied block (fields keep their own paste: shortcuts don't fire while typing).
+    expect(matchShortcut(press("v", { meta: true }))?.id).toBe("block.paste");
+    // ⌥⌘C on a Mac types "ç": the physical key is what counts.
+    expect(matchShortcut(press("ç", { code: "KeyC", meta: true, alt: true }))?.id).toBe("block.copyStyle");
+    expect(keyLabels(shortcutFor("block.pasteStyle")!, true)).toEqual(["⌥", "⌘", "V"]);
   });
   it("writes keys for each platform", () => {
     const s = shortcutFor("block.hide")!;

@@ -31,3 +31,4 @@ export const BrowserZoomNotice = part("zoom notice", () => import("./workspace/B
 export const ClaudePill = part("Claude status", () => import("./workspace/ClaudePill").then((m) => m.ClaudePill));
 export const UploadTray = part("upload progress", () => import("./ui/UploadTray").then((m) => m.UploadTray));
 export const ProblemsDialog = part("problem log", () => import("./commands/ProblemsDialog").then((m) => m.ProblemsDialog));
+export const ContextMenuHost = part("right-click menu", () => import("./menu/ContextMenu").then((m) => m.ContextMenuHost));

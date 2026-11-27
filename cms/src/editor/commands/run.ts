@@ -11,6 +11,7 @@ import { applyTool } from "../board/keys";
 import { resetBlockOverrides } from "../board/overrides";
 import { fit, frameRects, revealRect, setFrameHidden, toggleDotGrid, zoomStep, zoomTo } from "../board/store";
 import { deleteBlock, duplicateBlock, moveBlock, toggleBlockHidden } from "../canvas/actions";
+import { copySelection, copyStyleOfSelection, cutSelection, pasteClipboard, pasteStyleOnSelection } from "../canvas/clipboard-actions";
 import { adjustable, isAdjusting, startAdjust } from "../canvas/adjust-state";
 import { openQuickInsert } from "../insert/QuickInsert";
 import { currentPage, flush, getState, megaItemId, redo, undo, updatePage } from "../store";
@@ -126,6 +127,11 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
     const page = currentPage(getState());
     updatePage(page.id, (p) => resetBlockOverrides(p, id, bp), `Reset ${bp} changes`);
   }),
+  "block.copy": copySelection,
+  "block.cut": cutSelection,
+  "block.paste": pasteClipboard,
+  "block.copyStyle": copyStyleOfSelection,
+  "block.pasteStyle": pasteStyleOnSelection,
   "panel.layers": () => togglePanel("layers"),
   "panel.pages": () => togglePanel("pages"),
   "panel.media": () => togglePanel("media"),

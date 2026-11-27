@@ -28,8 +28,9 @@ import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { UploadTrayHost } from "./ui/UploadTrayHost";
-import { CompareView, BrowserZoomNotice, DesignsBoard, PickSheet, VariantBand } from "./parts";
+import { CompareView, BrowserZoomNotice, DesignsBoard, PickSheet, VariantBand, ContextMenuHost } from "./parts";
 import { usePickOpen } from "./variants/pick-open";
+import { useContextMenu } from "./menu/context-store";
 import { openDesigns } from "./templates/designs-open";
 import { useDesignsOpen } from "./templates/designs-open";
 import { useCompare } from "./workspace/compare";
@@ -78,6 +79,7 @@ export function Editor() {
   const comparing = !!useCompare();
   const designsOpen = !!useDesignsOpen();
   const picking = !!usePickOpen();
+  const contextOpen = !!useContextMenu();
   // A review link (?page=…&review=1, from Review's "Copy review link") opens Review for that page.
   useEffect(() => {
     if (new URLSearchParams(location.search).get("review") === "1") openDesigns();
@@ -131,6 +133,7 @@ export function Editor() {
           {comparing ? <CompareView /> : null}
           {designsOpen ? <DesignsBoard /> : null}
           {picking ? <PickSheet /> : null}
+          {contextOpen ? <ContextMenuHost /> : null}
           <LeftPanel />
           <Board />
           <Inspector />
