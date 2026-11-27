@@ -881,7 +881,6 @@ select.ed-input option {
 .ed-tree .ed-layer.is-hidden .ed-layer-name small { text-decoration: line-through; }
 .ed-tree .ed-layer.is-hidden .ed-layer-name,
 .ed-tree .ed-layer.is-hidden .ed-layer-icon { opacity: 0.42; }
-.ed-tree .ed-layer.is-hidden .ed-layer-tools { opacity: 1; }
 .ed-tree .ed-layer.is-hidden .ed-layer-tools [aria-pressed="true"] { color: #f0997b; }
 .ed-layer.is-dragging { opacity: 0.35; }
 .ed-layer-gap {

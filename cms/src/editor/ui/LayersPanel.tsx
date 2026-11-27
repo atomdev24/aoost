@@ -9,7 +9,7 @@ import { currentPage, getState, setOverlay, updatePage, useEditor } from "../sto
 import { Select } from "./kit";
 import { LayerIcon } from "./LayerIcon";
 
-const KIND_LABEL: Record<Section["kind"], string> = { flow: "Flow", grid: "Grid", canvas: "Free layout" };
+const KIND_LABEL: Record<Section["kind"], string> = { flow: "", grid: "Grid", canvas: "Free layout" };
 
 const Eye = ({ off }: { off: boolean }) => (
   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
