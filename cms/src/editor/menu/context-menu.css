@@ -1,0 +1,94 @@
+/* The right-click menu (menu/ContextMenu.tsx): the editor's glass menu, with keys on the right. */
+.ed-ctx {
+  position: fixed;
+  z-index: 420;
+  box-sizing: border-box;
+  min-width: 200px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: rgba(36, 36, 40, 0.86);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  border-radius: 10px;
+  box-shadow: var(--ed-glass-edge), 0 12px 32px rgba(0, 0, 0, 0.45);
+  color: var(--ed-text);
+  font: 12px/1.4 var(--ed-font);
+  letter-spacing: -0.01em;
+  animation: ed-ctx-in var(--ed-dur-fast, 120ms) var(--ed-ease-out);
+}
+html.ed-no-glass .ed-ctx {
+  background: var(--ed-panel-solid, #232326);
+}
+@keyframes ed-ctx-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+.ed-ctx button {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  height: 26px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ed-text);
+  font: 12px var(--ed-font);
+  text-align: left;
+  cursor: default;
+}
+.ed-ctx button > span:first-child {
+  flex: 1;
+  white-space: nowrap;
+}
+.ed-ctx kbd {
+  color: var(--ed-hint);
+  font: 11px var(--ed-font);
+  letter-spacing: 0.04em;
+}
+.ed-ctx-more {
+  color: var(--ed-sub);
+  font-size: 14px;
+  line-height: 1;
+}
+.ed-ctx button:hover:not(:disabled),
+.ed-ctx button:focus-visible,
+.ed-ctx button.is-open {
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
+  outline: none;
+}
+.ed-ctx button:hover:not(:disabled) kbd,
+.ed-ctx button:focus-visible kbd,
+.ed-ctx button.is-open kbd,
+.ed-ctx button:hover:not(:disabled) .ed-ctx-more,
+.ed-ctx button.is-open .ed-ctx-more {
+  color: inherit;
+  opacity: 0.8;
+}
+.ed-ctx button.is-danger:not(:disabled) {
+  color: #ff6b61;
+}
+.ed-ctx button.is-danger:hover:not(:disabled),
+.ed-ctx button.is-danger:focus-visible {
+  background: #d33a2f;
+  color: #fff;
+}
+.ed-ctx button:disabled {
+  color: var(--ed-hint);
+}
+.ed-ctx-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--ed-line);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ed-ctx {
+    animation: none;
+  }
+}

@@ -5,7 +5,7 @@ import type { ActionId, Group } from "./registry";
  * (e.key, lower-cased) or `code` (e.code, for keys whose character changes
  * with Shift). `mod` is ⌘ on a Mac and Ctrl elsewhere.
  */
-export type Combo = { key?: string; code?: string; mod?: boolean; shift?: boolean | "any" };
+export type Combo = { key?: string; code?: string; mod?: boolean; shift?: boolean | "any"; alt?: boolean };
 
 export type Shortcut = {
   id: string;
@@ -53,6 +53,11 @@ export const SHORTCUTS: Shortcut[] = [
 
   { id: "block.duplicate", action: "block.duplicate", group: "Blocks", label: "Duplicate", keys: ["mod", "D"], combos: [{ key: "d", mod: true }] },
   { id: "block.delete", action: "block.delete", group: "Blocks", label: "Delete", keys: ["Delete"], combos: [{ key: "delete" }, { key: "backspace" }] },
+  { id: "block.copy", action: "block.copy", group: "Blocks", label: "Copy", keys: ["mod", "C"], combos: [{ key: "c", mod: true }] },
+  { id: "block.cut", action: "block.cut", group: "Blocks", label: "Cut", keys: ["mod", "X"], combos: [{ key: "x", mod: true }] },
+  { id: "block.paste", action: "block.paste", group: "Blocks", label: "Paste", keys: ["mod", "V"], combos: [{ key: "v", mod: true }] },
+  { id: "block.copyStyle", action: "block.copyStyle", group: "Blocks", label: "Copy style", keys: ["alt", "mod", "C"], combos: [{ code: "KeyC", mod: true, alt: true }] },
+  { id: "block.pasteStyle", action: "block.pasteStyle", group: "Blocks", label: "Paste style", keys: ["alt", "mod", "V"], combos: [{ code: "KeyV", mod: true, alt: true }] },
   { id: "block.moveUp", action: "block.moveUp", group: "Blocks", label: "Move up", keys: ["mod", "↑"], combos: [{ key: "arrowup", mod: true }] },
   { id: "block.moveDown", action: "block.moveDown", group: "Blocks", label: "Move down", keys: ["mod", "↓"], combos: [{ key: "arrowdown", mod: true }] },
   { id: "block.hide", action: "block.hide", group: "Blocks", label: "Hide on this size", keys: ["mod", "shift", "H"], combos: [{ key: "h", mod: true, shift: true }] },
@@ -76,25 +81,25 @@ type KeyLike = { key: string; code: string; metaKey: boolean; ctrlKey: boolean; 
 const fits = (c: Combo, e: KeyLike) => {
   const mod = e.metaKey || e.ctrlKey;
   if (!!c.mod !== mod) return false;
+  if (!!c.alt !== e.altKey) return false;
   if (c.shift !== "any" && !!c.shift !== e.shiftKey) return false;
   if (c.code) return e.code === c.code;
   return e.key.toLowerCase() === c.key;
 };
 
-/** The shortcut a key press means, if any. Alt combinations are left to the browser and the fields. */
+/** The shortcut a key press means, if any. Alt combinations are left to the browser and the fields, except the few listed with alt. */
 export function matchShortcut(e: KeyLike): Shortcut | null {
-  if (e.altKey) return null;
   return SHORTCUTS.find((s) => s.combos.some((c) => fits(c, e))) ?? null;
 }
 
 /** A stable name for a combo, to find clashes. */
-export const comboName = (c: Combo) => `${c.mod ? "mod+" : ""}${c.shift === true ? "shift+" : c.shift === "any" ? "anyshift+" : ""}${c.code ? `code:${c.code}` : `key:${c.key}`}`;
+export const comboName = (c: Combo) => `${c.mod ? "mod+" : ""}${c.alt ? "alt+" : ""}${c.shift === true ? "shift+" : c.shift === "any" ? "anyshift+" : ""}${c.code ? `code:${c.code}` : `key:${c.key}`}`;
 
 export const isMac = () => typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
-/** The keys as shown: ⌘ ⇧ on a Mac, Ctrl Shift elsewhere. */
+/** The keys as shown: ⌘ ⇧ ⌥ on a Mac, Ctrl Shift Alt elsewhere. */
 export function keyLabels(s: Shortcut, mac = isMac()): string[] {
-  return s.keys.map((k) => (k === "mod" ? (mac ? "⌘" : "Ctrl") : k === "shift" ? (mac ? "⇧" : "Shift") : k));
+  return s.keys.map((k) => (k === "mod" ? (mac ? "⌘" : "Ctrl") : k === "shift" ? (mac ? "⇧" : "Shift") : k === "alt" ? (mac ? "⌥" : "Alt") : k));
 }
 
 export const shortcutFor = (action: ActionId) => SHORTCUTS.find((s) => s.action === action) ?? null;

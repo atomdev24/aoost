@@ -2,6 +2,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import { components } from "../../components/registry";
 import { getState, useEditor } from "../store";
 import { attachCanvasDrops } from "../canvas/drops";
+import { attachContextMenu } from "../menu/attach";
 import { attachAnnotationDrag } from "../canvas/annotations";
 import { attachFlowResize } from "../canvas/flow-resize";
 import { attachRatioChip } from "../canvas/ratio";
@@ -50,6 +51,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
     const detachSide = attachSideDrop(doc);
     const detach = attachKeys(doc);
     const detachDrops = attachCanvasDrops(doc);
+    const detachMenu = attachContextMenu(doc);
     const detachMarks = attachAnnotationDrag(doc);
     const detachFlowResize = attachFlowResize(doc);
     const detachSectionResize = attachSectionResize(doc);
@@ -93,6 +95,7 @@ export function PuckFrame({ children, document: doc }: { children: ReactNode; do
       detachComments();
       detach();
       detachDrops();
+      detachMenu();
       detachMarks();
       detachFlowResize();
       detachRatio();
