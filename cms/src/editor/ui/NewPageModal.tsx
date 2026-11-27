@@ -6,24 +6,18 @@ import { openWriter } from "../writer/writer-open";
 import { addCampaignFromBrief, BRIEF_ASKS, BRIEF_PRODUCTS, briefText, type BriefAsk, type BriefProduct } from "../templates/campaign-brief";
 import { getAuthor, newId, send } from "../comments/store";
 import { DEMO } from "../demo";
-
-/** Thumbnails for the starter templates (same language as the mockup). */
-const THUMBS: Record<string, string> = {
-  blank: "none",
-  gallery: "linear-gradient(90deg, #3A3A40 0 30%, transparent 30% 35%, #3A3A40 35% 65%, transparent 65% 70%, #3A3A40 70%)",
-  diary:
-    "linear-gradient(180deg, #3A3A40 0 40%, transparent 40% 52%, #33333A 52% 60%, transparent 60% 70%, #33333A 70% 78%, transparent 78%)",
-  playlist:
-    "linear-gradient(180deg, #E2683A 0 26%, transparent 26% 38%, #3A3A40 38% 50%, transparent 50% 62%, #3A3A40 62% 74%, transparent 74%)",
-};
-const CUSTOM_THUMB = "linear-gradient(180deg, #3A3A40 0 22%, transparent 22% 34%, #33333A 34% 100%)";
+import { LEGACY_PAGE_TEMPLATES, STRUCTURES, structure } from "../../model/structures";
+import { siteTemplate } from "../templates/site-templates";
+import { WireThumb } from "./WireThumb";
 
 /** New page: name → automatic URL, a template, "show in navigation" and "place it". */
 export function NewPageModal({ onClose }: { onClose: () => void }) {
   const pages = useEditor((s) => s.site.pages);
-  const templates = useEditor((s) => s.site.templates).filter((t) => t.kind === "page");
+  // Saved page templates of the site's own; the old portfolio starters gave way to the layouts.
+  const templates = useEditor((s) => s.site.templates).filter((t) => t.kind === "page" && !LEGACY_PAGE_TEMPLATES.includes(t.id));
   const [name, setName] = useState("");
-  const [templateId, setTemplateId] = useState("blank");
+  /** "s:<layout id>" for a built-in layout, "t:<template id>" for a saved one. */
+  const [choice, setChoice] = useState("s:blank");
   const [showInNav, setShowInNav] = useState(true);
   const [kind, setKind] = useState<"page" | "campaign" | "post">("page");
   const blog = pages.find((p) => p.id === "blog" || p.slug === "/blog");
@@ -59,9 +53,12 @@ export function NewPageModal({ onClose }: { onClose: () => void }) {
     let made = "";
     update(
       (site) => {
+        const st = choice.startsWith("s:") ? structure(choice.slice(2)) : undefined;
+        // On an Aerobotics site (and the demo) the layouts that have an Aerobotics page use it.
+        const aeroT = st?.aero && aero ? siteTemplate(st.aero) : undefined;
         const result = createPage(site, {
           name,
-          templateId,
+          ...(st ? { sections: aeroT ? aeroT.sections() : st.sections(), structureId: st.id } : { templateId: choice.slice(2) }),
           showInNav: kind === "page" && showInNav,
           parentId: parentId || null,
           kind,
@@ -155,7 +152,7 @@ export function NewPageModal({ onClose }: { onClose: () => void }) {
             className="ed-input ed-input-lg"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={briefMode ? "e.g. Interpoma 2026" : "e.g. Sketchbook"}
+            placeholder={briefMode ? "e.g. Interpoma 2026" : "e.g. Spring launch"}
             autoFocus
           />
           <span className="ed-hint">URL: alexoostendurp.com{preview}</span>
@@ -268,9 +265,15 @@ export function NewPageModal({ onClose }: { onClose: () => void }) {
           <div className="ed-field">
             <span className="ed-field-label ed-field-label-lg">Start from</span>
             <div className="ed-templates">
+              {STRUCTURES.map((t) => (
+                <button key={t.id} type="button" aria-pressed={choice === `s:${t.id}`} title={t.hint} onClick={() => setChoice(`s:${t.id}`)}>
+                  <WireThumb kind={t.id} />
+                  <span>{t.name}</span>
+                </button>
+              ))}
               {templates.map((t) => (
-                <button key={t.id} type="button" aria-pressed={t.id === templateId} onClick={() => setTemplateId(t.id)}>
-                  <span className="ed-template-thumb" style={{ backgroundImage: THUMBS[t.id] ?? CUSTOM_THUMB }} />
+                <button key={t.id} type="button" aria-pressed={choice === `t:${t.id}`} title="One of your saved page templates" onClick={() => setChoice(`t:${t.id}`)}>
+                  <WireThumb kind="custom" />
                   <span>{t.name}</span>
                 </button>
               ))}

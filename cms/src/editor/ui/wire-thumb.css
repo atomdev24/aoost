@@ -1,0 +1,104 @@
+/* Line drawings of the starting layouts in New page (WireThumb.tsx). */
+.wt {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 86px;
+  padding: 8px;
+  border-radius: 7px;
+  background: #f6f6f7;
+  overflow: hidden;
+}
+:where(.wt) i {
+  display: block;
+  box-sizing: border-box;
+}
+.wt-nav {
+  flex: none;
+  height: 5px;
+  border-radius: 3px;
+  background: #d2d2d7;
+}
+.wt-ln {
+  flex: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #c6c6cc;
+}
+.wt-ln.is-dark {
+  height: 5px;
+  background: #8e8e96;
+}
+.wt-ln.is-accent {
+  background: #6aa7f0;
+}
+.wt-ln.is-center {
+  margin: 3px auto 0;
+}
+.wt-btn {
+  flex: none;
+  width: 24px;
+  height: 6px;
+  margin-top: 1px;
+  border-radius: 3px;
+  background: #0a84ff;
+}
+.wt-split {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+}
+.wt-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+}
+.wt-pic {
+  flex: 1;
+  border-radius: 4px;
+  background: #dfdfe3;
+}
+.wt-pic.is-cover {
+  flex: 0 0 34%;
+}
+.wt-row {
+  display: flex;
+  flex: 0 0 18%;
+  gap: 4px;
+}
+.wt-row.is-tall {
+  flex: 1;
+}
+.wt-row i {
+  flex: 1;
+  border: 1px solid #d2d2d7;
+  border-radius: 3px;
+}
+.wt-row i.is-hl {
+  border-color: #0a84ff;
+}
+.wt-stats {
+  display: flex;
+  gap: 5px;
+  margin-top: 2px;
+}
+.wt-stats i {
+  flex: 1;
+  height: 9px;
+  border-left: 2px solid #bcbcc3;
+}
+.wt-photos {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+}
+.wt-photos i {
+  flex: 1;
+  border-radius: 3px;
+  background: #dfdfe3;
+}
