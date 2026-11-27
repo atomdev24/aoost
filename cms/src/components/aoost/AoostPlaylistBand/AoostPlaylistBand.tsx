@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { imageSources } from "../../../render/media";
 import generated from "../../../generated/playlists.json";
 import { ResponsiveFrameFit } from "../../../schema";
 import { defineComponent } from "../../types";
@@ -131,10 +132,10 @@ export const AoostPlaylistBand = defineComponent<AoostPlaylistBandContent>({
                 {list.map((p, i) => (
                   <figure key={i} className="pl-rec" data-i={i} hidden={i !== 0}>
                     <div className="pl-sleeve" style={p.color ? { background: p.color } : undefined}>
-                      {p.cover ? <img src={p.cover} alt="" decoding="async" /> : null}
+                      {p.cover ? <img {...imageSources(p.cover)} sizes="(max-width: 767px) 80vw, 420px" alt="" loading="lazy" decoding="async" /> : null}
                     </div>
                     <div className="pl-disc" aria-hidden="true">
-                      <span className="pl-lbl">{p.cover ? <img src={p.cover} alt="" decoding="async" /> : null}</span>
+                      <span className="pl-lbl">{p.cover ? <img src={imageSources(p.cover).src.replace(/\.960\.webp$/, ".480.webp")} alt="" loading="lazy" decoding="async" /> : null}</span>
                     </div>
                   </figure>
                 ))}

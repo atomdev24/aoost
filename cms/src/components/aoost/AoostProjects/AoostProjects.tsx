@@ -1,4 +1,4 @@
-import { imageSources } from "../../../render/media";
+import { imageSources, phoneVariant } from "../../../render/media";
 import { useEffect, useRef, type CSSProperties } from "react";
 import { clearLayout, pieceTransform, placeOf } from "../runtime/table.js";
 import { z } from "zod";
@@ -173,6 +173,8 @@ const extraCss = `
 /* The whole section, edge to edge: out to the screen's sides and over the band's padding (the band clips it). */
 .ao .board-shadow{position:absolute;z-index:70;pointer-events:none;overflow:hidden;container-type:size;left:calc(50% - 50vw);width:100vw;top:calc(-1 * var(--s8));bottom:calc(-1 * var(--s8));-webkit-mask-image:linear-gradient(#000 calc(100% - 140px),transparent);mask-image:linear-gradient(#000 calc(100% - 140px),transparent)}
 .ao .board-shadow>i{position:absolute;inset:0;background-repeat:no-repeat;background-size:max(calc(var(--sh-s,110) * 1cqw),100cqh);background-position:var(--sh-x,50%) var(--sh-y,40%)}
+.ao .board-shadow .sh-shade,.ao .board-shadow .sh-sun{background-image:var(--sh-img)}
+@media (max-width:767px){.ao .board-shadow .sh-shade,.ao .board-shadow .sh-sun{background-image:var(--sh-img-s,var(--sh-img))}}
 .ao .board-shadow .sh-shade{mix-blend-mode:multiply;opacity:var(--sh-k,.7)}
 .ao .board-shadow .sh-sun{mix-blend-mode:soft-light;opacity:var(--sh-w,.6)}
 .ao .board-shadow.sh-continued{-webkit-mask-image:none;mask-image:none}
@@ -194,8 +196,8 @@ function BoardShadow({ shadow }: { shadow?: z.infer<typeof AoostShadow> }) {
   const url = (u: string) => `url('${u.replace(/'/g, "%27")}')`;
   return (
     <div className="board-shadow" aria-hidden="true" data-shadow={shadow.image ? "custom" : (shadow.style ?? "window")} style={style}>
-      <i className="sh-shade" style={{ backgroundImage: url(shade) }} />
-      {sun ? <i className="sh-sun" style={{ backgroundImage: url(sun) }} /> : null}
+      <i className="sh-shade" style={{ "--sh-img": url(shade), "--sh-img-s": url(phoneVariant(shade)) } as CSSProperties} />
+      {sun ? <i className="sh-sun" style={{ "--sh-img": url(sun), "--sh-img-s": url(phoneVariant(sun)) } as CSSProperties} /> : null}
     </div>
   );
 }

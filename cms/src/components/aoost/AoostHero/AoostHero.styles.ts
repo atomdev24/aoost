@@ -21,5 +21,5 @@ export const css = `
 .ao .hr-top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;gap:var(--s4);padding:16px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));background:linear-gradient(rgba(20,21,22,.5),rgba(20,21,22,0));pointer-events:none}
 .ao .hr-top .label{color:#fff}
 .ao .hr-bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.22)}
-.ao .hr-bar i{display:block;height:100%;width:0;background:#fff}
+.ao .hr-bar i{display:block;height:100%;width:100%;background:#fff;transform:scaleX(0);transform-origin:0 50%;will-change:transform}
 `;
