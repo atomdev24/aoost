@@ -17,6 +17,7 @@ import { countOverrides } from "./overrides";
 import { frameRects, getBoard, openPage, panBy, resetFramePositions, setFrameHidden, setFramePosition, setHeight, setInteracting, setSize, toggleFrameHidden, useBoard, visibleFrameRects } from "./store";
 import { FRAME_GAP, isVisible, shortLabels, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
+import { newVariant } from "../variants/actions";
 import { ZoomBar } from "./ZoomBar";
 import { RefLayer, RefNotice } from "./RefLayer";
 import { OverflowLayer } from "./OverflowLayer";
@@ -305,6 +306,18 @@ export function Board() {
         </div>
       ))}
 
+      {/* Next to the frame names: start a variant of this page from the canvas (EDITOR-VARIANTS.md). */}
+      <div className="bd-label-wrap bd-variant-wrap" style={screen(addable.length && !simple ? slot.x : Math.max(...frames.map((f) => f.x + f.w)) + FRAME_GAP, Math.min(...frames.map((f) => f.y)))}>
+        <button
+          type="button"
+          className="bd-label bd-label-variant"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={() => newVariant()}
+          title="A copy of this page to try ideas on. The live page isn't touched; propose it when it's ready."
+        >
+          + New variant
+        </button>
+      </div>
       <VersionRowLabels frames={frames} />
 
       {hiddenBps.length ? (
@@ -378,6 +391,11 @@ function FrameMenu({ bp, canHide, open, setOpen }: { bp: Breakpoint; canHide: bo
           <li role="none">
             <button type="button" role="menuitem" onClick={pick(resetFramePositions)}>
               Reset positions
+            </button>
+          </li>
+          <li role="none">
+            <button type="button" role="menuitem" onClick={pick(() => newVariant())}>
+              New variant of this page
             </button>
           </li>
         </ul>
