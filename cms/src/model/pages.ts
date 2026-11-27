@@ -1,5 +1,5 @@
 import { createNode, createSection } from "./page-ops";
-import { newId, type NavItem, type Page, type Redirect, type Site } from "../schema";
+import { newId, type NavItem, type Page, type Redirect, type Section, type Site } from "../schema";
 import { instantiate } from "./library";
 
 /**
@@ -95,6 +95,10 @@ export type NewPage = {
   unpublishAt?: string;
   /** Blog posts: the post date (YYYY-MM-DD). */
   date?: string;
+  /** Start from these sections (a built-in layout, model/structures.ts) instead of a saved template. */
+  sections?: Section[];
+  /** The layout's id, kept on the page as its template. */
+  structureId?: string;
 };
 
 export function createPage(site: Site, input: NewPage): { site: Site; pageId: string } {
@@ -106,7 +110,7 @@ export function createPage(site: Site, input: NewPage): { site: Site; pageId: st
   const kind = input.kind ?? "page";
   const sections = kind === "post"
     ? [createSection("flow", { children: [createNode("PostBody")] })]
-    : instantiate(template?.sections ?? []).map((s) => ({
+    : (input.sections ?? instantiate(template?.sections ?? [])).map((s) => ({
     ...s,
     // A fresh page's first heading starts as the page name.
     children: s.children.map((n) => (n.type === "Text" && (n.content.tag === "h1" || n.content.styleId === "h1") ? { ...n, content: { ...n.content, text: title } } : n)),
@@ -117,7 +121,7 @@ export function createPage(site: Site, input: NewPage): { site: Site; pageId: st
     slug: uniqueSlug(site, input.slug ?? title, parentId),
     parentId,
     status: "draft",
-    template: template?.id ?? "blank",
+    template: input.structureId ?? template?.id ?? "blank",
     seo: {},
     isHome: false,
     showInNav: false,
