@@ -23,7 +23,7 @@
 }
 .vr-chip.is-archived {
   background: rgba(255, 255, 255, 0.06);
-  color: #8e8e93;
+  color: var(--ed-sub);
 }
 
 /* ----------------------------------------------------------- rows on the board */
@@ -72,7 +72,7 @@
   border: 0;
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.06);
-  color: #a1a1a6;
+  color: var(--ed-sub);
   font: 600 12px var(--ed-font);
   cursor: pointer;
 }
@@ -432,7 +432,7 @@
 }
 .vp-text {
   margin: 0;
-  color: #a1a1a6;
+  color: var(--ed-sub);
 }
 .vp-text a {
   color: #fff;
@@ -478,7 +478,7 @@
   padding: 12px 14px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
-  color: #a1a1a6;
+  color: var(--ed-sub);
 }
 .vp-kept b {
   color: var(--ed-text);
@@ -506,7 +506,7 @@
   flex-direction: column;
 }
 .vp-then small {
-  color: #a1a1a6;
+  color: var(--ed-sub);
   font-size: 12px;
 }
 .vp-then .is-later {

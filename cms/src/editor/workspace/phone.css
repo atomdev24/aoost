@@ -288,7 +288,7 @@
   cursor: pointer;
 }
 .ed-adjust-chip[aria-pressed="true"] {
-  background: #1c1c1e;
+  background: var(--ed-surface);
   color: #ffd60a;
 }
 .ed-adjust-tag:has(.ed-adjust-chip) {
