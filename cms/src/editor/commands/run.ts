@@ -3,6 +3,7 @@ import { openDesigns } from "../templates/designs-open";
 import { propose } from "../variants/actions";
 import { resetTips } from "../tips/tips";
 import { nodeToBoard } from "../board/ref-page";
+import { openCollections } from "../collections/collections-open";
 import { openProblemLog, openReport } from "../problems";
 import { locate } from "../../model/page-ops";
 import type { Breakpoint } from "../../schema";
@@ -135,6 +136,7 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
   "panel.theme": () => togglePanel("theme"),
   "panel.fonts": () => togglePanel("fonts"),
   "panel.global": () => togglePanel("global"),
+  "panel.collections": () => openCollections(),
   "insert.quick": () => !isAdjusting() && (openQuickInsert(), true),
   "history.undo": undo,
   "history.redo": redo,

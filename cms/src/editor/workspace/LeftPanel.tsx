@@ -9,7 +9,8 @@ import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage, useEditor } from "../store";
 import { LayersPanel } from "../ui/LayersPanel";
 import { anchorOf, Popover, type Anchor } from "../ui/Popover";
-import { CommentsPanel, FontsPanel, HistoryPanel, InsertPanel, LibraryPanel, MediaLibrary, NavPanel, PagesPanel, TemplatesPanel, ThemePanel } from "../parts";
+import { CollectionsView, CommentsPanel, FontsPanel, HistoryPanel, InsertPanel, LibraryPanel, MediaLibrary, NavPanel, PagesPanel, TemplatesPanel, ThemePanel } from "../parts";
+import { openCollections } from "../collections/collections-open";
 import { DEMO } from "../demo";
 import type { Part } from "../lazy";
 import {
@@ -36,6 +37,7 @@ const PANEL_TITLES: Record<PanelId, string> = {
   fonts: "Fonts",
   global: "Shared blocks",
   templates: "Templates",
+  collections: "Collections",
 };
 
 const KINDS: { kind: Section["kind"]; label: string; hint: string }[] = [
@@ -147,6 +149,13 @@ const RailIcon = ({ id }: { id: PanelId }) => {
           <path d="M2.2 2.5v2.6h2.6M8 5v3.2l2.2 1.4" />
         </svg>
       );
+    case "collections":
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
+          <path d="M2 6.5h12M2 10h12M6.5 6.5v7" />
+        </svg>
+      );
     case "templates":
       return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true">
@@ -207,10 +216,11 @@ const PANEL_PARTS: Partial<Record<PanelId, Part<never>>> = {
 // The demo gets ready-made page designs to try (Templates), right under Insert.
 // Direction A (Nov 2026): the everyday panels with words under them; what the whole site shares
 // sits under one Site button.
-const TOP_PANELS: PanelId[] = DEMO ? ["insert", "templates", "layers", "pages", "media", "comments"] : ["insert", "layers", "pages", "media", "comments"];
+// Collections (a full-screen table of entries) sits with Pages: both are the site's content.
+const TOP_PANELS: PanelId[] = DEMO ? ["insert", "templates", "layers", "pages", "collections", "media", "comments"] : ["insert", "layers", "pages", "collections", "media", "comments"];
 const SITE_PANELS: PanelId[] = ["nav", "theme", "fonts", "global", "history"];
 /** Short words under the rail's icons. */
-const RAIL_LABEL: Partial<Record<PanelId, string>> = { insert: "Add", templates: "Designs", global: "Shared" };
+const RAIL_LABEL: Partial<Record<PanelId, string>> = { insert: "Add", templates: "Designs", global: "Shared", collections: "Content" };
 const SITE_HINT: Partial<Record<PanelId, string>> = {
   nav: "The menu bar on every page",
   theme: "Colours and text styles",
@@ -354,8 +364,9 @@ export function LeftPanel() {
         aria-pressed={isSelected}
         title={DEMO && id === "history" ? `${title} (off in the demo)` : title}
         data-demo-off={DEMO && id === "history" ? "" : undefined}
-        onClick={() => togglePanel(id)}
-        onPointerEnter={() => void PANEL_PARTS[id]?.prefetch()}
+        // Collections is a full-screen view of its own, not a flyout.
+        onClick={() => (id === "collections" ? openCollections() : togglePanel(id))}
+        onPointerEnter={() => void (id === "collections" ? CollectionsView.prefetch() : PANEL_PARTS[id]?.prefetch())}
       >
         <RailIcon id={id} />
         {id === "pages" && waiting ? (

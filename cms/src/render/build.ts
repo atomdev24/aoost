@@ -4,6 +4,7 @@ import { renderNotFound } from "./not-found";
 import { redirectsFile } from "./redirects";
 import { expiries, isCampaign } from "../model/page-kinds";
 import { applyTranslation, translatable } from "../model/i18n";
+import { cmsPages } from "../model/cms";
 
 export type SearchEntry = { title: string; url: string; kind: string; text: string };
 
@@ -12,15 +13,15 @@ export function outputPath(slug: string): string {
   return slug === "/" ? "index.html" : `${slug.slice(1)}.html`;
 }
 
-/** Pages that get built: published and unlisted. Drafts never leave the editor. */
-export const builtPages = (site: Site): Page[] => site.pages.filter((p) => p.status !== "draft" && p.variantOf === undefined);
+/** Pages that get built: published and unlisted, and the live items of collections. Drafts (and collection page designs) never leave the editor. */
+export const builtPages = (site: Site): Page[] => [...site.pages.filter((p) => p.status !== "draft" && p.variantOf === undefined && !p.collectionId), ...cmsPages(site, true)];
 
 /** Search covers published pages, diary entries and artwork titles (SPEC §6). */
 export function searchIndex(site: Site): SearchEntry[] {
   const out: SearchEntry[] = [];
   const diaryPage = site.pages.find((p) => p.status === "published" && p.sections.some((s) => s.children.some((n) => n.type === "DiaryList")));
   // Campaign pages are reached by link only: never in search.
-  for (const p of site.pages.filter((x) => x.status === "published" && !isCampaign(x))) {
+  for (const p of [...site.pages, ...cmsPages(site, true)].filter((x) => x.status === "published" && !isCampaign(x) && !x.collectionId && !x.variantOf)) {
     const texts: string[] = [];
     for (const s of p.sections) {
       for (const n of s.children) {
@@ -62,7 +63,7 @@ export function buildSite(site: Site, opts: RenderOptions = {}): Record<string, 
   files["robots.txt"] = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\nDisallow: /preview\nDisallow: /staging\n${opts.siteUrl ? `Sitemap: ${opts.siteUrl.replace(/\/$/, "")}/sitemap.xml\n` : ""}`;
   if (opts.siteUrl) {
     const base = opts.siteUrl.replace(/\/$/, "");
-    const urls = site.pages
+    const urls = builtPages(site)
       .filter((p) => p.status === "published" && !isCampaign(p))
       .flatMap((p) => [p.slug, ...(translatable(p) ? Object.entries(p.translations ?? {}).filter(([, t]) => t.status === "published").map(([lang]) => applyTranslation(p, lang).slug) : [])])
       .map((slug) => `<url><loc>${base}${slug === "/" ? "/" : slug}</loc></url>`);

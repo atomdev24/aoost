@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { filesToSite, validateSite, type ContentFiles, type Site } from "./index";
 
@@ -6,6 +6,7 @@ import { filesToSite, validateSite, type ContentFiles, type Site } from "./index
 export function readContentFiles(repoRoot: string): ContentFiles {
   const files: ContentFiles = {};
   for (const name of ["content/site.json", "content/collections.json"]) files[name] = readFileSync(resolve(repoRoot, name), "utf8");
+  if (existsSync(resolve(repoRoot, "content/cms.json"))) files["content/cms.json"] = readFileSync(resolve(repoRoot, "content/cms.json"), "utf8");
   for (const f of readdirSync(resolve(repoRoot, "content/pages"))) {
     if (f.endsWith(".json")) files[`content/pages/${f}`] = readFileSync(resolve(repoRoot, "content/pages", f), "utf8");
   }

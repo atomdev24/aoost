@@ -4,6 +4,7 @@ import { Site, type Page } from "./content";
  * How a Site maps to files under content/ (the git-versioned source of truth):
  *   content/site.json          settings, theme, nav, globals, templates, redirects, page order
  *   content/collections.json   diary entries and playlists
+ *   content/cms.json           collections managed in the table view (absent = none)
  *   content/pages/<id>.json    one file per page
  * One file per page keeps git diffs and history readable.
  */
@@ -12,11 +13,13 @@ export type ContentFiles = Record<string, string>;
 const json = (v: unknown) => JSON.stringify(v, null, 2) + "\n";
 
 export function siteToFiles(site: Site): ContentFiles {
-  const { pages, collections, ...rest } = site;
+  const { pages, collections, cms, ...rest } = site;
   const files: ContentFiles = {
     "content/site.json": json({ ...rest, pageOrder: pages.map((p) => p.id) }),
     "content/collections.json": json(collections),
   };
+  // Only sites that use collections get the file, so nothing changes for the others.
+  if (cms?.length) files["content/cms.json"] = json(cms);
   for (const p of pages) files[`content/pages/${p.id}.json`] = json(p);
   return files;
 }
@@ -42,5 +45,6 @@ export function filesToSite(files: ContentFiles): unknown {
     }
   }
   ordered.push(...pages.values());
-  return { ...rest, collections: read("content/collections.json"), pages: ordered };
+  const cms = files["content/cms.json"] === undefined ? [] : JSON.parse(files["content/cms.json"]);
+  return { ...rest, collections: read("content/collections.json"), cms, pages: ordered };
 }

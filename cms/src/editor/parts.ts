@@ -12,6 +12,9 @@ export const LibraryPanel = part("Global panel", () => import("./ui/LibraryPanel
 export const PublishSheet = part("publish sheet", () => import("./workspace/PublishSheet").then((m) => m.PublishSheet));
 export const TemplatesPanel = part("Templates panel", () => import("./templates/TemplatesPanel").then((m) => m.TemplatesPanel));
 export const DesignsBoard = part("designs side by side", () => import("./templates/DesignsBoard").then((m) => m.DesignsBoard));
+export const CollectionsView = part("collections", () => import("./collections/CollectionsView").then((m) => m.CollectionsView));
+export const ConnectPanel = part("collection connections", () => import("./collections/ConnectPanel").then((m) => m.ConnectPanel));
+export const DesignBand = part("page design notice", () => import("./collections/DesignBand").then((m) => m.DesignBand));
 export const VersionRowFrames = part("variant rows", () => import("./variants/VersionRows").then((m) => m.VersionRowFrames));
 export const VersionRowLabels = part("variant row labels", () => import("./variants/VersionRows").then((m) => m.VersionRowLabels));
 export const VersionsButton = part("versions button", () => import("./variants/VersionsButton").then((m) => m.VersionsButton));

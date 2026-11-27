@@ -1,3 +1,4 @@
+import { cmsPages } from "./cms";
 import type { Node, Page, Site } from "../schema";
 
 export type Translation = NonNullable<Page["translations"]>[string];
@@ -125,8 +126,12 @@ export function languageCopy(site: Site, pageId: string, lang: string): { site: 
  */
 export function pageAt(site: Site, slug: string, live: boolean): Page | undefined {
   // Variants are drafts: never live, but the draft preview shows them (Compare, All designs, Preview).
-  const plain = site.pages.find((p) => p.slug === slug && (live ? p.status !== "draft" && p.variantOf === undefined : true));
+  // A collection's page design is never live either.
+  const plain = site.pages.find((p) => p.slug === slug && (live ? p.status !== "draft" && p.variantOf === undefined && !p.collectionId : true));
   if (plain) return plain;
+  // A collection item's page (live items only, unless signed in).
+  const item = cmsPages(site, live).find((p) => p.slug === slug);
+  if (item) return item;
   for (const p of site.pages) {
     if (!p.translations || p.variantOf || (live && p.status === "draft")) continue;
     for (const [lang, t] of Object.entries(p.translations)) if (translatedSlug(p, lang) === slug && (!live || t.status === "published")) return applyTranslation(p, lang);

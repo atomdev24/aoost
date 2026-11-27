@@ -22,7 +22,7 @@ describe("campaign pages from a brief", () => {
     expect(s.some((x) => x.children.some((n) => n.type === "HubSpotForm"))).toBe(false);
   });
   it("adds a valid campaign page with an end date, a description and a Spanish draft", () => {
-    const { site, pageId } = addCampaignFromBrief(demoSite, brief);
+    const { site, pageId } = addCampaignFromBrief(demoSite(), brief);
     expect(validateSite(site).ok).toBe(true);
     const page = site.pages.find((p) => p.id === pageId)!;
     expect(page.kind).toBe("campaign");

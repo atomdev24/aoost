@@ -81,3 +81,25 @@ export function Tag({ label, value, swatch, style }: { label: string; value: str
     </span>
   );
 }
+
+/**
+ * Entries of a collection (site.cms) for a list block: live entries in table order, each with
+ * its page address and a reader for its fields. Empty when the collection is gone.
+ */
+export function collectionEntries(ctx: RenderCtx, collectionId: string | undefined, limit?: number) {
+  const col = collectionId ? ctx.site.cms?.find((c) => c.id === collectionId) : undefined;
+  if (!col) return null;
+  const items = col.items.filter((i) => i.status === "live" || ctx.editing).slice(0, limit && limit > 0 ? limit : undefined);
+  const firstOf = (type: string) => col.fields.find((f) => f.type === type)?.id;
+  const value = (item: (typeof items)[number], fieldId: string | undefined) => {
+    const v = fieldId ? item.values[fieldId] : undefined;
+    return typeof v === "string" ? v : v === undefined ? "" : String(v);
+  };
+  return {
+    col,
+    entries: items.map((item) => ({ item, href: `${ctx.prefix ?? ""}${col.base}/${item.slug}`, value: (fieldId: string | undefined) => value(item, fieldId) })),
+    /** The field to use for a role: the collection's own choice, then a field with that id, then the first of that type. */
+    field: (role: "image" | "summary" | string, type?: string) =>
+      role === "image" ? (col.imageField ?? firstOf("image")) : role === "summary" ? (col.summaryField ?? firstOf("longtext") ?? firstOf("text")) : (col.fields.find((f) => f.id === role)?.id ?? (type ? firstOf(type) : undefined)),
+  };
+}

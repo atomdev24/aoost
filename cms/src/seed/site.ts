@@ -118,6 +118,7 @@ export const seedSite: Site = {
       { id: "pl-htr", title: "H | T | R", spotify: "6KYCNr0X6Zt189pYxHMx1j", cover: art("cover-disc3.jpg") },
     ],
   },
+  cms: [],
   pages: [
     aoostHome,
     galleryPage("work", "Work", "/work", null, "Two bodies of work: things made on a screen, and things you can drop on your foot.", [

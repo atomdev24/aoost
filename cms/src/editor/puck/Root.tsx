@@ -1,5 +1,6 @@
 import { HoverLabel } from "../canvas/HoverLabel";
 import { OverrideMarks } from "../canvas/OverrideMarks";
+import { BoundMarks } from "../collections/BoundMarks";
 import { ChangedMarks } from "../variants/ChangedMarks";
 import { MatBands } from "../canvas/MatBands";
 import { AgentMarks } from "../agent/AgentMarks";
@@ -69,6 +70,7 @@ export function Root({ children }: { children: ReactNode }) {
       <CanvasController />
       <HoverLabel />
       <OverrideMarks />
+      <BoundMarks />
       <ChangedMarks />
       <MatBands />
       <AgentMarks />

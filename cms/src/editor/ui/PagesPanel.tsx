@@ -10,6 +10,7 @@ import { setPage, update, useEditor } from "../store";
 import { NewPageModal } from "./NewPageModal";
 import { openWriter } from "../writer/writer-open";
 import { PageSettings } from "./PageSettings";
+import { openCollections } from "../collections/collections-open";
 
 const HomeIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
@@ -86,6 +87,7 @@ function Folder({ name, count, empty, children }: { name: string; count: number;
  */
 export function PagesPanel() {
   const pages = useEditor((s) => s.site.pages);
+  const cms = useEditor((s) => s.site.cms);
   const pageId = useEditor((s) => s.pageId);
   const [creating, setCreating] = useState(false);
   const [settingsFor, setSettingsFor] = useState<string | null>(takePageSettings);
@@ -108,18 +110,22 @@ export function PagesPanel() {
   const waiting = pages.filter((v) => v.variantOf && v.variantStatus === "proposed").length;
   const childrenOf = (p: P) => pages.filter((c) => c.parentId === p.id && !c.variantOf && (!c.kind || c.kind === "page"));
   // Campaign pages and blog posts live in their own folders below the site's pages.
-  const plain = (p: P) => !p.kind || p.kind === "page";
+  const plain = (p: P) => (!p.kind || p.kind === "page") && !p.collectionId;
   const review = (p: P) => !toReview || proposedOf(p).length > 0;
   const tops = toReview
     ? pages.filter((p) => !p.variantOf && hit(p) && review(p))
     : pages.filter((p) => !p.parentId && !p.variantOf && plain(p)).filter((p) => hit(p) || childrenOf(p).some(hit));
   const campaigns = toReview ? [] : pages.filter((p) => p.kind === "campaign" && !p.variantOf && hit(p));
+  // Collection page designs (the page every entry of a collection is made from) have their own folder.
+  const designs = toReview ? [] : pages.filter((p) => p.collectionId && !p.variantOf && hit(p));
   const posts = (toReview ? [] : pages).filter((p) => p.kind === "post" && !p.variantOf && hit(p)).sort((a, b) => (b.post?.date ?? "").localeCompare(a.post?.date ?? ""));
   const today = new Date().toISOString().slice(0, 10);
   const count = pages.filter((p) => !p.variantOf).length;
 
   const badge = (p: P) =>
-    p.kind === "campaign" && p.unpublishAt && today > p.unpublishAt ? (
+    p.collectionId ? (
+      <span className="ed-pbadge is-draft" title="The page design of a collection: never published itself; each live entry is.">Design</span>
+    ) : p.kind === "campaign" && p.unpublishAt && today > p.unpublishAt ? (
       <span className="ed-pbadge is-ended" title={`Ended after ${p.unpublishAt}`}>Ended</span>
     ) : p.status === "published" ? <span className="ed-pbadge is-live">Live</span> : <span className="ed-pbadge is-draft">{p.status === "draft" ? "Draft" : "Unlisted"}</span>;
 
@@ -241,7 +247,7 @@ export function PagesPanel() {
             </li>
           );
         })}
-        {!tops.length && !campaigns.length && !posts.length ? <li className="ed-empty">{toReview ? "Nothing waiting for review. Variants proposed to the team show here." : `No pages match “${query}”.`}</li> : null}
+        {!tops.length && !campaigns.length && !posts.length && !designs.length ? <li className="ed-empty">{toReview ? "Nothing waiting for review. Variants proposed to the team show here." : `No pages match “${query}”.`}</li> : null}
       </ul>
       <Folder name="Campaigns" count={campaigns.length} empty="Campaign pages for events and emails: New page → Campaign page.">
         {campaigns.map((c) => (
@@ -250,6 +256,21 @@ export function PagesPanel() {
             {c.unpublishAt ? <span className="ed-pfolder-note">{today > c.unpublishAt ? "Ended" : "Ends"} after {c.unpublishAt}</span> : null}
           </li>
         ))}
+      </Folder>
+      <Folder name="Collections" count={designs.length} empty="Page designs of collections (success stories, events…): rail › Collections.">
+        {designs.map((c) => {
+          const col = cms.find((x) => x.id === c.collectionId);
+          return (
+            <li key={c.id}>
+              {row(c, true)}
+              {col ? (
+                <button type="button" className="ed-pfolder-note ed-link" onClick={() => openCollections(col.id, null)}>
+                  {col.name}: {col.items.length} {col.items.length === 1 ? "entry" : "entries"}, open the table
+                </button>
+              ) : null}
+            </li>
+          );
+        })}
       </Folder>
       <Folder name="Blog" count={posts.length} empty="Blog posts: New page → Blog post.">
         {posts.map((c) => (

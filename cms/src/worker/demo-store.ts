@@ -12,7 +12,7 @@ import { DraftStore } from "./draft-store";
 export class DemoStore extends DraftStore {
   /** "Live" for the demo is the wireframe site (or whatever was last pretend-published). */
   protected override async built(): Promise<ContentFiles> {
-    return siteToFiles(demoSite);
+    return siteToFiles(demoSite());
   }
 
   override async apply(opsJson: string, origin: string, summary?: string, changedNodeIds?: string[], by?: string) {

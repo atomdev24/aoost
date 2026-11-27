@@ -42,6 +42,7 @@ export const ACTION_IDS = [
   "panel.theme",
   "panel.fonts",
   "panel.global",
+  "panel.collections",
   "insert.quick",
   "history.undo",
   "history.redo",
@@ -119,6 +120,7 @@ export const ACTIONS: ActionMeta[] = [
   { id: "panel.theme", title: "Theme", group: "Panels", keywords: "panel colours colors" },
   { id: "panel.fonts", title: "Fonts", group: "Panels", keywords: "panel type typography" },
   { id: "panel.global", title: "Global components", group: "Panels", keywords: "panel shared footer" },
+  { id: "panel.collections", title: "Collections", group: "Panels", keywords: "cms table entries items stories events database list" },
   { id: "insert.quick", title: "Quick insert", group: "Panels", keywords: "add block", common: true },
 
   { id: "history.undo", title: "Undo", group: "History and publishing" },

@@ -35,6 +35,8 @@ export interface Node {
   fit?: number;
   /** In a section with column stacks: which column (0-based) the block is stacked in. */
   col?: number;
+  /** On a collection's page design: content settings filled from the item's fields (content key → field id, or "title"). */
+  bind?: Record<string, string>;
 }
 
 export const Node: z.ZodType<Node> = z.object({
@@ -48,6 +50,7 @@ export const Node: z.ZodType<Node> = z.object({
   effects: ScrollEffects.optional(),
   fit: z.number().min(0.5).max(1).optional(),
   col: z.number().int().min(0).max(3).optional(),
+  bind: z.record(z.string(), z.string()).optional(),
 });
 
 // ------------------------------------------------------------- sections
@@ -147,6 +150,8 @@ export const Page = z.object({
    * kept out of the nav, search and sitemap, and taken down on `unpublishAt`) or a blog post.
    */
   kind: z.enum(["page", "campaign", "post"]).optional(),
+  /** The page design of a collection (site.cms): never built itself; each item of the collection is built from it. */
+  collectionId: Id.optional(),
   /** Campaign pages: the day (YYYY-MM-DD) after which the live page answers "gone". */
   unpublishAt: z.string().date().optional(),
   /** Blog posts: the date shown and sorted by, a cover picture and a short summary for lists. */
@@ -357,6 +362,58 @@ export type Playlist = z.infer<typeof Playlist>;
 
 export const Collections = z.object({ diary: z.array(DiaryEntry), playlists: z.array(Playlist) });
 
+// ----------------------------------------------------------- cms collections
+
+/** What a collection field holds. */
+export const CmsFieldType = z.enum(["text", "longtext", "image", "link", "date", "toggle", "choice", "number"]);
+export type CmsFieldType = z.infer<typeof CmsFieldType>;
+
+export const CmsField = z.object({
+  id: Id,
+  name: z.string().min(1),
+  type: CmsFieldType,
+  /** Choice fields: the options. */
+  options: z.array(z.string()).optional(),
+  /** A hint shown under the field in the form. */
+  help: z.string().optional(),
+});
+export type CmsField = z.infer<typeof CmsField>;
+
+export const CmsValue = z.union([z.string(), z.number(), z.boolean()]);
+export type CmsValue = z.infer<typeof CmsValue>;
+
+/** An item slug: lowercase words joined by hyphens ("ac-foods"). */
+export const CmsSlug = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "use lowercase letters, digits and hyphens");
+
+export const CmsItem = z.object({
+  id: Id,
+  title: z.string(),
+  slug: CmsSlug,
+  status: z.enum(["live", "draft"]),
+  values: z.record(z.string(), CmsValue),
+  updatedAt: z.string().optional(),
+  updatedBy: z.string().optional(),
+});
+export type CmsItem = z.infer<typeof CmsItem>;
+
+export const CmsCollection = z.object({
+  id: Id,
+  /** Plural, as listed: "Success stories". */
+  name: z.string().min(1),
+  /** One entry: "Story". */
+  itemName: z.string().min(1),
+  /** Where the items live: "/success-stories" (one segment); an item is at /success-stories/<slug>. */
+  base: z.string().regex(/^\/[a-z0-9]+(-[a-z0-9]+)*$/, "one segment, like /success-stories"),
+  fields: z.array(CmsField),
+  items: z.array(CmsItem),
+  /** The page design every item is built from (a page with collectionId set to this collection). */
+  pageId: Id.optional(),
+  /** Fields that give an item page its share text and share picture (optional). */
+  summaryField: Id.optional(),
+  imageField: Id.optional(),
+});
+export type CmsCollection = z.infer<typeof CmsCollection>;
+
 export const Site = z.object({
   settings: SiteSettings,
   theme: Theme,
@@ -364,6 +421,8 @@ export const Site = z.object({
   globals: z.array(GlobalComponent),
   templates: z.array(Template),
   collections: Collections,
+  /** Collections managed in the table view (content/cms.json). */
+  cms: z.array(CmsCollection).default([]),
   pages: z.array(Page),
   redirects: z.array(Redirect),
 });

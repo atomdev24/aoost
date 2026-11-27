@@ -2,6 +2,7 @@ import type { Page, Site, Theme } from "../schema";
 import { image, node, section, text } from "../seed/build";
 import { page } from "../seed/site";
 import { starterTemplates } from "../seed/templates";
+import { addExample } from "../editor/collections/examples";
 
 /**
  * The demo editor's site (/demo/): a neutral wireframe, so the editor can be shown and talked
@@ -173,7 +174,7 @@ const contact = simple("contact", "Contact", "/contact", [
   node("contact-work", "Button", { label: "Back to the work", target: { kind: "page", pageId: "work" }, variant: "outline" }),
 ]);
 
-export const demoSite: Site = {
+const wireframe: Site = {
   settings: {
     title: "Studio (demo)",
     socials: [],
@@ -203,6 +204,30 @@ export const demoSite: Site = {
     ],
     playlists: [],
   },
+  cms: [],
   pages: [home, work, journal, about, contact],
   redirects: [],
 };
+
+/**
+ * The demo starts with the two example collections (Success stories, Events) and their page
+ * designs. Ids are made stable here, so the demo's "live" content is the same on every server.
+ */
+function withExampleCollections(site: Site): Site {
+  let next = site;
+  for (const id of ["stories", "events"] as const) next = addExample(next, id).site;
+  const pages = next.pages.map((p) => {
+    const col = next.cms.find((c) => c.pageId === p.id);
+    if (!col) return p;
+    const pid = `p_${col.id}`;
+    return { ...p, id: pid, sections: p.sections.map((s, i) => ({ ...s, id: `${pid}_s${i}`, children: s.children.map((n, j) => ({ ...n, id: `${pid}_n${i}_${j}` })) })) };
+  });
+  const cms = next.cms.map((c) => ({ ...c, pageId: `p_${c.id}`, items: c.items.map((i) => ({ ...i, id: `i_${i.slug}`.slice(0, 64), updatedAt: undefined })) }));
+  return { ...next, pages, cms };
+}
+
+let made: Site | null = null;
+/** The demo's starting site. Made on first use: building the example collections draws random ids, which a Worker may not do at start-up. */
+export function demoSite(): Site {
+  return (made ??= withExampleCollections(wireframe));
+}

@@ -28,7 +28,8 @@ import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { UploadTrayHost } from "./ui/UploadTrayHost";
-import { CompareView, BrowserZoomNotice, DesignsBoard, PickSheet, VariantBand } from "./parts";
+import { CollectionsView, CompareView, BrowserZoomNotice, DesignBand, DesignsBoard, PickSheet, VariantBand } from "./parts";
+import { useCollectionsOpen } from "./collections/collections-open";
 import { usePickOpen } from "./variants/pick-open";
 import { openDesigns } from "./templates/designs-open";
 import { useDesignsOpen } from "./templates/designs-open";
@@ -75,8 +76,10 @@ export function Editor() {
   const interacting = useBoard((s) => s.interacting);
   const moving = useBoard((s) => s.moving);
   const onVariant = useEditor((s) => !!currentPage(s).variantOf);
+  const onDesign = useEditor((s) => !!currentPage(s).collectionId);
   const comparing = !!useCompare();
   const designsOpen = !!useDesignsOpen();
+  const collectionsOpen = !!useCollectionsOpen();
   const picking = !!usePickOpen();
   // A review link (?page=…&review=1, from Review's "Copy review link") opens Review for that page.
   useEffect(() => {
@@ -128,8 +131,10 @@ export function Editor() {
           <TopBar />
           <SyncNotice />
           <VariantBand />
+          {onDesign ? <DesignBand /> : null}
           {comparing ? <CompareView /> : null}
           {designsOpen ? <DesignsBoard /> : null}
+          {collectionsOpen ? <CollectionsView /> : null}
           {picking ? <PickSheet /> : null}
           <LeftPanel />
           <Board />
