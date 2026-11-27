@@ -69,9 +69,11 @@ export function initHero(){
     ['pointerdown','touchstart','wheel','focusin'].forEach(ev=>reel.addEventListener(ev,()=>{hrHold=performance.now()+4000;},{passive:true}));
     let hrScrollT;reel.addEventListener('scroll',()=>{clearTimeout(hrScrollT);hrScrollT=setTimeout(()=>{hrIdx=Math.round(reel.scrollLeft/Math.max(1,reel.clientWidth));hrT0=performance.now();onSlide(hrIdx);},120);},{passive:true});
     if('IntersectionObserver' in window)new IntersectionObserver(es=>es.forEach(e=>hrOn=e.isIntersecting)).observe(reel);
-    (function hrLoop(t){if(reduce||reelItems.length<2){hrBar.style.width='0';}
-      else if(hrOn&&t>hrHold&&!document.hidden){const p=Math.min(1,(t-hrT0)/HR_DUR);hrBar.style.width=(p*100)+'%';if(p>=1){hrIdx=(hrIdx+1)%reelItems.length;reel.scrollTo({left:hrIdx*reel.clientWidth,behavior:'smooth'});hrT0=t;onSlide(hrIdx);}}
-      else{hrT0=t-(parseFloat(hrBar.style.width)||0)/100*HR_DUR;}
+    /* the progress line grows with a transform (no layout each frame); it waits while the reel is off screen */
+    let hrP=0;
+    (function hrLoop(t){if(reduce||reelItems.length<2){hrBar.style.transform='scaleX(0)';return;}
+      if(hrOn&&t>hrHold&&!document.hidden){hrP=Math.min(1,(t-hrT0)/HR_DUR);hrBar.style.transform='scaleX('+hrP+')';if(hrP>=1){hrIdx=(hrIdx+1)%reelItems.length;reel.scrollTo({left:hrIdx*reel.clientWidth,behavior:'smooth'});hrT0=t;hrP=0;onSlide(hrIdx);}}
+      else{hrT0=t-hrP*HR_DUR;}
       requestAnimationFrame(hrLoop);})(performance.now());
   }
 
