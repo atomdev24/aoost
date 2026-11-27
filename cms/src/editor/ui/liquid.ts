@@ -1,16 +1,20 @@
 import "./liquid.css";
-import { glassOn, isChromium, onDisplayChange } from "../display";
+import { glassStyle, isChromium, onDisplayChange } from "../display";
 
 /*
- * Liquid glass on two floating pieces: the top-left island (page name and status) and the
- * phone tab bar (EDITOR-UI-RESEARCH.md, step 3). An SVG displacement map, the size of the
- * element, shifts what is behind it near the rounded edges; the middle stays still.
- * Only Chromium can use an SVG filter in backdrop-filter, so everywhere else (and with glass
- * off, or reduced motion or transparency) nothing happens and the frosted glass stays.
+ * Liquid glass on every floating toolbar: the top bar's islands, the rail, the zoom bar, the
+ * variant band and the phone tab bar (the "Liquid glass" setting, display.ts). An SVG
+ * displacement map, the size of the element, shifts what is behind it near the rounded edges;
+ * the middle stays still. Only Chromium can use an SVG filter in backdrop-filter, so everywhere
+ * else (and with Frosted or Solid chosen, or reduced motion or transparency) nothing happens and
+ * the frosted glass stays.
  */
 
 const TARGETS: { selector: string; scale: number }[] = [
-  { selector: ".ed-island-left", scale: 30 },
+  { selector: ".ed-island", scale: 30 },
+  { selector: ".ed-rail", scale: 26 },
+  { selector: ".bd-zoombar", scale: 26 },
+  { selector: ".ed-variant-band", scale: 26 },
   { selector: ".ed-phone-tabs", scale: 36 },
 ];
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -71,7 +75,7 @@ function mapUrl(doc: Document, w: number, h: number, r: number): string {
 }
 
 const wanted = (win: Window) =>
-  isChromium() && glassOn() && !win.matchMedia("(prefers-reduced-motion: reduce)").matches && !win.matchMedia("(prefers-reduced-transparency: reduce)").matches;
+  isChromium() && glassStyle() === "liquid" && !win.matchMedia("(prefers-reduced-motion: reduce)").matches && !win.matchMedia("(prefers-reduced-transparency: reduce)").matches;
 
 export function startLiquid(doc: Document): () => void {
   const win = doc.defaultView;
@@ -159,7 +163,7 @@ export function startLiquid(doc: Document): () => void {
     for (const t of TARGETS) doc.querySelectorAll(t.selector).forEach((el) => attach(el, t.scale));
   }
 
-  // The two pieces mount (and the phone layout swaps in) after start: watch for them.
+  // The bars mount (and the phone layout swaps in) after start: watch for them.
   let queued = false;
   const mounts = new MutationObserver(() => {
     if (queued) return;

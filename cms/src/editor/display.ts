@@ -1,15 +1,23 @@
 import { useSyncExternalStore } from "react";
 
 /*
- * Display settings for this browser. "Glass" is the blurred see-through look of
- * the floating toolbars. Chrome (and the browsers built on it) draws that blur
- * unreliably while the board zooms: panels flicker or show a stale, smeared
- * strip, even at a steady 60 fps with the panels never leaving the page (seen
- * in a real report, Chrome 157 on an M1 at 90% page zoom). So Chrome-based
- * browsers start with plain solid panels and Safari keeps the glass; the "…"
- * menu switches it either way, kept per browser.
+ * Display settings for this browser. The floating toolbars (top bar islands, rail, zoom bar,
+ * variant band, phone tabs) come in three looks, chosen in the "…" menu and kept per browser:
+ * - Liquid glass (default): frosted, and the page behind bends at the rounded edges. Only
+ *   Chromium can draw the bend (an SVG filter in backdrop-filter); Safari and Firefox show it as
+ *   frosted. While the board zooms or pans it drops to plain frosted (see ui/liquid.css).
+ * - Frosted glass: the blurred see-through look (the "acrylic" style).
+ * - Solid: plain panels, for anyone who finds glass busy or sees it flicker.
+ * The old on/off setting ("aoost.glass") is read once: on → liquid, off → solid.
  */
-const KEY = "aoost.glass";
+export type GlassStyle = "liquid" | "frosted" | "solid";
+export const GLASS_STYLES: { id: GlassStyle; name: string; hint: string }[] = [
+  { id: "liquid", name: "Liquid glass", hint: "Frosted, and the page bends at the edges (Chrome, Edge, Arc; frosted elsewhere)" },
+  { id: "frosted", name: "Frosted glass", hint: "Blurred and see-through, like acrylic" },
+  { id: "solid", name: "Solid", hint: "Plain panels, nothing behind shows through" },
+];
+const KEY = "aoost.glassStyle";
+const OLD_KEY = "aoost.glass";
 const listeners = new Set<() => void>();
 /** Run fn whenever a display setting (glass, theme) changes. Returns a way to stop. */
 export function onDisplayChange(fn: () => void): () => void {
@@ -24,29 +32,35 @@ export function isChromium(): boolean {
   return /Chrome\/|CriOS\/|Edg\//.test(navigator.userAgent);
 }
 
-function read(): boolean {
-  let saved: string | null = null;
-  try {
-    saved = localStorage.getItem(KEY);
-  } catch {
-    /* storage blocked */
-  }
-  if (saved === "on") return true;
-  if (saved === "off") return false;
-  return !isChromium();
+/** A saved value (new or old setting) back to a style; anything unknown is liquid. */
+export function glassStyleFrom(saved: string | null, old: string | null): GlassStyle {
+  if (saved === "liquid" || saved === "frosted" || saved === "solid") return saved;
+  if (old === "off") return "solid";
+  return "liquid";
 }
 
-let glass = read();
-export const glassOn = () => glass;
+function read(): GlassStyle {
+  try {
+    return glassStyleFrom(localStorage.getItem(KEY), localStorage.getItem(OLD_KEY));
+  } catch {
+    return "liquid";
+  }
+}
+
+let style = read();
+export const glassStyle = () => style;
+/** Any glass at all (liquid or frosted). */
+export const glassOn = () => style !== "solid";
 
 function apply() {
-  document.documentElement.classList.toggle("ed-no-glass", !glass);
+  document.documentElement.classList.toggle("ed-no-glass", style === "solid");
+  document.documentElement.setAttribute("data-ed-glass", style);
 }
 
-export function setGlass(on: boolean) {
-  glass = on;
+export function setGlassStyle(next: GlassStyle) {
+  style = glassStyleFrom(next, null);
   try {
-    localStorage.setItem(KEY, on ? "on" : "off");
+    localStorage.setItem(KEY, style);
   } catch {
     /* storage blocked: still applies for this visit */
   }
@@ -54,13 +68,13 @@ export function setGlass(on: boolean) {
   listeners.forEach((l) => l());
 }
 
-export const useGlass = () =>
+export const useGlassStyle = () =>
   useSyncExternalStore(
     (l) => {
       listeners.add(l);
       return () => void listeners.delete(l);
     },
-    () => glass,
+    () => style,
   );
 
 /*

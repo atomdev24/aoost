@@ -3643,3 +3643,14 @@ html[data-ed-theme="paper"] .ed-tag {
   right: 0;
   min-width: 240px;
 }
+/* Toolbars setting swatches (display.ts GLASS_STYLES) */
+.ed-glass-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 5px;
+  border: 1px solid var(--ed-line-strong);
+}
+.ed-glass-dot[data-glass="liquid"] { background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.55), rgba(255,255,255,.08) 55%), linear-gradient(135deg, rgba(120,170,255,.35), rgba(255,255,255,.06)); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.22); }
+.ed-glass-dot[data-glass="frosted"] { background: linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,.08)); }
+.ed-glass-dot[data-glass="solid"] { background: var(--ed-panel-solid, #232326); }

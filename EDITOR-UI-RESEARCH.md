@@ -50,3 +50,7 @@ entrance; tooltips for icon-only buttons that have no `title` yet.
 - Liquid glass (`ui/liquid.ts`, loaded only in Chromium, and only with Glass toolbars on and no reduced
   motion or transparency): the top-left island and the phone tab bar bend what's behind them at the edges,
   using a displacement map drawn to each one's size. During zoom and pan they go back to plain frosted.
+
+## Toolbars setting (27 Nov 2026)
+Liquid glass now covers every floating bar (islands, rail, zoom bar, variant band, phone tabs), and the "…" menu has a
+Toolbars choice: Liquid glass (default), Frosted glass, Solid. Replaces the "Glass toolbars" on/off switch.

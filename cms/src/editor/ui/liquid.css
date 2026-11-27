@@ -3,6 +3,6 @@
  * Chromium only, and only while the board is still: during zoom and pan the element keeps
  * its ordinary frosted glass, because refraction then costs a lot of drawing.
  */
-html:not(.ed-no-glass) body:not(:has(.ed-shell.is-interacting)) .ed-liquid {
+html:not(.ed-no-glass) body:not(:has(.ed-shell.is-interacting, .ed-shell.is-moving)) .ed-liquid {
   backdrop-filter: var(--ed-liquid-filter) !important;
 }
