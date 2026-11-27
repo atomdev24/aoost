@@ -54,7 +54,7 @@
   box-shadow: var(--ed-glass-shadow);
   color: var(--ed-text);
   font: 12px/1.4 var(--ed-font);
-  transition: opacity 150ms ease;
+  transition: opacity 150ms var(--ed-ease-out);
 }
 .ed-shell.is-interacting .ed-island,
 .is-dragging .ed-island,
@@ -102,7 +102,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background 120ms var(--ed-ease-out), color 120ms var(--ed-ease-out);
 }
 .ed-tool-bp:hover {
   color: var(--ed-text);
@@ -268,7 +268,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s var(--ed-ease-out), color 0.12s var(--ed-ease-out);
 }
 .ed-tool:hover {
   color: var(--ed-text);
@@ -380,7 +380,7 @@
   border-radius: var(--ed-glass-radius);
   box-shadow: var(--ed-glass-shadow);
   z-index: 100;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms var(--ed-ease-out);
 }
 .ed-shell.is-interacting .ed-rail {
   opacity: 0.7;
@@ -404,7 +404,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background 120ms var(--ed-ease-out), color 120ms var(--ed-ease-out);
 }
 .ed-rail-btn:hover {
   background: var(--ed-seg);
@@ -441,7 +441,7 @@
   box-shadow: var(--ed-glass-shadow);
   z-index: 95;
   overflow: hidden;
-  animation: ed-flyout-in 150ms ease-out;
+  animation: ed-flyout-in 150ms var(--ed-ease-out);
 }
 @keyframes ed-flyout-in {
   from {
@@ -1040,7 +1040,7 @@
   max-width: 0;
   overflow: hidden;
   opacity: 0;
-  transition: max-width 150ms ease, opacity 120ms ease;
+  transition: max-width 150ms var(--ed-ease-out), opacity 120ms var(--ed-ease-out);
 }
 /* Direction A: the selection's actions are always out, with the main one in words. */
 .ed-tag .ed-tag-actions {
@@ -1098,7 +1098,7 @@
 /* ------------------------------------------- step 3: inspector appears on selection */
 .ed-inspector {
   overflow: hidden;
-  animation: ed-inspector-in 150ms ease-out both;
+  animation: ed-inspector-in 150ms var(--ed-ease-out) both;
 }
 @keyframes ed-inspector-in {
   from {
@@ -2426,7 +2426,7 @@ button.ed-card {
   display: flex;
   gap: 2px;
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition: opacity 120ms var(--ed-ease-out);
 }
 .ed-masonry-item:hover .ed-asset-tools,
 .ed-masonry-item:focus-within .ed-asset-tools,
@@ -2564,7 +2564,7 @@ button.ed-card {
   gap: 6px;
   min-width: 78px;
   justify-content: center;
-  transition: background-color 200ms ease;
+  transition: background-color 200ms var(--ed-ease-out);
 }
 .ed-publish.is-github .ed-publish-btn:disabled,
 .ed-publish.is-rebuilding .ed-publish-btn:disabled {
@@ -2771,7 +2771,7 @@ button.ed-card {
   overflow: hidden;
   background: #232326;
   pointer-events: none;
-  transition: opacity 300ms ease;
+  transition: opacity var(--ed-dur) var(--ed-ease-out);
 }
 /* The page's last picture, shown as it is while the live page loads (it's a sharp copy of the
    page, so the frame looks ready at once; the live page fades in over it). */
@@ -2804,7 +2804,7 @@ button.ed-card {
   font: 500 12px var(--ed-font);
   pointer-events: none;
   /* Only for waits long enough to notice: a chip that flashes for a moment reads as slow. */
-  animation: bd-chip-in 180ms ease 400ms both;
+  animation: bd-chip-in 180ms var(--ed-ease-out) 400ms both;
 }
 @keyframes bd-chip-in {
   from {
@@ -2883,7 +2883,7 @@ button.ed-card {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  animation: ed-sync-in 160ms ease-out;
+  animation: ed-sync-in 160ms var(--ed-ease-out);
 }
 .ed-sync-banner {
   flex-direction: column;
@@ -3554,4 +3554,39 @@ body:has(.ed-flyout) .ed-dock {
 html[data-ed-theme="paper"] .ed-tag {
   background: var(--ed-accent);
   color: #1a1917;
+}
+
+/* ------------------------------------------------ popover & menu entrance */
+.ed-pop,
+.ed-more-menu {
+  animation: ed-pop-in var(--ed-dur) var(--ed-ease-out);
+}
+.ed-more-menu {
+  transform-origin: top right;
+}
+@keyframes ed-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* ------------------------------------------------ press feedback */
+.ed-btn,
+.ed-icon,
+.ed-tag-word {
+  transition: transform var(--ed-dur-press) var(--ed-ease-out);
+}
+.ed-rail-btn {
+  transition: background 120ms var(--ed-ease-out), color 120ms var(--ed-ease-out), transform var(--ed-dur-press) var(--ed-ease-out);
+}
+.ed-publish-btn {
+  transition: background-color 200ms var(--ed-ease-out), transform var(--ed-dur-press) var(--ed-ease-out);
+}
+.ed-btn:active:not(:disabled),
+.ed-icon:active:not(:disabled),
+.ed-rail-btn:active:not(:disabled),
+.ed-publish-btn:active:not(:disabled),
+.ed-tag-word:active:not(:disabled) {
+  transform: scale(0.97);
 }

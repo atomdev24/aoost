@@ -1,0 +1,29 @@
+/* Shared floating tooltip (tooltip.ts). */
+.ed-tooltip {
+  position: fixed;
+  z-index: 2000;
+  max-width: 260px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--ed-raised-2);
+  color: var(--ed-text);
+  border: 1px solid var(--ed-line);
+  box-shadow: var(--ed-glass-shadow);
+  font: 500 12px/1.35 var(--ed-font);
+  letter-spacing: -0.01em;
+  pointer-events: none;
+  white-space: normal;
+  word-wrap: break-word;
+}
+.ed-tooltip[hidden] {
+  display: none;
+}
+.ed-tooltip.is-anim {
+  animation: ed-tooltip-in var(--ed-dur-fast) var(--ed-ease-out);
+}
+@keyframes ed-tooltip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}

@@ -67,7 +67,7 @@
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 120ms ease, transform 120ms ease;
+    transition: opacity 120ms var(--ed-ease-out), transform 120ms var(--ed-ease-out);
     z-index: 200;
   }
   .ed-rail-btn:hover::after,
@@ -168,7 +168,7 @@
   width: 12px;
   height: 12px;
   color: var(--ed-sub);
-  transition: transform 120ms ease;
+  transition: transform 120ms var(--ed-ease-out);
 }
 .ed-prow.is-folded .ed-group-head .ed-chev {
   transform: rotate(-90deg);
@@ -298,7 +298,7 @@ html.ed-commenting #preview-frame {
   background: var(--pin, #3a3d44);
   box-shadow: 0 0 0 2px #0e0f11, 0 6px 14px rgba(0, 0, 0, 0.45);
   cursor: pointer;
-  transition: transform 120ms ease;
+  transition: transform 120ms var(--ed-ease-out);
 }
 .ed-cmt-pin:hover,
 .ed-cmt-pin.is-open {
@@ -889,7 +889,7 @@ select.ed-input option {
   border: 1.5px dashed var(--ed-accent);
   border-radius: 6px;
   background: var(--ed-accent-soft);
-  animation: ed-gap-open 0.14s ease-out;
+  animation: ed-gap-open 0.14s var(--ed-ease-out);
 }
 @keyframes ed-gap-open { from { height: 0; opacity: 0; } to { height: 24px; opacity: 1; } }
 
@@ -1004,7 +1004,7 @@ select.ed-input option {
   color: var(--ed-text);
   font: 13px var(--ed-font);
   transform: translateX(-50%);
-  animation: ed-toast-in 0.22s ease-out, ed-toast-out 0.3s ease-in 2.9s forwards;
+  animation: ed-toast-in 0.22s var(--ed-ease-out), ed-toast-out var(--ed-dur) var(--ed-ease-out) 2.9s forwards;
   pointer-events: auto;
 }
 .ed-toast button { background: none; border: 0; padding: 3px 9px; border-radius: 999px; color: var(--ed-accent-hi); font: 600 13px var(--ed-font); cursor: pointer; }
@@ -1113,7 +1113,7 @@ select.ed-input option {
 .ed-agent-pill b { font-weight: 600; }
 .ed-agent-pill .ed-agent-text { overflow: hidden; text-overflow: ellipsis; color: inherit; opacity: 0.85; }
 .ed-agent-pill.is-working { color: #ffd7c8; background: linear-gradient(90deg, rgba(217, 119, 87, 0.22), rgba(217, 119, 87, 0.42), rgba(217, 119, 87, 0.22)), rgba(28, 28, 30, 0.9); background-size: 200% 100%, auto; animation: ed-agent-shimmer 1.8s linear infinite; box-shadow: inset 0 0 0 1px rgba(217, 119, 87, 0.55); }
-.ed-agent-pill.is-done { color: #5be37f; background: linear-gradient(rgba(48, 209, 88, 0.16), rgba(48, 209, 88, 0.16)), rgba(28, 28, 30, 0.9); box-shadow: inset 0 0 0 1px rgba(48, 209, 88, 0.4); animation: ed-toast-in 0.2s ease-out; }
+.ed-agent-pill.is-done { color: #5be37f; background: linear-gradient(rgba(48, 209, 88, 0.16), rgba(48, 209, 88, 0.16)), rgba(28, 28, 30, 0.9); box-shadow: inset 0 0 0 1px rgba(48, 209, 88, 0.4); animation: ed-toast-in 0.2s var(--ed-ease-out); }
 .ed-agent-spark { color: #f0a58a; animation: ed-agent-spin 2.4s linear infinite; flex: none; }
 .ed-agent-sheen { position: fixed; left: 0; right: 0; top: 0; height: 2px; z-index: 70; pointer-events: none; background: linear-gradient(90deg, transparent, #D97757, #ffb08f, #D97757, transparent); background-size: 50% 100%; background-repeat: no-repeat; animation: ed-agent-sweep 1.6s ease-in-out infinite; }
 @keyframes ed-agent-shimmer { to { background-position: -200% 0; } }
@@ -1221,3 +1221,20 @@ select.ed-input option {
 /* Variants waiting for review, on the Pages button (EDITOR-VARIANTS.md). */
 .ed-rail-btn { position: relative; }
 .ed-rail-count { position: absolute; top: 2px; right: 6px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 8px; background: var(--ed-variant); color: #fff; font: 700 10px/16px var(--ed-font); text-align: center; pointer-events: none; }
+
+/* Reduced motion: drop press scale and entrance transform animations, keeping opacity changes. */
+@media (prefers-reduced-motion: reduce) {
+  .ed-btn:active:not(:disabled),
+  .ed-icon:active:not(:disabled),
+  .ed-rail-btn:active:not(:disabled),
+  .ed-publish-btn:active:not(:disabled),
+  .ed-tag-word:active:not(:disabled) {
+    transform: none !important;
+  }
+  .ed-pop,
+  .ed-more-menu,
+  .ed-tooltip,
+  .ed-tooltip.is-anim {
+    animation: none !important;
+  }
+}

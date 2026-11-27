@@ -310,7 +310,7 @@ body:has(.ed-shell.is-interacting) .ed-dock {
   border-radius: 999px;
   color: var(--ed-text);
   font-size: 12px;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms var(--ed-ease-out);
 }
 .bd-hidden-chip button {
   padding: 0;
@@ -413,7 +413,7 @@ body:has(.ed-shell.is-interacting) .ed-dock {
 }
 .bd-still.is-fading {
   opacity: 0;
-  transition: opacity 160ms ease;
+  transition: opacity 160ms var(--ed-ease-out);
 }
 .bd-still.is-leaving {
   pointer-events: none;
