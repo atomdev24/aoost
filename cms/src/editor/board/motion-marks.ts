@@ -1,9 +1,10 @@
 /*
- * On the canvas nothing moves (frame-css stillMotion; Play shows the motion). So people know a
- * section does move, each one with motion gets a small pink badge in its top-right corner,
- * in every frame (a pink circle with a play mark). Found by looking at the frame itself, so any block takes part without changes:
- * CSS animations (tickers, marquees), entrance effects, canvases (the dot board), autoplaying
- * video, Lottie and 3D, and the blocks whose motion comes from their page script.
+ * On the board nothing moves (frame-css stillMotion; Play shows the motion). A thin grey line in
+ * the board's margin, just left of the frame, marks each section that moves: never on the design
+ * itself, and grey so it doesn't compete. "Motion" in the zoom bar's Show menu hides them.
+ * Found by looking at the frame itself, so any block takes part without changes: CSS animations
+ * (tickers, marquees), entrance effects, canvases (the dot board), autoplaying video, Lottie and
+ * 3D, and the blocks whose motion comes from their page script.
  */
 
 /** Blocks whose motion comes from a page script, so the frame alone can't show it. */
@@ -23,36 +24,36 @@ export function sectionMoves(section: Element): boolean {
 
 export function markMotion(doc: Document): () => void {
   const win = doc.defaultView!;
-  const layer = doc.createElement("div");
-  layer.className = "ed-motion-layer";
-  layer.setAttribute("aria-hidden", "true");
-  doc.body.appendChild(layer);
-  const badges = new Map<Element, HTMLElement>();
+  // The lines live on the board (the frame's parent), beside the frame.
+  const box = (win.frameElement as HTMLElement | null)?.closest<HTMLElement>(".bd-frame") ?? null;
+  const world = box?.parentElement ?? null;
+  const lines = new Map<Element, HTMLElement>();
+  let moving: Element[] = [];
 
   const place = () => {
-    for (const [s, b] of badges) {
+    if (!box || !world) return;
+    const px = parseFloat(doc.documentElement.style.getPropertyValue("--ed-px")) || 1;
+    for (const s of moving) {
+      let line = lines.get(s);
+      if (!line) {
+        line = world.ownerDocument.createElement("span");
+        line.className = "ed-motion-line";
+        line.title = "This section moves: Play above the frame shows it";
+        world.appendChild(line);
+        lines.set(s, line);
+      }
       const r = s.getBoundingClientRect();
-      b.style.top = `${r.top + win.scrollY}px`;
-      b.style.left = `${r.right + win.scrollX}px`;
+      line.style.left = `${box.offsetLeft - 14 * px}px`;
+      line.style.top = `${box.offsetTop + r.top + win.scrollY}px`;
+      line.style.height = `${Math.max(4, r.height)}px`;
+      line.style.width = `${3 * px}px`;
     }
+    for (const [s, l] of lines) if (!moving.includes(s)) (l.remove(), lines.delete(s));
   };
   const scan = () => {
     // Autoplaying videos hold still on the board too.
     doc.querySelectorAll("video").forEach((v) => !v.paused && v.pause());
-    const sections = [...doc.querySelectorAll("section.s[id]")];
-    for (const [s, b] of badges) if (!s.isConnected || !sections.includes(s)) (b.remove(), badges.delete(s));
-    for (const s of sections) {
-      const moves = sectionMoves(s);
-      const had = badges.get(s);
-      if (moves && !had) {
-        const b = doc.createElement("span");
-        b.className = "ed-motion-badge";
-        b.title = "This section moves. Press Play above the frame to see it.";
-        b.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.2v9.6a.6.6 0 0 0 .9.5l7.6-4.8a.6.6 0 0 0 0-1L5.9 2.7a.6.6 0 0 0-.9.5Z"/></svg>';
-        layer.appendChild(b);
-        badges.set(s, b);
-      } else if (!moves && had) (had.remove(), badges.delete(s));
-    }
+    moving = [...doc.querySelectorAll("section.s[id]")].filter((s) => s.isConnected && sectionMoves(s));
     place();
   };
 
@@ -61,26 +62,22 @@ export function markMotion(doc: Document): () => void {
     win.clearTimeout(t);
     t = win.setTimeout(scan, 300);
   };
-  const mo = new win.MutationObserver((ms) => {
-    // Our own badges changing isn't a reason to look again.
-    if (ms.every((m) => layer.contains(m.target))) return;
-    later();
-  });
+  const mo = new win.MutationObserver(later);
   mo.observe(doc.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style", "data-enter"] });
+  // Zoom (--ed-px on the frame's root) and the frame moving on the board.
+  const zoomed = new win.MutationObserver(place);
+  zoomed.observe(doc.documentElement, { attributes: true, attributeFilter: ["style"] });
+  const moved = box ? new MutationObserver(place) : null;
+  if (box) moved!.observe(box, { attributes: true, attributeFilter: ["style"] });
   const ro = new win.ResizeObserver(place);
   ro.observe(doc.body);
   scan();
   return () => {
     win.clearTimeout(t);
     mo.disconnect();
+    zoomed.disconnect();
+    moved?.disconnect();
     ro.disconnect();
-    layer.remove();
+    for (const l of lines.values()) l.remove();
   };
 }
-
-/** Styles for the badges, added to each frame's fixed editor CSS. */
-export const motionBadgeCss =
-  // A small pink circle with a play mark, top right of the section; the same size on screen at any zoom.
-  ".ed-motion-layer{position:absolute;top:0;left:0;width:0;height:0;z-index:40;pointer-events:none}" +
-  ".ed-motion-badge{position:absolute;transform:translate(calc(-100% - 8px * var(--ed-px,1)),calc(8px * var(--ed-px,1)));display:grid;place-items:center;width:calc(20px * var(--ed-px,1));height:calc(20px * var(--ed-px,1));border-radius:50%;background:#ff4fa3;color:#fff;box-shadow:0 0 0 calc(2px * var(--ed-px,1)) rgba(255,255,255,.85),0 calc(2px * var(--ed-px,1)) calc(6px * var(--ed-px,1)) rgba(0,0,0,.3);pointer-events:auto;cursor:help}" +
-  ".ed-motion-badge svg{width:calc(9px * var(--ed-px,1));height:calc(9px * var(--ed-px,1));margin-left:calc(1px * var(--ed-px,1))}";

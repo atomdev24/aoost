@@ -61,6 +61,8 @@
         addEventListener("error", function (e) {
           var el = e.target;
           var src = el && (el.src || el.href);
+          // A stylesheet that arrived but whose font @import failed also fires "error"; it has a sheet, so it's fine.
+          if (el.tagName === "LINK" && el.sheet) return;
           if (src && /\/admin\/assets\//.test(src) && (el.tagName === "SCRIPT" || el.tagName === "LINK")) {
             if (!reloadOnce("A build file failed to load", src.split("/").pop())) banner();
           }
