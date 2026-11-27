@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { startLoadGuard } from "./load-guard";
-import { startDisplay } from "./display";
+import { isChromium, startDisplay } from "./display";
 import { guardPinch } from "./pinch-guard";
 import { startTooltips } from "./ui/tooltip";
 import "./editor.css";
@@ -19,6 +19,8 @@ if (import.meta.env.PROD && !DEMO && "serviceWorker" in navigator) {
 
 startDisplay();
 startTooltips(document);
+// Liquid glass only works in Chromium, so only Chromium downloads it (ui/liquid.ts).
+if (isChromium()) void import("./ui/liquid").then((m) => m.startLiquid(document)).catch(() => undefined);
 guardPinch(window);
 if (import.meta.env.PROD) startLoadGuard();
 

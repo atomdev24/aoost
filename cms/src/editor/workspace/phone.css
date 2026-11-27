@@ -323,9 +323,11 @@
     height: var(--ed-tabs);
     padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
     box-sizing: border-box;
-    background: rgba(20, 20, 22, 0.96);
+    /* Glass, but denser than the other bars: its labels sit over bright pages. */
+    background: color-mix(in srgb, var(--ed-solid-bg) 84%, transparent);
     -webkit-backdrop-filter: var(--ed-glass-backdrop);
     backdrop-filter: var(--ed-glass-backdrop);
+    box-shadow: var(--ed-glass-edge);
     border-top: 1px solid rgba(255, 255, 255, 0.07);
   }
   .ed-phone-tabs button {
@@ -375,7 +377,9 @@
     padding: 8px 16px 14px;
     box-sizing: border-box;
     border-radius: 16px 16px 0 0;
-    background: #1c1c20;
+    background: var(--ed-panel-solid);
+    -webkit-backdrop-filter: var(--ed-panel-backdrop);
+    backdrop-filter: var(--ed-panel-backdrop);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.4);
     color: var(--ed-text);

@@ -57,7 +57,7 @@ Before more features: the basics people touch all day. In order:
    aoost.com's own numbers). ✓ built (EDITOR-INSIGHTS.md).
 5. **UI research** — ten rules from the best tools, boards on the Design canvas (EDITOR-UI-RESEARCH.md).
    Step 1 (colour list, Graphite default, Ink and Paper at night in the "…" menu) ✓ built; step 2 motion kit ✓ built
-   (by Gemini); next glass tidy, safe sub-menus.
+   (by Gemini); step 3 glass tidy ✓ built; next safe sub-menus.
 6. Later (kept, not now): **AI attention preview** (predicted heatmaps before publishing).
 
 ## Done (26 Nov 2026): editor UI spec for the Aerobotics team
