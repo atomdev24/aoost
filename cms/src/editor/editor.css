@@ -712,11 +712,15 @@ body {
 .ed-layer-tools {
   display: flex;
   align-items: center;
-  opacity: 0.35;
 }
-.ed-layer:hover .ed-layer-tools,
-.ed-layer:focus-within .ed-layer-tools,
-.ed-layer.is-selected .ed-layer-tools {
+.ed-layer-tools .ed-mini {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.ed-layer-tools .ed-mini[aria-pressed="true"],
+.ed-layer:hover .ed-layer-tools .ed-mini,
+.ed-layer:focus-within .ed-layer-tools .ed-mini,
+.ed-layer.is-selected .ed-layer-tools .ed-mini {
   opacity: 1;
 }
 .ed-mini {
