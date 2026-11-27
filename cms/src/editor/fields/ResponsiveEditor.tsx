@@ -6,6 +6,7 @@ import { useEditor } from "../store";
 import { ColorInput, NumberInput, Select, TextInput, Toggle } from "../ui/kit";
 import { AlignControl, type AlignValue } from "./AlignControl";
 import { ScrubLength, ScrubNumber } from "./ScrubField";
+import { MediaInput } from "./media";
 import { formatSpacing, parseSpacing } from "./spacing";
 import type { RowContext, RowDef } from "./rows";
 
@@ -302,10 +303,10 @@ function BackgroundControl({ value, onChange }: { value: SectionLayout["backgrou
   return (
     <div className="ed-stack">
       <ColorInput label="Background colour" value={bg.color} onChange={(c) => set({ color: c })} />
-      <TextInput ariaLabel="Background image" placeholder="Image URL (or pick from Assets)" value={bg.image ?? ""} onCommit={(v) => set({ image: v })} />
-      <TextInput ariaLabel="Background video" placeholder="Video URL (desktop only)" value={bg.video ?? ""} onCommit={(v) => set({ video: v })} />
-      <TextInput ariaLabel="Poster image" placeholder="Still image for phones" value={bg.poster ?? ""} onCommit={(v) => set({ poster: v })} />
-      <TextInput ariaLabel="Tint over the background" placeholder="Tint, e.g. rgba(20,20,20,.4)" value={bg.overlay ?? ""} onCommit={(v) => set({ overlay: v })} />
+      <MediaInput kind="image" label="Background picture" value={bg.image} onChange={(v) => set({ image: v || undefined })} />
+      <MediaInput kind="video" label="Background video (computers only)" value={bg.video} onChange={(v) => set({ video: v || undefined })} />
+      {bg.video ? <MediaInput kind="image" label="Still picture for phones" value={bg.poster} onChange={(v) => set({ poster: v || undefined })} /> : null}
+      <ColorInput label="Tint over the background (set its strength with the %)" value={bg.overlay} onChange={(c) => set({ overlay: c })} />
     </div>
   );
 }
