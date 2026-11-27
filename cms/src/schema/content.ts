@@ -326,7 +326,8 @@ export type GlobalComponent = z.infer<typeof GlobalComponent>;
 export const Template = z.object({
   id: Id,
   name: z.string(),
-  kind: z.enum(["section", "page"]),
+  /** section and page: templates. block: a saved block (Insert → Saved). default: how new blocks of one type start (name = the type). */
+  kind: z.enum(["section", "page", "block", "default"]),
   sections: z.array(Section),
 });
 export type Template = z.infer<typeof Template>;

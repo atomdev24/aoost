@@ -1,4 +1,5 @@
 import { setMode, useSimple } from "./mode";
+import { BlockSaveMenu } from "./BlockSaveMenu";
 import { useSettingsShown } from "./settings-pref";
 import { Puck } from "@puckeditor/core";
 import { getComponent } from "../../components/registry";
@@ -76,6 +77,8 @@ function InspectorPanel() {
   const size = phone && panelOpen ? "collapsed" : card.size;
   // Each new selection opens short, at the top: the Content fields.
   const target = useEditor((s) => s.overlayId ?? s.globalId ?? s.selection[0] ?? null);
+  // A block (not a section, a global or an overlay) gets the save menu in the header.
+  const nodeId = useEditor((s) => (!s.overlayId && !s.globalId && s.selection.length === 1 ? (locate(currentPage(s), s.selection[0]!)?.kind === "node" ? s.selection[0]! : null) : null));
   const body = useRef<HTMLDivElement>(null);
   // On a phone the card's height lifts the notes dock (workspace/Dock.tsx) above it.
   const [aside, setAside] = useState<HTMLElement | null>(null);
@@ -133,6 +136,7 @@ function InspectorPanel() {
           <strong title={subject.name}>{subject.name}</strong>
           <span>{subject.type}</span>
         </div>
+        {nodeId ? <BlockSaveMenu nodeId={nodeId} /> : null}
       </header>
       {selected || overlayId ? <ScopeBar /> : null}
       {shownTabs.length > 1 ? (

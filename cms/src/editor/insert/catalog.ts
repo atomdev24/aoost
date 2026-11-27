@@ -1,7 +1,8 @@
 import { showTip } from "../tips/tips";
 import { components, getComponent } from "../../components/registry";
 import { addNode, addSection, createNode, createSection, locate, sectionForBlock } from "../../model/page-ops";
-import type { Page, Section } from "../../schema";
+import type { Node, Page, Section, Style } from "../../schema";
+import { blockDefault, blockFromSaved } from "../../model/saved-blocks";
 import { selectBlock } from "../board/bridge";
 import { DEMO } from "../demo";
 import { currentPage, getState, updatePage } from "../store";
@@ -69,14 +70,22 @@ export function insertAnchorName(page: Page, selected: string | undefined): stri
  * grid), otherwise in a new section right after the selected one, or at the
  * end of the page when nothing is selected.
  */
-export function placeBlock(page: Page, selected: string | undefined, type: string): { page: Page; id: string } {
+export function placeBlock(page: Page, selected: string | undefined, type: string, start?: { content?: Record<string, unknown>; style?: Style } | null): { page: Page; id: string } {
   const at = selected ? locate(page, selected) : null;
   const sectionIndex = at && at.kind !== "overlay" ? page.sections.indexOf(at.section) + 1 : page.sections.length;
   if (KIND[type]) {
     const section = createSection(KIND[type]);
     return { page: addSection(page, section, sectionIndex), id: section.id };
   }
-  const node = createNode(type);
+  // A block type with a site default (Make default) starts from it.
+  return placeNode(page, selected, createNode(type, start ?? {}));
+}
+
+/** Put a ready-made block (a saved block) below the selection, or at the end of the page. */
+export function placeNode(page: Page, selected: string | undefined, node: Node): { page: Page; id: string } {
+  const type = node.type;
+  const at = selected ? locate(page, selected) : null;
+  const sectionIndex = at && at.kind !== "overlay" ? page.sections.indexOf(at.section) + 1 : page.sections.length;
   // A full-bleed block (an Aerobotics band) gets a section of its own, edge to edge.
   if (getComponent(type)?.fullBleed) return { page: addSection(page, sectionForBlock(node), sectionIndex), id: node.id };
   if (at?.kind === "node" && at.section.kind !== "canvas") {
@@ -93,7 +102,7 @@ export function insertBlock(type: string) {
   updatePage(
     page.id,
     (p) => {
-      const placed = placeBlock(p, state.selection[0], type);
+      const placed = placeBlock(p, state.selection[0], type, blockDefault(state.site, type));
       id = placed.id;
       return placed.page;
     },
@@ -102,5 +111,24 @@ export function insertBlock(type: string) {
   if (id) selectBlock(id);
   if (type === "Image") showTip("imageEmpty");
   else if (type === "Video") showTip("video");
+  return id;
+}
+
+/** Add a saved block (Insert → Saved) below the selection, as one undo step, and select it. */
+export function insertSavedBlock(savedId: string, name: string) {
+  const state = getState();
+  const node = blockFromSaved(state.site, savedId);
+  if (!node) return "";
+  let id = "";
+  updatePage(
+    currentPage(state).id,
+    (p) => {
+      const placed = placeNode(p, state.selection[0], node);
+      id = placed.id;
+      return placed.page;
+    },
+    `Add ${name}`,
+  );
+  if (id) selectBlock(id);
   return id;
 }
