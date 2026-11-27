@@ -16,6 +16,11 @@
   --ed-raised-2: #2e2e33;
   --ed-glass-bg: rgba(36, 36, 40, 0.62);
   --ed-solid-bg: rgba(36, 36, 40, 0.97);
+  /* Long panels (inspector, layers, sheets) are nearly solid so they read easily; glass is for floating bits. */
+  --ed-panel-solid: rgba(36, 36, 40, 0.94);
+  --ed-panel-backdrop: blur(12px) saturate(140%);
+  /* A faint bright top edge on floating glass. */
+  --ed-glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   --ed-glass-backdrop: blur(22px) saturate(170%);
   --ed-glass-border: 1px solid rgba(255, 255, 255, 0.07);
   --ed-glass-radius: 12px;
@@ -59,6 +64,7 @@ html[data-ed-theme="ink"] {
   --ed-raised-2: #1f2024;
   --ed-glass-bg: rgba(22, 23, 26, 0.7);
   --ed-solid-bg: rgba(22, 23, 26, 0.97);
+  --ed-panel-solid: rgba(22, 23, 26, 0.95);
   --ed-text: #e8e9ec;
   --ed-sub: #9a9ca3;
   --ed-hint: #7e8189;
@@ -76,6 +82,8 @@ html[data-ed-theme="paper"] {
   --ed-raised-2: #2d2a26;
   --ed-glass-bg: rgba(35, 33, 30, 0.68);
   --ed-solid-bg: rgba(35, 33, 30, 0.97);
+  --ed-panel-solid: rgba(35, 33, 30, 0.95);
+  --ed-glass-edge: inset 0 1px 0 rgba(255, 245, 230, 0.1);
   --ed-glass-border: 1px solid rgba(255, 245, 230, 0.08);
   --ed-line: rgba(255, 245, 230, 0.08);
   --ed-line-strong: rgba(255, 245, 230, 0.15);
@@ -93,12 +101,16 @@ html[data-ed-theme="paper"] {
 html.ed-no-glass {
   --ed-glass-bg: var(--ed-solid-bg);
   --ed-glass-backdrop: none;
+  --ed-panel-solid: var(--ed-solid-bg);
+  --ed-panel-backdrop: none;
 }
 @media (prefers-reduced-transparency: reduce) {
   html,
   html[data-ed-theme] {
     --ed-glass-bg: var(--ed-solid-bg);
     --ed-glass-backdrop: none;
+    --ed-panel-solid: var(--ed-solid-bg);
+    --ed-panel-backdrop: none;
   }
 }
 

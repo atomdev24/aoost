@@ -23,7 +23,7 @@ The boards are on the Design canvas, in the "UI research" row: rules vs aoost to
 2. **Motion kit** ✓ (built by Gemini via the relay, reviewed by Claude): two curves (`cubic-bezier(.23,1,.32,1)` out, `cubic-bezier(.77,0,.175,1)` in-out),
    menus from the trigger side from scale 0.96, press 0.97, no animation when opened by keyboard,
    one shared tooltip with a single timer, reduced motion built in.
-3. **Glass tidy**: glass only on floating pieces, side panels near-solid; liquid refraction
+3. **Glass tidy** ✓ (built by Claude; Gemini's account hit its weekly quota): glass only on floating pieces, side panels near-solid; liquid refraction
    (SVG displacement in backdrop-filter, Chromium only, frosted fallback) only on the status pill and
    phone tab bar.
 4. **Safe sub-menus** in the shared menu, following the pointer (Linear, React Aria), off for touch.
@@ -41,3 +41,12 @@ The boards are on the Design canvas, in the "UI research" row: rules vs aoost to
 
 Still to do from this step: other dropdowns that aren't `Popover` (Publish ▾, block … menus) could use the same
 entrance; tooltips for icon-only buttons that have no `title` yet.
+
+## Glass tidy: what was built (27 Nov 2026)
+- Long panels (inspector, layers and other side panels, phone sheets, uploads, phone "More") are nearly solid
+  (`--ed-panel-solid`, light blur); floating bars, menus and pop-ups stay glass with a faint bright top edge
+  (`--ed-glass-edge`). Glass off or "reduce transparency" makes everything solid.
+- The phone tab bar is glass now, denser than the other bars because its labels sit over bright pages.
+- Liquid glass (`ui/liquid.ts`, loaded only in Chromium, and only with Glass toolbars on and no reduced
+  motion or transparency): the top-left island and the phone tab bar bend what's behind them at the edges,
+  using a displacement map drawn to each one's size. During zoom and pan they go back to plain frosted.

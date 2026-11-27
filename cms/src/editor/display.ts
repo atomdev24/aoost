@@ -11,6 +11,11 @@ import { useSyncExternalStore } from "react";
  */
 const KEY = "aoost.glass";
 const listeners = new Set<() => void>();
+/** Run fn whenever a display setting (glass, theme) changes. Returns a way to stop. */
+export function onDisplayChange(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => void listeners.delete(fn);
+}
 
 /** Chrome, Edge, Brave, Arc, Opera…: Blink engine. Safari and Firefox are not. */
 export function isChromium(): boolean {

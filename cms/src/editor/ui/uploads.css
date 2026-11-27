@@ -47,9 +47,9 @@
   width: min(380px, calc(100vw - 24px));
   color: var(--ed-text);
   font: 12.5px/1.35 var(--ed-font);
-  background: #232327;
-  -webkit-backdrop-filter: var(--ed-glass-backdrop);
-  backdrop-filter: var(--ed-glass-backdrop);
+  background: var(--ed-panel-solid);
+  -webkit-backdrop-filter: var(--ed-panel-backdrop);
+  backdrop-filter: var(--ed-panel-backdrop);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
