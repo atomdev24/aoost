@@ -23,6 +23,8 @@ import { renameVariant } from "../../model/variants";
 import { update } from "../store";
 import { CHANGED_CSS } from "./changed-css";
 import { PlayButton } from "../play/PlayButton";
+import { hiddenList, useMarks } from "../board/marks";
+import { VersionStill } from "./VersionStill";
 import "./variants.css";
 
 /**
@@ -166,6 +168,8 @@ function VersionFrame({ page, bp, x, y, w, visible, outline }: { page: Page; bp:
   }, [doc, page.id, bp]);
 
   const css = useMemo(() => pinViewportUnits(pageCss(site, page), SCREEN_HEIGHT[bp]), [site, page, bp]);
+  const height = heights.get(`${page.id}:${bp}`) ?? 900;
+  const stamp = useStamp([site, page, outline, height, hiddenList(useMarks())]);
   const changed = useMemo(() => (outline && page.variantOf ? changedIds(site, page) : []), [site, page, outline]);
   useEffect(() => {
     if (!doc || !visible) return;
@@ -175,8 +179,9 @@ function VersionFrame({ page, bp, x, y, w, visible, outline }: { page: Page; bp:
   });
 
   return (
-    <div className="bd-frame vr-frame" data-bp={bp} style={{ left: x, top: y, width: w, height: heights.get(`${page.id}:${bp}`) ?? 900 }}>
+    <div className="bd-frame vr-frame" data-bp={bp} style={{ left: x, top: y, width: w, height }}>
       <iframe ref={ref} className="bd-live" title={`${page.variantName ?? page.title}, ${BREAKPOINT_LABEL[bp]}`} tabIndex={-1} />
+      <VersionStill doc={doc} ready={visible} stamp={stamp} bp={bp} pageId={page.id} />
       {doc && visible
         ? createPortal(
             <>
@@ -192,6 +197,13 @@ function VersionFrame({ page, bp, x, y, w, visible, outline }: { page: Page; bp:
   );
 }
 
+
+/** A number that goes up whenever one of `deps` changes (what a frame's picture shows). */
+function useStamp(deps: unknown[]): number {
+  const r = useRef({ deps, n: 0 });
+  if (deps.length !== r.current.deps.length || deps.some((d, i) => d !== r.current.deps[i])) r.current = { deps, n: r.current.n + 1 };
+  return r.current.n;
+}
 
 /** The rows' frames, in board space (inside .bd-world). */
 export function VersionRowFrames({ frames, view, size, after }: { frames: FrameRect[]; view: View; size: { w: number; h: number }; after?: number }) {
