@@ -155,7 +155,13 @@ function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
     // Loaded when a board is on screen, so the editor's first download stays small.
     let board: { stop(): void } | null = null, gone = false;
     void import("../runtime/dots.js").then(({ startDotBoard }) => {
-      if (!gone && ref.current) board = startDotBoard(ref.current, { lines, ...opts });
+      if (gone || !ref.current) return;
+      // Side frames (read-only previews, motion stilled) show whole frames without animating; the
+      // live frame pauses while someone types in the editor, so each key lands without waiting.
+      const doc = ref.current.ownerDocument;
+      const still = !!doc.getElementById("ed-still-motion");
+      const top = doc.defaultView?.parent as (Window & { __edBusyUntil?: number }) | undefined;
+      board = startDotBoard(ref.current, { lines, ...opts, still, hold: () => Math.max(0, (top?.__edBusyUntil ?? 0) - Date.now()) });
     });
     return () => { gone = true; board?.stop(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps

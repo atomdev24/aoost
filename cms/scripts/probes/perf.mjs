@@ -29,7 +29,7 @@ const sel = [];
 for (const p of els) { const t = Date.now(); await P.mouse.click(p.x, p.y); await P.waitForTimeout(400); sel.push(Date.now() - t - 400); }
 await P.evaluate(() => (window.__ev = []));
 // typing into the first text input in the inspector
-const inp = P.locator(".ed-inspector textarea, .ed-inspector input[type=text]").first();
+const inp = P.locator(".ed-inspector textarea:visible, .ed-inspector input[type=text]:visible").first();
 let typed = "n/a";
 if (await inp.count()) { await inp.click(); const t = Date.now(); await P.keyboard.type(" quick check of typing speed", { delay: 30 }); typed = Date.now() - t; }
 await P.waitForTimeout(800);

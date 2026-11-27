@@ -19,6 +19,10 @@ if (import.meta.env.PROD && !DEMO && "serviceWorker" in navigator) {
 
 startDisplay();
 startTooltips(document);
+// While someone types in the editor, the hero's dot board in the canvas holds still (AoostHero).
+const busy = () => ((window as Window & { __edBusyUntil?: number }).__edBusyUntil = Date.now() + 700);
+document.addEventListener("input", busy, true);
+document.addEventListener("keydown", busy, true);
 // Liquid glass only works in Chromium, so only Chromium downloads it (ui/liquid.ts).
 if (isChromium()) void import("./ui/liquid").then((m) => m.startLiquid(document)).catch(() => undefined);
 guardPinch(window);

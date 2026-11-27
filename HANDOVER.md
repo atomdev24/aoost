@@ -60,10 +60,9 @@ Speed probes: `cms/scripts/probes/perf.mjs [mobile]` (editor: load, tap and key 
   only when what they draw from changes (phone tap 150 → 48 ms).
 
 ## Next, in order
-1. **Speed, part 2:** side frames (LiveFrame) catch up after an edit rather than during it;
-   lighter first load (1.9 MB before the board; show a still of the page first, load Puck behind).
-2. **Homepage on phones:** 5.2 s to the main picture, 1.8 MB (artwork images and effects).
-   Smaller images, start effects after first paint. It's Alex's art homepage: keep the look.
+1. **Speed, part 2** ✓ (27 Nov): side frames already catch up after a pause (useSettled); the dot board no
+   longer animates in side frames and pauses while typing (keys 112 → 64 ms). First load is 0.7 MB now.
+2. **Homepage on phones** ✓ (27 Nov, #145): main picture 5.5 s → ~1.5 s, 1.8 → 0.8 MB.
 3. **Audit leftovers** ✓ (27 Nov): background picture/video use the media picker, the tint uses the colour picker
    (with strength), lists show bigger pictures with names as words. Quieter Layers #140, phone wording #135.
    Still possible: a full picture grid for long image lists.
