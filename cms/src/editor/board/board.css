@@ -458,3 +458,97 @@ html.ed-drag-out .bd { box-shadow: inset 0 0 0 3px var(--ed-accent, var(--ed-acc
   background: rgba(191, 90, 242, 0.18);
   color: #fff;
 }
+
+/* Motion: a thin grey line in the board's margin beside each section that moves (motion-marks.ts). */
+.ed-motion-line {
+  position: absolute;
+  z-index: 1;
+  border-radius: 99px;
+  background: rgba(235, 235, 245, 0.32);
+  pointer-events: auto;
+  cursor: help;
+}
+body.ed-hide-motion .ed-motion-line,
+body.ed-hide-comments .ed-cmt-pin:not(.is-draft):not(.is-open) {
+  display: none;
+}
+
+/* The zoom bar's Show menu (board/marks.ts). */
+.bd-show {
+  position: relative;
+}
+.bd-show-n {
+  margin-left: 5px;
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.bd-show-menu {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: 0;
+  z-index: 30;
+  min-width: 210px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border-radius: var(--ed-glass-radius);
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  box-shadow: var(--ed-glass-edge, none), var(--ed-glass-shadow);
+  transform-origin: bottom right;
+  animation: bd-show-in var(--ed-dur, 180ms) var(--ed-ease-out, ease-out);
+}
+@keyframes bd-show-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+.bd-show-head {
+  padding: 6px 10px 4px;
+  color: var(--ed-hint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.bd-show-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ed-text);
+  font: 13px var(--ed-font);
+  text-align: left;
+  cursor: pointer;
+}
+.bd-show-menu button:hover {
+  background: var(--ed-seg-on);
+}
+.bd-show-box {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--ed-line-strong);
+  color: var(--ed-text);
+  font-size: 11px;
+}
+.bd-show-menu button[aria-checked="true"] .bd-show-box {
+  background: var(--ed-accent-fill);
+  box-shadow: none;
+  color: var(--ed-on-accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bd-show-menu {
+    animation: none;
+  }
+}

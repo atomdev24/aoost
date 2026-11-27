@@ -542,3 +542,101 @@
     display: none;
   }
 }
+
+/* ----------------------------------------------------------- version headers (board clarity A) */
+.vr-head-line {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 34px;
+  padding: 0 2px 8px;
+  border-bottom: 1px solid var(--ed-line-strong);
+  color: var(--ed-text);
+  font: 13px/1 var(--ed-font);
+  white-space: nowrap;
+}
+.vr-head-line.is-variant {
+  border-bottom-color: color-mix(in srgb, var(--ed-variant, #bf5af2) 55%, transparent);
+}
+.vr-head-line.is-hidden {
+  border-bottom-style: dashed;
+}
+.vr-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 4px;
+  background: #30d158;
+}
+.vr-head-line.is-variant .vr-dot {
+  background: var(--ed-variant, #bf5af2);
+}
+.vr-head-line strong,
+.vr-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+.vr-name {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.vr-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.vr-state {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ed-sub);
+}
+.vr-sp {
+  flex: 1;
+}
+.vr-eye {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ed-sub);
+  cursor: pointer;
+}
+.vr-eye:hover:not(:disabled) {
+  background: var(--ed-seg-on);
+  color: var(--ed-text);
+}
+.vr-eye:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.vr-head-line .vr-vote {
+  height: 22px;
+  padding: 0 7px;
+  font-size: 12px;
+}
+.vr-folded {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px dashed color-mix(in srgb, var(--ed-variant, #bf5af2) 40%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--ed-variant, #bf5af2) 4%, transparent);
+}
+.vr-folded.is-owner {
+  border-color: var(--ed-line-strong);
+  background: transparent;
+}

@@ -1,4 +1,42 @@
+import { useEffect, useRef, useState } from "react";
+import { MARK_KINDS, setMark, useMarks } from "./marks";
 import { fit, setLinked, toggleDotGrid, useBoard, zoomStep, zoomTo } from "./store";
+
+/** "Show": which marks the board draws (comments, variant changes, motion, screen-size edits). */
+function ShowMenu() {
+  const marks = useMarks();
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: PointerEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
+    const key = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", key);
+    return () => (document.removeEventListener("pointerdown", away), document.removeEventListener("keydown", key));
+  }, [open]);
+  const off = MARK_KINDS.filter((k) => !marks[k.id]).length;
+  return (
+    <div className="bd-show" ref={box}>
+      <button type="button" className="bd-zb bd-zb-text" aria-haspopup="menu" aria-expanded={open} title="Choose which marks show on the board" onClick={() => setOpen(!open)}>
+        Show{off ? <span className="bd-show-n">{MARK_KINDS.length - off}/{MARK_KINDS.length}</span> : null}
+      </button>
+      {open ? (
+        <ul className="bd-show-menu" role="menu" aria-label="Show on the board">
+          <li className="bd-show-head" role="presentation">Show on the board</li>
+          {MARK_KINDS.map((k) => (
+            <li key={k.id} role="none">
+              <button type="button" role="menuitemcheckbox" aria-checked={marks[k.id]} title={k.hint} onClick={() => setMark(k.id, !marks[k.id])}>
+                <span className="bd-show-box" aria-hidden="true">{marks[k.id] ? "✓" : ""}</span>
+                {k.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
 
 const GridIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
@@ -30,6 +68,7 @@ export function ZoomBar() {
         Linked
       </button>
       <span className="bd-zb-rule" />
+      <ShowMenu />
       <button type="button" className="bd-zb bd-zb-grid" aria-label="Dot grid" aria-pressed={dotGrid} title="Dot grid (')" onClick={toggleDotGrid}>
         <GridIcon />
       </button>

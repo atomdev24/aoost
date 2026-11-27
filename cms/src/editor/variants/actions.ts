@@ -99,16 +99,20 @@ export async function pick(pickedId: string, then: "staging" | "none"): Promise<
 // ------------------------------------------------------------------ board preferences (per browser)
 
 export type RowsMode = "all" | "proposed" | "none";
-type Prefs = { rows: RowsMode; outline: boolean };
+/** hidden: versions folded away on the board (their header's eye), by page id. */
+type Prefs = { rows: RowsMode; outline: boolean; hidden: string[] };
 const KEY = "ed-variant-prefs";
 let prefs: Prefs = (() => {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? "null") as Partial<Prefs> | null;
-    return { rows: raw?.rows === "proposed" || raw?.rows === "none" ? raw.rows : "all", outline: raw?.outline !== false };
+    return { rows: raw?.rows === "proposed" || raw?.rows === "none" ? raw.rows : "all", outline: raw?.outline !== false, hidden: Array.isArray(raw?.hidden) ? raw!.hidden.filter((x) => typeof x === "string") : [] };
   } catch {
-    return { rows: "all", outline: true };
+    return { rows: "all", outline: true, hidden: [] };
   }
 })();
+/** Fold a version away on the board, or bring it back. */
+export const setVersionHidden = (pageId: string, hide: boolean) =>
+  setVariantPrefs({ hidden: hide ? [...new Set([...prefs.hidden, pageId])] : prefs.hidden.filter((id) => id !== pageId) });
 const listeners = new Set<() => void>();
 export function setVariantPrefs(patch: Partial<Prefs>) {
   prefs = { ...prefs, ...patch };

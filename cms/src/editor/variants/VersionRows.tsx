@@ -17,7 +17,7 @@ import { attachFrameGestures } from "../touch/gestures";
 import { usePhone } from "../touch/device";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { openDesigns } from "../templates/designs-open";
-import { newVariant, openVersion, propose, removeVariant, useVariantPrefs, voter, vote } from "./actions";
+import { newVariant, openVersion, propose, removeVariant, setVersionHidden, useVariantPrefs, voter, vote } from "./actions";
 import { openPick } from "./pick-open";
 import { renameVariant } from "../../model/variants";
 import { update } from "../store";
@@ -54,8 +54,10 @@ const useHeights = () =>
     () => tick,
   );
 
-/** One other version: its frames sit at the open page's frames moved right by `dx`. */
-export type VersionRow = { page: Page; dx: number; h: number };
+/** One other version: its frames sit at the open page's frames moved right by `dx`; hidden ones fold to a narrow strip. */
+export type VersionRow = { page: Page; dx: number; h: number; hidden: boolean; w: number };
+/** A folded version's strip on the board (board units). */
+const FOLDED_W = 240;
 
 /**
  * Where the other versions sit: to the right of the open page's frames (and of the "add a screen
@@ -79,8 +81,10 @@ export function useVersionLayout(frames: FrameRect[], after = -Infinity): { grou
       if (p.id === pageId) continue;
       if (prefs.rows === "proposed" && p.variantOf && statusOf(p) !== "proposed") continue;
       const h = Math.max(...frames.map((f) => heights.get(`${p.id}:${f.bp}`) ?? f.h));
-      rows.push({ page: p, dx: x - left, h });
-      x += span + COL_GAP;
+      const hidden = prefs.hidden.includes(p.id);
+      const w = hidden ? FOLDED_W : span;
+      rows.push({ page: p, dx: x - left, h, hidden, w });
+      x += w + COL_GAP;
     }
   return { group, rows, top, left, right, span, end: x - COL_GAP / 2 };
 }
@@ -198,7 +202,9 @@ export function VersionRowFrames({ frames, view, size, after }: { frames: FrameR
   return (
     <>
       {layout.rows.map((r) =>
-        frames.map((f) => (
+        r.hidden ? (
+          <div key={r.page.id} className={`vr-folded${r.page.variantOf ? "" : " is-owner"}`} style={{ left: layout.left + r.dx, top: layout.top, width: r.w, height: Math.max(...frames.map((f) => f.h)) }} aria-hidden="true" />
+        ) : frames.map((f) => (
           <VersionFrame
             key={`${r.page.id}:${f.bp}`}
             page={r.page}
@@ -294,41 +300,68 @@ function RowMenu({ page, isOwner, current }: { page: Page; isOwner: boolean; cur
   );
 }
 
-/** A row's name, status, votes and comments, to the left of its frames (screen space). */
-function RowLabel({ page, current, owner, style }: { page: Page; current: boolean; owner: Page; style: React.CSSProperties }) {
+const EYE = (
+  <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+    <path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8s-2.4 4.5-6.5 4.5S1.5 8 1.5 8Z" />
+    <circle cx="8" cy="8" r="2" />
+  </svg>
+);
+const EYE_OFF = (
+  <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+    <path d="M2 2l12 12M6.3 4c.5-.2 1.1-.3 1.7-.3 4.1 0 6.5 4.3 6.5 4.3a11 11 0 0 1-1.7 2.2M10 11.9c-.6.4-1.3.6-2 .6-4.1 0-6.5-4.5-6.5-4.5a11 11 0 0 1 2.3-2.8" />
+  </svg>
+);
+
+/**
+ * A version's header (board clarity, option A): one line above its frames with a rule under it,
+ * marking where it starts. Dot (green: the page, purple: a variant), name, status, votes and
+ * comments, the eye that folds it away, and its menu. A click on the name opens it for editing.
+ */
+function VersionHeader({ page, current, owner, hidden, style }: { page: Page; current: boolean; owner: Page; hidden: boolean; style: React.CSSProperties }) {
   const isOwner = page.id === owner.id;
   const status = isOwner ? null : statusOf(page);
   const comments = useOpenComments(page.id);
   const me = voter().id;
   const votes = page.variantVotes ?? [];
   const mine = votes.some((v) => v.id === me);
+  const name = isOwner ? page.title : (page.variantName ?? "Variant");
+  const state = isOwner ? (owner.status === "published" ? "Live page" : "The page") : STATUS_LABEL[status!];
   return (
-    <div className={`vr-label${current ? " is-current" : ""}${isOwner ? " is-owner" : ""}`} style={style} onPointerDown={(e) => e.stopPropagation()}>
-      <div className="vr-head">
-        <strong title={page.variantName ?? page.title}>{isOwner ? page.title : page.variantName}</strong>
-        <RowMenu page={page} isOwner={isOwner} current={current} />
-      </div>
-      {isOwner ? (
-        <span className={`vr-chip ${owner.status === "published" ? "is-live" : "is-page"}`}>{owner.status === "published" ? "Live page" : "The page"}</span>
-      ) : (
-        <span className={`vr-chip is-${status}`}>{STATUS_LABEL[status!]}</span>
-      )}
-      <span className="vr-meta">{isOwner ? "As it is now" : page.variantBy ? `By ${page.variantBy}` : "Variant"}</span>
-      {!isOwner ? (
-        <span className="vr-social">
-          <button type="button" className={`vr-vote${mine ? " is-on" : ""}`} aria-pressed={mine} title={votes.length ? votes.map((v) => v.name).join(", ") : "Vote for this one"} onClick={() => vote(page.id)}>
-            ▲ {votes.length}
-          </button>
-          <span>{comments === 1 ? "1 comment" : `${comments} comments`}</span>
-        </span>
-      ) : null}
+    <div className={`vr-head-line${isOwner ? " is-owner" : " is-variant"}${current ? " is-current" : ""}${hidden ? " is-hidden" : ""}`} style={style} onPointerDown={(e) => e.stopPropagation()}>
+      <span className="vr-dot" aria-hidden="true" />
       {current ? (
-        <span className="vr-editing">You're editing this</span>
+        <strong title={name}>{name}</strong>
       ) : (
-        <button type="button" className="vr-open" onClick={() => openVersion(page.id)}>
-          Edit this one
+        <button type="button" className="vr-name" title={`Edit ${name}`} onClick={() => openVersion(page.id)}>
+          {name}
         </button>
       )}
+      {hidden ? null : (
+        <span className="vr-state">
+          {state}
+          {!isOwner && page.variantBy ? ` · ${page.variantBy}` : ""}
+          {current ? " · editing" : ""}
+        </span>
+      )}
+      <span className="vr-sp" />
+      {!isOwner && !hidden ? (
+        <button type="button" className={`vr-vote${mine ? " is-on" : ""}`} aria-pressed={mine} title={votes.length ? votes.map((v) => v.name).join(", ") : "Vote for this one"} onClick={() => vote(page.id)}>
+          ▲ {votes.length}
+        </button>
+      ) : null}
+      {!hidden && comments ? <span className="vr-state" title="Open comments">{comments === 1 ? "1 comment" : `${comments} comments`}</span> : null}
+      <button
+        type="button"
+        className="vr-eye"
+        aria-pressed={!hidden}
+        disabled={current}
+        aria-label={current ? `You're editing ${name}` : hidden ? `Show ${name}` : `Hide ${name}`}
+        title={current ? "You're editing this one" : hidden ? "Show it on the board" : "Hide it on the board"}
+        onClick={() => setVersionHidden(page.id, !hidden)}
+      >
+        {hidden ? EYE_OFF : EYE}
+      </button>
+      {hidden ? null : <RowMenu page={page} isOwner={isOwner} current={current} />}
     </div>
   );
 }
@@ -356,25 +389,27 @@ export function VersionRowLabels({ frames, after }: { frames: FrameRect[]; after
   if (!current || !frames.length || phone) return null;
   const owner = layout.group[0] ?? current;
   const at = (x: number, y: number) => ({ left: x * view.zoom + view.x, top: y * view.zoom + view.y });
-  // Each version's card sits above its frames, clear of the frame names.
-  const labelPos = (dx: number) => {
+  // One header line per version, above its frame names: where it starts, and its eye.
+  const headPos = (dx: number, w: number) => {
     const p = at(layout.left + dx, layout.top);
-    return { left: p.left, top: p.top - 44, width: LABEL_W, transform: "translateY(-100%)" };
+    return { left: p.left, top: p.top - 40, width: Math.max(w * view.zoom, 160), transform: "translateY(-100%)" };
   };
-  const button = at(layout.end, layout.top);
+  // After the last header (a folded one is wider on screen than its strip), never on top of it.
+  const lastHead = layout.rows.length ? headPos(layout.rows.at(-1)!.dx, layout.rows.at(-1)!.w) : headPos(0, layout.span);
+  const button = { left: Math.max(at(layout.end, layout.top).left, lastHead.left + lastHead.width + 24), top: at(0, layout.top).top };
   return (
     <>
-      {layout.group.length > 1 ? <RowLabel page={current} current owner={owner} style={labelPos(0)} /> : null}
+      {layout.group.length > 1 ? <VersionHeader page={current} current owner={owner} hidden={false} style={headPos(0, layout.span)} /> : null}
       {layout.rows.map((r) => (
-        <RowLabel key={r.page.id} page={r.page} current={false} owner={owner} style={labelPos(r.dx)} />
+        <VersionHeader key={r.page.id} page={r.page} current={false} owner={owner} hidden={r.hidden} style={headPos(r.dx, r.w)} />
       ))}
       {layout.rows.map((r) =>
-        frames.map((f) => <VersionFrameLabel key={`${r.page.id}:${f.bp}`} page={r.page} bp={f.bp} style={{ ...at(f.x + r.dx, f.y), transform: "translateY(calc(-100% - 6px))" }} />),
+        r.hidden ? null : frames.map((f) => <VersionFrameLabel key={`${r.page.id}:${f.bp}`} page={r.page} bp={f.bp} style={{ ...at(f.x + r.dx, f.y), transform: "translateY(calc(-100% - 6px))" }} />),
       )}
       <button
         type="button"
         className="vr-new"
-        style={{ left: button.left, top: button.top, width: LABEL_W }}
+        style={{ left: button.left, top: button.top - 40, transform: "translateY(-100%)" }}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => newVariant(owner.id)}
         title="A copy of the page to try ideas on. The live page isn't touched."
