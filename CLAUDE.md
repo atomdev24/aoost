@@ -44,4 +44,8 @@ Copied from vercel-labs/agent-skills (MIT, commit 5a37a63) into `.claude/skills/
 - `web-design-guidelines`: check UI changes against its rules (accessibility, focus, forms, motion, touch).
 - `react-best-practices`: React performance rules. aoost is Vite, not Next.js, so skip the server and Next-only rules.
 - `composition-patterns`: how to split components instead of piling on boolean props.
+Also in `.claude/skills/` (copied, pinned):
+- `security-audit` (Cloudflare, cloudflare/security-audit-skill c1c8a8c): how to review code for real security holes. Use it for security questions and the nightly security audit; only run its full six-phase audit when asked.
+- `workers-best-practices`, `durable-objects`, `wrangler`, `web-perf` (Cloudflare, cloudflare/skills ff191de): how to build, debug and speed up Workers and Durable Objects, which is what aoost runs on.
+- `skill-inspector` (NVIDIA SkillSpector 02894ec): check any new skill before adding it here. Never run scripts from the skill being checked.
 They don't override the rules above. Where they disagree with aoost's taste or decisions, aoost wins.
