@@ -1,3 +1,4 @@
+import { pictureName } from "../../../model/names";
 import type { Fields } from "@puckeditor/core";
 import { mediaField } from "../../../editor/fields/media";
 import { sizeField } from "../../../editor/fields/size";
@@ -23,7 +24,7 @@ export const fields: Fields<AoostProjectsContent> = {
       hidden: onOff("Hidden"),
     },
     defaultItemProps: { image: "" },
-    getItemSummary: (item, i) => withThumb(item.image, item.title || item.image?.split("/").pop() || `Project ${(i ?? 0) + 1}`),
+    getItemSummary: (item, i) => withThumb(item.image, item.title || pictureName(item.image) || `Project ${(i ?? 0) + 1}`),
   },
   note: {
     type: "object",
@@ -58,7 +59,7 @@ export const fields: Fields<AoostProjectsContent> = {
       hidden: onOff("Hidden"),
     },
     defaultItemProps: { image: "", x: 30, y: 30, width: 200 },
-    getItemSummary: (item, i) => withThumb(item.image, item.image?.split("/").pop() || `Fixture ${(i ?? 0) + 1}`),
+    getItemSummary: (item, i) => withThumb(item.image, pictureName(item.image) || `Fixture ${(i ?? 0) + 1}`),
   },
   shadow: {
     type: "object",

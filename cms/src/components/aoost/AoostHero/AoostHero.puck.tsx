@@ -1,3 +1,4 @@
+import { pictureName } from "../../../model/names";
 import type { Fields } from "@puckeditor/core";
 import { mediaField } from "../../../editor/fields/media";
 import { withThumb, hexField } from "../fields";
@@ -25,7 +26,7 @@ export const fields: Fields<AoostHeroContent> = {
       tone: { type: "text", label: "Overlay colour (hex, e.g. #FF4FA3; empty = taken from the artwork)" },
     },
     defaultItemProps: { src: "", alt: "" },
-    getItemSummary: (item, i) => withThumb(item.src, item.alt || item.src?.split("/").pop() || `Artwork ${(i ?? 0) + 1}`),
+    getItemSummary: (item, i) => withThumb(item.src, item.alt || pictureName(item.src) || `Artwork ${(i ?? 0) + 1}`),
   },
   reelSeconds: { type: "number", label: "Seconds per artwork", min: 1, max: 60 },
   artDim: { type: "number", label: "Darken the artwork (0–0.8, default 0.15)", min: 0, max: 0.8, step: 0.05 },

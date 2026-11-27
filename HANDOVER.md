@@ -64,8 +64,9 @@ Speed probes: `cms/scripts/probes/perf.mjs [mobile]` (editor: load, tap and key 
    lighter first load (1.9 MB before the board; show a still of the page first, load Puck behind).
 2. **Homepage on phones:** 5.2 s to the main picture, 1.8 MB (artwork images and effects).
    Smaller images, start effects after first paint. It's Alex's art homepage: keep the look.
-3. **Audit leftovers** (canvas board "Audit"): developer words in fields (raw URL, rgba tint),
-   pictures not file names in lists, quieter Layers rows. ("25 changes for phones" done, PR #135.)
+3. **Audit leftovers** ✓ (27 Nov): background picture/video use the media picker, the tint uses the colour picker
+   (with strength), lists show bigger pictures with names as words. Quieter Layers #140, phone wording #135.
+   Still possible: a full picture grid for long image lists.
 4. **Rich text for the Aerobotics blocks' text fields**; inline font size.
 5. **Web app extras:** share a photo from the phone into Media (Web Share Target), push
    notifications for mentions and Claude replies.
