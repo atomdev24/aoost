@@ -25,7 +25,7 @@ import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
 import { openPalette } from "../commands/palette-store";
 import { openProblemLog, openReport } from "../problems";
-import { setGlass, setTheme, THEMES, useGlass, useTheme } from "../display";
+import { GLASS_STYLES, setGlassStyle, setTheme, THEMES, useGlassStyle, useTheme } from "../display";
 // Opened now and then: loads on first use.
 const DemoModal = lazy(() => import("../team/DemoModal").then((m) => ({ default: m.DemoModal })));
 const InsightsModal = lazy(() => import("../insights/InsightsModal").then((m) => ({ default: m.InsightsModal })));
@@ -272,7 +272,7 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
   const [teamOpen, setTeamOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
   const [insightsOpen, setInsightsOpen] = useState(false);
-  const glass = useGlass();
+  const glass = useGlassStyle();
   const theme = useTheme();
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -356,17 +356,17 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
               Discard draft
             </button>
           </li>
-          <li role="none">
-            <button
-              type="button"
-              role="menuitemcheckbox"
-              aria-checked={glass}
-              title="The blurred see-through toolbars. Off by default in Chrome, where the blur can flicker while zooming."
-              onClick={() => setGlass(!glass)}
-            >
-              {glass ? "✓ " : ""}Glass toolbars
-            </button>
-          </li>
+          <li role="separator" className="ed-menu-sep" />
+          <li role="presentation" className="ed-menu-head">Toolbars</li>
+          {GLASS_STYLES.map((g) => (
+            <li role="none" key={g.id}>
+              <button type="button" className="is-theme" role="menuitemradio" aria-checked={glass === g.id} title={g.hint} onClick={() => setGlassStyle(g.id)}>
+                <span className="ed-glass-dot" data-glass={g.id} aria-hidden="true" />
+                {g.name}
+                {glass === g.id ? <span className="ed-menu-check" aria-hidden="true">✓</span> : null}
+              </button>
+            </li>
+          ))}
           <li role="separator" className="ed-menu-sep" />
           <li role="presentation" className="ed-menu-head">Colours</li>
           {THEMES.map((t) => (
