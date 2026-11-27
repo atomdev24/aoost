@@ -230,8 +230,8 @@
 }
 .ed-menu button:hover,
 .ed-menu button:focus-visible {
-  background: var(--ed-accent);
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
 }
 .ed-menu button[aria-checked="true"] span {
   font-weight: 600;
@@ -321,7 +321,7 @@
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: #6e6e73;
+  background: var(--ed-hint);
 }
 .ed-pill.is-on .ed-pill-dot {
   background: #34c759;
@@ -339,8 +339,8 @@
 .ed-btn-accent {
   padding: 0 16px;
   border-color: var(--ed-accent);
-  background: var(--ed-accent);
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
   font-weight: 600;
 }
 .ed-btn-accent:hover:not(:disabled) {
@@ -348,7 +348,7 @@
 }
 .ed-btn-primary {
   border-color: var(--ed-accent);
-  color: #409cff;
+  color: var(--ed-accent-hi);
 }
 .ed-btn-danger {
   border-color: #ff453a;
@@ -574,7 +574,7 @@
 }
 .ed-caps-note {
   font-size: 12px;
-  color: #6e6e73;
+  color: var(--ed-hint);
 }
 .ed-layers {
   padding: 0 10px 8px;
@@ -693,7 +693,7 @@
   padding: 6px 10px;
   border-radius: 8px;
   background: var(--ed-accent-soft);
-  color: #8cc4ff;
+  color: var(--ed-accent-hi);
   font-size: 12px;
 }
 .ed-inspector-body {
@@ -719,7 +719,7 @@
 }
 .ed-igroup-title span {
   font-weight: 400;
-  color: #6e6e73;
+  color: var(--ed-hint);
   margin-left: 4px;
 }
 .ed-subhead {
@@ -728,7 +728,7 @@
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
-  color: #8e8e93;
+  color: var(--ed-sub);
 }
 .ed-responsive {
   gap: 6px;
@@ -756,7 +756,7 @@
 .ed-dot-hollow {
   width: 6px;
   height: 6px;
-  box-shadow: inset 0 0 0 1px #6e6e73;
+  box-shadow: inset 0 0 0 1px var(--ed-hint);
 }
 .ed-override-note {
   margin: 2px 0 0;
@@ -767,7 +767,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: #409cff;
+  color: var(--ed-accent-hi);
   font: inherit;
   cursor: pointer;
 }
@@ -790,7 +790,7 @@
 }
 .ed-chip[aria-pressed="true"] {
   background: var(--ed-accent-soft);
-  color: #409cff;
+  color: var(--ed-accent-hi);
   font-weight: 600;
 }
 
@@ -909,7 +909,7 @@
 .ed-inspector [class*="ArrayField-addButton"] {
   border-radius: 8px;
   background: transparent;
-  color: #409cff;
+  color: var(--ed-accent-hi);
   font-weight: 500;
 }
 .ed-inspector [class*="ArrayField-addButton"]:hover {
@@ -942,7 +942,7 @@
   letter-spacing: 0;
 }
 .ed-blocks [class*="ComponentList-titleIcon"] {
-  color: #6e6e73;
+  color: var(--ed-hint);
 }
 .ed-blocks [class*="DrawerItem-draggable"],
 .ed-blocks [class*="ComponentList-item"] {
@@ -964,18 +964,18 @@
 /* Selection on the editable frame (inside the iframe; Puck copies these styles in).
    --ed-px is 1/zoom, set on the frame's root, so lines stay the same width on screen. */
 [class*="DraggableComponent-overlay_"] {
-  outline: calc(1.5px * var(--ed-px, 1)) solid #0a84ff !important;
+  outline: calc(1.5px * var(--ed-px, 1)) solid var(--ed-accent) !important;
   outline-offset: calc(-1.5px * var(--ed-px, 1)) !important;
 }
 [class*="DraggableComponent--hover"] > [class*="DraggableComponent-overlayWrapper"] > [class*="DraggableComponent-overlay_"] {
   background: transparent !important;
-  outline: calc(1px * var(--ed-px, 1)) solid rgba(10, 132, 255, 0.55) !important;
+  outline: calc(1px * var(--ed-px, 1)) solid color-mix(in srgb, var(--ed-accent) 55%, transparent) !important;
   outline-offset: calc(-1px * var(--ed-px, 1)) !important;
 }
 [class*="DraggableComponent--isSelected"] > [class*="DraggableComponent-overlayWrapper"] > [class*="DraggableComponent-overlay_"] {
   position: relative;
   background: transparent !important;
-  outline: calc(1.5px * var(--ed-px, 1)) solid #0a84ff !important;
+  outline: calc(1.5px * var(--ed-px, 1)) solid var(--ed-accent) !important;
   outline-offset: calc(-1.5px * var(--ed-px, 1)) !important;
 }
 /* Four corner handles: 6px white squares with an accent border (visual; free-layout layers draw their own live handles). */
@@ -992,10 +992,10 @@
     linear-gradient(#fff, #fff) right var(--o) top var(--o) / var(--i) var(--i) no-repeat,
     linear-gradient(#fff, #fff) left var(--o) bottom var(--o) / var(--i) var(--i) no-repeat,
     linear-gradient(#fff, #fff) right var(--o) bottom var(--o) / var(--i) var(--i) no-repeat,
-    linear-gradient(#0a84ff, #0a84ff) left top / var(--h) var(--h) no-repeat,
-    linear-gradient(#0a84ff, #0a84ff) right top / var(--h) var(--h) no-repeat,
-    linear-gradient(#0a84ff, #0a84ff) left bottom / var(--h) var(--h) no-repeat,
-    linear-gradient(#0a84ff, #0a84ff) right bottom / var(--h) var(--h) no-repeat;
+    linear-gradient(var(--ed-accent), var(--ed-accent)) left top / var(--h) var(--h) no-repeat,
+    linear-gradient(var(--ed-accent), var(--ed-accent)) right top / var(--h) var(--h) no-repeat,
+    linear-gradient(var(--ed-accent), var(--ed-accent)) left bottom / var(--h) var(--h) no-repeat,
+    linear-gradient(var(--ed-accent), var(--ed-accent)) right bottom / var(--h) var(--h) no-repeat;
 }
 [class*="DraggableComponent-actions_"] {
   right: auto !important;
@@ -1015,8 +1015,8 @@
   height: 18px;
   padding: 0 1px 0 0;
   border-radius: 4px 4px 4px 0;
-  background: #0a84ff;
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
   transform-origin: left top;
   white-space: nowrap;
   font: 500 11px/1 var(--ed-font, -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif);
@@ -1180,7 +1180,7 @@
 .ed-inspector .ed-subhead {
   margin: 6px 0 2px;
   font-size: 12px;
-  color: #6e6e73;
+  color: var(--ed-hint);
 }
 .ed-inspector .ed-responsive {
   display: flex;
@@ -1262,7 +1262,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6e6e73;
+  color: var(--ed-hint);
   font-size: 11px;
   font-weight: 600;
   user-select: none;
@@ -1284,7 +1284,7 @@
 }
 .ed-scrub-suffix {
   flex: none;
-  color: #6e6e73;
+  color: var(--ed-hint);
   font-size: 12px;
 }
 .ed-scrub-input[aria-invalid="true"] {
@@ -1412,8 +1412,8 @@
 }
 .ed-pop-menu button:hover,
 .ed-pop-menu button:focus-visible {
-  background: var(--ed-accent);
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
   outline: none;
 }
 .ed-pop-menu button[aria-checked="true"]::after {
@@ -1475,7 +1475,7 @@ body:has(.ed-scrub.is-scrubbing) {
   border-radius: 4px;
 }
 .ed-colorrow-swatch > span.is-none {
-  background: linear-gradient(135deg, transparent 45%, #ff453a 45% 55%, transparent 55%), #2a2a2e !important;
+  background: linear-gradient(135deg, transparent 45%, #ff453a 45% 55%, transparent 55%), var(--ed-raised-2) !important;
 }
 .ed-colorrow-value {
   flex: 1;
@@ -1657,13 +1657,13 @@ body:has(.ed-scrub.is-scrubbing) {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #6e6e73;
+  background: var(--ed-hint);
 }
 .ed-align-grid button:hover span {
   background: var(--ed-text);
 }
 .ed-align-grid button.is-near span {
-  background: #409cff;
+  background: var(--ed-accent-hi);
 }
 .ed-align-grid button[aria-pressed="true"] {
   background: var(--ed-accent-soft);
@@ -1745,8 +1745,8 @@ body:has(.ed-scrub.is-scrubbing) {
   font-size: 12px;
 }
 .ed-scope.is-override {
-  background: rgba(10, 132, 255, 0.14);
-  color: #8cc4ff;
+  background: color-mix(in srgb, var(--ed-accent) 14%, transparent);
+  color: var(--ed-accent-hi);
 }
 .ed-scope-text {
   flex: 1;
@@ -1763,12 +1763,12 @@ body:has(.ed-scrub.is-scrubbing) {
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: #409cff;
+  color: var(--ed-accent-hi);
   font: 600 12px var(--ed-font);
   cursor: pointer;
 }
 .ed-scope-reset:hover {
-  background: rgba(10, 132, 255, 0.2);
+  background: color-mix(in srgb, var(--ed-accent) 20%, transparent);
 }
 .ed-inspector button.ed-label {
   padding: 0;
@@ -1780,7 +1780,7 @@ body:has(.ed-scrub.is-scrubbing) {
   cursor: pointer;
 }
 .ed-inspector .ed-label.is-over {
-  color: #409cff;
+  color: var(--ed-accent-hi);
 }
 .ed-inspector .ed-label.is-over:hover span {
   text-decoration: underline;
@@ -1792,15 +1792,15 @@ body:has(.ed-scrub.is-scrubbing) {
 .ed-inspector .ed-cell.is-over .ed-colorrow,
 .ed-inspector .ed-cell.is-over .ed-align-grid,
 .ed-inspector .ed-cell.is-over .ed-pair .ed-scrub {
-  background: rgba(10, 132, 255, 0.16);
+  background: color-mix(in srgb, var(--ed-accent) 16%, transparent);
 }
 /* A picture inside a block whose framing differs on this size. */
 .ed-inspector .ed-mediarow.is-over .ed-mediarow-main {
-  background: rgba(10, 132, 255, 0.16);
+  background: color-mix(in srgb, var(--ed-accent) 16%, transparent);
 }
 /* A piece whose size differs on this size. */
 .ed-inspector .ed-sizefield.is-over .ed-scrub {
-  background: rgba(10, 132, 255, 0.16);
+  background: color-mix(in srgb, var(--ed-accent) 16%, transparent);
 }
 .ed-inspector .ed-field > .ed-label.is-over {
   padding: 0;
@@ -1847,8 +1847,8 @@ body:has(.ed-scrub.is-scrubbing) {
   position: absolute;
   padding: 2px 6px;
   border-radius: 4px;
-  background: var(--ed-accent);
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
   font: 600 12px var(--ed-font);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -1895,7 +1895,7 @@ body:has(.ed-scrub.is-scrubbing) {
   padding: 2px 6px;
   border-radius: 4px;
   background: #ffd60a;
-  color: #1c1c1e;
+  color: var(--ed-surface);
   font: 600 12px var(--ed-font);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -2079,7 +2079,7 @@ body:has(.ed-scrub.is-scrubbing) {
 .ed-chip-sm[aria-selected="true"],
 .ed-chip-sm[aria-pressed="true"] {
   background: var(--ed-text);
-  color: #1c1c1e;
+  color: var(--ed-surface);
 }
 .ed-cards {
   display: grid;
@@ -2231,8 +2231,8 @@ button.ed-card {
   cursor: pointer;
 }
 .ed-qi li[aria-selected="true"] {
-  background: var(--ed-accent);
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
 }
 .ed-qi-icon {
   flex: none;
@@ -2281,12 +2281,12 @@ button.ed-card {
   padding: 3px 8px;
   border-radius: 999px;
   background: var(--ed-accent-soft);
-  color: #8cc4ff;
+  color: var(--ed-accent-hi);
   font-size: 12px;
 }
 .ed-qi-keys {
   margin-top: auto;
-  color: #6e6e73;
+  color: var(--ed-hint);
   font-size: 12px;
 }
 .ed-card-wrap [class*="DrawerItem"],
@@ -2517,7 +2517,7 @@ button.ed-card {
   white-space: nowrap;
 }
 .ed-medialist-used.is-used {
-  color: #8cc4ff;
+  color: var(--ed-accent-hi);
 }
 
 /* ---------------------------------------------------------------- save dot, publish button, publish sheet */
@@ -2526,7 +2526,7 @@ button.ed-card {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #6e6e73;
+  background: var(--ed-hint);
   cursor: help;
 }
 .ed-savedot[data-state="saving"] {
@@ -2569,7 +2569,7 @@ button.ed-card {
 .ed-publish.is-github .ed-publish-btn:disabled,
 .ed-publish.is-rebuilding .ed-publish-btn:disabled {
   opacity: 1;
-  background: rgba(10, 132, 255, 0.55);
+  background: color-mix(in srgb, var(--ed-accent) 55%, transparent);
   color: #fff;
 }
 .ed-publish.is-live .ed-publish-btn {
@@ -2586,7 +2586,7 @@ button.ed-card {
   border: 2px solid #242428;
   border-radius: 999px;
   background: #fff;
-  color: #1c1c1e;
+  color: var(--ed-surface);
   font: 700 11px/14px var(--ed-font);
   font-variant-numeric: tabular-nums;
   cursor: pointer;
@@ -2876,7 +2876,7 @@ button.ed-card {
   max-width: min(560px, calc(100vw - 32px));
   padding: 9px 12px;
   font-size: 12.5px;
-  color: #ececee;
+  color: var(--ed-text);
   background: rgba(36, 36, 40, 0.88);
   -webkit-backdrop-filter: var(--ed-glass-backdrop);
   backdrop-filter: var(--ed-glass-backdrop);
@@ -2999,7 +2999,7 @@ button.ed-card {
   transform-origin: top center;
   padding: 8px 14px;
   border-radius: 10px;
-  background: #2a2a2e;
+  background: var(--ed-raised-2);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   color: var(--ed-text);
@@ -3055,7 +3055,7 @@ button.ed-card {
   max-width: calc(100vw - 520px);
   padding: 7px 8px 7px 12px;
   font-size: 12.5px;
-  color: #ececee;
+  color: var(--ed-text);
   background: rgba(36, 30, 44, 0.94);
   border: 1px solid var(--ed-variant);
   border-radius: 12px;
@@ -3222,7 +3222,7 @@ button.ed-card {
 }
 .ed-history-meta {
   font-size: 12px;
-  color: var(--ed-text-dim, #8e8e93);
+  color: var(--ed-text-dim, var(--ed-sub));
 }
 .ed-history-actions {
   display: flex;
@@ -3265,7 +3265,7 @@ button.ed-card {
 .ed-compare-seg-btn {
   border: 0;
   background: transparent;
-  color: var(--ed-text-dim, #8e8e93);
+  color: var(--ed-text-dim, var(--ed-sub));
   font: inherit;
   font-size: 12px;
   padding: 4px 10px;
@@ -3291,7 +3291,7 @@ button.ed-card {
 }
 .ed-compare-pane figcaption {
   font-size: 12px;
-  color: var(--ed-text-dim, #8e8e93);
+  color: var(--ed-text-dim, var(--ed-sub));
 }
 .ed-compare-pane:last-child figcaption {
   color: var(--ed-variant);
@@ -3513,4 +3513,45 @@ body:has(.ed-flyout) .ed-dock {
     font-size: 0 !important;
     flex: none;
   }
+}
+
+/* "…" menu: colour theme choices. */
+.ed-menu-head {
+  list-style: none;
+  padding: 6px 10px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-hint);
+}
+.ed-theme-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border-radius: 6px;
+  vertical-align: -1px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+.ed-theme-dot[data-theme="graphite"] { background: linear-gradient(135deg, #2e2e33 50%, #0a84ff 50%); }
+.ed-theme-dot[data-theme="ink"] { background: linear-gradient(135deg, #16171a 50%, #6e8bff 50%); }
+.ed-theme-dot[data-theme="paper"] { background: linear-gradient(135deg, #2d2a26 50%, #efe9df 50%); }
+.ed-menu-check {
+  margin-left: auto;
+  padding-left: 12px;
+  color: var(--ed-accent);
+}
+.ed-menu button.is-theme {
+  flex-direction: row;
+  align-items: center;
+}
+.ed-menu button.is-theme:hover .ed-menu-check,
+.ed-menu button.is-theme:focus-visible .ed-menu-check {
+  color: inherit;
+}
+/* Paper at night: the selected block's name tag matches its orange outline. */
+html[data-ed-theme="paper"] .ed-tag {
+  background: var(--ed-accent);
+  color: #1a1917;
 }

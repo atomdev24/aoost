@@ -19,6 +19,7 @@ import { attachFrameGestures } from "../touch/gestures";
 import { ZoomVar } from "./PuckFrame";
 import { closeUnpinnedFlyout } from "../workspace/rail-store";
 import { watchWindow } from "../problems";
+import { frameThemeCss, markTheme, useTheme } from "../display";
 import { guardPinch } from "../pinch-guard";
 
 /** Editor-only rules for a passive frame: still motion, no live media, nav drawn in place. */
@@ -30,13 +31,13 @@ html.js [data-enter]{opacity:1!important;translate:none!important;scale:none!imp
 .n iframe,.n video,.n audio,.n model-viewer{pointer-events:none}
 body{cursor:default}
 a{cursor:default}
-[data-ed-sel]{outline:calc(1px * var(--ed-px,1)) dashed #0A84FF!important;outline-offset:calc(-1px * var(--ed-px,1))}
+[data-ed-sel]{outline:calc(1px * var(--ed-px,1)) dashed var(--ed-sel,#0A84FF)!important;outline-offset:calc(-1px * var(--ed-px,1))}
 [data-ed-flash]{animation:ed-flash 2s ease-out}
 [data-ed-agent]{outline:calc(2px * var(--ed-px,1)) solid #D97757!important;outline-offset:calc(1px * var(--ed-px,1))}
 [data-ed-changed]:not([data-ed-sel]){outline:calc(1.5px * var(--ed-px,1)) dashed rgba(191,90,242,.95);outline-offset:calc(-1.5px * var(--ed-px,1))}
 [data-ed-over]:not([data-ed-sel]){outline:calc(1.5px * var(--ed-px,1)) solid rgba(255,159,10,.85);outline-offset:calc(-1.5px * var(--ed-px,1))}
 .s[data-ed-over]:not([data-ed-sel]){outline:none;box-shadow:inset calc(3px * var(--ed-px,1)) 0 0 rgba(255,159,10,.85)}
-@keyframes ed-flash{0%,60%{outline:3px solid #0A84FF;outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}
+@keyframes ed-flash{0%,60%{outline:3px solid var(--ed-sel,#0A84FF);outline-offset:3px}100%{outline:3px solid transparent;outline-offset:3px}}
 `;
 
 /** Re-render at most every `ms` while values keep changing (typing in a frame or a field). */
@@ -78,6 +79,7 @@ function frameModel(site: Site, page: Page): { site: Site; page: Page } {
  * make this breakpoint active with that block selected.
  */
 export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean }) {
+  const theme = useTheme();
   const ref = useRef<HTMLIFrameElement>(null);
   const [doc, setDoc] = useState<Document | null>(null);
   const liveSite = useEditor((s) => s.site);
@@ -206,7 +208,7 @@ export function LiveFrame({ bp, visible }: { bp: Breakpoint; visible: boolean })
         ? createPortal(
             <>
               <style>{css}</style>
-              <style>{frameBaseCss + passiveCss}</style>
+              <style ref={(el) => void (el && markTheme(el.ownerDocument, theme))}>{frameBaseCss + passiveCss + frameThemeCss(theme)}</style>
               <ZoomVar doc={doc} />
               <PageBody site={model.site} page={model.page} editing />
             </>,

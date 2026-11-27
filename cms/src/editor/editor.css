@@ -1,11 +1,21 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 
 /* aoost editor: the dark, Photoshop-style workspace from the mockups (SPEC §9). */
+/*
+ * Colour list (Nov 2026 research, "Dark themes on a small palette" board).
+ * Every editor colour comes from these names. Graphite is the default; Ink and
+ * Paper at night are picked in the "…" menu (display.ts sets data-ed-theme).
+ * Jobs: canvas, surface, raised-2 (three surfaces), line, three word greys
+ * (text, sub = labels, hint), accent (selection, focus, links), accent-fill and
+ * on-accent (filled buttons; white on the bright blue failed 4.5:1).
+ */
 :root {
-  /* Direction B, "dark Pro" (EDITOR-REDESIGN.md §1 & EDITOR-SECTION1.md §0). */
-  --ed-canvas: #161618;
-  --ed-dot: #2c2c30;
+  --ed-canvas: #1c1c1e;
+  --ed-dot: #2e2e33;
+  --ed-surface: #1c1c1e;
+  --ed-raised-2: #2e2e33;
   --ed-glass-bg: rgba(36, 36, 40, 0.62);
+  --ed-solid-bg: rgba(36, 36, 40, 0.97);
   --ed-glass-backdrop: blur(22px) saturate(170%);
   --ed-glass-border: 1px solid rgba(255, 255, 255, 0.07);
   --ed-glass-radius: 12px;
@@ -14,10 +24,15 @@
   --ed-panel: var(--ed-glass-bg);
   --ed-bar: var(--ed-glass-bg);
   --ed-line: rgba(255, 255, 255, 0.07);
-  --ed-text: #ECECEE;
-  --ed-sub: #8E8E93;
-  --ed-accent: #0A84FF;
-  --ed-accent-soft: rgba(10, 132, 255, 0.22);
+  --ed-line-strong: rgba(255, 255, 255, 0.14);
+  --ed-text: #ececee;
+  --ed-sub: #a1a1a8;
+  --ed-hint: #8b8b93;
+  --ed-accent: #0a84ff;
+  --ed-accent-hi: #8ac2ff;
+  --ed-accent-fill: #1a6fe0;
+  --ed-on-accent: #fff;
+  --ed-accent-soft: color-mix(in srgb, var(--ed-accent) 22%, transparent);
   --ed-seg: rgba(255, 255, 255, 0.06);
   --ed-seg-on: rgba(255, 255, 255, 0.14);
   --ed-input: rgba(0, 0, 0, 0.25);
@@ -26,16 +41,60 @@
   --ed-bg: var(--ed-canvas);
   --ed-raised: var(--ed-input);
   --ed-selected: var(--ed-seg-on);
-  --ed-line-strong: rgba(255, 255, 255, 0.14);
-  --ed-text-2: #ECECEE;
+  --ed-text-2: color-mix(in srgb, var(--ed-text) 70%, var(--ed-sub));
   --ed-muted: var(--ed-sub);
   --ed-ink: #141414;
   color-scheme: dark;
 }
-/* Glass switched off in the "…" menu: plain solid panels, no blur. */
+/* Ink: near-black and cool. */
+html[data-ed-theme="ink"] {
+  --ed-canvas: #0f1012;
+  --ed-dot: #1f2024;
+  --ed-surface: #16171a;
+  --ed-raised-2: #1f2024;
+  --ed-glass-bg: rgba(22, 23, 26, 0.7);
+  --ed-solid-bg: rgba(22, 23, 26, 0.97);
+  --ed-text: #e8e9ec;
+  --ed-sub: #9a9ca3;
+  --ed-hint: #7e8189;
+  --ed-accent: #6e8bff;
+  --ed-accent-hi: #a4b5ff;
+  --ed-accent-fill: #4f63d8;
+  --ed-input: rgba(0, 0, 0, 0.32);
+}
+/* Paper at night: warm and monochrome, like the site. Selection is a warm orange so it
+   still shows on cream pages; filled buttons are cream with dark words. */
+html[data-ed-theme="paper"] {
+  --ed-canvas: #1a1917;
+  --ed-dot: #2d2a26;
+  --ed-surface: #23211e;
+  --ed-raised-2: #2d2a26;
+  --ed-glass-bg: rgba(35, 33, 30, 0.68);
+  --ed-solid-bg: rgba(35, 33, 30, 0.97);
+  --ed-glass-border: 1px solid rgba(255, 245, 230, 0.08);
+  --ed-line: rgba(255, 245, 230, 0.08);
+  --ed-line-strong: rgba(255, 245, 230, 0.15);
+  --ed-text: #efe9df;
+  --ed-sub: #a8a196;
+  --ed-hint: #8d877d;
+  --ed-accent: #ff9a52;
+  --ed-accent-hi: #ffc093;
+  --ed-accent-fill: #efe9df;
+  --ed-on-accent: #1a1917;
+  --ed-seg: rgba(255, 245, 230, 0.06);
+  --ed-seg-on: rgba(255, 245, 230, 0.14);
+}
+/* Glass switched off in the "…" menu (or by the system's reduce-transparency): solid panels. */
 html.ed-no-glass {
-  --ed-glass-bg: rgba(34, 34, 38, 0.97);
+  --ed-glass-bg: var(--ed-solid-bg);
   --ed-glass-backdrop: none;
+}
+@media (prefers-reduced-transparency: reduce) {
+  html,
+  html[data-ed-theme] {
+    --ed-glass-bg: var(--ed-solid-bg);
+    --ed-glass-backdrop: none;
+  }
 }
 
 html,
@@ -84,9 +143,9 @@ body {
   --puck-color-grey-02: #e5e5ea;
   --puck-color-grey-03: #d1d1d6;
   --puck-color-grey-04: #c7c7cc;
-  --puck-color-grey-05: #a1a1a6;
-  --puck-color-grey-06: #8e8e93;
-  --puck-color-grey-07: #6e6e73;
+  --puck-color-grey-05: var(--ed-sub);
+  --puck-color-grey-06: var(--ed-sub);
+  --puck-color-grey-07: var(--ed-hint);
   --puck-color-grey-08: #48484d;
   --puck-color-grey-09: #3a3a3e;
   --puck-color-grey-10: #2e2e32;
@@ -94,13 +153,13 @@ body {
   --puck-color-grey-12: #1e1e21;
   --puck-color-azure-01: #eaf4ff;
   --puck-color-azure-02: #cfe6ff;
-  --puck-color-azure-03: #8cc4ff;
-  --puck-color-azure-04: #0a84ff;
-  --puck-color-azure-05: #0a84ff;
+  --puck-color-azure-03: var(--ed-accent-hi);
+  --puck-color-azure-04: var(--ed-accent);
+  --puck-color-azure-05: var(--ed-accent);
   --puck-color-azure-06: #0a74e0;
   --puck-color-azure-07: #0862bd;
   --puck-color-azure-08: #064c93;
-  --puck-color-azure-09: rgba(10, 132, 255, 0.04);
+  --puck-color-azure-09: color-mix(in srgb, var(--ed-accent) 4%, transparent);
   --puck-color-azure-10: #10273f;
   --puck-color-azure-11: #142233;
   --puck-color-azure-12: #161d27;
@@ -207,12 +266,12 @@ body {
 }
 .ed-btn-accent {
   border-color: var(--ed-accent);
-  background: var(--ed-accent);
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
   font-weight: 600;
 }
 .ed-btn-accent:hover:not(:disabled) {
-  background: #409cff;
+  background: var(--ed-accent-hi);
 }
 .ed-btn-primary {
   border-color: var(--ed-accent);
@@ -221,8 +280,8 @@ body {
 }
 .ed-btn-danger {
   border-color: var(--ed-accent);
-  background: var(--ed-accent);
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
 }
 .ed-btn:disabled,
 .ed-icon:disabled {
@@ -360,7 +419,7 @@ body {
 .ed-label {
   font-size: 12px;
   font-weight: 500;
-  color: var(--ed-text-2);
+  color: var(--ed-sub);
 }
 .ed-bp-note {
   margin: 0;
@@ -1281,7 +1340,7 @@ body {
 }
 .ed-library.is-over .ed-drop {
   border-color: var(--ed-accent);
-  background: rgba(10, 132, 255, 0.08);
+  background: color-mix(in srgb, var(--ed-accent) 8%, transparent);
 }
 .ed-drop {
   display: flex;
@@ -1400,7 +1459,7 @@ body {
   outline: 2px dashed var(--ed-accent);
   outline-offset: 2px;
   border-radius: 8px;
-  background: rgba(10, 132, 255, 0.1);
+  background: color-mix(in srgb, var(--ed-accent) 10%, transparent);
 }
 
 /* Insert panel: things that go on top of a picture (fruit readings) */

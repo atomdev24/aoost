@@ -55,7 +55,10 @@ Before more features: the basics people touch all day. In order:
    notifications for mentions and Claude; no offline editing yet.
 4. **Microsoft Clarity** with cookie consent, and an insights view in the editor (the demo shows
    aoost.com's own numbers). ✓ built (EDITOR-INSIGHTS.md).
-5. Later (kept, not now): **AI attention preview** (predicted heatmaps before publishing).
+5. **UI research** — ten rules from the best tools, boards on the Design canvas (EDITOR-UI-RESEARCH.md).
+   Step 1 (colour list, Graphite default, Ink and Paper at night in the "…" menu) ✓ built; next the motion
+   kit, glass tidy, safe sub-menus.
+6. Later (kept, not now): **AI attention preview** (predicted heatmaps before publishing).
 
 ## Done (26 Nov 2026): editor UI spec for the Aerobotics team
 

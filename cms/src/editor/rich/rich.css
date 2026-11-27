@@ -75,8 +75,8 @@
   padding: 0 12px;
   border: 0;
   border-radius: 7px;
-  background: var(--ed-accent);
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
   font: inherit;
   font-weight: 600;
   cursor: pointer;

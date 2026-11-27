@@ -25,7 +25,7 @@ import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
 import { openPalette } from "../commands/palette-store";
 import { openProblemLog, openReport } from "../problems";
-import { setGlass, useGlass } from "../display";
+import { setGlass, setTheme, THEMES, useGlass, useTheme } from "../display";
 // Opened now and then: loads on first use.
 const DemoModal = lazy(() => import("../team/DemoModal").then((m) => ({ default: m.DemoModal })));
 const InsightsModal = lazy(() => import("../insights/InsightsModal").then((m) => ({ default: m.InsightsModal })));
@@ -273,6 +273,7 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
   const [demoOpen, setDemoOpen] = useState(false);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const glass = useGlass();
+  const theme = useTheme();
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -366,6 +367,17 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
               {glass ? "✓ " : ""}Glass toolbars
             </button>
           </li>
+          <li role="separator" className="ed-menu-sep" />
+          <li role="presentation" className="ed-menu-head">Colours</li>
+          {THEMES.map((t) => (
+            <li role="none" key={t.id}>
+              <button type="button" className="is-theme" role="menuitemradio" aria-checked={theme === t.id} title={t.hint} onClick={() => setTheme(t.id)}>
+                <span className="ed-theme-dot" data-theme={t.id} aria-hidden="true" />
+                {t.name}
+                {theme === t.id ? <span className="ed-menu-check" aria-hidden="true">✓</span> : null}
+              </button>
+            </li>
+          ))}
           <li role="separator" className="ed-menu-sep" />
           <li role="none">
             <button
