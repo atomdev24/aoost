@@ -132,3 +132,47 @@
   }
 }
 
+
+/* Text size (a few words bigger or smaller) */
+.ed-richsize {
+  display: inline-flex;
+  align-items: baseline;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1;
+}
+.ed-richsize small {
+  font-size: 10px;
+}
+.ed-richsizes {
+  display: flex;
+  gap: 4px;
+}
+.ed-richsizebtn {
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  gap: 4px;
+  min-width: 52px;
+  height: 58px;
+  padding: 6px 6px 7px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ed-text);
+  font: inherit;
+  cursor: pointer;
+}
+.ed-richsizebtn span {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+}
+.ed-richsizebtn small {
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.ed-richsizebtn:hover,
+.ed-richsizebtn[aria-pressed="true"] {
+  background: var(--ed-seg-on);
+}

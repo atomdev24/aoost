@@ -29,6 +29,12 @@ async function addTestGrid(page: Page, request: Parameters<typeof draftSite>[0])
   return id;
 }
 
+/** Columns live on the inspector's Layout tab. */
+async function splitInto(page: Page, n: number) {
+  await page.locator(".ed-inspector").getByRole("tab", { name: "Layout" }).click();
+  await page.getByRole("group", { name: "Split into columns" }).getByRole("button", { name: String(n), exact: true }).click();
+}
+
 test.describe("breakpoint board", () => {
   test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
   test.use({ viewport: { width: 1440, height: 900 } });
@@ -68,14 +74,14 @@ test.describe("breakpoint board", () => {
     await bpSwitch(page, "Mobile").click();
     const columnsLabel = page.locator(".ed-inspector .ed-label.is-over", { hasText: "Columns" });
     await expect(columnsLabel).toHaveCount(0);
-    await page.getByRole("group", { name: "Split into columns" }).getByRole("button", { name: "2", exact: true }).click();
+    await splitInto(page, 2);
     await expect.poll(async () => {
       const l = await sectionLayout(request, id);
       return [l.base.columns, l.desktop?.columns];
     }).toEqual([2, 3]);
     await expect(columnsLabel).toBeVisible();
     await expect(page.locator(".ed-scope")).toContainText(/Editing Mobile · \d+ changes?/);
-    await expect(page.locator(".bd-badge")).toContainText("override");
+    await expect(page.locator(".bd-badge")).toContainText(/changes? for phones/);
     // Desktop still shows three columns; Mobile shows two.
     await expect(live(page, "desktop").locator(`.s#${id} > .si`)).toHaveCSS("grid-template-columns", /^(\S+\s){2}\S+$/);
     await expect(editable(page).locator(`.s#${id} > .si`)).toHaveCSS("grid-template-columns", /^\S+\s\S+$/);
@@ -84,7 +90,7 @@ test.describe("breakpoint board", () => {
   test("Reset to desktop removes the override", async ({ page, request }) => {
     const id = await addTestGrid(page, request);
     await bpSwitch(page, "Mobile").click();
-    await page.getByRole("group", { name: "Split into columns" }).getByRole("button", { name: "2", exact: true }).click();
+    await splitInto(page, 2);
     await expect.poll(async () => (await sectionLayout(request, id)).base.columns).toBe(2);
     await page.locator(".ed-inspector .ed-label.is-over", { hasText: "Columns" }).click();
     await page.getByRole("menuitem", { name: "Reset to desktop" }).click();

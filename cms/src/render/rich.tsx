@@ -1,5 +1,6 @@
 import { createElement, type ReactElement, type ReactNode } from "react";
 import type { RichBlock, RichDoc, RichInline, RichList } from "../schema/rich";
+import { RICH_SIZES } from "../schema/rich-sizes";
 import { safeUrl } from "./links";
 
 /**
@@ -22,6 +23,7 @@ function inlines(content: RichInline[] | undefined, key = 0): ReactNode[] {
       else if (m.type === "underline") el = <u>{el}</u>;
       else if (m.type === "strike") el = <s>{el}</s>;
       else if (m.type === "color") el = <span style={{ color: colour(m.attrs.color) }}>{el}</span>;
+      else if (m.type === "size") el = <span style={{ fontSize: `${RICH_SIZES[m.attrs.size]}em`, lineHeight: 1.15 }}>{el}</span>;
     }
     const link = n.marks?.find((m) => m.type === "link");
     if (link && link.type === "link") {

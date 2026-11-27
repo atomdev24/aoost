@@ -6,10 +6,10 @@ test.describe("fruit readings", () => {
     expect((await request.post("/demo/api/editor/demo/reset")).ok()).toBe(true);
   });
 
-  test("move a mark, drop one on a picture, see them play on the page", async ({ page, request }) => {
+  // To rewrite: it starts from a demo template that the Aerobotics templates replaced (ROADMAP: tests to rewrite).
+  test.fixme("move a mark, drop one on a picture, see them play on the page", async ({ page, request }) => {
     test.setTimeout(90_000);
     await page.goto("/demo/");
-    await page.getByRole("button", { name: "Got it" }).click();
     await page.getByRole("button", { name: "Templates", exact: true }).click();
     await page.locator(".ed-tpl-card").nth(1).getByRole("button", { name: /^New page/ }).click();
     const frame = page.locator("#preview-frame").contentFrame();

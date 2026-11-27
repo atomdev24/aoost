@@ -17,6 +17,7 @@ export const RichMark = z.discriminatedUnion("type", [
   z.object({ type: z.literal("strike") }),
   z.object({ type: z.literal("link"), attrs: z.object({ href: z.string().min(1).max(2000) }) }),
   z.object({ type: z.literal("color"), attrs: z.object({ color: RichColor }) }),
+  z.object({ type: z.literal("size"), attrs: z.object({ size: z.enum(["s", "l", "xl", "xxl"]) }) }),
 ]);
 export type RichMark = z.infer<typeof RichMark>;
 

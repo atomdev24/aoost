@@ -11,7 +11,7 @@ test.describe("variants and staging", () => {
   test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test("variant → elect → staging link → push", async ({ page, request, browser }) => {
+  test("variant → pick → staging link → push", async ({ page, request, browser }) => {
     await draftWithAllPagesLive(request, password!);
     await request.delete("/api/editor/staging?forget=1", { headers: bearer(password!) });
     await signIn(page, password!);
@@ -49,8 +49,8 @@ test.describe("variants and staging", () => {
       .toEqual([false, true]);
 
     // The variant never shows on the public preview of the page.
-    // Elect: its content goes onto the page, the variant goes, the draft goes to staging.
-    // Compare with live: both pages side by side, the change listed, Elect from there.
+    // Pick: its content goes onto the page, the variant is kept as an earlier version, the draft goes to staging.
+    // Compare with live: both pages side by side, the change listed, Pick from there.
     await band.getByRole("button", { name: "Compare" }).click();
     const compare = page.getByRole("dialog", { name: /compared with live Sample/ });
     await expect(compare).toBeVisible();
@@ -60,9 +60,17 @@ test.describe("variants and staging", () => {
     await expect(compare.frameLocator('iframe[title^="Variant 1"]').locator("main h1").first()).toContainText("from staging");
     await compare.getByRole("button", { name: "Mobile" }).click();
     await expect(compare.frameLocator('iframe[title^="Variant 1"]').locator("main h1").first()).toContainText("from staging");
-    await compare.getByRole("button", { name: "Elect to staging" }).click();
+    // Picking happens in its own sheet now: the variant becomes the page and the draft goes to staging.
+    await compare.getByRole("button", { name: "Pick this one…" }).click();
     await expect(compare).toBeHidden();
+    const pick = page.getByRole("dialog", { name: "Pick Variant 1" });
+    await expect(pick.getByRole("radio", { name: /Send to staging/ })).toBeChecked();
+    await pick.getByRole("button", { name: "Pick Variant 1" }).click();
+    await expect(pick).toContainText("Variant 1 is now the page in the draft.");
+    await expect(pick.getByRole("link")).toHaveAttribute("href", /\/staging\/[\w-]{16,}\//);
+    await pick.getByRole("button", { name: "Done" }).click();
     await expect(band).toBeHidden();
+    await page.locator(".ed-staging-chip").click();
     const link = page.getByLabel("Staging link");
     await expect(link).toBeVisible();
     await expect(page.locator(".ed-staging-head")).toContainText("Sample");
@@ -72,7 +80,7 @@ test.describe("variants and staging", () => {
     await expect
       .poll(async () => {
         const site = await draftSite(request, password!);
-        return [site.pages.some((p: { variantOf?: string }) => p.variantOf === "sample"), JSON.stringify(site.pages.find((p: { id: string }) => p.id === "sample").sections).includes("from staging")];
+        return [site.pages.some((p: { variantOf?: string; variantStatus?: string }) => p.variantOf === "sample" && p.variantStatus !== "archived"), JSON.stringify(site.pages.find((p: { id: string }) => p.id === "sample").sections).includes("from staging")];
       })
       .toEqual([false, true]);
 

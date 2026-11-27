@@ -29,7 +29,6 @@ test("fruit reading layer anchors to the picture and follows it", async ({ page,
   expect((await request.post("/demo/api/editor/ops", { data: { ops: [{ op: "putPage", page: home }] } })).ok()).toBe(true);
 
   await page.goto("/demo/");
-  await page.getByRole("button", { name: "Got it" }).click();
   const frame = page.locator("#preview-frame").contentFrame();
   const photo = frame.locator(".n-n-photo");
   await expect(photo).toBeVisible({ timeout: 20_000 });

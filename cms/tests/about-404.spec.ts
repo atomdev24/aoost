@@ -47,15 +47,16 @@ test.describe("404: the clover", () => {
   });
 });
 
-test.describe("About (draft preview)", () => {
+test.describe("About", () => {
   test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
   test.beforeEach(async ({ page, request }) => {
     await resetDraft(request, password!);
     await signIn(page, password!);
   });
 
-  test("the public site leaves the draft out", async ({ request }) => {
-    expect((await request.get("/about")).status()).toBe(404);
+  // About went live from the editor (Nov 2026): the public site serves it now.
+  test("the public site serves About now it's published", async ({ request }) => {
+    expect((await request.get("/about")).status()).toBe(200);
   });
 
   for (const size of [

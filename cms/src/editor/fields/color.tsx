@@ -1,4 +1,5 @@
 import type { CustomField } from "@puckeditor/core";
+import { ColorField } from "../color/ColorField";
 
 /** A colour: pick it, or type any CSS colour (blank for the default). */
 export const colorField = (label: string): CustomField<string | undefined> => ({
@@ -16,4 +17,22 @@ export const colorField = (label: string): CustomField<string | undefined> => ({
       </div>
     );
   },
+});
+
+/**
+ * A colour with the full picker (theme colours, eyedropper, hex/RGB): stores "token:name" or a hex.
+ * `none` says what an empty value means ("Deep green").
+ */
+export const colourPickField = (label: string, none = "Default"): CustomField<string | undefined> => ({
+  type: "custom",
+  label,
+  render: ({ value, onChange }) => (
+    <div className="ed-field">
+      <span className="ed-field-label">
+        {label}
+        {value ? null : <span style={{ color: "var(--ed-sub)", fontWeight: 400 }}> · {none}</span>}
+      </span>
+      <ColorField value={value} onChange={onChange} label={label} />
+    </div>
+  ),
 });

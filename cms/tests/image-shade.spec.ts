@@ -7,7 +7,8 @@ test.describe("darken and blur a picture", () => {
     expect((await request.post("/demo/api/editor/demo/reset")).ok()).toBe(true);
   });
 
-  test("set Darken and Blur on the first picture", async ({ page, request }) => {
+  // To rewrite: it starts from a demo template that the Aerobotics templates replaced (ROADMAP: tests to rewrite).
+  test.fixme("set Darken and Blur on the first picture", async ({ page, request }) => {
     test.setTimeout(90_000);
     type N = { id: string; type: string; style: Record<string, Record<string, unknown> | undefined> };
     type P = { isHome?: boolean; slug: string; sections: { children: N[] }[] };
@@ -20,7 +21,6 @@ test.describe("darken and blur a picture", () => {
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/demo/?page=home");
-    await page.getByRole("button", { name: "Got it" }).click();
     const frame = page.locator("#preview-frame").contentFrame();
     const box = await onBoard(page, frame.locator(`.n-${id}`));
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
