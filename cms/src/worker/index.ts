@@ -5,6 +5,7 @@ import { editorApi, historyPage, livePage, preview, staging } from "./api";
 import { demoEnv, demoStub, draftStub, type Env } from "./env";
 import { cleanDemoSettings, DEMO_SETTINGS_KEY, resetsTonight } from "../model/demo-settings";
 import { releaseTick } from "./release";
+import { fetchInsights } from "./insights";
 import { error, html, json } from "./http";
 import { loginPage } from "./login-page";
 import { mcp } from "./mcp";
@@ -39,6 +40,8 @@ export default {
   // Every 15 minutes: releases that are due go live or end (worker/release.ts).
   async scheduled(event: ScheduledController, env: Env): Promise<void> {
     if (event.cron === "0 1 * * *" && resetsTonight(await demoSettings(env), new Date())) await demoStub(env).wipe();
+    // Visitor numbers from Clarity, once a day (03:00 in Cape Town).
+    if (event.cron === "0 1 * * *" && env.CLARITY_API_TOKEN) await fetchInsights(env).catch(() => undefined);
     if (event.cron === "*/15 * * * *") await releaseTick(env, demoEnv(env));
   },
 } satisfies ExportedHandler<Env>;

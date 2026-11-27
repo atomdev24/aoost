@@ -1,6 +1,7 @@
 import { HoverLabel } from "../canvas/HoverLabel";
 import { OverrideMarks } from "../canvas/OverrideMarks";
 import { BoundMarks } from "../collections/BoundMarks";
+import { ChangedMarks } from "../variants/ChangedMarks";
 import { MatBands } from "../canvas/MatBands";
 import { AgentMarks } from "../agent/AgentMarks";
 import { openPanel } from "../workspace/rail-store";
@@ -15,7 +16,9 @@ import { currentPage, megaItemId, useEditor } from "../store";
 import { puckToPage, type PuckData } from "./adapter";
 import { canvasCss } from "./canvas.styles";
 import { EditorOverlay } from "./EditorOverlay";
+import { frameThemeCss, markTheme, useTheme } from "../display";
 import { usePuck } from "./usePuck";
+import { FieldEditingPart } from "../rich/part";
 
 /**
  * The page shell inside the preview iframe: the same CSS and nav as the
@@ -24,6 +27,7 @@ import { usePuck } from "./usePuck";
  * media queries decide which layout shows.
  */
 export function Root({ children }: { children: ReactNode }) {
+  const theme = useTheme();
   const site = useEditor((s) => s.site);
   const stored = useEditor(currentPage);
   const bp = useEditor((s) => s.bp);
@@ -38,7 +42,7 @@ export function Root({ children }: { children: ReactNode }) {
   return (
     <>
       <style>{css}</style>
-      <style>{canvasCss + frameBaseCss}</style>
+      <style ref={(el) => void (el && markTheme(el.ownerDocument, theme))}>{canvasCss + frameBaseCss + frameThemeCss(theme)}</style>
       {mega || page.hideNav ? null : (
         // The nav isn't a block on the page: a click on it opens its own panel (Navigation, in the
         // rail) instead of following a link (it used to be inert, which swallowed clicks).
@@ -62,10 +66,12 @@ export function Root({ children }: { children: ReactNode }) {
             <EditorOverlay key={o.id} overlay={o} />
           ))}
       </main>
+      <FieldEditingPart />
       <CanvasController />
       <HoverLabel />
       <OverrideMarks />
       <BoundMarks />
+      <ChangedMarks />
       <MatBands />
       <AgentMarks />
     </>

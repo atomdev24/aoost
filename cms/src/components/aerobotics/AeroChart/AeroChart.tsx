@@ -17,5 +17,5 @@ export const AeroChart = defineComponent<AeroChartContent>({
   defaults: { content: SAMPLE_CHARTS.bars, style: { maxWidth: "380px" } },
   kit: aeroboticsKit,
   css: chartCss,
-  Render: ({ content }) => <ChartCard d={content} />,
+  Render: ({ content, ctx }) => <ChartCard d={content} editing={ctx.editing} />,
 });

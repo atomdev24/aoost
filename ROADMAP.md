@@ -42,8 +42,25 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
    (email, Slack provision) and a settings page.
 6. Masks and colour adjustments for board images; video and link references; shared scrapbook board.
 7. Engine / site-pack split for the Aerobotics website (see HANDBOOK.md §7). Started: the Aerobotics block pack (`components/aerobotics/`) is in the demo's Brand tab.
-8. Collections (`EDITOR-COLLECTIONS.md`): ✓ built on `feat/collections` (PR open, waiting on Alex's review).
+8. Variants front and centre (`EDITOR-VARIANTS.md`): rows on the board, propose, vote, Review, Pick keeping earlier versions. Next: A/B tests from variants, notifications.
+9. Collections (`EDITOR-COLLECTIONS.md`): ✓ built on `feat/collections` (PR #123, brought up to date with main on 27 Nov; waiting on Alex's review).
    Next: the "not yet" list in that brief.
+
+## Foundations first (Alex, 26 Nov 2026)
+
+Before more features: the basics people touch all day. In order:
+1. **Text editing** — rich text on the page, per-screen type controls (EDITOR-TEXT.md). ✓ built.
+2. **Speed and UI audit** — baseline measured, 13-item audit and three directions (A calm, B content
+   first, C command bar; two phone layouts) in EDITOR-FOUNDATIONS.md and the Design canvas. Alex picked A as
+   the base, B's Simple mode, Phone 1 (EDITOR-LAYOUT.md); stages 1–2 built.
+3. **Web app** — the editor already installs as an app. Next: share photos into Media, push
+   notifications for mentions and Claude; no offline editing yet.
+4. **Microsoft Clarity** with cookie consent, and an insights view in the editor (the demo shows
+   aoost.com's own numbers). ✓ built (EDITOR-INSIGHTS.md).
+5. **UI research** — ten rules from the best tools, boards on the Design canvas (EDITOR-UI-RESEARCH.md).
+   Step 1 (colour list, Graphite default, Ink and Paper at night in the "…" menu) ✓ built; step 2 motion kit ✓ built
+   (by Gemini); step 3 glass tidy ✓ built; next safe sub-menus.
+6. Later (kept, not now): **AI attention preview** (predicted heatmaps before publishing).
 
 ## Done (26 Nov 2026): editor UI spec for the Aerobotics team
 
@@ -157,3 +174,16 @@ campaigns); roles with a Team panel and @mention suggestions. Waiting on Alex: B
 
 - Done (Nov 2026): Releases with a schedule (research item 1): Publish ▾ → Schedule…, a release chip with Cancel and Undo, a 15-minute cron on the server (EDITOR-RELEASES.md). 
 - Done (Nov 2026): Pre-flight checks (research item 2), left of Preview (EDITOR-CHECKS.md). Next from the research: campaign pages from a brief, by Claude.
+- Done (Nov 2026): Campaign pages from a brief, with Claude polishing the words through an @Claude comment (EDITOR-CAMPAIGN-BRIEF.md). Next from the research: A/B tests from variants, then brand guardrails with a Simple mode.
+
+## Later: designs from Figma (researched 27 Nov 2026)
+- A Figma file itself (.fig) is a closed format with no official reader: not realistic to upload.
+- Realistic, smallest first:
+  1. **Claude brings a frame in** (no editor code): pick a frame in Figma, Claude reads it through the
+     Figma connector (layout, text, pictures, colours) and builds it on a page from our own blocks. About a
+     day to set up as a repeatable skill; each import then takes minutes, with a person checking it.
+  2. **Theme from Figma**: colours, type and spacing from the file's variables into the site theme. 1–2 days.
+  3. **"Import from Figma" in the editor**: paste a frame link, the Worker reads it with a Figma token and
+     maps auto-layout to sections, text to Text, images to Image. Close, not exact. 2–4 weeks; needs a Figma
+     token kept as a Worker secret.
+

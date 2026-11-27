@@ -10,12 +10,20 @@ describe("HubSpotForm", () => {
     expect(parseHubSpot(EMBED)).toEqual({ portalId: "1234567", formId: "0a1b2c3d-1111-2222-3333-444455556666", region: "eu1" });
   });
   it("loads HubSpot's form on the live page", () => {
-    const html = renderNode("HubSpotForm", { embed: EMBED, portalId: "", formId: "", region: "na1" });
+    const html = renderNode("HubSpotForm", { embed: EMBED, portalId: "", formId: "", region: "na1", live: true });
     expect(html).toContain("js.hsforms.net/forms/embed/v2.js");
     expect(html).toContain('"portalId":"1234567"');
     expect(html).toContain('"region":"eu1"');
   });
   it("renders nothing on the live page until it has ids", () => {
-    expect(renderNode("HubSpotForm", { portalId: "", formId: "", region: "na1" })).toBe("");
+    expect(renderNode("HubSpotForm", { portalId: "", formId: "", region: "na1", live: true })).toBe("");
+  });
+  it("is off by default: a placeholder that sends nothing", () => {
+    const html = renderNode("HubSpotForm", { embed: EMBED, portalId: "", formId: "", region: "na1", placeholderButton: "Request a demo" });
+    expect(html).not.toContain("hsforms");
+    expect(html).toContain("hsf-off");
+    expect(html).toContain("Work email");
+    expect(html).toContain("Request a demo");
+    expect(html).toContain("disabled");
   });
 });

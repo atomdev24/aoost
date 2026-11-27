@@ -28,7 +28,7 @@ describe("AoostPlaylistBand", () => {
   it("shows the first playlist's sleeve and tracklist, the others hidden", () => {
     const html = renderNode("AoostPlaylistBand", d);
     expect(count(html, /class="pl-rec"/g)).toBe(3);
-    expect(html).toContain('<figure class="pl-rec" data-i="0"><div class="pl-sleeve"><img src="/art/cover-disc1.jpg"');
+    expect(html).toContain('<figure class="pl-rec" data-i="0"><div class="pl-sleeve"><img src="/art/cover-disc1.960.webp"');
     expect(html).toContain('<figure class="pl-rec" data-i="1" hidden="">');
     expect(html).toContain('<div class="pl-list" data-i="0"><ol');
     expect(html).toContain('<div class="pl-list" data-i="2" hidden="">');

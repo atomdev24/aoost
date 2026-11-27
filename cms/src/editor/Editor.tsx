@@ -28,8 +28,10 @@ import { Inspector } from "./workspace/Inspector";
 import { LeftPanel } from "./workspace/LeftPanel";
 import { SyncNotice } from "./workspace/SyncNotice";
 import { UploadTrayHost } from "./ui/UploadTrayHost";
-import { CollectionsView, CompareView, BrowserZoomNotice, DesignBand, DesignsBoard, VariantBand } from "./parts";
+import { CollectionsView, CompareView, BrowserZoomNotice, DesignBand, DesignsBoard, PickSheet, VariantBand } from "./parts";
 import { useCollectionsOpen } from "./collections/collections-open";
+import { usePickOpen } from "./variants/pick-open";
+import { openDesigns } from "./templates/designs-open";
 import { useDesignsOpen } from "./templates/designs-open";
 import { useCompare } from "./workspace/compare";
 import { TopBar } from "./workspace/TopBar";
@@ -78,6 +80,11 @@ export function Editor() {
   const comparing = !!useCompare();
   const designsOpen = !!useDesignsOpen();
   const collectionsOpen = !!useCollectionsOpen();
+  const picking = !!usePickOpen();
+  // A review link (?page=…&review=1, from Review's "Copy review link") opens Review for that page.
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("review") === "1") openDesigns();
+  }, []);
   useEffect(() => attachKeys(document), []);
   useEffect(() => warmUp(), []);
   useEffect(() => void performance.mark("aoost:shell"), []);
@@ -128,6 +135,7 @@ export function Editor() {
           {comparing ? <CompareView /> : null}
           {designsOpen ? <DesignsBoard /> : null}
           {collectionsOpen ? <CollectionsView /> : null}
+          {picking ? <PickSheet /> : null}
           <LeftPanel />
           <Board />
           <Inspector />

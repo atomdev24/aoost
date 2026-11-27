@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { inline } from "../../../render/inline";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
 import { art, Band, Btn, Pic, lines, BACKGROUNDS } from "../shared";
@@ -63,7 +64,7 @@ export const AeroSteps = defineComponent<AeroStepsContent>({
         <div className="abse-card">
           <Pic src={c.image} alt="" sizes="480px" ctx={ctx} />
           {c.cardTitle ? <h3>{c.cardTitle}</h3> : null}
-          {c.cardText ? <p className="ab-text">{c.cardText}</p> : null}
+          {c.cardText ? <p className="ab-text">{inline(c.cardText)}</p> : null}
           {c.cardPrompt ? <p className="ab-text">
               <b>{c.cardPrompt}</b>
             </p> : null}

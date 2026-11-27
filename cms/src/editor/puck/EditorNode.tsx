@@ -1,3 +1,4 @@
+import { useSimple } from "../workspace/mode";
 import type { PuckContext } from "@puckeditor/core";
 import { useMemo } from "react";
 import { makeCtx } from "../../render/context";
@@ -10,6 +11,8 @@ import { currentPage, useEditor } from "../store";
 import { itemToNode } from "./adapter";
 import type { Node, Page } from "../../schema";
 import { usePuck } from "./usePuck";
+import { useRichEdit } from "../rich/edit-store";
+import { RichEditingPart } from "../rich/part";
 
 /**
  * A node on the editor canvas. It draws exactly what the public site draws
@@ -32,6 +35,17 @@ function savedKeysOnly(node: Node, page: Page): Node {
   return Object.keys(content).length === Object.keys(node.content).length ? node : { ...node, content };
 }
 
+function savedNode(page: Page, id: string): Node | null {
+  for (const s of page.sections) {
+    const n = s.children.find((c) => c.id === id);
+    if (n) return n;
+  }
+  return page.overlays.find((o) => o.node.id === id)?.node ?? null;
+}
+
+/** Blocks that draw from other pages (lists of posts, a post's body, diaries, playlists). */
+const PAGE_READERS = new Set(["PostList", "PostBody", "DiaryList", "PlaylistCard"]);
+
 export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckContext; id: string } & Record<string, unknown>) {
   const site = useEditor((s) => s.site);
   const page = useEditor(currentPage);
@@ -39,8 +53,25 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
   const flash = useEditor((s) => s.highlight.includes(props.id));
   const selected = useEditor((s) => s.selection.includes(props.id));
   const inCanvas = usePuck((s) => s.getParentById(props.id)?.type === "CanvasSection");
+  const richEdit = useRichEdit();
+  const editingText = type === "Text" && richEdit?.id === props.id && richEdit.bp === bp;
+  // Simple mode: no resize handles (the layout stays as designed).
+  const simple = useSimple();
   const node = savedKeysOnly(itemToNode({ type, props }), page);
   const ctx = useMemo(() => ({ ...makeCtx(site, page, { editing: true }), bp }), [site, page, bp]);
+  // Redraw a block only when something it draws from changed (speed, Nov 2026): its own settings,
+  // the screen size, what every page shares, and the page list for blocks that read other pages.
+  // Typing in one block no longer redraws every other block on the page.
+  // The saved block keeps its identity until it's edited (the store copies only what changes), so
+  // it's a cheap "did this block change?" test; a block not saved yet falls back to its contents.
+  const saved = useMemo(() => savedNode(page, props.id), [page, props.id]);
+  const nodeKey: unknown = saved ?? JSON.stringify(node);
+  const readsPages = useMemo(() => PAGE_READERS.has(type) || JSON.stringify(saved?.content ?? node.content).includes('"pageId"'), [type, saved]);
+  const drawn = useMemo(
+    () => <NodeContent node={node} ctx={ctx} />,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nodeKey, bp, page.id, page.lang, site.theme, site.settings, site.nav, site.globals, site.collections, readsPages ? site.pages : null],
+  );
   const attrs = nodeAttrs(node);
   return (
     <div
@@ -52,8 +83,8 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
       data-node-id={node.id}
       style={node.fit ? ({ "--fit": String(node.fit) } as React.CSSProperties) : undefined}
     >
-      <NodeContent node={node} ctx={ctx} />
-      {selected && inCanvas && !node.locked ? HANDLES.map((h) => <span key={h} className="ed-h" data-ed-handle={h} />) : null}
+      {editingText ? <RichEditingPart node={node} fallback={drawn} /> : drawn}
+      {selected && inCanvas && !node.locked && !editingText && !simple ? HANDLES.map((h) => <span key={h} className="ed-h" data-ed-handle={h} />) : null}
       {selected && !node.locked && (inCanvas || getComponent(type)?.framed) ? (
         <button
           type="button"
@@ -70,7 +101,7 @@ export function EditorNode({ type, puck, ...props }: { type: string; puck: PuckC
           {keepsRatio(node) ? "Proportions" : "Free"}
         </button>
       ) : null}
-      {selected && !inCanvas && !node.locked ? FLOW_HANDLES.map((h) => <span key={h} className="ed-fh" data-ed-flow-handle={h} title={FLOW_HANDLE_TIP[h]} />) : null}
+      {selected && !inCanvas && !node.locked && !editingText && !simple ? FLOW_HANDLES.map((h) => <span key={h} className="ed-fh" data-ed-flow-handle={h} title={FLOW_HANDLE_TIP[h]} />) : null}
     </div>
   );
 }

@@ -1,0 +1,134 @@
+/* In-place text editing: the formatting bar (frosted, like the other floating bars). */
+.ed-richbar {
+  position: fixed;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  border-radius: var(--ed-glass-radius);
+  box-shadow: var(--ed-glass-shadow);
+  color: var(--ed-text);
+  font: 13px var(--ed-font);
+  box-sizing: border-box;
+}
+.ed-richbar * {
+  box-sizing: border-box;
+}
+.ed-richbar-phone {
+  left: 8px;
+  right: 8px;
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  overflow-x: auto;
+  justify-content: space-between;
+}
+.ed-richbtn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+.ed-richbtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.ed-richbtn[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.16);
+}
+.ed-richbtn:focus-visible,
+.ed-richdone:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 1px;
+}
+.ed-richdot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+}
+.ed-richnum {
+  font-size: 12px;
+  font-weight: 600;
+}
+.ed-richsep {
+  width: 1px;
+  height: 18px;
+  margin: 0 3px;
+  background: rgba(255, 255, 255, 0.12);
+  flex: none;
+}
+.ed-richdone {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  flex: none;
+}
+.ed-richpop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 240px;
+  padding: 10px;
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  border-radius: var(--ed-glass-radius);
+  box-shadow: var(--ed-glass-shadow);
+}
+.ed-richbar-phone .ed-richpop {
+  position: fixed;
+  top: auto;
+  left: 8px;
+  right: 8px;
+  bottom: calc(60px + env(safe-area-inset-bottom));
+}
+.ed-richrow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.ed-richswatches {
+  display: grid;
+  grid-template-columns: repeat(6, 28px);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.ed-richswatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.ed-richswatch[aria-pressed="true"] {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 2px;
+}
+
+/* Phones: the settings card steps aside while words are being edited; the bar sits above the keyboard. */
+@media (max-width: 600px) {
+  body.ed-rich-on .ed-inspector.is-card {
+    display: none;
+  }
+}
+

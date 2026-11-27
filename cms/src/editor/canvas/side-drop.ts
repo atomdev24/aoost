@@ -89,7 +89,7 @@ export function attachSideDrop(doc: Document) {
 
   // Blocks dragged inside the page.
   const down = (e: PointerEvent) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || (e.target as Element | null)?.closest?.("[data-rich-editing]")) return;
     const el = (e.target as Element | null)?.closest?.<HTMLElement>("[data-node-id]");
     const id = el?.dataset.nodeId;
     if (!id || (e.target as Element).closest("[data-ed-handle], [data-ed-flow-handle], [data-ed-ratio], [contenteditable=true]")) return;

@@ -1,3 +1,6 @@
+import { useSimple } from "./mode";
+import { PhoneTabs } from "./PhoneTabs";
+import { usePhone } from "../touch/device";
 import { Puck } from "@puckeditor/core";
 import { useEffect, useRef, useState } from "react";
 import { addSection, createSection, locate } from "../../model/page-ops";
@@ -5,6 +8,7 @@ import type { Section } from "../../schema";
 import { selectBlock } from "../board/bridge";
 import { currentPage, getState, updatePage, useEditor } from "../store";
 import { LayersPanel } from "../ui/LayersPanel";
+import { anchorOf, Popover, type Anchor } from "../ui/Popover";
 import { CollectionsView, CommentsPanel, FontsPanel, HistoryPanel, InsertPanel, LibraryPanel, MediaLibrary, NavPanel, PagesPanel, TemplatesPanel, ThemePanel } from "../parts";
 import { openCollections } from "../collections/collections-open";
 import { DEMO } from "../demo";
@@ -31,7 +35,7 @@ const PANEL_TITLES: Record<PanelId, string> = {
   nav: "Navigation",
   theme: "Theme",
   fonts: "Fonts",
-  global: "Global",
+  global: "Shared blocks",
   templates: "Templates",
   collections: "Collections",
 };
@@ -210,17 +214,84 @@ const PANEL_PARTS: Partial<Record<PanelId, Part<never>>> = {
 
 /* Build (what is on this page) above the line, Site (what every page shares) below it. */
 // The demo gets ready-made page designs to try (Templates), right under Insert.
-const TOP_PANELS: PanelId[] = DEMO ? ["layers", "insert", "templates", "media", "comments", "history"] : ["layers", "insert", "media", "comments", "history"];
-const BOTTOM_PANELS: PanelId[] = ["pages", "collections", "nav", "theme", "fonts", "global"];
+// Direction A (Nov 2026): the everyday panels with words under them; what the whole site shares
+// sits under one Site button.
+// Collections (a full-screen table of entries) sits with Pages: both are the site's content.
+const TOP_PANELS: PanelId[] = DEMO ? ["insert", "templates", "layers", "pages", "collections", "media", "comments"] : ["insert", "layers", "pages", "collections", "media", "comments"];
+const SITE_PANELS: PanelId[] = ["nav", "theme", "fonts", "global", "history"];
+/** Short words under the rail's icons. */
+const RAIL_LABEL: Partial<Record<PanelId, string>> = { insert: "Add", templates: "Designs", global: "Shared", collections: "Content" };
+const SITE_HINT: Partial<Record<PanelId, string>> = {
+  nav: "The menu bar on every page",
+  theme: "Colours and text styles",
+  fonts: "Uploaded and Google fonts",
+  global: "Blocks shared across pages",
+  history: "Earlier versions of the site",
+};
+
+/** Site: one rail button for what every page shares (menu bar, look, fonts, shared blocks, history). */
+function SiteButton({ active, pressed }: { active: PanelId | null; pressed: boolean }) {
+  const [at, setAt] = useState<Anchor | null>(null);
+  return (
+    <>
+      <button
+        type="button"
+        className={`ed-rail-btn${pressed ? " is-active" : ""}`}
+        aria-label="Site: settings every page shares"
+        aria-haspopup="menu"
+        aria-expanded={!!at}
+        aria-pressed={pressed}
+        title="Site: menu bar, look, fonts, shared blocks, history"
+        onClick={(e) => setAt(at ? null : anchorOf(e.currentTarget))}
+        onPointerEnter={() => SITE_PANELS.forEach((id) => void PANEL_PARTS[id]?.prefetch())}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" aria-hidden="true">
+          <circle cx="8" cy="8" r="2.2" />
+          <path d="M8 1.8v1.8M8 12.4v1.8M1.8 8h1.8M12.4 8h1.8M3.6 3.6l1.3 1.3M11.1 11.1l1.3 1.3M3.6 12.4l1.3-1.3M11.1 4.9l1.3-1.3" />
+        </svg>
+        <span className="ed-rail-label" aria-hidden="true">
+          Site
+        </span>
+      </button>
+      {at ? (
+        <Popover anchor={at} onClose={() => setAt(null)} label="Site" width={260} className="ed-site-menu" side="right">
+          <ul role="menu" aria-label="Site">
+            {SITE_PANELS.map((id) => (
+              <li key={id} role="none">
+                <button
+                  type="button"
+                  role="menuitem"
+                  aria-current={active === id || undefined}
+                  data-demo-off={DEMO && id === "history" ? "" : undefined}
+                  onClick={() => {
+                    setAt(null);
+                    if (active !== id) togglePanel(id);
+                  }}
+                >
+                  <RailIcon id={id} />
+                  <span>
+                    {PANEL_TITLES[id]}
+                    <small>{SITE_HINT[id]}</small>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Popover>
+      ) : null}
+    </>
+  );
+}
 
 /**
- * Direction B left panel: a slim 36px frosted rail and floating flyouts beside it.
+ * The left rail: labelled panel buttons and floating flyouts beside them.
  */
 export function LeftPanel() {
   const active = useRail((s) => s.active);
   const pinned = useRail((s) => s.pinned);
   const pos = useRail((s) => s.pos);
   const pageId = useEditor((s) => s.pageId);
+  const waitingCount = useEditor((s) => s.site.pages.filter((p) => p.variantOf && p.variantStatus === "proposed").length);
   const railRef = useRef<HTMLElement>(null);
   const [win, setWin] = useState(() => ({ w: innerWidth, h: innerHeight }));
   const [railH, setRailH] = useState(330);
@@ -279,6 +350,8 @@ export function LeftPanel() {
     setRailPos({ x: place.x + d[0]!, y: place.y + d[1]! });
   };
 
+  // Variants proposed for review, on the Pages button (EDITOR-VARIANTS.md).
+  const waiting = waitingCount;
   const renderPanelButton = (id: PanelId) => {
     const isSelected = active === id;
     const title = PANEL_TITLES[id];
@@ -296,9 +369,20 @@ export function LeftPanel() {
         onPointerEnter={() => void (id === "collections" ? CollectionsView.prefetch() : PANEL_PARTS[id]?.prefetch())}
       >
         <RailIcon id={id} />
+        {id === "pages" && waiting ? (
+          <span className="ed-rail-count" title={`${waiting} ${waiting === 1 ? "variant" : "variants"} waiting for review`}>
+            {waiting}
+          </span>
+        ) : null}
+        <span className="ed-rail-label" aria-hidden="true">
+          {RAIL_LABEL[id] ?? title}
+        </span>
       </button>
     );
   };
+  const siteActive = !!active && SITE_PANELS.includes(active);
+  const simple = useSimple();
+  const phone = usePhone();
 
   return (
     <>
@@ -321,11 +405,16 @@ export function LeftPanel() {
         <div className="ed-rail-group">
           {TOP_PANELS.map(renderPanelButton)}
         </div>
-        <span className="ed-rail-divider" aria-hidden="true" />
-        <div className="ed-rail-group">
-          {BOTTOM_PANELS.map(renderPanelButton)}
-        </div>
+        {simple ? null : (
+          <>
+            <span className="ed-rail-divider" aria-hidden="true" />
+            <div className="ed-rail-group">
+              <SiteButton active={active} pressed={siteActive} />
+            </div>
+          </>
+        )}
       </nav>
+      {phone ? <PhoneTabs /> : null}
 
       {active ? (
         <aside

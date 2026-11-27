@@ -1,3 +1,5 @@
+import { setMode, useMode, useSimple } from "./mode";
+import { InDock } from "./Dock";
 import { AgentPill } from "../agent/AgentPill";
 import { createPortal } from "react-dom";
 import { TeamModal } from "../team/TeamModal";
@@ -17,14 +19,16 @@ import { Preflight } from "./Preflight";
 import { loadStaging, useStaging } from "./staging";
 import { useChanges } from "./changes-count";
 import { DEMO } from "../demo";
-import { Avatars, DemoBar, PublishSheet, ClaudePill } from "../parts";
+import { Avatars, DemoBar, PublishSheet, VersionsButton } from "../parts";
+import { StatusPill } from "./StatusPill";
 import { PageSwitcher } from "./PageSwitcher";
 import { ToolGroup } from "./ToolGroup";
 import { openPalette } from "../commands/palette-store";
 import { openProblemLog, openReport } from "../problems";
-import { setGlass, useGlass } from "../display";
+import { setGlass, setTheme, THEMES, useGlass, useTheme } from "../display";
 // Opened now and then: loads on first use.
 const DemoModal = lazy(() => import("../team/DemoModal").then((m) => ({ default: m.DemoModal })));
+const InsightsModal = lazy(() => import("../insights/InsightsModal").then((m) => ({ default: m.InsightsModal })));
 
 /** "just now", "2 min ago", "at 14:05". */
 function ago(at: number, now: number): string {
@@ -73,6 +77,7 @@ export function TopBar() {
   const returnPageId = useEditor((s) => s.returnPageId);
   const editingMenu = !!megaItemId(page.id);
   const [notice, setNotice] = useState<string | null>(null);
+  const simple = useSimple();
   const now = useNow(20_000);
   // Claude has its own pill (agent/AgentPill); this line is for edits from another window.
   const remote = lastLabel && /^Another window: /.test(lastLabel) ? lastLabel : null;
@@ -126,26 +131,19 @@ export function TopBar() {
             Done editing menu panel
           </button>
         ) : null}
-        <span className="ed-savechip" data-state={save === "error" ? "error" : save === "saving" ? "saving" : "saved"} title={saveTitle}>
-          <span className="ed-savedot" data-state={save === "error" ? "error" : save === "saving" ? "saving" : "saved"} role="img" aria-label={saveTitle} title={saveTitle} />
-          <span className="ed-savetext ed-desk-only" aria-hidden="true">{save === "error" ? "Not saved" : save === "saving" ? "Saving…" : "Saved"}</span>
-        </span>
-        {/* Draft vs live, in words (UI spec, Nov 2026): amber while the draft differs from the live site. */}
-        <button
-          type="button"
-          className={`ed-statechip${count ? " is-draft" : " is-live"}`}
-          onClick={openSheet}
-          title={count ? "The draft has changes visitors can't see yet. Click to see them, then Publish." : "Everything in the editor is what visitors see."}
-        >
-          <span aria-hidden="true" />
-          {count ? `Draft · ${count} not live` : count === 0 ? "Matches live" : "Draft · changes not live"}
-        </button>
+        <StatusPill
+          save={save === "error" ? "error" : save === "saving" ? "saving" : "saved"}
+          saveTitle={saveTitle}
+          savedText={savedAt ? ago(savedAt, now) : "All saved"}
+          count={count}
+          live={live}
+        />
         {notice || remote ? (
           <span className="ed-status" role="status" title={lastLabel ?? undefined}>
             {notice ?? remote}
           </span>
         ) : null}
-        <span className={`ed-live${live ? " is-on" : ""}`} title={live ? "Live: changes from Claude appear here as they happen" : "Reconnecting to live sync…"} aria-label={live ? "Live sync connected" : "Live sync reconnecting"} role="img" />
+        <ModeSwitch />
         <span className="ed-history">
           <button type="button" className="ed-icon" onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (⌘Z)">
             <Icon d="M5 3L2 6l3 3M2 6h7.5a4 4 0 0 1 0 8H7" />
@@ -161,7 +159,7 @@ export function TopBar() {
         <ToolGroup />
         <span className="ed-island-divider" aria-hidden="true" />
         <div className="ed-island-bps" role="group" aria-label="Breakpoints">
-          {ISLAND_ORDER.map((b) => (
+          {ISLAND_ORDER.filter((b) => !simple || b === "desktop" || b === "mobile" || b === bp).map((b) => (
             <button
               key={b}
               type="button"
@@ -185,16 +183,18 @@ export function TopBar() {
       </div>
 
       {/* Claude at work: its own pill, centred under the top bar so it never crowds the controls. */}
-      <div className="ed-agent-dock">
-        <AgentPill />
-      </div>
+      <InDock slot="top" name="agent">
+        <div className="ed-agent-dock">
+          <AgentPill />
+        </div>
+      </InDock>
 
       {/* Right island: Claude status pill, Preview, Discard draft, Publish */}
       <div className="ed-island ed-island-right" role="toolbar" aria-label="Publishing and preview">
         {DEMO ? <DemoBar /> : null}
         <Avatars />
-        {DEMO ? null : <ClaudePill />}
         <Preflight />
+        <VersionsButton />
         <button type="button" className="ed-btn ed-desk-only" onClick={preview}>
           Preview
         </button>
@@ -221,6 +221,21 @@ export function TopBar() {
   );
 }
 
+/** Simple / Full (direction B): what this person sees. Remembered per person. */
+function ModeSwitch() {
+  const mode = useMode();
+  return (
+    <div className="ed-seg ed-mode-switch ed-desk-only" role="radiogroup" aria-label="Editing mode" title="Simple: words and pictures. Full: style, layout and screen sizes too.">
+      <button type="button" role="radio" aria-checked={mode === "simple"} onClick={() => setMode("simple")}>
+        Simple
+      </button>
+      <button type="button" role="radio" aria-checked={mode === "full"} onClick={() => setMode("full")}>
+        Full
+      </button>
+    </div>
+  );
+}
+
 /**
  * Publish, with its real stages: a spinner and "Saving…", then "Rebuilding…",
  * then a green "Live" for a few seconds. The badge counts unpublished changes;
@@ -229,17 +244,20 @@ export function TopBar() {
 function PublishButton({ phase, count, disabled }: { phase: string; count: number | null; disabled: boolean }) {
   const busy = phase === "github" || phase === "rebuilding";
   const label = phase === "github" ? "Saving…" : phase === "rebuilding" ? "Rebuilding…" : phase === "live" ? "Live" : "Publish";
+  // The count sits in the button (one number, not a second badge); the status pill lists them.
+  const n = count && phase === "idle" ? count : null;
   return (
     <span className={`ed-publish is-${phase}`} onPointerEnter={() => void PublishSheet.prefetch()}>
       <button type="button" className="ed-btn ed-btn-accent ed-pill ed-publish-btn" onClick={() => void publish()} disabled={busy || (disabled && phase !== "error")} aria-live="polite">
         {busy ? <span className="ed-spinner" aria-hidden="true" /> : phase === "live" ? <span aria-hidden="true">✓</span> : null}
         {label}
+        {n ? (
+          <span className="ed-publish-n" aria-label={`, ${n} ${n === 1 ? "change" : "changes"}`}>
+            {n}
+          </span>
+        ) : null}
       </button>
-      {count && phase === "idle" ? (
-        <button type="button" className="ed-publish-badge" aria-label={`${count} unpublished ${count === 1 ? "change" : "changes"}: show details`} title="What will be published" onClick={openSheet}>
-          {count}
-        </button>
-      ) : phase === "error" ? (
+      {phase === "error" ? (
         <button type="button" className="ed-publish-badge is-error" aria-label="Publishing failed: show details" onClick={openSheet}>
           !
         </button>
@@ -253,7 +271,9 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
   const [open, setOpen] = useState(false);
   const [teamOpen, setTeamOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
+  const [insightsOpen, setInsightsOpen] = useState(false);
   const glass = useGlass();
+  const theme = useTheme();
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -265,6 +285,7 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
     <div className="ed-more" ref={box}>
       {teamOpen ? createPortal(<TeamModal onClose={() => setTeamOpen(false)} />, document.body) : null}
       {demoOpen ? createPortal(<Suspense fallback={null}><DemoModal onClose={() => setDemoOpen(false)} /></Suspense>, document.body) : null}
+      {insightsOpen ? createPortal(<Suspense fallback={null}><InsightsModal onClose={() => setInsightsOpen(false)} /></Suspense>, document.body) : null}
       <button type="button" className="ed-icon ed-more-btn" aria-label="More" aria-haspopup="menu" aria-expanded={open} title="More" onClick={() => setOpen(!open)}>
         …
       </button>
@@ -293,6 +314,18 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
               }}
             >
               Team…
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                setInsightsOpen(true);
+              }}
+            >
+              Visitor insights…
             </button>
           </li>
           {DEMO ? null : (
@@ -334,6 +367,17 @@ function MoreMenu({ canDiscard, onDiscard, onPreview }: { canDiscard: boolean; o
               {glass ? "✓ " : ""}Glass toolbars
             </button>
           </li>
+          <li role="separator" className="ed-menu-sep" />
+          <li role="presentation" className="ed-menu-head">Colours</li>
+          {THEMES.map((t) => (
+            <li role="none" key={t.id}>
+              <button type="button" className="is-theme" role="menuitemradio" aria-checked={theme === t.id} title={t.hint} onClick={() => setTheme(t.id)}>
+                <span className="ed-theme-dot" data-theme={t.id} aria-hidden="true" />
+                {t.name}
+                {theme === t.id ? <span className="ed-menu-check" aria-hidden="true">✓</span> : null}
+              </button>
+            </li>
+          ))}
           <li role="separator" className="ed-menu-sep" />
           <li role="none">
             <button

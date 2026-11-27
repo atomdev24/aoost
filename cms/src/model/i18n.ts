@@ -125,7 +125,9 @@ export function languageCopy(site: Site, pageId: string, lang: string): { site: 
  * (pages and translations), for the public site and staging.
  */
 export function pageAt(site: Site, slug: string, live: boolean): Page | undefined {
-  const plain = site.pages.find((p) => p.slug === slug && (!live || (p.status !== "draft" && !p.collectionId)) && p.variantOf === undefined);
+  // Variants are drafts: never live, but the draft preview shows them (Compare, All designs, Preview).
+  // A collection's page design is never live either.
+  const plain = site.pages.find((p) => p.slug === slug && (live ? p.status !== "draft" && p.variantOf === undefined && !p.collectionId : true));
   if (plain) return plain;
   // A collection item's page (live items only, unless signed in).
   const item = cmsPages(site, live).find((p) => p.slug === slug);

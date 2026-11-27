@@ -29,10 +29,14 @@ export function FrameStill({ bp, pageId, active }: { bp: Breakpoint; pageId: str
     if (phase !== "shown") return;
     // Live page first (hidden pages aren't drawn), two frames for it to paint, then fade the picture.
     setPhase("leaving");
-    let id = requestAnimationFrame(() => (id = requestAnimationFrame(() => ref.current?.classList.add("is-fading"))));
-    const t = setTimeout(() => setPhase("off"), 260);
+    // A heavy page (3D, big pictures) can take a few frames more to draw after being hidden, so
+    // the fade waits a little longer than two frames: otherwise it showed blank for a moment.
+    let fade: ReturnType<typeof setTimeout> | undefined;
+    let id = requestAnimationFrame(() => (id = requestAnimationFrame(() => (fade = setTimeout(() => ref.current?.classList.add("is-fading"), 140)))));
+    const t = setTimeout(() => setPhase("off"), 420);
     return () => {
       cancelAnimationFrame(id);
+      clearTimeout(fade);
       clearTimeout(t);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,7 +63,7 @@ export function FrameStill({ bp, pageId, active }: { bp: Breakpoint; pageId: str
 }
 
 /** Shows the picture's own canvas (one per frame, moved here rather than copied). */
-function StillCanvas({ canvas }: { canvas: HTMLCanvasElement }) {
+export function StillCanvas({ canvas }: { canvas: HTMLCanvasElement }) {
   const box = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = box.current;
@@ -78,7 +82,7 @@ function StillCanvas({ canvas }: { canvas: HTMLCanvasElement }) {
  * picks that block (or piece) as a click on the page would. The live page is only hidden from the
  * board; inside its own document everything is still there to hit.
  */
-function clickThrough(bp: Breakpoint, el: HTMLElement, clientX: number, clientY: number) {
+export function clickThrough(bp: Breakpoint, el: HTMLElement, clientX: number, clientY: number, otherwise: () => void = () => activateBreakpoint(bp, null)) {
   const r = el.getBoundingClientRect();
   const zoom = getBoard().view.zoom;
   const x = (clientX - r.left) / zoom;
@@ -86,6 +90,6 @@ function clickThrough(bp: Breakpoint, el: HTMLElement, clientX: number, clientY:
   const frame = el.parentElement?.querySelector("iframe");
   const doc = frame?.contentDocument;
   const target = doc?.elementFromPoint(x, y);
-  if (!doc || !target) return activateBreakpoint(bp, null);
+  if (!doc || !target) return otherwise();
   target.dispatchEvent(new (doc.defaultView as Window & typeof globalThis).MouseEvent("click", { bubbles: true, cancelable: true, clientX: x, clientY: y, view: doc.defaultView }));
 }

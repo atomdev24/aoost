@@ -3,8 +3,9 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { startLoadGuard } from "./load-guard";
-import { startDisplay } from "./display";
+import { isChromium, startDisplay } from "./display";
 import { guardPinch } from "./pinch-guard";
+import { startTooltips } from "./ui/tooltip";
 import "./editor.css";
 import "./workspace/workspace.css";
 
@@ -17,6 +18,13 @@ if (import.meta.env.PROD && !DEMO && "serviceWorker" in navigator) {
 }
 
 startDisplay();
+startTooltips(document);
+// While someone types in the editor, the hero's dot board in the canvas holds still (AoostHero).
+const busy = () => ((window as Window & { __edBusyUntil?: number }).__edBusyUntil = Date.now() + 700);
+document.addEventListener("input", busy, true);
+document.addEventListener("keydown", busy, true);
+// Liquid glass only works in Chromium, so only Chromium downloads it (ui/liquid.ts).
+if (isChromium()) void import("./ui/liquid").then((m) => m.startLiquid(document)).catch(() => undefined);
 guardPinch(window);
 if (import.meta.env.PROD) startLoadGuard();
 

@@ -1,4 +1,5 @@
 import type { CustomField } from "@puckeditor/core";
+import { pictureName } from "../../model/names";
 import { useState } from "react";
 import { updateNode } from "../../model/page-ops";
 import { overridesAt, REFERENCE, resetAt, resolve, setOnly } from "../../responsive/resolve";
@@ -121,7 +122,7 @@ export function MediaInput({ value, onChange, kind, label, owner = false, slot =
     >
       <button type="button" className="ed-mediarow-main" aria-label={`${label}: ${value ? fileName(value) : "none"}. Open media options`} aria-haspopup="dialog" aria-expanded={!!open} onClick={(e) => setOpen(open ? null : anchorOf(e.currentTarget))}>
         <span className="ed-mediarow-thumb">{isImage ? <img src={/\.(svg|gif)(\?|$)/i.test(value!) || /^https?:/.test(value!) ? value : `${value}?w=96`} alt="" /> : <span>{GLYPH[kind]}</span>}</span>
-        <span className="ed-mediarow-name">{dropping ? "Drop to upload" : busy ? "Uploading…" : value ? fileName(value) : "Choose…"}</span>
+        <span className="ed-mediarow-name">{dropping ? "Drop to upload" : busy ? "Uploading…" : value ? pictureName(value) : "Choose…"}</span>
         {fit && value ? <span className="ed-mediarow-fit">{FIT_NAME[fit.fit]}</span> : null}
       </button>
       {open ? <MediaPopover anchor={open} value={value} onChange={onChange} kind={kind} label={label} node={node} slot={slot} altKey={altKey} fit={fit} onClose={() => setOpen(null)} /> : null}
@@ -152,7 +153,7 @@ function MediaPopover({ anchor, value, onChange, kind, label, node, slot, altKey
         ) : isImage ? (
           <img src={value} alt="" />
         ) : (
-          <span className="ed-mediapop-glyph">{value ? fileName(value) : "Nothing chosen"}</span>
+          <span className="ed-mediapop-glyph">{value ? pictureName(value) : "Nothing chosen"}</span>
         )}
       </div>
       <div className="ed-mediapop-actions">

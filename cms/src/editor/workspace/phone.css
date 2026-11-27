@@ -135,6 +135,9 @@
     width: 40px;
     height: 40px;
   }
+  .ed-rail-label {
+    display: none;
+  }
   .ed-flyout {
     top: calc(env(safe-area-inset-top) + 120px);
     left: calc(max(8px, env(safe-area-inset-left)) + 56px);
@@ -158,7 +161,7 @@
     width: min(380px, calc(100vw - 16px - env(safe-area-inset-left) - env(safe-area-inset-right)));
     max-height: none;
     height: 34dvh;
-    transition: height 180ms ease;
+    transition: height 180ms var(--ed-ease-out);
     z-index: 110;
   }
   .ed-inspector.is-card[data-size="collapsed"] {
@@ -285,11 +288,182 @@
   cursor: pointer;
 }
 .ed-adjust-chip[aria-pressed="true"] {
-  background: #1c1c1e;
+  background: var(--ed-surface);
   color: #ffd60a;
 }
 .ed-adjust-tag:has(.ed-adjust-chip) {
   display: flex;
   align-items: center;
   padding: 4px 4px 4px 8px;
+}
+
+/* -------------------------------------------------- Phone 1 (Nov 2026): one top row, tabs at the bottom */
+.ed-phone-tabs,
+.ed-phone-more {
+  display: none;
+}
+@media (max-width: 767px) {
+  :root {
+    --ed-tabs: calc(58px + env(safe-area-inset-bottom));
+  }
+  .ed-rail,
+  .ed-island-center {
+    display: none !important;
+  }
+  .ed-islands {
+    grid-template-areas: "left right";
+  }
+  .ed-phone-tabs {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 130;
+    display: flex;
+    height: var(--ed-tabs);
+    padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
+    box-sizing: border-box;
+    /* Glass, but denser than the other bars: its labels sit over bright pages. */
+    background: color-mix(in srgb, var(--ed-solid-bg) 84%, transparent);
+    -webkit-backdrop-filter: var(--ed-glass-backdrop);
+    backdrop-filter: var(--ed-glass-backdrop);
+    box-shadow: var(--ed-glass-edge);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .ed-phone-tabs button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 0;
+    background: transparent;
+    color: var(--ed-sub);
+    font: 500 11px var(--ed-font);
+  }
+  .ed-phone-tabs button[aria-pressed="true"] {
+    color: #fff;
+  }
+  .ed-phone-tabs button[aria-pressed="true"] svg {
+    color: #4aa3ff;
+  }
+  /* Typing in place: the formatting bar takes the bottom. */
+  body.ed-rich-on .ed-phone-tabs {
+    display: none;
+  }
+  /* Panels open as half-height sheets above the tabs. */
+  .ed-flyout,
+  .ed-flyout[style] {
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--ed-tabs) !important;
+    width: auto !important;
+    height: 56dvh;
+    max-height: none !important;
+    border-radius: 16px 16px 0 0;
+    z-index: 125;
+  }
+  .ed-phone-more {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--ed-tabs);
+    z-index: 126;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 8px 16px 14px;
+    box-sizing: border-box;
+    border-radius: 16px 16px 0 0;
+    background: var(--ed-panel-solid);
+    -webkit-backdrop-filter: var(--ed-panel-backdrop);
+    backdrop-filter: var(--ed-panel-backdrop);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.4);
+    color: var(--ed-text);
+    font: 15px var(--ed-font);
+  }
+  .ed-phone-grip {
+    align-self: center;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .ed-phone-more-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ed-phone-more-head b {
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .ed-phone-more-head button,
+  .ed-phone-more li button {
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+  .ed-phone-more-head button {
+    color: #4aa3ff;
+    min-height: 44px;
+  }
+  .ed-phone-more ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ed-phone-more li button {
+    width: 100%;
+    min-height: 48px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .ed-phone-bps {
+    display: flex;
+  }
+  .ed-phone-bps button {
+    flex: 1;
+    height: 40px;
+    font-size: 14px;
+  }
+  /* The settings card, the zoom bar and notes sit above the tabs. */
+  .ed-inspector.is-card {
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+    width: auto;
+    bottom: calc(var(--ed-tabs) + 8px);
+  }
+  .ed-inspector.is-card[data-size="full"] {
+    height: calc(100dvh - env(safe-area-inset-top) - var(--ed-tabs) - 80px);
+  }
+  .bd-zoombar {
+    bottom: calc(var(--ed-tabs) + 8px);
+  }
+}
+@media (max-width: 767px) {
+  /* One top row: the page name keeps its room; Redo lives in the palette on phones. */
+  .ed-island-left .ed-switcher {
+    flex: 1 1 auto;
+    min-width: 64px;
+    overflow: hidden;
+  }
+  .ed-island-left .ed-switcher-btn {
+    max-width: 100%;
+  }
+  .ed-history .ed-icon + .ed-icon,
+  .ed-search-btn {
+    display: none !important;
+  }
+}
+@media (max-width: 767px) {
+  /* The settings card is the tip's subject: one at a time. */
+  body:has(.ed-inspector.is-card) .ed-tip {
+    display: none !important;
+  }
 }

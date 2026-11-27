@@ -81,17 +81,17 @@ export function stepZoom(z: number, dir: 1 | -1): number {
  * under the labels. Whole pages are usually far taller than wide, so fitting
  * their full height too would shrink them past reading; the height is panned.
  */
-export function fitAll(rects: Rect[], width: number, height: number): View {
+export function fitAll(rects: Rect[], width: number, height: number, extraTop = 0): View {
   const left = Math.min(...rects.map((r) => r.x));
   const right = Math.max(...rects.map((r) => r.x + r.w));
   const top = Math.min(...rects.map((r) => r.y));
   const bottom = Math.max(...rects.map((r) => r.y + r.h));
   const byWidth = (width - FIT_PAD.x * 2) / (right - left);
-  const byHeight = (height - FIT_PAD.top - FIT_PAD.bottom) / (bottom - top);
+  const byHeight = (height - FIT_PAD.top - extraTop - FIT_PAD.bottom) / (bottom - top);
   // Fit the whole height only when it doesn't cost more than half the width fit.
   const zoom = clampZoom(byHeight >= byWidth / 2 ? Math.min(byWidth, byHeight) : byWidth);
   const x = (width - (right - left) * zoom) / 2 - left * zoom;
-  return { zoom, x, y: FIT_PAD.top - top * zoom };
+  return { zoom, x, y: FIT_PAD.top + extraTop - top * zoom };
 }
 
 /** Centre a world rect in the view at the current zoom (zooming out if it's wider than the view). */

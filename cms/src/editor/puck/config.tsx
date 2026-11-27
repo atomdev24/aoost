@@ -1,4 +1,6 @@
 import type { ComponentConfig, Config, PuckContext } from "@puckeditor/core";
+import { blockDefault } from "../../model/saved-blocks";
+import { getState } from "../store";
 import { contentFields } from "../../components/fields";
 import { components } from "../../components/registry";
 import type { ComponentDef } from "../../components/types";
@@ -27,6 +29,13 @@ function nodeConfig(def: ComponentDef): ComponentConfig {
       ...(def.defaults.content as object),
       style: { base: def.defaults.style ?? {} },
       ...(def.framed ? { frame: { base: DEFAULT_FRAME_FIT } } : {}),
+    },
+    // Dragged in from Insert: a block type with a site default (Make default) starts from it.
+    resolveData: (data, params) => {
+      if ((params as { trigger?: string }).trigger !== "insert") return data;
+      const start = blockDefault(getState().site, def.type);
+      if (!start) return data;
+      return { ...data, props: { ...data.props, ...start.content, style: { base: { ...(def.defaults.style ?? {}), ...(start.style ?? {}) } } } };
     },
     // Canvas layers are positioned freely, so Puck's list reordering is off there.
     resolvePermissions: (data, { parent }) => ({

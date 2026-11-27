@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { inline } from "../../../render/inline";
 import { defineComponent } from "../../types";
 import { aeroboticsKit } from "../kit";
 import { Band, BACKGROUNDS } from "../shared";
@@ -45,7 +46,7 @@ export const AeroFaq = defineComponent<AeroFaqContent>({
       {c.items.map((it, i) => (
         <details key={i} open={ctx.editing && i === 0}>
           <summary>{it.question}</summary>
-          <p>{it.answer}</p>
+          <p>{inline(it.answer)}</p>
         </details>
       ))}
     </Band>

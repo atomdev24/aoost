@@ -1,3 +1,5 @@
+import { useSimple } from "../workspace/mode";
+import { InDock } from "../workspace/Dock";
 import { Puck } from "@puckeditor/core";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BREAKPOINT_LABEL, DESIGN_WIDTH, type Breakpoint } from "../../schema";
@@ -15,13 +17,15 @@ import { countOverrides } from "./overrides";
 import { frameRects, getBoard, openPage, panBy, resetFramePositions, setFrameHidden, setFramePosition, setHeight, setInteracting, setSize, toggleFrameHidden, useBoard, visibleFrameRects } from "./store";
 import { FRAME_GAP, isVisible, shortLabels, slotRect } from "./viewport";
 import { onBoardWheel } from "./wheel";
+import { newVariant } from "../variants/actions";
 import { ZoomBar } from "./ZoomBar";
 import { RefLayer, RefNotice } from "./RefLayer";
 import { OverflowLayer } from "./OverflowLayer";
 import { attachRefDrops } from "./refs-store";
 import { attachGestures } from "../touch/gestures";
 import { LONG_PRESS_MS } from "../touch/longpress";
-import { AdjustImage, CommentLayer, PresenceLayer } from "../parts";
+import { AdjustImage, CommentLayer, PresenceLayer, VersionRowFrames, VersionRowLabels } from "../parts";
+import { PlayButton, PlayHost } from "../play/PlayButton";
 import "./board.css";
 
 const NAME = BREAKPOINT_LABEL;
@@ -68,7 +72,13 @@ function LoadingCover({ bp, pageId, slug, ready }: { bp: Breakpoint; pageId: str
  * preview; the others are live renders of the same draft. One document, many
  * views: an edit anywhere shows everywhere.
  */
+/** "25 changes for phones": plain words, not "overrides" (audit, Nov 2026). */
+const FOR: Record<string, string> = { mobile: "phones", tablet: "tablets", widescreen: "wide screens", desktop: "desktop" };
+const overrideWords = (n: number, bp: string) => `${n} ${n === 1 ? "change" : "changes"} for ${FOR[bp] ?? bp}`;
+
 export function Board() {
+  // Simple mode works on Desktop and Mobile only.
+  const simple = useSimple();
   const host = useRef<HTMLDivElement>(null);
   const pageId = useEditor((s) => s.pageId);
   const bp = useEditor((s) => s.bp);
@@ -236,7 +246,9 @@ export function Board() {
               <LoadingCover bp={f.bp} pageId={pageId} slug={page.slug} ready={ready[f.bp] && !hold} />
             </div>
           ))}
-        {addable.length ? (
+        {/* Other versions of this page (it and its variants), as rows under it (EDITOR-VARIANTS.md). */}
+        <VersionRowFrames frames={frames} view={view} size={size} after={addable.length && !simple ? slot.x + slot.w : undefined} />
+        {addable.length && !simple ? (
           <div className="bd-slot" style={{ left: slot.x, top: slot.y, width: slot.w, height: slot.h }} role="group" aria-label="Add a breakpoint">
             <span className="bd-slot-plus">+</span>
             <span>Add a breakpoint</span>
@@ -283,19 +295,24 @@ export function Board() {
             {short ? null : (NOTE[f.bp] ?? null)}
             {overrides[f.bp] ? (
               short ? (
-                <span className="bd-badge is-dot" title={overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}>
-                  <span className="ed-visually-hidden">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span>
+                <span className="bd-badge is-dot" title={overrideWords(overrides[f.bp]!, f.bp)}>
+                  <span className="ed-visually-hidden">{overrideWords(overrides[f.bp]!, f.bp)}</span>
                 </span>
               ) : (
-                <span className="bd-badge">{overrides[f.bp] === 1 ? "1 override" : `${overrides[f.bp]} overrides`}</span>
+                <span className="bd-badge">{overrideWords(overrides[f.bp]!, f.bp)}</span>
               )
             ) : null}
           </button>
+          <PlayButton pageId={pageId} bp={f.bp} />
           <FrameMenu bp={f.bp} canHide={frames.length > 1} open={menuFor === f.bp} setOpen={(open) => setMenuFor(open ? f.bp : null)} />
         </div>
       ))}
 
+      {/* "+ New variant" sits after the last version, to the right (VersionRowLabels). */}
+      <VersionRowLabels frames={frames} after={addable.length && !simple ? slot.x + slot.w : undefined} />
+
       {hiddenBps.length ? (
+        <InDock slot="bottom" name="hidden">
         <div className="bd-hidden-chip" role="status">
           {hiddenBps.map((b) => (
             <span key={b}>
@@ -306,6 +323,7 @@ export function Board() {
             </span>
           ))}
         </div>
+        </InDock>
       ) : null}
 
       <RefNotice />
@@ -313,11 +331,14 @@ export function Board() {
       <PresenceLayer />
       <CommentLayer />
       <AdjustImage />
+      <PlayHost />
       {!hidden[bp] ? <EmptyPage rect={{ ...screen(active.x, active.y), width: active.w * view.zoom, height: active.h * view.zoom }} /> : null}
       {loading ? (
-        <div className="bd-loading-chip" role="status">
-          <span className="ed-spinner" aria-hidden="true" /> Loading latest…
-        </div>
+        <InDock slot="bottom" name="loading">
+          <div className="bd-loading-chip" role="status">
+            <span className="ed-spinner" aria-hidden="true" /> Loading latest…
+          </div>
+        </InDock>
       ) : null}
       {spaceDown ? <div className="bd-shield" onPointerDown={startPan} /> : null}
       <ZoomBar />
@@ -362,6 +383,11 @@ function FrameMenu({ bp, canHide, open, setOpen }: { bp: Breakpoint; canHide: bo
           <li role="none">
             <button type="button" role="menuitem" onClick={pick(resetFramePositions)}>
               Reset positions
+            </button>
+          </li>
+          <li role="none">
+            <button type="button" role="menuitem" onClick={pick(() => newVariant())}>
+              New variant of this page
             </button>
           </li>
         </ul>

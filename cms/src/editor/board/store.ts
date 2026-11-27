@@ -181,10 +181,17 @@ function coveredEdges(): { left: number; right: number } {
   const side = !rail.pos ? "left" : rail.pos.x <= 12 ? "left" : typeof innerWidth === "number" && rail.pos.x >= innerWidth - 60 ? "right" : "none";
   return panelRoom(state.size.w, rail.active !== null && side === "left", rail.active !== null && side === "right");
 }
+/** Notes in the top dock (the demo strip, draft sync, Claude at work): Fit leaves room for them above the frame labels. */
+function topDockRoom(): number {
+  if (typeof document === "undefined") return 0;
+  const dock = document.getElementById("ed-dock-top");
+  if (!dock || !dock.childElementCount) return 0;
+  return Math.max(0, Math.round(dock.getBoundingClientRect().bottom + 34 - 92));
+}
 export const fit = () => {
   if (!state.size.w) return;
   const { left, right } = coveredEdges();
-  const v = fitAll([...allRects(), ...extraFitRects()], state.size.w - left - right, state.size.h);
+  const v = fitAll([...allRects(), ...extraFitRects()], state.size.w - left - right, state.size.h, topDockRoom());
   setView({ ...v, x: v.x + left });
 };
 export const zoomTo = (zoom: number, px = state.size.w / 2, py = state.size.h / 2) => setView(zoomAt(state.view, clampZoom(zoom), px, py));

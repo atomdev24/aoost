@@ -1,3 +1,6 @@
+import { startRichEdit } from "../rich/edit-store";
+import { openDesigns } from "../templates/designs-open";
+import { propose } from "../variants/actions";
 import { resetTips } from "../tips/tips";
 import { nodeToBoard } from "../board/ref-page";
 import { openCollections } from "../collections/collections-open";
@@ -49,6 +52,12 @@ function editSelection(): boolean {
   if (at.kind === "section") {
     const first = at.section.children[0];
     if (first) selectBlock(first.id);
+    return true;
+  }
+  // Text: edit the words where they are.
+  const node = at.kind === "node" ? at.node : at.kind === "overlay" ? at.overlay.node : null;
+  if (node?.type === "Text" && !node.locked) {
+    startRichEdit(id, getState().bp);
     return true;
   }
   if (adjustable(blockEl(id))) {
@@ -137,6 +146,11 @@ export const RUNNERS: Record<ActionId, () => boolean | void> = {
   "page.preview": () => void previewPage(),
   "variant.new": () => newVariant(),
   "variant.elect": () => void electCurrentVariant(),
+  "variant.review": () => openDesigns(),
+  "variant.propose": () => {
+    const p = currentPage(getState());
+    if (p.variantOf) propose(p.id, true);
+  },
   "staging.send": () => void sendToStaging().then((ok) => ok && openSheet()),
   "staging.push": () => void (getStaging().info ? pushStaging() : sendToStaging().then((ok) => ok && openSheet())),
   "claude.ask": openPalette,

@@ -6,6 +6,17 @@ const RASTER = /\.(jpe?g|png|webp|avif)$/i;
 export const STATIC_WIDTHS = [480, 960, 1600] as const;
 export const staticVariant = (src: string, width: number) => src.replace(/\.[a-z]+$/i, `.${width}.webp`);
 
+/**
+ * A smaller copy of a picture for phones (960 px wide), when one exists: the build's .960.webp for
+ * the repo's own /art files, the Worker's ?w=960 for uploads. Anything else comes back unchanged.
+ * For CSS backgrounds, which can't use srcset.
+ */
+export function phoneVariant(src: string): string {
+  if (src.startsWith("/art/") && RASTER.test(src) && !/\.\d+\.webp$/.test(src)) return staticVariant(src, 960);
+  if (src.startsWith("/media/") && RASTER.test(src) && !src.includes("?")) return `${src}?w=960`;
+  return src;
+}
+
 /** Uploaded raster images get a srcset; static files and SVG/GIF are served as they are. */
 export function imageSources(src: string): { src: string; srcSet?: string } {
   if (src.startsWith("/art/") && RASTER.test(src) && !/\.\d+\.webp$/.test(src)) {

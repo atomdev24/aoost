@@ -1,6 +1,7 @@
 import type { Fields } from "@puckeditor/core";
 import { mediaField } from "../../../editor/fields/media";
 import { backgroundField } from "../shared";
+import { tickerFields } from "../ticker";
 import type { AeroLogosContent } from "./AeroLogos";
 
 export const fields: Fields<AeroLogosContent> = {
@@ -12,5 +13,6 @@ export const fields: Fields<AeroLogosContent> = {
     defaultItemProps: { src: "", alt: "" },
     getItemSummary: (item, i) => item.alt || `Logo ${(i ?? 0) + 1}`,
   },
+  ...tickerFields,
   bg: backgroundField,
 };

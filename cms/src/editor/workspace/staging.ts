@@ -5,7 +5,7 @@ import { closeCompare, openCompare } from "./compare";
 import { api, ApiError, type StagingInfo } from "../api";
 import { noteProblem } from "../problems";
 import { onServerMessage } from "../socket";
-import { currentPage, flush, getState, setPage, update } from "../store";
+import { currentPage, flush, getState } from "../store";
 import { getPublish, loadPublished, openSheet } from "./publish";
 
 /**
@@ -66,18 +66,12 @@ export async function sendToStaging(label?: string): Promise<boolean> {
   }
 }
 
-/** Elect the variant on screen: its content replaces its page in the draft, then the draft goes to staging. */
+/** Elect the variant on screen: opens the Pick sheet (EDITOR-VARIANTS.md), which keeps the other versions. */
 export async function electCurrentVariant() {
-  const s = getState();
-  const v = currentPage(s);
+  const v = currentPage(getState());
   if (!v.variantOf) return;
-  const page = ownerPage(s.site, v);
-  const label = `${page.title}: ${v.variantName ?? "variant"}`;
-  const next = electVariant(s.site, v.id);
-  if (!next) return;
-  update(() => next, `Elect ${v.variantName ?? "variant"}`);
-  setPage(page.id);
-  if (await sendToStaging(label)) openSheet();
+  const { openPick } = await import("../variants/pick-open");
+  openPick(v.id);
 }
 
 export async function emptyStaging() {
@@ -117,10 +111,10 @@ export async function compareCurrentVariant() {
   openCompare({
     title: `${v.variantName ?? "Variant"} compared with live ${page.title}`,
     left: { label: `Live: ${page.title}`, src: `/preview/_live${previewPath(page.slug)}` },
-    right: { label: `${v.variantName ?? "Variant"} (what electing would make live)`, src: `/preview${previewPath(v.slug)}` },
+    right: { label: `${v.variantName ?? "Variant"} (what picking would make the page)`, src: `/preview${previewPath(v.slug)}` },
     changes: items.length ? [{ title: page.title, items }] : [],
     action: {
-      label: "Elect to staging",
+      label: "Pick this one…",
       run: async () => {
         closeCompare();
         await electCurrentVariant();

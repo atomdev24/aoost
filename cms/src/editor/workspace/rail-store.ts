@@ -111,7 +111,8 @@ export function setRailPos(pos: RailState["pos"]) {
 }
 
 export const RAIL_HOME = { x: 10, y: 58 };
-export const RAIL_W = 44;
+/** The rail with its labels under the icons (direction A, Nov 2026). */
+export const RAIL_W = 60;
 export const FLYOUT_W = 260;
 const GAP = 6;
 

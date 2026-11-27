@@ -73,6 +73,11 @@ function StylePanel({ value, onChange, framed, textual }: { value: Responsive<St
         {parentKind === "canvas" ? <AlignBar /> : null}
         <ResponsiveEditor value={value} onChange={onChange} rows={STYLE_ROWS} ctx={{ parentKind, framed }} groups={["Position", "Size", "Grid cell", "Spacing"]} />
       </InspectorGroup>
+      {textual ? (
+        <InspectorGroup title="Text">
+          <ResponsiveEditor value={value} onChange={onChange} rows={STYLE_ROWS} ctx={{ parentKind, framed, textual }} groups={["Text"]} hideHeads={["Text"]} />
+        </InspectorGroup>
+      ) : null}
       <InspectorGroup title="Frame">
         <ResponsiveEditor value={value} onChange={onChange} rows={STYLE_ROWS} ctx={{ parentKind, framed, textual }} groups={["Frame", "Look"]} hideHeads={["Frame"]} />
       </InspectorGroup>
@@ -89,10 +94,11 @@ export const styleField = (framed: boolean, textual = false): CustomField<Respon
 /** A titled group in the inspector: 11px semibold label, then its rows. */
 /** Which inspector tab a group sits under (UI spec, Nov 2026: Content / Style / Layout). */
 export type InspectorTab = "content" | "style" | "layout";
-const GROUP_TAB: Record<string, InspectorTab> = { Layout: "layout", "Visible on": "layout", Frame: "style", "Picture in frame": "style", Motion: "style", Background: "style" };
+const GROUP_TAB: Record<string, InspectorTab> = { Text: "style", Layout: "layout", "Visible on": "layout", Frame: "style", "Picture in frame": "style", Motion: "style", Background: "style" };
 /** One line per group, shown by its help icon. Plain words for teammates who aren't designers. */
 export const GROUP_HELP: Record<string, string> = {
   Content: "The words, pictures and links in this block. The same on every screen size.",
+  Text: "How the words look on this screen size: font, size, weight, spacing, colour and capitals. Empty means the text style decides. Double-click the text on the page to style single words.",
   Layout: "Where the block sits and how big it is: position, size, columns and spacing. Can differ per screen size.",
   "Visible on": "Switch the block off on screen sizes where it shouldn't show. It stays on the others.",
   Frame: "How the block's box looks: corners, border, background, shadow and opacity.",

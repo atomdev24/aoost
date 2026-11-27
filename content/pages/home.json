@@ -62,6 +62,10 @@
                 "src": "/media/2026/aoost-hero-jadeskull-01-front-close-w4dd.png",
                 "alt": "",
                 "date": "22.11.26"
+              },
+              {
+                "src": "",
+                "alt": ""
               }
             ],
             "reelSeconds": 3,
@@ -213,7 +217,8 @@
                     "y": 0.7875
                   }
                 },
-                "sticker": false
+                "sticker": false,
+                "hidden": false
               },
               {
                 "image": "/media/2026/aoost-hero-skull-scuffed-chrome-2400x1000-cxr4.png",
@@ -227,7 +232,8 @@
                     "y": 0.5997,
                     "scale": 1.5
                   }
-                }
+                },
+                "hidden": false
               },
               {
                 "image": "/media/2026/aoost-hero-jadeskull-02-tilt-1h1t.png",

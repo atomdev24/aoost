@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InDock } from "../workspace/Dock";
 import "./uploads.css";
 import { cancelUpload, dismissUpload, useUploads, type Upload } from "../uploads";
 import { progressLabel } from "./upload-label";
@@ -31,6 +32,7 @@ export function UploadTray() {
   if (!uploads.length) return null;
   const going = uploads.filter((u) => u.status === "uploading" || u.status === "preparing").length;
   return (
+    <InDock slot="bottom" name="uploads">
     <section className="ed-uploads" aria-label="Uploads">
       <header className="ed-uploads-head">
         <span>{going ? `Uploading ${going} ${going === 1 ? "file" : "files"}` : "Uploads"}</span>
@@ -46,6 +48,7 @@ export function UploadTray() {
         ))}
       </ul>
     </section>
+    </InDock>
   );
 }
 

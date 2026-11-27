@@ -3,7 +3,7 @@ import { typeStyleField } from "../../editor/fields/custom";
 import type { TextContent } from "./Text";
 
 export const fields: Fields<TextContent> = {
-  text: { type: "textarea", label: "Text (**bold**, *italic*, [link](url))" },
+  text: { type: "textarea", label: "Words (double-click them on the page to style them)" },
   styleId: typeStyleField(),
   tag: {
     type: "select",

@@ -140,8 +140,8 @@
   height: 18px;
   padding: 0 7px;
   border-radius: 999px;
-  background: var(--ed-accent-soft);
-  color: var(--ed-accent);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ed-sub);
   font-size: 11px;
   font-weight: 600;
 }
@@ -228,7 +228,7 @@
   justify-content: center;
 }
 .ed-shell.is-interacting .bd-zoombar,
-.ed-shell.is-interacting .bd-hidden-chip {
+body:has(.ed-shell.is-interacting) .ed-dock {
   opacity: 0.7;
 }
 
@@ -310,13 +310,13 @@
   border-radius: 999px;
   color: var(--ed-text);
   font-size: 12px;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms var(--ed-ease-out);
 }
 .bd-hidden-chip button {
   padding: 0;
   border: 0;
   background: none;
-  color: #409cff;
+  color: var(--ed-accent-hi);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -366,8 +366,8 @@
   position: absolute;
   left: 0;
   white-space: nowrap;
-  background: var(--ed-accent);
-  color: #fff;
+  background: var(--ed-accent-fill);
+  color: var(--ed-on-accent);
   font-family: var(--ed-font);
   line-height: 1.4;
   pointer-events: none;
@@ -413,7 +413,7 @@
 }
 .bd-still.is-fading {
   opacity: 0;
-  transition: opacity 160ms ease;
+  transition: opacity 160ms var(--ed-ease-out);
 }
 .bd-still.is-leaving {
   pointer-events: none;
@@ -427,19 +427,128 @@
 /* What hangs off the edge of the active frame (OverflowLayer) */
 .bd-over { position: absolute; width: 0; height: 0; pointer-events: none; }
 /* Behind the frames: only the part outside them shows. */
-.bd-over-ghost { position: absolute; z-index: -1; overflow: hidden; opacity: 0.45; outline: 1px dashed rgba(10, 132, 255, 0.8); }
+.bd-over-ghost { position: absolute; z-index: -1; overflow: hidden; opacity: 0.45; outline: 1px dashed color-mix(in srgb, var(--ed-accent) 80%, transparent); }
 .bd-over-ghost img { display: block; width: 100%; height: 100%; }
-.bd-over-sel { position: absolute; z-index: 3; outline: calc(1px / var(--z, 1)) solid #0a84ff; }
-.bd-over-h { position: absolute; width: 10px; height: 10px; margin: -5px; background: #fff; border: 1px solid #0a84ff; pointer-events: auto; transform: scale(calc(1 / var(--bd-zoom, 1))); }
+.bd-over-sel { position: absolute; z-index: 3; outline: calc(1px / var(--z, 1)) solid var(--ed-accent); }
+.bd-over-h { position: absolute; width: 10px; height: 10px; margin: -5px; background: #fff; border: 1px solid var(--ed-accent); pointer-events: auto; transform: scale(calc(1 / var(--bd-zoom, 1))); }
 .bd-over-h[data-h="nw"] { left: 0; top: 0; cursor: nwse-resize; } .bd-over-h[data-h="n"] { left: 50%; top: 0; cursor: ns-resize; }
 .bd-over-h[data-h="ne"] { left: 100%; top: 0; cursor: nesw-resize; } .bd-over-h[data-h="e"] { left: 100%; top: 50%; cursor: ew-resize; }
 .bd-over-h[data-h="se"] { left: 100%; top: 100%; cursor: nwse-resize; } .bd-over-h[data-h="s"] { left: 50%; top: 100%; cursor: ns-resize; }
 .bd-over-h[data-h="sw"] { left: 0; top: 100%; cursor: nesw-resize; } .bd-over-h[data-h="w"] { left: 0; top: 50%; cursor: ew-resize; }
-.bd-over-tip { position: absolute; left: 0; bottom: 100%; margin-bottom: 6px; padding: 2px 7px; border-radius: 5px; background: #0a84ff; color: #fff; font: 600 11px/1.4 -apple-system, system-ui, sans-serif; white-space: nowrap; transform: scale(calc(1 / var(--bd-zoom, 1))); transform-origin: 0 100%; }
+.bd-over-tip { position: absolute; left: 0; bottom: 100%; margin-bottom: 6px; padding: 2px 7px; border-radius: 5px; background: var(--ed-accent-fill); color: var(--ed-on-accent); font: 600 11px/1.4 -apple-system, system-ui, sans-serif; white-space: nowrap; transform: scale(calc(1 / var(--bd-zoom, 1))); transform-origin: 0 100%; }
 /* A reference held over the page: it becomes a picture there when let go (board/ref-page.ts). */
-.bd-ref.is-into-page { z-index: 50; opacity: 0.75; outline: 3px dashed var(--ed-accent, #0a84ff) !important; outline-offset: 0 !important; }
+.bd-ref.is-into-page { z-index: 50; opacity: 0.75; outline: 3px dashed var(--ed-accent, var(--ed-accent)) !important; outline-offset: 0 !important; }
 /* A block parked on the board, drawn live (board/ParkedBlock.tsx). */
 .bd-parked { position: absolute; inset: 0; overflow: hidden; pointer-events: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); }
 .bd-parked iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; background: transparent; pointer-events: none; }
 /* A block held outside the page: let go to park it on the board. */
-html.ed-drag-out .bd { box-shadow: inset 0 0 0 3px var(--ed-accent, #0a84ff); }
+html.ed-drag-out .bd { box-shadow: inset 0 0 0 3px var(--ed-accent, var(--ed-accent)); }
+
+/* "+ New variant" beside the frame names (EDITOR-VARIANTS.md). */
+.bd-label.bd-label-variant {
+  padding: 0 9px;
+  border: 1px dashed rgba(191, 90, 242, 0.6);
+  border-radius: 7px;
+  background: rgba(191, 90, 242, 0.08);
+  color: #e2b6f9;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bd-label.bd-label-variant:hover {
+  background: rgba(191, 90, 242, 0.18);
+  color: #fff;
+}
+
+/* Motion: a thin grey line in the board's margin beside each section that moves (motion-marks.ts). */
+.ed-motion-line {
+  position: absolute;
+  z-index: 1;
+  border-radius: 99px;
+  background: rgba(235, 235, 245, 0.32);
+  pointer-events: auto;
+  cursor: help;
+}
+body.ed-hide-motion .ed-motion-line,
+body.ed-hide-comments .ed-cmt-pin:not(.is-draft):not(.is-open) {
+  display: none;
+}
+
+/* The zoom bar's Show menu (board/marks.ts). */
+.bd-show {
+  position: relative;
+}
+.bd-show-n {
+  margin-left: 5px;
+  color: var(--ed-sub);
+  font-size: 11px;
+}
+.bd-show-menu {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: 0;
+  z-index: 30;
+  min-width: 210px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border-radius: var(--ed-glass-radius);
+  background: var(--ed-glass-bg);
+  -webkit-backdrop-filter: var(--ed-glass-backdrop);
+  backdrop-filter: var(--ed-glass-backdrop);
+  border: var(--ed-glass-border);
+  box-shadow: var(--ed-glass-edge, none), var(--ed-glass-shadow);
+  transform-origin: bottom right;
+  animation: bd-show-in var(--ed-dur, 180ms) var(--ed-ease-out, ease-out);
+}
+@keyframes bd-show-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+.bd-show-head {
+  padding: 6px 10px 4px;
+  color: var(--ed-hint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.bd-show-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ed-text);
+  font: 13px var(--ed-font);
+  text-align: left;
+  cursor: pointer;
+}
+.bd-show-menu button:hover {
+  background: var(--ed-seg-on);
+}
+.bd-show-box {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--ed-line-strong);
+  color: var(--ed-text);
+  font-size: 11px;
+}
+.bd-show-menu button[aria-checked="true"] .bd-show-box {
+  background: var(--ed-accent-fill);
+  box-shadow: none;
+  color: var(--ed-on-accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bd-show-menu {
+    animation: none;
+  }
+}

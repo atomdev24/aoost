@@ -6,6 +6,7 @@ import { useEditor } from "../store";
 import { ColorInput, NumberInput, Select, TextInput, Toggle } from "../ui/kit";
 import { AlignControl, type AlignValue } from "./AlignControl";
 import { ScrubLength, ScrubNumber } from "./ScrubField";
+import { MediaInput } from "./media";
 import { formatSpacing, parseSpacing } from "./spacing";
 import type { RowContext, RowDef } from "./rows";
 
@@ -120,7 +121,16 @@ function Control<T>({ row, value, onChange, id }: { row: RowDef<T>; value: unkno
     case "number":
       return <ScrubNumber id={id} ariaLabel={row.label} glyph={row.glyph} value={value as number | undefined} min={row.min} max={row.max} step={row.step} suffix={row.suffix} placeholder={row.placeholder} spacing={row.spacing} onChange={(n) => (n === undefined && row.required ? undefined : onChange(n))} />;
     case "select":
-      return <Select id={id} ariaLabel={row.label} value={(value as string) ?? ""} options={row.options ?? []} onChange={(v) => onChange(v || undefined)} />;
+      return (
+        <Select
+          id={id}
+          ariaLabel={row.label}
+          value={value === undefined || value === null ? "" : String(value)}
+          options={row.options ?? []}
+          // Number rows offered as a list (font weight) keep their number.
+          onChange={(v) => onChange(v ? (row.numeric ? Number(v) : v) : undefined)}
+        />
+      );
     case "color":
       return <ColorInput label={row.label} value={value as string | undefined} onChange={onChange} />;
     case "toggle":
@@ -293,10 +303,10 @@ function BackgroundControl({ value, onChange }: { value: SectionLayout["backgrou
   return (
     <div className="ed-stack">
       <ColorInput label="Background colour" value={bg.color} onChange={(c) => set({ color: c })} />
-      <TextInput ariaLabel="Background image" placeholder="Image URL (or pick from Assets)" value={bg.image ?? ""} onCommit={(v) => set({ image: v })} />
-      <TextInput ariaLabel="Background video" placeholder="Video URL (desktop only)" value={bg.video ?? ""} onCommit={(v) => set({ video: v })} />
-      <TextInput ariaLabel="Poster image" placeholder="Still image for phones" value={bg.poster ?? ""} onCommit={(v) => set({ poster: v })} />
-      <TextInput ariaLabel="Tint over the background" placeholder="Tint, e.g. rgba(20,20,20,.4)" value={bg.overlay ?? ""} onCommit={(v) => set({ overlay: v })} />
+      <MediaInput kind="image" label="Background picture" value={bg.image} onChange={(v) => set({ image: v || undefined })} />
+      <MediaInput kind="video" label="Background video (computers only)" value={bg.video} onChange={(v) => set({ video: v || undefined })} />
+      {bg.video ? <MediaInput kind="image" label="Still picture for phones" value={bg.poster} onChange={(v) => set({ poster: v || undefined })} /> : null}
+      <ColorInput label="Tint over the background (set its strength with the %)" value={bg.overlay} onChange={(c) => set({ overlay: c })} />
     </div>
   );
 }

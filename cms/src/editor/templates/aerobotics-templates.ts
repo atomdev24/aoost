@@ -14,12 +14,19 @@ import type { SiteTemplate } from "./site-templates";
 
 const A = "https://aerobotics.com";
 /** One block in its own edge-to-edge section, named for the Layers panel. */
-const band = (name: string, type: string, content: Record<string, unknown> = {}): Section => ({ ...sectionForBlock(createNode(type, { content })), name });
-const footer = () => band("Footer", "AeroFooter");
+export const band = (name: string, type: string, content: Record<string, unknown> = {}): Section => ({ ...sectionForBlock(createNode(type, { content })), name });
+export const footer = () => band("Footer", "AeroFooter");
 const cta = (title?: string) => band("Call to action", "AeroCta", title ? { title } : {});
-/** Aerobotics' own HubSpot forms (account 8626769, EU), as aerobotics.com embeds them. Submissions go to HubSpot. */
+/**
+ * Aerobotics' own HubSpot forms (account 8626769, EU), as aerobotics.com embeds them. They start
+ * switched off (a placeholder that sends nothing); "Send submissions to HubSpot" turns them on.
+ */
 const HUBSPOT = { contact: "c97c36e7-7161-4ac3-9cef-ffd4ecba9ffa", demo: "d8e51afa-df82-45ec-944d-d3236c4458fc" };
-const form = (which: keyof typeof HUBSPOT) => createNode("HubSpotForm", { content: { portalId: "8626769", formId: HUBSPOT[which], region: "eu1", heading: "" } });
+const PLACEHOLDER = {
+  contact: { placeholderFields: "First name, Last name, Work email, Company, Country, Message", placeholderButton: "Send message" },
+  demo: { placeholderFields: "First name, Last name, Work email, Phone number, Company, Country, Crops you grow", placeholderButton: "Request a demo" },
+};
+export const form = (which: keyof typeof HUBSPOT) => createNode("HubSpotForm", { content: { portalId: "8626769", formId: HUBSPOT[which], region: "eu1", heading: "", live: false, ...PLACEHOLDER[which], placeholderNote: "" } });
 
 const page = (t: Omit<SiteTemplate, "hideNav" | "nav">): SiteTemplate => ({ ...t, hideNav: false, nav: "aerobotics" });
 

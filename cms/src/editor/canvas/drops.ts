@@ -1,3 +1,6 @@
+import { startRichEdit, startFieldEdit } from "../rich/edit-store";
+import { findField, takesMarks } from "../rich/field-locate";
+import { plainOf } from "../../model/markdown-doc";
 import { addNode, addSection, createNode, createSection, locate, updateNode } from "../../model/page-ops";
 import { isCancelled, uploadFile } from "../media";
 import { pickMedia } from "../fields/media";
@@ -109,6 +112,43 @@ function placeMediaNear(hit: DropHit, media: { url: string; kind?: string; width
  *   drop an image file (or a media library item) on an Image block → replace it;
  *   drop one anywhere else → place it as a new block there.
  */
+/**
+ * The words field a double-click landed on, and the elements showing it: the innermost element
+ * (up to the block) whose text is a field's words, or one paragraph of a field (then every
+ * paragraph beside it that belongs to the same field).
+ */
+function wordsAt(target: Element, block: Element, content: unknown, x: number, y: number) {
+  // Inside blocks the canvas often turns pointer events off, so the click lands on the block:
+  // start from the smallest element with words of its own under the pointer instead.
+  let start = target;
+  if (target === block || !block.contains(target)) {
+    let best: Element | null = null;
+    let area = Infinity;
+    for (const el of block.querySelectorAll("*")) {
+      if (![...el.childNodes].some((c) => c.nodeType === 3 && c.textContent!.trim())) continue;
+      const r = el.getBoundingClientRect();
+      if (x < r.left || x > r.right || y < r.top || y > r.bottom || !r.width) continue;
+      if (r.width * r.height < area) (best = el), (area = r.width * r.height);
+    }
+    if (!best) return null;
+    start = best;
+  }
+  for (let at: Element | null = start; at && at !== block.parentElement; at = at.parentElement) {
+    if (!(at instanceof (at.ownerDocument.defaultView as Window & typeof globalThis).HTMLElement)) continue;
+    const hit = findField(content, at.textContent ?? "");
+    if (!hit) continue;
+    let els = [at as HTMLElement];
+    if (hit.paragraphs) {
+      const own = new Set(hit.value.split(/\n[ \t]*\n/).map((p) => plainOf(p).toLowerCase()));
+      els = [...(at.parentElement?.children ?? [])].filter((c) => own.has((c.textContent ?? "").replace(/\s+/g, " ").trim().toLowerCase())) as HTMLElement[];
+      if (!els.length) els = [at as HTMLElement];
+    }
+    const tag = at.tagName.toLowerCase();
+    return { path: hit.path, value: hit.value, els, single: !hit.paragraphs && (/^h[1-6]$/.test(tag) || tag === "a" || tag === "button" || tag === "span" || !hit.value.includes("\n")) };
+  }
+  return null;
+}
+
 export function attachCanvasDrops(doc: Document) {
   const dbl = (e: MouseEvent) => {
     const el = (e.target as Element | null)?.closest?.("[data-node-id]");
@@ -116,6 +156,25 @@ export function attachCanvasDrops(doc: Document) {
     // A picture inside a block's content (an aoost block's artwork or cover): adjust that one picture.
     const at = locate(currentPage(getState()), el.getAttribute("data-node-id") ?? "");
     const owner = at?.kind === "node" ? at.node : at?.kind === "overlay" ? at.overlay.node : null;
+    // Text: edit the words where they are.
+    if (owner?.type === "Text" && !owner.locked) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!getState().selection.includes(owner.id)) selectBlock(owner.id);
+      startRichEdit(owner.id, getState().bp);
+      return;
+    }
+    // Words of another block (an Aerobotics heading, paragraph, card text): edit them where they are.
+    if (owner && !owner.locked && !(e.target as Element).closest?.("img, picture, video, canvas")) {
+      const words = wordsAt(e.target as Element, el, owner.content, e.clientX, e.clientY);
+      if (words) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!getState().selection.includes(owner.id)) selectBlock(owner.id);
+        startFieldEdit({ id: owner.id, bp: getState().bp, ...words, marks: takesMarks(owner.type, words.path) });
+        return;
+      }
+    }
     const hit = owner ? slotAtPoint(owner, el, e.clientX, e.clientY) : null;
     if (owner && hit && (hit.slot.kind === "bg" || (hit.el as HTMLImageElement).naturalWidth)) {
       e.preventDefault();

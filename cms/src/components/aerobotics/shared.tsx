@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { safeUrl } from "../../render/links";
 import { imageSources } from "../../render/media";
 import type { RenderCtx } from "../types";
@@ -70,9 +70,9 @@ export function Band({ bg, className, children, center }: { bg: Background | str
 }
 
 /** A reading tag as the app shows it on a photo: a small label over a value, with an optional colour swatch. */
-export function Tag({ label, value, swatch }: { label: string; value: string; swatch?: string }) {
+export function Tag({ label, value, swatch, style }: { label: string; value: string; swatch?: string; style?: CSSProperties }) {
   return (
-    <span className="ab-tag">
+    <span className="ab-tag" style={style}>
       <small>{label}</small>
       <b>
         {swatch ? <i style={{ background: swatch }} /> : null}

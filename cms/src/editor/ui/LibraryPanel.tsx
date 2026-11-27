@@ -80,7 +80,7 @@ export function LibraryPanel({ mode = "all" }: { mode?: "all" | "globals" | "tem
             <span className="ed-caps">Templates</span>
           </div>
           <ul className="ed-layers">
-            {site.templates.map((t) => (
+            {site.templates.filter((t) => t.kind === "section" || t.kind === "page").map((t) => (
               <li key={t.id} className="ed-layer" style={{ paddingLeft: 8 }}>
                 <button type="button" className="ed-layer-name" onClick={() => update((s) => insertTemplate(s, getState().pageId, t.id), `Insert template ${t.name}`)} title="Add this template's sections to the end of the page">
                   <span>{t.name}</span>

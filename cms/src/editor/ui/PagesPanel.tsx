@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { openVersion } from "../variants/actions";
+import { openDesigns } from "../templates/designs-open";
+import { createPortal } from "react-dom";
 import { onOpenPageSettings, takePageSettings } from "./page-settings-open";
 import { deletePage, setShowInNav } from "../../model/pages";
 import { newVariant } from "../workspace/PageSwitcher";
@@ -90,6 +93,8 @@ export function PagesPanel() {
   const [settingsFor, setSettingsFor] = useState<string | null>(takePageSettings);
   useEffect(() => onOpenPageSettings(setSettingsFor), []);
   const [query, setQuery] = useState("");
+  // "To review": only pages with variants proposed to the team (EDITOR-VARIANTS.md).
+  const [toReview, setToReview] = useState(false);
   if (settingsFor && pages.some((p) => p.id === settingsFor)) {
     return (
       <div className="ed-panel ed-page-settings">
@@ -99,15 +104,21 @@ export function PagesPanel() {
   }
   const q = query.trim().toLowerCase();
   const hit = (p: P) => !q || p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q);
-  const variantsOf = (p: P) => pages.filter((v) => v.variantOf === p.id);
+  // Earlier versions (kept after a pick) live in the page's Versions list, not here.
+  const variantsOf = (p: P) => pages.filter((v) => v.variantOf === p.id && v.variantStatus !== "archived");
+  const proposedOf = (p: P) => variantsOf(p).filter((v) => v.variantStatus === "proposed");
+  const waiting = pages.filter((v) => v.variantOf && v.variantStatus === "proposed").length;
   const childrenOf = (p: P) => pages.filter((c) => c.parentId === p.id && !c.variantOf && (!c.kind || c.kind === "page"));
   // Campaign pages and blog posts live in their own folders below the site's pages.
   const plain = (p: P) => (!p.kind || p.kind === "page") && !p.collectionId;
-  const tops = pages.filter((p) => !p.parentId && !p.variantOf && plain(p)).filter((p) => hit(p) || childrenOf(p).some(hit));
-  const campaigns = pages.filter((p) => p.kind === "campaign" && !p.variantOf && hit(p));
+  const review = (p: P) => !toReview || proposedOf(p).length > 0;
+  const tops = toReview
+    ? pages.filter((p) => !p.variantOf && hit(p) && review(p))
+    : pages.filter((p) => !p.parentId && !p.variantOf && plain(p)).filter((p) => hit(p) || childrenOf(p).some(hit));
+  const campaigns = toReview ? [] : pages.filter((p) => p.kind === "campaign" && !p.variantOf && hit(p));
   // Collection page designs (the page every entry of a collection is made from) have their own folder.
-  const designs = pages.filter((p) => p.collectionId && !p.variantOf && hit(p));
-  const posts = pages.filter((p) => p.kind === "post" && !p.variantOf && hit(p)).sort((a, b) => (b.post?.date ?? "").localeCompare(a.post?.date ?? ""));
+  const designs = toReview ? [] : pages.filter((p) => p.collectionId && !p.variantOf && hit(p));
+  const posts = (toReview ? [] : pages).filter((p) => p.kind === "post" && !p.variantOf && hit(p)).sort((a, b) => (b.post?.date ?? "").localeCompare(a.post?.date ?? ""));
   const today = new Date().toISOString().slice(0, 10);
   const count = pages.filter((p) => !p.variantOf).length;
 
@@ -152,13 +163,14 @@ export function PagesPanel() {
     return (
       <div className="ed-pvariants" role="group" aria-label={`Variants of ${p.title}`}>
         <span className="ed-pvariants-label">Variants</span>
-        <button type="button" className={`ed-pchip${p.id === pageId ? " is-on" : ""}`} aria-current={p.id === pageId ? "page" : undefined} onClick={() => setPage(p.id)}>
+        <button type="button" className={`ed-pchip${p.id === pageId ? " is-on" : ""}`} aria-current={p.id === pageId ? "page" : undefined} onClick={() => openVersion(p.id)}>
           Original
         </button>
         {vs.map((v) => (
-          <span key={v.id} className={`ed-pchip${v.id === pageId ? " is-on" : ""}`}>
-            <button type="button" aria-current={v.id === pageId ? "page" : undefined} onClick={() => setPage(v.id)}>
+          <span key={v.id} className={`ed-pchip${v.id === pageId ? " is-on" : ""}${v.variantStatus === "proposed" ? " is-proposed" : ""}`} title={v.variantStatus === "proposed" ? `Proposed for review${v.variantBy ? ` by ${v.variantBy}` : ""}` : v.variantBy ? `Draft by ${v.variantBy}` : "Draft"}>
+            <button type="button" aria-current={v.id === pageId ? "page" : undefined} onClick={() => openVersion(v.id)}>
               {v.variantName}
+              {v.variantStatus === "proposed" ? <span className="ed-pchip-proposed"> · Proposed</span> : null}
             </button>
             <button
               type="button"
@@ -171,6 +183,9 @@ export function PagesPanel() {
             </button>
           </span>
         ))}
+        <button type="button" className="ed-pchip ed-pchip-review" onClick={() => openDesigns(p.id)}>
+          Review {vs.length + 1} side by side
+        </button>
       </div>
     );
   };
@@ -200,6 +215,14 @@ export function PagesPanel() {
           New page
         </button>
       </div>
+      <div className="ed-pfilter" role="group" aria-label="Show">
+        <button type="button" aria-pressed={!toReview} className={!toReview ? "is-on" : ""} onClick={() => setToReview(false)}>
+          All
+        </button>
+        <button type="button" aria-pressed={toReview} className={toReview ? "is-on" : ""} onClick={() => setToReview(true)}>
+          To review{waiting ? ` · ${waiting}` : ""}
+        </button>
+      </div>
       <label className="ed-psearch">
         <SearchIcon />
         <input type="search" placeholder="Search pages" aria-label="Search pages" value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -224,7 +247,7 @@ export function PagesPanel() {
             </li>
           );
         })}
-        {!tops.length && !campaigns.length && !posts.length && !designs.length ? <li className="ed-empty">No pages match “{query}”.</li> : null}
+        {!tops.length && !campaigns.length && !posts.length && !designs.length ? <li className="ed-empty">{toReview ? "Nothing waiting for review. Variants proposed to the team show here." : `No pages match “${query}”.`}</li> : null}
       </ul>
       <Folder name="Campaigns" count={campaigns.length} empty="Campaign pages for events and emails: New page → Campaign page.">
         {campaigns.map((c) => (
@@ -260,7 +283,8 @@ export function PagesPanel() {
       <p className="ed-panel-note">
         The eye shows or hides a page in the nav; hidden pages still work at their address, like /links for your Instagram bio. <VariantIcon /> makes a variant to try ideas without touching the live page.
       </p>
-      {creating ? <NewPageModal onClose={() => setCreating(false)} /> : null}
+      {/* On the page itself, so the panel's width doesn't squeeze it. */}
+      {creating ? createPortal(<NewPageModal onClose={() => setCreating(false)} />, document.body) : null}
     </div>
   );
 }

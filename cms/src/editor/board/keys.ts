@@ -32,6 +32,8 @@ const PAGE_FIELDS = ".ed-inspector, .ed-flyout, [data-page-field]";
 const pageField = (doc: Document) => {
   const el = doc.activeElement as HTMLElement | null;
   if (!el) return false;
+  // Text being edited in place keeps its own undo (the edit is saved as one step when it ends).
+  if (el.closest("[data-rich-editing]")) return false;
   if (el.isContentEditable && doc !== document) return true;
   // Search boxes keep the browser's own undo: typing a search isn't an edit.
   if (el.matches('input[type="search"], [role="searchbox"], [role="combobox"]')) return false;
@@ -52,6 +54,8 @@ export function attachKeys(doc: Document): () => void {
   const down = (e: KeyboardEvent) => {
     const sc = matchShortcut(e);
     if (!sc) return;
+    // Text edited in place has its own keys (⌘A, ⌘K for a link, ⌘Z…); only Save reaches the editor.
+    if ((doc.activeElement as HTMLElement | null)?.closest?.("[data-rich-editing]") && sc.id !== "draft.save") return;
     if (typing(doc) && !sc.whileTyping && !(HISTORY.has(sc.id) && pageField(doc))) return;
     // The cheat sheet is up: only ? (and its own Esc) reach the editor.
     if (getPalette().cheat && sc.id !== "help.shortcuts" && sc.id !== "palette.open") return;

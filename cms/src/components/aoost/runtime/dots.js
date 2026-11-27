@@ -166,7 +166,7 @@ export function glassBacking(hex) {
   return '#' + ch.map((c) => c.toString(16).padStart(2, '0')).join('');
 }
 
-export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe', after = 'loop', idleSpeed = 0.5, textSize = 70, look = 'flat', lensOpts = {}, base = '' } = {}) {
+export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, effect = 'breathe', after = 'loop', idleSpeed = 0.5, textSize = 70, look = 'flat', lensOpts = {}, base = '', still: holdStill = false, hold = null } = {}) {
   // Glass block / Liquid glass: the board is lit through a bar of square glass (lens.js, WebGL 2).
   // It must take the canvas before the 2D context does; without WebGL 2 the board stays flat.
   const lens = look === 'glassblock' || look === 'liquid' ? createLens(canvas, look) : null;
@@ -181,7 +181,8 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
   const shown = new Set();
   let idle = false, idleT0 = -1;
   const doc = canvas.ownerDocument, win = doc.defaultView;
-  const reduce = win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // still: draw whole frames without animating (the editor's side frames, like reduced motion).
+  const reduce = holdStill || win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fx = EFFECTS[effect] || EFFECTS.breathe;
   const main = lens ? null : canvas.getContext('2d');
   // Behind glass the dots fill their cells, so letters read as solid light rather than a second texture.
@@ -472,9 +473,17 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     return -1;
   }
 
+  // hold(): ms to wait before drawing again (the editor pauses the board while someone types).
+  // The animation carries on from where it was, as if no time had passed.
+  let holdT = 0;
   function loop(now) {
     raf = 0;
     if (stopped) return;
+    const wait = hold ? hold() : 0;
+    if (wait > 0) {
+      if (!holdT) { const from = now; holdT = win.setTimeout(() => { holdT = 0; const d = win.performance.now() - from; t0 += d; if (introT0 >= 0) introT0 += d; if (idleT0 >= 0) idleT0 += d; if (visible && !doc.hidden && !stopped) raf = win.requestAnimationFrame(loop); }, wait); }
+      return;
+    }
     if (intro) {
       if (!fontReady) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); if (visible && !doc.hidden) raf = win.requestAnimationFrame(loop); return; }
       if (introT0 < 0) introT0 = now;
@@ -499,11 +508,11 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
     draw(Math.min(t, T.total));
     if (visible && !doc.hidden) raf = win.requestAnimationFrame(loop);
   }
-  const wake = () => { if (!raf && !stopped && visible && !doc.hidden) { t0 = win.performance.now() - (reduce ? 0 : 0); raf = win.requestAnimationFrame(loop); } };
+  const wake = () => { if (!raf && !holdT && !stopped && visible && !doc.hidden) { t0 = win.performance.now() - (reduce ? 0 : 0); raf = win.requestAnimationFrame(loop); } };
 
   // Reduced motion: each frame shows whole, and they change in place.
   let still = 0;
-  function startStill() { win.clearInterval(still); draw(0); still = win.setInterval(() => {
+  function startStill() { win.clearInterval(still); draw(0); if (holdStill) return; still = win.setInterval(() => {
     if (frames[at]) shown.add(frames[at].text);
     const n = nextFrame();
     if (n < 0) { win.clearInterval(still); paint(() => { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); drawGrid(); }); return; }
@@ -530,6 +539,6 @@ export function startDotBoard(canvas, { lines = [], seconds = 4, grid = true, ef
       if (idle) { const j = frames.findIndex((f) => !shown.has(f.text)); if (j >= 0) { idle = false; at = j; t0 = win.performance.now(); } }
       if (reduce) draw(0);
     },
-    stop() { stopped = true; if (raf) win.cancelAnimationFrame(raf); win.clearInterval(still); ro.disconnect(); io?.disconnect(); doc.removeEventListener('visibilitychange', onVis); },
+    stop() { stopped = true; if (raf) win.cancelAnimationFrame(raf); win.clearTimeout(holdT); win.clearInterval(still); ro.disconnect(); io?.disconnect(); doc.removeEventListener('visibilitychange', onVis); },
   };
 }

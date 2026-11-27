@@ -11,6 +11,11 @@ import { useSyncExternalStore } from "react";
  */
 const KEY = "aoost.glass";
 const listeners = new Set<() => void>();
+/** Run fn whenever a display setting (glass, theme) changes. Returns a way to stop. */
+export function onDisplayChange(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => void listeners.delete(fn);
+}
 
 /** Chrome, Edge, Brave, Arc, Opera…: Blink engine. Safari and Firefox are not. */
 export function isChromium(): boolean {
@@ -58,5 +63,63 @@ export const useGlass = () =>
     () => glass,
   );
 
-/** Apply the saved setting before the editor draws. */
-export const startDisplay = apply;
+/*
+ * Colour theme for this browser: Graphite (default), Ink or Paper at night.
+ * Set in the "…" menu and kept per browser, like the glass setting.
+ */
+export type EditorTheme = "graphite" | "ink" | "paper";
+export const THEMES: { id: EditorTheme; name: string; hint: string }[] = [
+  { id: "graphite", name: "Graphite", hint: "Neutral grey, blue highlights" },
+  { id: "ink", name: "Ink", hint: "Near-black and cool" },
+  { id: "paper", name: "Paper at night", hint: "Warm and monochrome" },
+];
+const THEME_KEY = "aoost.theme";
+/** A saved value back to a theme; anything unknown is Graphite. */
+export const themeFrom = (v: unknown): EditorTheme => (v === "ink" || v === "paper" ? v : "graphite");
+
+let theme: EditorTheme = (() => {
+  try {
+    return themeFrom(localStorage.getItem(THEME_KEY));
+  } catch {
+    return "graphite";
+  }
+})();
+export const currentTheme = () => theme;
+
+/** The selection colour inside page frames (they are separate documents, so they get it as a rule). */
+const SELECT: Record<EditorTheme, string> = { graphite: "#0a84ff", ink: "#6e8bff", paper: "#ff9a52" };
+export const frameThemeCss = (t: EditorTheme) => `:root{--ed-sel:${SELECT[t]}}`;
+
+/** Mark a document with the theme. Page frames are documents of their own and get it too. */
+export function markTheme(doc: Document, t: EditorTheme = theme) {
+  const root = doc.documentElement;
+  if (t === "graphite") root.removeAttribute("data-ed-theme");
+  else root.setAttribute("data-ed-theme", t);
+}
+const applyTheme = () => markTheme(document);
+
+export function setTheme(next: EditorTheme) {
+  theme = themeFrom(next);
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch {
+    /* storage blocked: still applies for this visit */
+  }
+  applyTheme();
+  listeners.forEach((l) => l());
+}
+
+export const useTheme = () =>
+  useSyncExternalStore(
+    (l) => {
+      listeners.add(l);
+      return () => void listeners.delete(l);
+    },
+    () => theme,
+  );
+
+/** Apply the saved settings before the editor draws. */
+export function startDisplay() {
+  apply();
+  applyTheme();
+}

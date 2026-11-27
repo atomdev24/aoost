@@ -238,3 +238,15 @@ describe("nav model", () => {
     expect(badgeFor(item, "2026-12-01")).toBeUndefined();
   });
 });
+
+describe("visitor insights tag", () => {
+  const withClarity = (notice?: boolean): SiteT => ({ ...site, settings: { ...site.settings, analytics: { clarity: "zju5sls37v", ...(notice === false ? { notice: false } : {}) } } });
+  it("adds Clarity with the notice to published pages only", () => {
+    const html = renderPage(withClarity(), page("home"));
+    expect(html).toContain('id="clarity-tag" data-clarity="zju5sls37v" data-notice=""');
+    expect(html).toContain('"https://www.clarity.ms/tag/"+i');
+    expect(renderPage(withClarity(false), page("home"))).not.toContain("data-notice");
+    expect(renderPage(withClarity(), page("home"), { preview: { prefix: "/preview" } })).not.toContain("clarity");
+    expect(renderPage(site, page("home"))).not.toContain("clarity");
+  });
+});

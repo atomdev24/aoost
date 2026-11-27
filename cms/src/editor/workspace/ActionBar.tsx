@@ -3,6 +3,9 @@ import { isHidden, locate } from "../../model/page-ops";
 import { useBoard } from "../board/store";
 import { deleteBlock, duplicateBlock, moveBlock, toggleBlockHidden } from "../canvas/actions";
 import { currentPage, useEditor } from "../store";
+import { chooseMedia } from "../canvas/drops";
+import { startRichEdit } from "../rich/edit-store";
+import { toggleSettings, useSettingsShown } from "./settings-pref";
 
 const Icon = ({ d }: { d: string }) => (
   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -32,6 +35,17 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
   const item = at?.kind === "section" ? at.section : at?.kind === "node" ? at.node : null;
   const hidden = item ? isHidden(item, bp) : false;
   const name = item?.name ?? label;
+  const settings = useSettingsShown();
+  const node = at?.kind === "node" ? at.node : null;
+  // The block's main action, in words (direction A): type in text, replace a picture or video.
+  const main =
+    node && !node.locked
+      ? node.type === "Text"
+        ? { label: "Edit text", run: (x: string) => startRichEdit(x, bp) }
+        : node.type === "Image" || node.type === "Video"
+          ? { label: "Replace", run: (x: string) => void chooseMedia(x, node.type === "Video" ? "video" : "image") }
+          : null
+      : null;
   // A block at the very top of its frame has no room above it, so the tag tucks inside its top edge instead.
   const ref = useRef<HTMLDivElement>(null);
   const [inside, setInside] = useState(false);
@@ -44,6 +58,23 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
     const next = room < 24 / zoom;
     if (next !== inside) setInside(next);
   });
+  // A block near the frame's right edge (or a small zoom, where the tag is wide in page terms) would
+  // push the actions past the frame, where they're cut off: slide the tag left until it fits.
+  const [shift, setShift] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      const docW = el.ownerDocument.documentElement.clientWidth;
+      const natural = el.getBoundingClientRect().right + shift;
+      const next = Math.max(0, Math.ceil(natural - docW + 2));
+      if (Math.abs(next - shift) > 1) setShift(next);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  });
   const act = (fn: (id: string) => void) => (e: React.MouseEvent) => {
     e.stopPropagation();
     if (id) fn(id);
@@ -52,7 +83,7 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
     <div
       ref={ref}
       className={`ed-tag${inside ? " is-inside" : ""}${open ? " is-open" : ""}`}
-      style={{ transform: `scale(${1 / zoom}) translateY(${inside ? "4px" : "calc(-100% - 4px)"})` }}
+      style={{ transform: `translateX(${-shift}px) scale(${1 / zoom}) translateY(${inside ? "4px" : "calc(-100% - 4px)"})` }}
       onPointerDown={(e) => e.stopPropagation()}>
       {/* On touch there is no hover: a tap on the name opens the quick actions. */}
       <span className="ed-tag-name" onClick={() => setOpen((o) => !o)}>
@@ -60,6 +91,11 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
       </span>
       {item ? (
         <span className="ed-tag-actions" role="toolbar" aria-label="Block actions">
+          {main ? (
+            <button type="button" className="ed-tag-word" onClick={act(main.run)}>
+              {main.label}
+            </button>
+          ) : null}
           {parentAction}
           <button type="button" aria-label="Move up" title="Move up" onClick={act((x) => moveBlock(x, -1))}>
             <Icon d={UP} />
@@ -75,6 +111,9 @@ export function ActionBar({ label, parentAction }: { label?: string; children?: 
           </button>
           <button type="button" aria-label="Delete" title="Delete" onClick={act(deleteBlock)}>
             <Icon d={TRASH} />
+          </button>
+          <button type="button" className="ed-tag-word ed-desk-only" aria-pressed={settings} title={settings ? "Hide the settings panel" : "Show the settings panel"} onClick={act(() => toggleSettings())}>
+            Settings
           </button>
         </span>
       ) : null}

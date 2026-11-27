@@ -1,3 +1,6 @@
+import { setMode, useSimple } from "./mode";
+import { BlockSaveMenu } from "./BlockSaveMenu";
+import { useSettingsShown } from "./settings-pref";
 import { Puck } from "@puckeditor/core";
 import { getComponent } from "../../components/registry";
 import { locate } from "../../model/page-ops";
@@ -54,7 +57,11 @@ export function Inspector() {
   const overlayId = useEditor((s) => s.overlayId);
   const globalId = useEditor((s) => s.globalId);
   const selected = useEditor((s) => s.selection.length > 0);
+  const shown = useSettingsShown();
+  const phone = usePhone();
   if (!selected && !overlayId && !globalId) return null;
+  // Desktop: the settings show when asked for (Settings in the block's action bar); phones keep the sheet.
+  if (!shown && !phone && !overlayId && !globalId) return null;
   return <InspectorPanel />;
 }
 
@@ -71,7 +78,25 @@ function InspectorPanel() {
   const size = phone && panelOpen ? "collapsed" : card.size;
   // Each new selection opens short, at the top: the Content fields.
   const target = useEditor((s) => s.overlayId ?? s.globalId ?? s.selection[0] ?? null);
+  // A block (not a section, a global or an overlay) gets the save menu in the header.
+  const nodeId = useEditor((s) => (!s.overlayId && !s.globalId && s.selection.length === 1 ? (locate(currentPage(s), s.selection[0]!)?.kind === "node" ? s.selection[0]! : null) : null));
   const body = useRef<HTMLDivElement>(null);
+  // On a phone the card's height lifts the notes dock (workspace/Dock.tsx) above it.
+  const [aside, setAside] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    const el = aside;
+    const root = document.documentElement;
+    if (!phone || !el) {
+      root.style.removeProperty("--ed-card-h");
+      return;
+    }
+    const ro = new ResizeObserver(() => root.style.setProperty("--ed-card-h", `${Math.round(el.offsetHeight)}px`));
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty("--ed-card-h");
+    };
+  }, [phone, aside]);
   const [tab, setTab] = useState<InspectorTab>("content");
   const [present, setPresent] = useState<InspectorTab[]>(["content", "style", "layout"]);
   useEffect(() => {
@@ -96,8 +121,12 @@ function InspectorPanel() {
     setTab((t) => (present.includes(t) ? t : (present[0] ?? "content")));
   }, [present]);
   useEffect(() => setTab(present[0] ?? "content"), [target]);
+  const simple = useSimple();
+  // Simple mode: just the words and pictures (Content); the rest is one click away in Full.
+  const shownTabs = simple && !overlayId && !globalId ? present.filter((t) => t === "content") : present;
+  const shownTab = simple && !overlayId && !globalId ? "content" : tab;
   return (
-    <aside className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
+    <aside ref={setAside} className={`ed-inspector${phone ? " is-card" : ""}`} aria-label="Inspector" data-size={phone ? size : undefined} style={phone && card.drag !== null ? { height: card.drag } : undefined}>
       {phone ? (
         <button type="button" className="ed-card-grip" aria-label={size === "full" ? "Shrink the inspector" : "Expand the inspector"} aria-expanded={size === "full"} onPointerDown={card.onPointerDown} onClick={card.onClick}>
           <span aria-hidden="true" />
@@ -108,18 +137,19 @@ function InspectorPanel() {
           <strong title={subject.name}>{subject.name}</strong>
           <span>{subject.type}</span>
         </div>
+        {nodeId ? <BlockSaveMenu nodeId={nodeId} /> : null}
       </header>
       {selected || overlayId ? <ScopeBar /> : null}
-      {present.length > 1 ? (
+      {shownTabs.length > 1 ? (
         <div className="ed-itabs" role="tablist" aria-label="Settings">
-          {TABS.filter((t) => present.includes(t.id)).map((t) => (
+          {TABS.filter((t) => shownTabs.includes(t.id)).map((t) => (
             <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
               {t.label}
             </button>
           ))}
         </div>
       ) : null}
-      <div className="ed-inspector-body" ref={body} data-tab={present.length > 1 ? tab : undefined}>
+      <div className="ed-inspector-body" ref={body} data-tab={present.length > 1 || simple ? shownTab : undefined} data-simple={simple && !overlayId && !globalId ? "" : undefined}>
         {overlayId ? <OverlayPanel overlayId={overlayId} /> : globalId ? <GlobalPanel globalId={globalId} /> : (
           <>
             {onDesign ? <ConnectPanel /> : null}
@@ -127,6 +157,15 @@ function InspectorPanel() {
           </>
         )}
       </div>
+      {simple && !overlayId && !globalId ? (
+        <p className="ed-simple-note">
+          {present.includes("content") ? "Simple: words and pictures. " : "This block has no words or pictures to change. "}
+          <button type="button" onClick={() => setMode("full")}>
+            Switch to Full
+          </button>{" "}
+          for style and layout.
+        </p>
+      ) : null}
     </aside>
   );
 }

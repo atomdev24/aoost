@@ -36,6 +36,9 @@ function early(path: string, init?: RequestInit): Promise<Response> | null {
   return res;
 }
 
+/** Visitor numbers kept by the server (worker/insights.ts). */
+export type InsightsReply = { project: string | null; token: boolean; last: { at: number; error?: string } | null; days: import("../model/insights").InsightsDay[]; demo?: boolean };
+
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
@@ -85,6 +88,9 @@ export const api = {
   undoRelease: () => call<{ release: Release }>("/api/editor/release/undo", { method: "POST" }).then((r) => r.release),
   demoSettings: () => call<{ settings: DemoSettings }>("/api/editor/demo/settings"),
   putDemoSettings: (settings: DemoSettings) => call<{ settings: DemoSettings }>("/api/editor/demo/settings", { method: "PUT", body: JSON.stringify(settings) }),
+  insights: (days = 30) => call<InsightsReply>(`/api/editor/insights?days=${days}`),
+  fetchInsights: () => call<InsightsReply & { error?: string }>("/api/editor/insights/fetch", { method: "POST" }),
+  putInsightsProject: (project: string | null) => call<{ project: string | null }>("/api/editor/insights/project", { method: "PUT", body: JSON.stringify({ project }) }),
   resetDemo: () => call<{ ok: boolean }>("/api/editor/demo/reset-now", { method: "POST" }),
   putTeam: (team: Team) => call<{ team: Team }>("/api/editor/team", { method: "PUT", body: JSON.stringify({ team }) }),
   history: () => call<{ versions: Version[]; unavailable?: string }>("/api/editor/history"),

@@ -155,7 +155,13 @@ function EditingDots({ lines, opts }: { lines: string[]; opts: DotOpts }) {
     // Loaded when a board is on screen, so the editor's first download stays small.
     let board: { stop(): void } | null = null, gone = false;
     void import("../runtime/dots.js").then(({ startDotBoard }) => {
-      if (!gone && ref.current) board = startDotBoard(ref.current, { lines, ...opts });
+      if (gone || !ref.current) return;
+      // On the board (motion stilled) the board shows its first line, whole and still; Play shows it
+      // moving. In Play it also pauses while someone types in the editor, so each key lands at once.
+      const doc = ref.current.ownerDocument;
+      const still = !!doc.getElementById("ed-still-motion");
+      const top = doc.defaultView?.parent as (Window & { __edBusyUntil?: number }) | undefined;
+      board = startDotBoard(ref.current, { lines, ...opts, still, hold: () => Math.max(0, (top?.__edBusyUntil ?? 0) - Date.now()) });
     });
     return () => { gone = true; board?.stop(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -197,6 +203,8 @@ const screenCss = [
   `.ao .hr-screen i{position:absolute;inset:0;background-position:0 0;background-size:100% 100%;background-repeat:no-repeat}`,
   `.ao .hr-screen .sc-shade{background-image:url(/art/aoost_hero_screen_shade_2400x1000.webp);mix-blend-mode:multiply;opacity:var(--sc-shade)}`,
   `.ao .hr-screen .sc-glare{background-image:url(/art/aoost_hero_screen_glare_2400x1000.webp);mix-blend-mode:screen;opacity:var(--sc-glare)}`,
+  // Phones get the 960 px copies of the screen's shade and glare: the glare is what the phone sees first (LCP).
+  `@media (max-width:767px){.ao .hr-screen .sc-shade{background-image:url(/art/aoost_hero_screen_shade_2400x1000.960.webp)}.ao .hr-screen .sc-glare{background-image:url(/art/aoost_hero_screen_glare_2400x1000.960.webp)}}`,
   `.ao .hr-screen .sc-grain{background-image:url(/art/aoost_hero_screen_grain_tile_512.webp);background-size:256px 256px;background-repeat:repeat;mix-blend-mode:screen;opacity:var(--sc-grain)}`,
   // carried over the ticker: one screen; its shade and glare span hero + strip (hero.js sets the heights)
   `.ao .sc-joined.hero-rect .hr-screen i:not(.sc-grain){background-size:100% calc(100% + var(--tk-h,124px))}`,

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { undo, useEditor } from "../store";
+import { InDock } from "./Dock";
 import { feedbackFor } from "./feedback";
 
 /**
@@ -23,6 +24,7 @@ export function FeedbackToast() {
   useEffect(() => () => clearTimeout(timer.current), []);
   if (!shown) return null;
   return (
+    <InDock slot="bottom" name="toast">
     <div key={shown.key} className="ed-toast" role="status">
       <span>{shown.text}</span>
       {shown.undoable ? (
@@ -36,5 +38,6 @@ export function FeedbackToast() {
         </button>
       ) : null}
     </div>
+    </InDock>
   );
 }

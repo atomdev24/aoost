@@ -181,6 +181,14 @@ export const Page = z.object({
   variantName: z.string().min(1).max(60).optional(),
   /** Variant block id → the page's block id it was copied from, so electing gives blocks back their ids. */
   variantIds: z.record(z.string(), z.string()).optional(),
+  /** Where a variant is in review: a draft (unset), proposed to the team, or kept as an earlier version after a pick. */
+  variantStatus: z.enum(["proposed", "archived"]).optional(),
+  /** Who made the variant (their name). */
+  variantBy: z.string().max(60).optional(),
+  /** Teammates who voted for the variant (one each). */
+  variantVotes: z.array(z.object({ id: z.string().min(1).max(120), name: z.string().max(60) })).max(200).optional(),
+  /** When a variant became an earlier version (ISO date). */
+  archivedAt: z.string().max(40).optional(),
 });
 export type Page = z.infer<typeof Page>;
 
@@ -306,6 +314,15 @@ export const SiteSettings = z.object({
   socials: z.array(Social),
   defaultSeo: Seo,
   favicon: z.string().optional(),
+  /** Visitor insights: a Microsoft Clarity project on the published pages, with a small cookie notice. */
+  analytics: z
+    .object({
+      /** The Clarity project ID (public; it sits in the page anyway). */
+      clarity: z.string().regex(/^[a-z0-9]{6,20}$/).optional(),
+      /** Show the cookie notice (on unless switched off). */
+      notice: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 export const GlobalComponent = z.object({ id: Id, name: z.string(), node: Node });
@@ -314,7 +331,8 @@ export type GlobalComponent = z.infer<typeof GlobalComponent>;
 export const Template = z.object({
   id: Id,
   name: z.string(),
-  kind: z.enum(["section", "page"]),
+  /** section and page: templates. block: a saved block (Insert → Saved). default: how new blocks of one type start (name = the type). */
+  kind: z.enum(["section", "page", "block", "default"]),
   sections: z.array(Section),
 });
 export type Template = z.infer<typeof Template>;
