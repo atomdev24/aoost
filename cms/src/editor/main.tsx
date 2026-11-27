@@ -5,6 +5,7 @@ import { App } from "./App";
 import { startLoadGuard } from "./load-guard";
 import { startDisplay } from "./display";
 import { guardPinch } from "./pinch-guard";
+import { startTooltips } from "./ui/tooltip";
 import "./editor.css";
 import "./workspace/workspace.css";
 
@@ -17,6 +18,7 @@ if (import.meta.env.PROD && !DEMO && "serviceWorker" in navigator) {
 }
 
 startDisplay();
+startTooltips(document);
 guardPinch(window);
 if (import.meta.env.PROD) startLoadGuard();
 

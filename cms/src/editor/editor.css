@@ -44,6 +44,11 @@
   --ed-text-2: color-mix(in srgb, var(--ed-text) 70%, var(--ed-sub));
   --ed-muted: var(--ed-sub);
   --ed-ink: #141414;
+  --ed-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ed-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ed-dur-press: 140ms;
+  --ed-dur-fast: 120ms;
+  --ed-dur: 180ms;
   color-scheme: dark;
 }
 /* Ink: near-black and cool. */
@@ -367,7 +372,7 @@ body {
   height: 16px;
   border-radius: 999px;
   background: #f3efe6;
-  transition: left 0.15s;
+  transition: left 0.15s var(--ed-ease-out);
 }
 .ed-toggle[aria-checked="true"] {
   background: var(--ed-accent);
@@ -774,7 +779,7 @@ body {
 }
 .ed-layer-tools .ed-mini {
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition: opacity 120ms var(--ed-ease-out);
 }
 .ed-layer-tools .ed-mini[aria-pressed="true"],
 .ed-layer:hover .ed-layer-tools .ed-mini,
