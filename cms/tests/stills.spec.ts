@@ -27,7 +27,7 @@ test.describe("still pictures on the board", () => {
     await expect.poll(() => state(page), { timeout: 20_000 }).toEqual({ "desktop*": "live", mobile: "still" });
     // The picture is the page: same size as its frame.
     const fits = await page.evaluate(() => {
-      const f = document.querySelector<HTMLElement>('.bd-frame[data-bp="mobile"]')!;
+      const f = document.querySelector<HTMLElement>('.bd-frame:not(.vr-frame)[data-bp="mobile"]')!;
       const c = f.querySelector<HTMLCanvasElement>(".bd-still canvas")!;
       return Math.abs(c.width - 390) <= 1;
     });
@@ -49,7 +49,7 @@ test.describe("still pictures on the board", () => {
     await expect.poll(() => state(page), { timeout: 20_000 }).toEqual({ "desktop*": "live", mobile: "still" });
     // Find a heading in the (hidden) mobile page and click its place on the picture.
     const at = await page.evaluate(() => {
-      const f = document.querySelector<HTMLElement>('.bd-frame[data-bp="mobile"]')!;
+      const f = document.querySelector<HTMLElement>('.bd-frame:not(.vr-frame)[data-bp="mobile"]')!;
       const doc = f.querySelector("iframe")!.contentDocument!;
       const h = doc.querySelector("h1, h2")!;
       const r = h.getBoundingClientRect();
@@ -65,8 +65,8 @@ test.describe("still pictures on the board", () => {
   test("an edit brings a fresh picture", async ({ page, request }) => {
     await expect.poll(() => state(page), { timeout: 20_000 }).toEqual({ "desktop*": "live", mobile: "still" });
     // Mark the current picture; a fresh one is a different canvas.
-    await page.evaluate(() => ((document.querySelector('.bd-frame[data-bp="mobile"] .bd-still canvas') as HTMLCanvasElement & { old?: boolean }).old = true));
-    const fresh = () => page.evaluate(() => !(document.querySelector('.bd-frame[data-bp="mobile"] .bd-still canvas') as (HTMLCanvasElement & { old?: boolean }) | null)?.old);
+    await page.evaluate(() => ((document.querySelector('.bd-frame:not(.vr-frame)[data-bp="mobile"] .bd-still canvas') as HTMLCanvasElement & { old?: boolean }).old = true));
+    const fresh = () => page.evaluate(() => !(document.querySelector('.bd-frame:not(.vr-frame)[data-bp="mobile"] .bd-still canvas') as (HTMLCanvasElement & { old?: boolean }) | null)?.old);
     await mcpCall(request, password!, "add_section", { page: "sample", kind: "grid", name: "Fresh", index: 0, layout: { columns: 1 }, nodes: [{ type: "Text", content: { text: "A brand new line" } }] });
     await expect.poll(fresh, { timeout: 15_000 }).toBe(true);
   });

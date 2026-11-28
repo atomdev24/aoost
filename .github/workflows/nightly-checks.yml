@@ -1,0 +1,116 @@
+# Nightly checks: the editor's unit and browser tests on a fresh local copy, and a look at the live site
+# at phone and desktop sizes compared with the night before. Read-only: it deploys nothing and changes
+# no content. Results are in the run's summary and artifacts; a failing check marks the run red.
+name: Nightly checks
+on:
+  schedule:
+    - cron: "41 23 * * *" # 01:41 in Cape Town
+  workflow_dispatch:
+concurrency:
+  group: nightly-checks
+  cancel-in-progress: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    defaults:
+      run:
+        working-directory: cms
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cms/package-lock.json
+      - run: npm ci
+      - name: Unit tests
+        run: npx vitest run
+      - name: Build (with the size budget)
+        run: npm run -s build:site && npm run -s build
+      - run: npx playwright install --with-deps chromium
+      # A throwaway password for the local copy only; it never leaves this run.
+      - name: Local editor password
+        run: echo "EDITOR_PASSWORD=ci-$(openssl rand -hex 12)" > .dev.vars
+      - name: Browser tests
+        id: e2e
+        continue-on-error: true
+        run: npx playwright test --reporter=line,json
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: e2e.json
+      - name: Summary
+        if: always()
+        run: |
+          node -e '
+            const fs = require("fs");
+            let r; try { r = JSON.parse(fs.readFileSync("e2e.json", "utf8")); } catch { r = null; }
+            const out = ["## Browser tests", ""];
+            if (!r) out.push("The browser tests did not produce a report.");
+            else {
+              const s = r.stats;
+              out.push(`${s.expected} passed, ${s.unexpected} failed, ${s.skipped} skipped, ${s.flaky} flaky.`, "");
+              const failed = [];
+              const walk = (suite, trail) => {
+                for (const spec of suite.specs ?? []) for (const t of spec.tests) if (t.status === "unexpected") failed.push(`- ${spec.file}: ${[...trail, spec.title].filter(Boolean).join(" › ")}`);
+                for (const child of suite.suites ?? []) walk(child, [...trail, child.title]);
+              };
+              for (const suite of r.suites) walk(suite, []);
+              if (failed.length) out.push("### Failed", "", ...failed);
+            }
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
+          '
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-tests
+          path: |
+            cms/e2e.json
+            cms/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Mark the run red when browser tests failed
+        if: steps.e2e.outcome == 'failure'
+        run: exit 1
+
+  live-look:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: cms
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cms/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Last night's captures
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p ../prev
+          url=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=live-look&per_page=1" --jq '.artifacts[0].archive_download_url // empty')
+          if [ -n "$url" ]; then gh api "$url" > ../prev.zip && unzip -q ../prev.zip -d ../prev || echo "No usable captures from last night."; fi
+      # The published pages, from the same content the live site is built from.
+      - name: Published pages
+        run: |
+          npm run -s build:site
+          paths=$(cd dist && ls *.html | grep -v '^404' | sed -e 's/^index\.html$/\//' -e 's/\.html$/\//' -e 's/^\([^/]\)/\/\1/' | paste -sd, -)
+          echo "LOOK_PATHS=$paths" >> "$GITHUB_ENV"
+      - name: Look at the live site
+        run: node scripts/live-look.mjs https://alexoostendurp.com ../look ../prev
+      - name: Summary
+        if: always()
+        run: cat ../look/summary.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-look
+          path: look/
+          retention-days: 14

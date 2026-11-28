@@ -13,21 +13,21 @@ test.describe("demo editor", () => {
 
   test("opens without a sign-in, on the sample site, with the demo notice", async ({ page }) => {
     await page.goto("/demo/");
-    await expect(canvas(page).getByText("A headline goes here.")).toBeVisible({ timeout: 20_000 });
+    await expect(canvas(page).getByText("See what TrueFruit can do for your crop this season")).toBeVisible({ timeout: 20_000 });
     // The demo says so in a thin strip; its Details opens the full card (Nov 2026: no card on arrival).
     await expect(page.getByRole("dialog", { name: "About this demo" })).toHaveCount(0);
     await page.getByRole("button", { name: "Details" }).click();
     await expect(page.getByRole("dialog", { name: "About this demo" })).toBeVisible();
     await page.getByRole("button", { name: "Got it" }).click();
     await expect(page.getByRole("dialog", { name: "About this demo" })).toHaveCount(0);
-    // nothing of the real site in the canvas
-    await expect(canvas(page).locator("img[src*='/art/']")).toHaveCount(0);
+    // nothing of the real site in the canvas (template and Aerobotics demo art is fine)
+    await expect(canvas(page).locator("img[src*='/art/']:not([src*='/art/tpl_']):not([src*='/art/aero_'])")).toHaveCount(0);
   });
 
   test("keeps apart from the real draft, refuses uploads and on-page code, and only pretends to publish", async ({ request }) => {
     expect((await request.get("/api/editor/site")).status()).toBe(401);
     const { site } = await (await request.get("/demo/api/editor/site")).json();
-    expect(site.settings.title).toBe("Studio (demo)");
+    expect(site.settings.title).toBe("Aerobotics (demo)");
 
     // an edit lands in the demo draft only
     const home = site.pages.find((p: { id: string }) => p.id === "home");
@@ -65,7 +65,7 @@ test.describe("demo editor", () => {
     const { staging } = await (await request.post("/demo/api/editor/staging", { data: { label: "Demo try" } })).json();
     expect(staging.path).toMatch(/^\/demo\/staging\//);
     const html = await (await request.get(staging.path)).text();
-    expect(html).toContain("A headline goes here.");
+    expect(html).toContain("See what TrueFruit can do for your crop this season");
     expect(html).toContain("Demo · staging preview");
   });
 });

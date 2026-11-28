@@ -117,7 +117,7 @@ test.describe("breakpoint board", () => {
     expect(fitted).toBeLessThan(60);
     // Fit all: every frame and the breakpoint slot sit inside the board.
     const board = (await page.locator(".bd").boundingBox())!;
-    for (const sel of ['.bd-frame[data-bp="desktop"]', '.bd-frame[data-bp="mobile"]', ".bd-slot"]) {
+    for (const sel of ['.bd-frame:not(.vr-frame)[data-bp="desktop"]', '.bd-frame:not(.vr-frame)[data-bp="mobile"]', ".bd-slot"]) {
       const b = (await page.locator(sel).boundingBox())!;
       expect(b.x).toBeGreaterThanOrEqual(board.x);
       expect(b.x + b.width).toBeLessThanOrEqual(board.x + board.width);
@@ -129,7 +129,7 @@ test.describe("breakpoint board", () => {
     await expect(page.locator(".bd-zoom-pct")).toHaveText("100%");
     await page.getByRole("button", { name: "Zoom out" }).click();
     await expect(page.locator(".bd-zoom-pct")).toHaveText("75%");
-    const desktopWidth = (await page.locator('.bd-frame[data-bp="desktop"]').boundingBox())!.width;
+    const desktopWidth = (await page.locator('.bd-frame:not(.vr-frame)[data-bp="desktop"]').boundingBox())!.width;
     expect(Math.round(desktopWidth)).toBe(1080);
 
     // Remembered after a reload…
@@ -143,10 +143,10 @@ test.describe("breakpoint board", () => {
 
   test("the add-a-breakpoint slot shows the hidden Tablet and Widescreen frames", async ({ page }) => {
     const slot = page.locator(".bd-slot");
-    await expect(page.locator('.bd-frame[data-bp="tablet"]')).toHaveCount(0);
+    await expect(page.locator('.bd-frame:not(.vr-frame)[data-bp="tablet"]')).toHaveCount(0);
     await expect(slot.getByRole("button")).toHaveText(["Tablet 834", "Widescreen 1920"]);
     await slot.getByRole("button", { name: /Tablet/ }).click();
-    await expect(page.locator('.bd-frame[data-bp="tablet"]')).toBeVisible();
+    await expect(page.locator('.bd-frame:not(.vr-frame)[data-bp="tablet"]')).toBeVisible();
     await expect(slot.getByRole("button")).toHaveText(["Widescreen 1920"]);
   });
 });

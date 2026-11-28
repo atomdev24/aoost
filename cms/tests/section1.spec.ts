@@ -18,8 +18,8 @@ const layerRows = (page: Page) => page.locator(".ed-layers > li");
 
 /** Somewhere on the board with nothing under it: the gap between the Desktop and Mobile frames. */
 async function emptyCanvas(page: Page) {
-  const desktop = (await page.locator('.bd-frame[data-bp="desktop"]').boundingBox())!;
-  const mobile = (await page.locator('.bd-frame[data-bp="mobile"]').boundingBox())!;
+  const desktop = (await page.locator('.bd-frame:not(.vr-frame)[data-bp="desktop"]').boundingBox())!;
+  const mobile = (await page.locator('.bd-frame:not(.vr-frame)[data-bp="mobile"]').boundingBox())!;
   return { x: (desktop.x + desktop.width + mobile.x) / 2, y: 500 };
 }
 /** A top-level layer row by its exact name. */
@@ -106,13 +106,13 @@ test.describe("editor section 1", () => {
   });
 
   test("an unpinned flyout closes on a canvas click, a pinned one doesn't", async ({ page }) => {
-    await rail(page, "Theme").click();
+    await rail(page, "Media").click();
     await expect(flyout(page)).toBeVisible();
     const spot = await emptyCanvas(page);
     await page.mouse.click(spot.x, spot.y);
     await expect(flyout(page)).toHaveCount(0);
 
-    await rail(page, "Theme").click();
+    await rail(page, "Media").click();
     await flyout(page).getByRole("button", { name: "Pin flyout" }).click();
     await page.mouse.click(spot.x, spot.y);
     // A click inside a frame is a canvas click too.
@@ -121,11 +121,11 @@ test.describe("editor section 1", () => {
     // Esc leaves a pinned flyout alone; its icon closes it.
     await page.keyboard.press("Escape");
     await expect(flyout(page)).toBeVisible();
-    await rail(page, "Theme").click();
+    await rail(page, "Media").click();
     await expect(flyout(page)).toHaveCount(0);
     // The pin is remembered.
     await page.reload();
-    await rail(page, "Theme").click();
+    await rail(page, "Media").click();
     await expect(flyout(page).getByRole("button", { name: "Unpin flyout" })).toBeVisible();
   });
 
@@ -158,7 +158,7 @@ test.describe("editor section 1", () => {
     await flyout(page).getByRole("button", { name: "Page settings for Home" }).click();
     await expect(flyout(page).getByText("Name (also the nav label)")).toBeVisible();
     await flyout(page).getByRole("button", { name: "Back to pages" }).click();
-    await expect(flyout(page).locator(".ed-pages")).toBeVisible();
+    await expect(flyout(page).locator(".ed-pages-panel")).toBeVisible();
   });
 
   test("Duplicate and Delete from the name tag work and undo", async ({ page }) => {
@@ -171,7 +171,7 @@ test.describe("editor section 1", () => {
     await tag.getByRole("button", { name: "Duplicate" }).click();
     await rail(page, "Layers").click();
     await expect(layerNamed(page, "Playlists")).toHaveCount(2);
-    await page.getByRole("button", { name: "Undo" }).click();
+    await page.locator('.ed-icon[aria-label="Undo"]').click();
     await expect(layerNamed(page, "Playlists")).toHaveCount(1);
 
     await layerNamed(page, "Playlists").click();
@@ -182,13 +182,13 @@ test.describe("editor section 1", () => {
     await expect(page.locator(".ed-inspector")).toHaveCount(0);
     await rail(page, "Layers").click();
     await expect(layerNamed(page, "Playlists")).toHaveCount(0);
-    await page.getByRole("button", { name: "Undo" }).click();
+    await page.locator('.ed-icon[aria-label="Undo"]').click();
     await expect(layerNamed(page, "Playlists")).toHaveCount(1);
     await expect(layerRows(page)).toHaveCount(count);
   });
 
   test("a dragged frame position survives a reload", async ({ page }) => {
-    const frame = page.locator('.bd-frame[data-bp="mobile"]');
+    const frame = page.locator('.bd-frame:not(.vr-frame)[data-bp="mobile"]');
     const before = await frame.evaluate((el) => (el as HTMLElement).style.left);
     const label = (await page.getByRole("button", { name: "Edit the Mobile frame" }).boundingBox())!;
     await page.mouse.move(label.x + 20, label.y + label.height / 2);
@@ -231,7 +231,7 @@ test.describe("editor section 1", () => {
   test("at least one frame always stays visible", async ({ page }) => {
     await page.getByRole("button", { name: "Frame options for Mobile" }).click();
     await page.getByRole("menuitem", { name: "Hide frame" }).click();
-    await expect(page.locator('.bd-frame[data-bp="mobile"]')).toHaveCount(0);
+    await expect(page.locator('.bd-frame:not(.vr-frame)[data-bp="mobile"]')).toHaveCount(0);
     await page.getByRole("button", { name: "Frame options for Desktop" }).click();
     await expect(page.getByRole("menuitem", { name: "Hide frame" })).toBeDisabled();
   });

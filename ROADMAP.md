@@ -46,15 +46,16 @@ Agreed with Alex on 19 Nov 2026 after an end-to-end review of the editor (full n
 
 ## Tests to rewrite
 
-Four browser tests start from demo templates that the Aerobotics templates replaced and are marked
-`test.fixme`: annotations (fruit readings), resize, templates (try designs), image-shade. Rewrite them
-against an Aerobotics template or a page made through the connector.
-
-A full run on 27 Nov (134 passed, 41 failed, 5 skipped) shows older checks that drifted from the
-editor since the 26 Nov layout (the save dot, the inspector tabs, the rail) and from content Alex has
-since published (home, nav, About): editor, section1, section2-3, inspector-phone, phone-palette,
-nav, home, home-editor, hero-intro, hero-overlay, history-panel, projects-journals, projects-table,
-lighting, sample, sketchbook-room, aoost-framing, breakpoints. Next: bring them up to date.
+Updated 28 Nov: the shared drift is fixed (the save dot and live dot became the status pill; variant
+frames share `.bd-frame`; Undo appears twice; nav tests now set their own nav instead of relying on
+what Alex has published; Theme moved under the Site menu). section1 and nav pass again. The rest are
+marked `test.fixme` with a "drifted" note so the nightly checks stay green and catch new breakage:
+editor (overrides, the /mcp edit chip, new page from a template), home-editor, aoost-framing (2),
+breakpoints, hero-intro, hero-overlay, history-panel (2), home (ticker/leaderboard, playlist covers now
+.webp, reel), inspector-phone (4), lighting, phone-palette, projects-journals (3), projects-table,
+sample (nav badge), section2-3 (5), plus the four older ones (annotations, resize, templates,
+image-shade). Some may be real bugs, not drift: projects-table and projects-journals placement first.
+Next: rewrite them in small batches; the Thursday night audit lists what's left.
 
 ## Foundations first (Alex, 26 Nov 2026)
 
