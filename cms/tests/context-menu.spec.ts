@@ -27,7 +27,7 @@ test.describe("right-click menu", () => {
     await page.mouse.click(title.x + 30, title.y + 20, { button: "right" });
     const menu = page.getByRole("menu", { name: "Block" });
     await expect(menu).toBeVisible();
-    await expect(menu.getByRole("menuitem", { name: /Copy\s*⌘C|Copy\s*CtrlC/ })).toBeVisible();
+    await expect(menu.getByRole("menuitem", { name: /Copy\s*(⌘C|Ctrl\+?C)/ })).toBeVisible();
     await page.screenshot({ path: test.info().outputPath("menu.png") });
     await menu.getByRole("menuitem", { name: /^Copy/ }).first().click();
     await expect(menu).toBeHidden();

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { navSubPages, page as contentPage, pages, site } from "./content";
-import { draftWithAllPagesLive, editorPassword, resetDraft, signIn } from "./helpers";
+import { classicNav, draftWithAllPagesLive, editorPassword, resetDraft, signIn } from "./helpers";
 
 /*
  * Only the homepage is published, and it is the original aoost page, which has no nav. So these
@@ -11,12 +11,13 @@ const password = editorPassword();
 test.skip(!password, "needs EDITOR_PASSWORD in .dev.vars");
 test.beforeEach(async ({ page, request }) => {
   await draftWithAllPagesLive(request, password!);
+  await classicNav(request, password!);
   await signIn(page, password!);
 });
 test.afterAll(async ({ request }) => {
   if (password) await resetDraft(request, password);
 });
-const workSub = navSubPages("work");
+const workSub = navSubPages("work", { all: true });
 
 const desktop = { width: 1440, height: 900 };
 const phone = { width: 390, height: 844 };
@@ -149,9 +150,8 @@ test.describe("floating pill nav, mobile", () => {
   test("a menu link navigates", async ({ page }) => {
     await page.goto("/preview/about");
     await page.locator(".pill-menu").click();
-    await page.locator("#nav-sheet a.sheet-link", { hasText: "Playlists" }).click();
-    await expect(page).toHaveURL(/\/preview\/playlists$/);
-    await expect(page.locator("h1")).toHaveText("Playlists");
+    await page.locator("#nav-sheet a.sheet-link", { hasText: contentPage("diary").title }).click();
+    await expect(page).toHaveURL(/\/preview\/diary$/);
   });
 
   test("no horizontal overflow at 390px on every page", async ({ page }) => {

@@ -59,7 +59,8 @@ test.describe("editor diagnostics", () => {
     await request.delete("/api/editor/problems", { headers: bearer(password!) });
   });
 
-  test("Chrome starts with solid toolbars (its blur flickers while zooming); glass switches on, stays on after a reload, and back off", async ({ page }) => {
+  // Superseded by glass-style.spec.ts: since 27 Nov the toolbars start as liquid glass, with a choice in the "…" menu.
+  test.fixme("Chrome starts with solid toolbars (its blur flickers while zooming); glass switches on, stays on after a reload, and back off", async ({ page }) => {
     await signIn(page, password!);
     await page.goto("/admin/?page=home");
     await page.waitForSelector(".ed-island-right");

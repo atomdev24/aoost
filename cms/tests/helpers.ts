@@ -121,3 +121,19 @@ export async function onBoard(page: Page, target: import("@playwright/test").Loc
   }
   throw new Error("could not bring the block into view");
 }
+
+/**
+ * A known nav for nav tests, whatever Alex has published: About, Diary and Work (with Work's
+ * sub-pages in a dropdown), every one shown in the nav. Call after draftWithAllPagesLive.
+ */
+export async function classicNav(request: APIRequestContext, password: string) {
+  const site = await draftSite(request, password);
+  const ids = ["about", "diary", "work"];
+  const ops: object[] = site.pages
+    .filter((p: { id: string; parentId?: string | null }) => ids.includes(p.id) || p.parentId === "work")
+    .map((p: object) => ({ op: "putPage", page: { ...p, showInNav: true } }));
+  const items = ids.map((pageId) => ({ id: `nav_${pageId}`, type: "page", target: { kind: "page", pageId }, showOn: "both", hover: "tint" }));
+  ops.push({ op: "set", key: "nav", value: { ...site.nav, items } });
+  const res = await request.post("/api/editor/ops", { headers: bearer(password), data: { ops } });
+  if (!res.ok()) throw new Error(`could not set the test nav: ${res.status()}`);
+}

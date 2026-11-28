@@ -27,10 +27,10 @@ export function homeBlock(type: string): Record<string, any> {
 export const visibleProjects = (): { image: string; title?: string }[] => homeBlock("AoostProjects").projects.filter((p: { hidden?: boolean }) => !p.hidden);
 
 /** Titles of a page's sub-pages that show in the nav, in the site's page order. */
-export function navSubPages(parentId: string): string[] {
+export function navSubPages(parentId: string, opts: { all?: boolean } = {}): string[] {
   const order: string[] = site().pageOrder ?? [];
   return pages()
-    .filter((p) => p.parentId === parentId && p.showInNav)
+    .filter((p) => p.parentId === parentId && (opts.all || p.showInNav))
     .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
     .map((p) => p.title);
 }
